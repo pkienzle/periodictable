@@ -93,7 +93,6 @@ import mass
 import density
 from elements import *
 __all__ = elements.__all__ + ['neutron_sld','xray_sld','molecule']
-print "New all"
 
 # Allow elements.table as a shorthand for elements.periodic_table
 table = periodic_table

@@ -240,26 +240,29 @@ def xray_sld(input,density=None,wavelength=None,energy=None):
     in units of 10**-6 angstrom**-2.
     
     Wavelength is in angstroms.  Energy is in keV.
-
-    Note that the computed absorption is not yet verified.
     
-    Raises AssertionError if density is not provided
+    Raises AssertionError if density or wavelength/energy is not provided
     """
     import molecules
-    assert density is not None, "xray_sld needs density"
-    
-    if wavelength is not None: energy = xray_energy(wavelength)
     return xray_sld_from_atoms(molecules.Molecule(input).atoms,
-                                  density,wavelength)
+                               density=density,wavelength=wavelength,
+                               energy=energy)
 
-def xray_sld_from_atoms(atoms,density,energy):
+def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
     """
     The underlying scattering length density calculator.  This
     works with a dictionary of atoms and quanties directly, such
     as returned by molecule.atoms.
     
-    X-ray energy is in keV.
+    Wavelength is in angstroms.  Energy is in keV.
+    
+    Raises AssertionError if density or wavelength/energy is not provided
     """
+
+    if wavelength is not None: energy = xray_energy(wavelength)
+    assert density is not None, "xray_sld needs density"
+    assert energy is not None, "xray_sld needs energy or wavelength"
+
     mass,scattering,absorption = 0,0,0
     for element,quantity in atoms.iteritems():
         mass += element.mass*quantity
@@ -397,12 +400,18 @@ def test():
             %(molecule,density,rho,mu)
     """
 
+    # Cross check against mo
+    rho,mu = xray_sld_from_atoms({Si:1},density=Si.density,wavelength=1.54)
+    rhoSi,muSi = Si.xray.sld(wavelength=1.54)
+    assert abs(rho - rhoSi) < 1e-14
+    assert abs(mu - muSi) < 1e-14
+
     # Check that neutron_sld works as expected
     atoms = Molecule('SiO2').atoms
-    rho,mu = xray_sld_from_atoms(atoms,2.2,xray_energy(Cu.K_alpha))
+    rho,mu = xray_sld_from_atoms(atoms,2.2,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-18.87)<0.1
     atoms = Molecule('B4C').atoms
-    rho,mu = xray_sld_from_atoms(atoms,2.52,xray_energy(Cu.K_alpha))
+    rho,mu = xray_sld_from_atoms(atoms,2.52,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-20.17)<0.1
     
 

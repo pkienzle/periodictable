@@ -128,9 +128,10 @@ class Molecule(object):
         """
         if self.density is None: return None,None,None
         from nsf import neutron_sld_from_atoms
-        return neutron_sld_from_atoms(self.atoms,self.density,wavelength)
+        return neutron_sld_from_atoms(self.atoms,density=self.density,
+                                      wavelength=wavelength)
 
-    def xray_sld(self, wavelength):
+    def xray_sld(self, energy=None, wavelength=None):
         """
         X-ray scattering information for the molecule.
         Returns (sld,absorption,incoherent scattering).
@@ -138,7 +139,8 @@ class Molecule(object):
         """
         if self.density is None: return None,None
         from xsf import xray_sld_from_atoms
-        return xray_sld_from_atoms(self.atoms,self.density,wavelength)
+        return xray_sld_from_atoms(self.atoms,density=self.density,
+                                   wavelength=wavelength,energy=energy)
 
     def __eq__(self,other):
         """
@@ -285,7 +287,7 @@ def _count_atoms(seq):
     """
     total = {}
     for count,fragment in seq:
-         if isinstance(fragment,list):
+         if isinstance(fragment,(list,tuple)):
              partial = _count_atoms(fragment)
          else:
              partial = {fragment: 1}
@@ -379,9 +381,14 @@ def test():
 
     # Test composition
     assert ikaite==Molecule( "CaCO3" ) + 6*Molecule( "H2O" )
-    
+
+    # Check atom count
+    assert Molecule("Fe2O4+3H2O").atoms == {Fe:2,O:7,H:6}
+
     # Check the mass calculator
     assert Molecule('H2O').mass == 2*H.mass+O.mass
+    assert Molecule("Fe2O4+3H2O").mass == 2*Fe.mass+7*O.mass+6*H.mass
+    assert Molecule("Fe2O[18]4+3H2O").mass == 2*Fe.mass+4*O[18].mass+3*O.mass+6*H.mass
 
     # Test isotopes; make sure this is last since it changes ikaite!
     assert ikaite!=Molecule("CaCO[18]3+6H2O")
@@ -389,11 +396,16 @@ def test():
     
     # Check x-ray and neutron sld
     import density,xsf,nsf
-    rho,mu,inc = Molecule('Si',Si.density).neutron_sld()
-    rhoSi,muSi,incSi = Si.neutron.sld()
+    rho,mu,inc = Molecule('Si',Si.density).neutron_sld(wavelength=4.5)
+    rhoSi,muSi,incSi = Si.neutron.sld(wavelength=4.5)
     assert abs(rho - rhoSi) < 1e-14
     assert abs(mu - muSi) < 1e-14
     assert abs(inc - incSi) < 1e-14
+
+    rho,mu = Molecule('Si',Si.density).xray_sld(wavelength=1.54)
+    rhoSi,muSi = Si.xray.sld(wavelength=1.54)
+    assert abs(rho - rhoSi) < 1e-14
+    assert abs(mu - muSi) < 1e-14
     
     # Check that names work
     permalloy = Molecule('Ni8Fe2',8.692,name='permalloy')

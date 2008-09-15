@@ -92,7 +92,8 @@ import elements
 import mass
 import density
 from elements import *
-__all__ = elements.__all__
+__all__ = elements.__all__ + ['neutron_sld','xray_sld','molecule']
+print "New all"
 
 # Allow elements.table as a shorthand for elements.periodic_table
 table = periodic_table
@@ -194,7 +195,7 @@ def molecule(value=None, density=None, name=None):
     import molecules
     return molecules.Molecule(value=value,density=density, name=name)
 
-def neutron_sld(molecule,density,wavelength=1):
+def neutron_sld(molecule,density=None,wavelength=1):
     """
     Compute neutron scattering length densities for molecules.
     Returns the scattering length density, the absorption and
@@ -203,7 +204,7 @@ def neutron_sld(molecule,density,wavelength=1):
     import nsf
     return nsf.neutron_sld(molecule,density,wavelength)
 
-def xray_sld(molecule,density,wavelength=1):
+def xray_sld(molecule,density=None,wavelength=None):
     """
     Compute neutron scattering length densities for molecules.
     Returns the scattering length density, the absorption and

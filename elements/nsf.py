@@ -333,18 +333,23 @@ def neutron_sld(input,density=None,wavelength=1):
     Compute neutron scattering length densities for molecules.
     Returns the scattering length density, the absorption and
     the incoherent scattering in units of 10**-6 angstrom**-2.
+
+    Raises AssertionError if density is missing.
     """
     import molecules
-    assert density is not None, "neutron_sld needs density"
     return neutron_sld_from_atoms(molecules.Molecule(input).atoms,
-                                  density,wavelength)
+                                  density=density,wavelength=wavelength)
 
-def neutron_sld_from_atoms(atoms,density,wavelength=1):
+def neutron_sld_from_atoms(atoms,density=None,wavelength=1):
     """
     The underlying scattering length density calculator.  This
     works with a dictionary of atoms and quanties directly, such
     as returned by molecule.atoms.
+
+    Raises AssertionError if density is missing.
     """
+    assert density is not None, "neutron_sld needs density"
+
     b_c = 0
     absorption = 0
     incoherent = 0

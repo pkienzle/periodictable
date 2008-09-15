@@ -1,0 +1,4 @@
+#!/bin/sh
+
+files=`grep -l "def test" *.py`
+for f in $files; do echo $f; python $f; done

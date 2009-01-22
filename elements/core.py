@@ -137,12 +137,23 @@ def delayed_load(all_props,loader,element=True,isotope=False):
             loader()
             return getattr(el,propname)
         return getfn
+
+    def setter(propname):
+        """Create property setter for attribute propname.
+        """
+        def setfn(el, value):
+            el.__dict__[propname] = value
+        return setfn
+
     if element:
         for p in all_props:
-            setattr(Element,p,property(getter(p),doc=loader.__doc__))
+            pprop = property(getter(p), setter(p), doc=loader.__doc__)
+            setattr(Element, p, pprop)
+
     if isotope:
         for p in all_props:
-            setattr(Isotope,p,property(getter(p),doc=loader.__doc__))
+            pprop = property(getter(p), setter(p), doc=loader.__doc__)
+            setattr(Isotope, p, pprop)
 
 
 # Define the element names from the element table.
@@ -360,6 +371,9 @@ class Element(object):
         for isotope in self.isotopes:
             yield self._isotopes[isotope]
 
+    # PJ FIXME: string returned by __repr__ should be convertible
+    # to an instance.  The method should be rather called
+    # __str__ than __repr__.
     def __repr__(self):
         return self.symbol
     

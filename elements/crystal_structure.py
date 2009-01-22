@@ -114,8 +114,6 @@ def _init():
     if 'crystal_structure' in periodic_table.properties: return
     periodic_table.properties.append('crystal_structure')
 
-    # TODO assignment error if missing the following line.  Don't know why
-    hasattr(periodic_table[0],'crystal_structure') 
     for Z,struct in enumerate(crystal_structures):
         periodic_table[Z].crystal_structure = struct
 

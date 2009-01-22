@@ -114,7 +114,7 @@ def _load_crystal_structure():
     Ashcroft and Mermin
     """
     import crystal_structure
-core.delayed_load(['crystal_structure'],_load_covalent_radius)
+core.delayed_load(['crystal_structure'], _load_crystal_structure)
 
 # Delayed loading of neutron properties
 def _load_neutron():

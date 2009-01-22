@@ -58,7 +58,6 @@ def _init():
     if 'covalent_radius' in periodic_table.properties: return
     periodic_table.properties.append('covalent_radius')
 
-    hasattr(periodic_table[0],'covalent_radius') # TODO why is this needed?
     periodic_table[0].covalent_radius = 0.20
     Element.covalent_radius_units = 'angstrom'
     Element.covalent_radius = None
@@ -75,7 +74,6 @@ def _init():
         dr = float(fields[3])*0.01
         n = int(fields[4])
         
-        #hasattr(periodic_table[Z],'covalent_radius') # TODO why is this needed
         periodic_table[Z].covalent_radius = r
         periodic_table[Z].covalent_radius_uncertainty = dr
 

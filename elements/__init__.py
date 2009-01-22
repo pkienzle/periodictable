@@ -88,11 +88,11 @@ whose conditions may differ from those of your experiment.
 __docformat__ = 'restructuredtext en'
 
 # Pull in periodic table and elements
-import elements
+import core
 import mass
 import density
-from elements import *
-__all__ = elements.__all__ + ['neutron_sld','xray_sld','molecule']
+from core import *
+__all__ = core.__all__ + ['neutron_sld','xray_sld','molecule']
 
 # Allow elements.table as a shorthand for elements.periodic_table
 table = periodic_table
@@ -105,7 +105,7 @@ def _load_covalent_radius():
     """
     import covalent_radius
     covalent_radius._init()
-elements.delayed_load(['covalent_radius'],_load_covalent_radius)
+core.delayed_load(['covalent_radius'],_load_covalent_radius)
 
 def _load_crystal_structure():
     """
@@ -114,7 +114,7 @@ def _load_crystal_structure():
     Ashcroft and Mermin
     """
     import crystal_structure
-elements.delayed_load(['crystal_structure'],_load_covalent_radius)
+core.delayed_load(['crystal_structure'],_load_covalent_radius)
 
 # Delayed loading of neutron properties
 def _load_neutron():
@@ -126,7 +126,7 @@ def _load_neutron():
     ILL Neutron Data Booklet.
     """
     import nsf
-elements.delayed_load(['neutron'],_load_neutron)
+core.delayed_load(['neutron'],_load_neutron)
 
 # Delayed loading of xray properties
 def _load_xray():
@@ -142,9 +142,9 @@ def _load_xray():
     International Tables for Crystallography Volume C.
     """
     import xsf
-elements.delayed_load(['xray','K_alpha','K_beta1'],_load_xray)
-elements.Element.K_alpha_units = "angstrom"
-elements.Element.K_beta1_units = "angstrom"
+core.delayed_load(['xray','K_alpha','K_beta1'],_load_xray)
+core.Element.K_alpha_units = "angstrom"
+core.Element.K_beta1_units = "angstrom"
 
 
 # Constructors and functions
@@ -183,7 +183,7 @@ def molecule(value=None, density=None, name=None):
     Isotopes are represented by index, e.g., "CaCO[18]3+6H2O". 
     Counts can be integer or decimal, e.g. "CaCO3+(3HO0.5)2".
 
-    For full details see help(elements.molecule.molecule_grammar)
+    For full details see help(elements.molecules.molecule_grammar)
         
     This is designed for calculating molar mass and scattering 
     length density, not for representing bonds or atom positions.  
@@ -203,11 +203,17 @@ def neutron_sld(molecule,density=None,wavelength=1):
     import nsf
     return nsf.neutron_sld(molecule,density,wavelength)
 
-def xray_sld(molecule,density=None,wavelength=None):
+def xray_sld(molecule,density=None,wavelength=None,energy=None):
     """
     Compute neutron scattering length densities for molecules.
     Returns the scattering length density, the absorption and
     the incoherent scattering in units of 10**-6 Nb.
+
+    Either supply the wavelength (A) or the energy (keV) of the X-rays.
     """
     import xsf
-    return xsf.xray_sld(molecule,density,wavelength)
+    return xsf.xray_sld(molecule,density=density,
+                        wavelength=wavelength,energy=energy)
+
+del core, mass, density
+

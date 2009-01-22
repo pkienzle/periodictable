@@ -2,7 +2,7 @@
 This data is from Ashcroft and Mermin.
 '''
 
-from elements import periodic_table
+from core import periodic_table
 
 crystal_structures = [\
     None, #X
@@ -113,16 +113,10 @@ crystal_structures = [\
 def _init():
     if 'crystal_structure' in periodic_table.properties: return
     periodic_table.properties.append('crystal_structure')
-    
+
+    # TODO assignment error if missing the following line.  Don't know why
+    hasattr(periodic_table[0],'crystal_structure') 
     for Z,struct in enumerate(crystal_structures):
         periodic_table[Z].crystal_structure = struct
 
 _init()
-
-def test():
-    xtal = periodic_table.Hg.crystal_structure
-    assert xtal['symmetry'] == 'Rhombohedral'
-    assert xtal['a'] == 2.99
-    assert xtal['alpha'] == 70.45
-
-if __name__ == "__main__": test()

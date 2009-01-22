@@ -32,3 +32,18 @@ Features under consideration:
       fitting parameters.
    magnetic scattering parameters
 
+Change history:
+
+== 1.1  2009-01-20 ==
+
+Restructure package, separating tests into different directory.
+
+When defining table extensions, you should now do:
+
+  from elements.core import periodic_table, Element, Isotope
+
+rather than:
+
+  from elements import periodic_table
+  from elements.elements import Element, Isotope
+

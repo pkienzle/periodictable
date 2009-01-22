@@ -7,9 +7,9 @@ X-ray scatting information.
     xray.scattering_factors(wavelength)
         Returns f1,f2, the X-ray scattering factors for the given wavelengths
         interploted from sftable.
-    xray.sld(wavelength)
+    xray.sld(wavelength=A or energy=keV)
         Returns scattering length density and absorption for the
-        given wavelengths.
+        given wavelengths or energies.
 
     K_alpha, K_beta1 (Angstrom)
 
@@ -18,23 +18,22 @@ X-ray scatting information.
         K_alpha is the average of K_alpha1 and K_alpha2 lines.
    
 
-K-alpha and K-beta1 lines:
+K-alpha and K-beta1 lines::
 
-   D.C. Creagh and J.H. Hubbell (1999), "4.2.4 X-ray absorption 
-   (or attenuation) coefficients" in A.J.C. Wilson, E.Prince Eds., 
-   International Tables for Crystallography Vol C p220-236.  
-   Kluwer Academic Publishers, Dordrecht, The Netherlands.
+    D.C. Creagh and J.H. Hubbell (1999), "4.2.4 X-ray absorption 
+    (or attenuation) coefficients" in A.J.C. Wilson, E.Prince Eds., 
+    International Tables for Crystallography Vol C p220-236.  
+    Kluwer Academic Publishers, Dordrecht, The Netherlands.
 
-X-ray scattering factors:
+X-ray scattering factors::
 
-                Low-Energy X-ray Interaction Coefficients:
-                Photoabsorption, Scattering, and Reflection
-                        E = 30-30,000 eV, Z = 1-92
+    Low-Energy X-ray Interaction Coefficients: Photoabsorption, 
+    Scattering, and Reflection E = 30-30,000 eV, Z = 1-92
 
-                B. L. Henke, E. M. Gullikson, and J. C. Davis
-                        Center for X-Ray Optics, 2-400
-                        Lawrence Berkeley Laboratory
-                        Berkeley, California 94720
+    B. L. Henke, E. M. Gullikson, and J. C. Davis
+    Center for X-Ray Optics, 2-400
+    Lawrence Berkeley Laboratory
+    Berkeley, California 94720
 
 These files were used to generate the tables published in reference [1].
 The files contain three columns of data: Energy(eV), f_1, f_2,
@@ -113,8 +112,7 @@ from __future__ import with_statement
 import os.path
 import numpy
 
-import elements
-from elements import periodic_table
+from core import periodic_table, Element, Isotope
 from density import avogadro_number
 import mass,density
 
@@ -283,9 +281,10 @@ def _init():
     if 'xray' in periodic_table.properties: return
     periodic_table.properties.append('xray')
     for el in periodic_table:
+        hasattr(el,'xray') # TODO why is this necessary?
         el.xray = Xray(el)
-    elements.Element.K_alpha_units = "angstrom"
-    elements.Element.K_beta1_units = "angstrom"
+    Element.K_alpha_units = "angstrom"
+    Element.K_beta1_units = "angstrom"
         
     # Sets the K_alpha and K_beta1 wavelengths for select elements
     periodic_table.Ag.K_alpha = 0.5608
@@ -349,70 +348,3 @@ def emission_table():
             print "%3s %7.4f %7.4f"%(el.symbol,el.K_alpha,el.K_beta1)
 
 _init()
-
-def test():
-    from molecules import Molecule
-    from elements import Cu,Mo,Ni,Fe,Si
-
-    # Check some K_alpha and K_beta1 values
-    assert Cu.K_alpha == 1.5418
-    assert Cu.K_beta1 == 1.3922
-    
-    # Check scalar scattering factor lookup
-    f1,f2 = Ni.xray.scattering_factors(xray_energy(Cu.K_alpha))
-    assert abs(f1-25.0229)<0.0001
-    assert abs(f2-0.5249)<0.0001
-
-    # Check array scattering factor lookup
-    f1,f2 = Ni.xray.scattering_factors(xray_energy(Cu.K_alpha))
-    m1,m2 = Ni.xray.scattering_factors(xray_energy(Mo.K_alpha))
-    B1,B2 = Ni.xray.scattering_factors(xray_energy([Cu.K_alpha,Mo.K_alpha]))
-    assert (B1==[f1,m1]).all() and (B2==[f2,m2]).all()
-
-    # Check that we can lookup sld by wavelength and energy
-    Fe_rho,Fe_mu = Fe.xray.sld(wavelength=Cu.K_alpha)
-    assert abs(Fe_rho-59.45) < 0.01
-    Si_rho,Si_mu = Si.xray.sld(energy=8.050)
-    assert abs(Si_rho-20.0701) < 0.0001
-    assert abs(Si_mu-0.4572) < 0.0001
-
-    # Check that wavelength is the default
-    Fe_rho_default,Fe_mu_default = Fe.xray.sld(Cu.K_alpha)
-    assert Fe_rho == Fe_rho_default and Fe_mu == Fe_mu_default
-
-    # Check array form of sld lookup
-    f1,f2 = Si.xray.sld(wavelength=Cu.K_alpha)
-    m1,m2 = Si.xray.sld(wavelength=Mo.K_alpha)
-    B1,B2 = Si.xray.sld(wavelength=[Cu.K_alpha,Mo.K_alpha])
-    assert (B1==[f1,m1]).all() and (B2==[f2,m2]).all()
-
-    #print Cu.xray.sftable
-    #plot_xsf(Cu)
-    #emission_table()
-    #sld_table(table,Cu.K_alpha)
-
-    """
-    # Table of scattering length densities for various molecules
-    for molecule,density in [('SiO2',2.2),('B4C',2.52)]:
-        atoms = Molecule(molecule).atoms
-        rho,mu = xray_sld(atoms,density,wavelength=Cu.K_alpha)
-        print "sld for %s(%g g/cm**3)  rho=%.4g mu=%.4g"\
-            %(molecule,density,rho,mu)
-    """
-
-    # Cross check against mo
-    rho,mu = xray_sld_from_atoms({Si:1},density=Si.density,wavelength=1.54)
-    rhoSi,muSi = Si.xray.sld(wavelength=1.54)
-    assert abs(rho - rhoSi) < 1e-14
-    assert abs(mu - muSi) < 1e-14
-
-    # Check that neutron_sld works as expected
-    atoms = Molecule('SiO2').atoms
-    rho,mu = xray_sld_from_atoms(atoms,2.2,energy=xray_energy(Cu.K_alpha))
-    assert abs(rho-18.87)<0.1
-    atoms = Molecule('B4C').atoms
-    rho,mu = xray_sld_from_atoms(atoms,2.52,energy=xray_energy(Cu.K_alpha))
-    assert abs(rho-20.17)<0.1
-    
-
-if __name__ == "__main__": test()

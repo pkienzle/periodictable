@@ -52,12 +52,13 @@ Covalent radii revisited. Dalton Trans., 2008, 2832-2838
 doi:http://dx.doi.org/10.1039%2Fb801115j
 """
 
-from elements import periodic_table, Element
+from core import periodic_table, Element
 
 def _init():
     if 'covalent_radius' in periodic_table.properties: return
     periodic_table.properties.append('covalent_radius')
 
+    hasattr(periodic_table[0],'covalent_radius') # TODO why is this needed?
     periodic_table[0].covalent_radius = 0.20
     Element.covalent_radius_units = 'angstrom'
     Element.covalent_radius = None
@@ -74,6 +75,7 @@ def _init():
         dr = float(fields[3])*0.01
         n = int(fields[4])
         
+        #hasattr(periodic_table[Z],'covalent_radius') # TODO why is this needed
         periodic_table[Z].covalent_radius = r
         periodic_table[Z].covalent_radius_uncertainty = dr
 
@@ -186,10 +188,3 @@ Cordero = """\
 """
 
 _init()
-
-def test():
-    #assert periodic_table.Po.covalent_radius == 1.53
-    assert periodic_table.Po.covalent_radius == 1.40
-    assert periodic_table.Po.covalent_radius_uncertainty == 0.04
-    
-if __name__ == "__main__": test()

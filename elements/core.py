@@ -22,24 +22,24 @@ The periodic table is extensible.  Third party packages can
 add attributes to the table, and they will appear in all of
 the elements.  For example:
 
-    import danse.gammatable  # loads gammaray data
+    import danse.gammaray  # loads gammaray data
     from elements import *   # loads symbols for periodic_table, H, He, ...
 
     for el in periodic_table: print el.symbol, el.gammadata
 
-To implement this, you will need the following in gammatable.py:
+To implement this, you will need the following in gammaray/core.py:
 
-    from elements import periodic_table
+    from elements.core import periodic_table, Element
     
     def _init():
         if 'gammadata' in periodic_table.properties: return
         periodic_table.properties.append('gammadata')
 
         # Set the default, if any
-        elements.elements.Element.gamma = None
+        Element.gamma = None
 
         # Set the units
-        elements.elements.Element.gamma_units = "Ev"
+        Element.gamma_units = "Ev"
 
         # Load the data
         for s,data in gamma_table.iteritems():
@@ -56,7 +56,7 @@ To implement this, you will need the following in gammatable.py:
 
 You can use similar tricks for isotope specific data:
 
-    from elements import periodic_table
+    from elements.core import periodic_table, Isotope
 
     def _init():
         if 'shells' in periodic_table.properties: return
@@ -66,7 +66,7 @@ You can use similar tricks for isotope specific data:
         # setting it to None.  If the attribute is missing then the
         # isotope data reverts to the element to supply the value,
         # which is almost certainly not what you want.
-        elements.elements.Isotope.shells = None
+        Isotope.shells = None
 
         # Load the data
         for symbol,data in shell_table.iteritems():
@@ -83,18 +83,21 @@ You can use similar tricks for isotope specific data:
 
     _init()
 
-Since your data table is likely to be in its own package, you can
-put the following in the package/__init__.py:
+Since your data table is in its own package, you need an __init__.py, which
+contains something like:
 
      import elements
-     table = elements.table  # Allow user to say e.g., gamma.table.Si
+     table = elements.table  # Allow user to say e.g., gammaray.table.Si
      
-     import gammatable
+     import core
+     del elements,core  # Clean up symbol space
 
 You can also define attributes on import that are not loaded directly.
 For example, if you don't want to load all the isotope information for
 shells immediately, then you can use delayed_load in __init__.py:
 
+
+     from elements.core import delayed_load
 
      # Delayed loading of shell info
      def _load_shell():
@@ -104,7 +107,7 @@ shells immediately, then you can use delayed_load in __init__.py:
          T. Student, Tables of Shell Information
          '''
          import shelltable
-     elements.elements.delayed_load(['shells'],_load_shell)
+     delayed_load(['shells'],_load_shell)
 
 The first argument to delayed_load is the list of all attributes that will
 be defined when the module is loaded.  The second argument is the loading
@@ -112,10 +115,6 @@ function, whose docstring will appear as the attribute description for
 each attribute in the first list.
 """
 import copy
-
-# Note: importing self so that we can run as __main__; if we don't then
-# elements.Element does not match the implicit __main__.Element
-import elements
 
 # Note: __all__ will include all the elements and periodic_table; it is
 # defined below.
@@ -134,16 +133,16 @@ def delayed_load(all_props,loader,element=True,isotope=False):
         """
         def getfn(el):
             for p in all_props:
-                delattr(elements.Element,p)
+                delattr(Element,p)
             loader()
             return getattr(el,propname)
         return getfn
     if element:
         for p in all_props:
-            setattr(elements.Element,p,property(getter(p),doc=loader.__doc__))
+            setattr(Element,p,property(getter(p),doc=loader.__doc__))
     if isotope:
         for p in all_props:
-            setattr(elements.Isotope,p,property(getter(p),doc=loader.__doc__))
+            setattr(Isotope,p,property(getter(p),doc=loader.__doc__))
 
 
 # Define the element names from the element table.
@@ -188,7 +187,7 @@ class _PeriodicTable(object):
         self.properties = []
         self._element = {}
         for Z,name in element_symbols.iteritems():
-            element = elements.Element(name[0].lower(),name[1],Z)
+            element = Element(name[0].lower(),name[1],Z)
             self._element[element.number] = element
             setattr(self,element.symbol,element)
 
@@ -222,7 +221,7 @@ class _PeriodicTable(object):
         """
         if hasattr(self,input):
             value = getattr(self,input)
-            if isinstance(value,(elements.Element,elements.Isotope)):
+            if isinstance(value,(Element,Isotope)):
                 return value
         raise ValueError("unknown element "+input)
         
@@ -264,14 +263,14 @@ class _PeriodicTable(object):
         # If it is an element, check that the isotope exists
         if hasattr(self,symbol):
             attr = getattr(self,symbol)
-            if isinstance(attr,elements.Element):
+            if isinstance(attr,Element):
                 # If no isotope, return the element
                 if isotope == 0:
                     return attr
                 # If isotope, check that it is valid
                 if isotope in attr.isotopes:
                     return attr[isotope]
-            elif isinstance(attr,elements.Isotope):
+            elif isinstance(attr,Isotope):
                 # D,T must not have an associated isotope; D[4] is meaningless.
                 if isotope == 0:
                     return attr
@@ -349,7 +348,7 @@ class Element(object):
     isotopes = property(_getisotopes,doc="List of all isotopes")
     def add_isotope(self,number):
         if number not in self._isotopes:
-            self._isotopes[number] = elements.Isotope(self,number)
+            self._isotopes[number] = Isotope(self,number)
         return self._isotopes[number]
     def __getitem__(self,number):
         return self._isotopes[number]
@@ -500,53 +499,9 @@ for el in periodic_table:
 D = periodic_table.D
 T = periodic_table.T
 exec D.name+"=D"
-exec T.name+"=D"
-# Import all elements on "from elements import *"
+exec T.name+"=T"
+# Import all elements on "from core import *"
 __all__ = ([el.symbol for el in periodic_table]
            + [el.name for el in periodic_table]
            + [D.symbol, D.name, T.symbol, T.name]
            + ['periodic_table'])
-
-def test():
-    # Check that we can access element properties
-    assert H.name == "hydrogen"
-    assert H.symbol == "H"
-    assert H.number == 1
-    assert helium.symbol == 'He'
-
-    # Check that isotopes work and produce the correct strings and symbols
-    O.add_isotope(18)
-    assert H[2].symbol == 'D'
-    assert H[3].symbol == 'T'
-    assert O[18].symbol == 'O'
-    assert str(H[2])=='D'
-    assert str(H[3])=='T'
-    assert str(O[18])=='18-O'
-
-    # Check the for el in elements works and for iso in el works
-    elements = tuple(el for el in periodic_table)
-    assert elements[0].number == 0
-    assert elements[1].number == 1
-    isotopes = tuple(iso for iso in O)
-    assert isotopes[0].isotope == 18
-        
-    # Check that table lookup works and fails appropriately
-    Fe.add_isotope(56)
-    assert periodic_table.symbol('Fe') == Fe
-    assert periodic_table.name('iron') == Fe
-    assert periodic_table.isotope('Fe') == Fe
-    assert periodic_table.isotope('56-Fe') == Fe[56]
-    try:
-        periodic_table.symbol('Qu')
-    except ValueError,msg:
-        assert str(msg) == "unknown element Qu"
-    try:
-        periodic_table.name('Qu')
-    except ValueError,msg:
-        assert str(msg) == "unknown element Qu"
-    try:
-        periodic_table.isotope('Qu')
-    except ValueError,msg:
-        assert str(msg) == "unknown element Qu"
-
-if __name__ == "__main__": test()

@@ -21,8 +21,7 @@ Physics, 80th ed. (CRC Press, Boca Raton, Florida, 1999).
 These values are reproduced in the ILL Neutron Data Booklet, Second Edition.
 """
 
-import elements
-from elements import periodic_table
+from core import periodic_table, Element
 import mass # required for number density
 
 avogadro_number = 6.02214179e23 #(30) mol-1 
@@ -61,16 +60,16 @@ def number_density(element):
 def _init():
     if 'density' in periodic_table.properties: return
     periodic_table.properties.append('density')
-    elements.Element.density_units = "g/cm**3"
+    Element.density_units = "g/cm**3"
 
-    elements.Element.interatomic_distance \
+    Element.interatomic_distance \
         = property(interatomic_distance,
                    "interatomic distance estimated from density")
-    elements.Element.interatomic_distance_units = "angstrom"
-    elements.Element.number_density \
+    Element.interatomic_distance_units = "angstrom"
+    Element.number_density \
         = property(number_density,
                    "number density estimated from mass and density")
-    elements.Element.number_density_units = ""
+    Element.number_density_units = ""
     
     for k,v in element_densities.iteritems():
         el = getattr(periodic_table,k)
@@ -203,16 +202,3 @@ element_densities = dict(
     )
 
 _init()
-
-def test():
-    assert periodic_table.Cm.density == 13.51
-    assert periodic_table.Cm.density_caveat == "calculated"
-    assert periodic_table.Cm.density_units == "g/cm**3"
-
-    #periodic_table.list('symbol','density','density_caveat', format="%3s %10s   %s")
-    
-    #import mass
-    #mass.init()
-    #periodic_table.list('symbol','interatomic_distance')
-
-if __name__ == "__main__": test()

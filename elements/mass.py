@@ -51,8 +51,7 @@ Neutron mass from NIST Reference on Constants, Units, and Uncertainty
     http://physics.nist.gov/cuu/index.html
 """
 
-import elements
-from elements import periodic_table
+from core import periodic_table, Element, Isotope
 
 __all__ = ['init']
 
@@ -87,11 +86,11 @@ def abundance(isotope):
 def _init():
     if 'mass' in periodic_table.properties: return
     periodic_table.properties.append('mass')
-    elements.Element.mass = property(mass,doc=mass.__doc__)
-    elements.Isotope.mass = property(mass,doc=mass.__doc__)
-    elements.Isotope.abundance = property(abundance,doc=abundance.__doc__)
-    elements.Element.mass_units = "u"
-    elements.Element.abundance_units = "%"
+    Element.mass = property(mass,doc=mass.__doc__)
+    Isotope.mass = property(mass,doc=mass.__doc__)
+    Isotope.abundance = property(abundance,doc=abundance.__doc__)
+    Element.mass_units = "u"
+    Element.abundance_units = "%"
     
     for line in massdata.split('\n'):
         isotope,m,p,avg = line.split(',')
@@ -3052,42 +3051,3 @@ massdata="""\
 """
 
 _init() # Load the data
-
-def test():
-
-    assert periodic_table.Be[12].mass == 12.026921
-    assert periodic_table.Be.mass == 9.012182
-    assert periodic_table.Pb[206].abundance == 24.1
-    assert periodic_table.Pb[209].abundance == 0
-    assert periodic_table.Pb.mass == 207.2
-    assert periodic_table.n.mass == 1.00866491597
-
-    # Check abundance totals to 0% or 100%
-    for el in periodic_table:
-        abundance=0
-        for iso in el:
-            if iso.abundance == None:
-                print iso,"abundance=None"
-            else:
-                abundance += iso.abundance
-        assert abs(abundance-100) < 1e-4 or abundance==0,\
-            "total abundance for %s is %.15g%%"%(el.symbol,abundance)
-
-
-    # Check average mass corresponds to abundance information
-    # Note: should check that this is true within uncertainty, but
-    # uncertainties are not being loaded.
-    for el in periodic_table:
-        abundance=0
-        mass=0
-        for iso in el:
-            if iso.abundance == None:
-                print iso,"abundance=None"
-            else:
-                abundance += iso.abundance
-                mass += iso.mass*iso.abundance/100.
-        assert abundance==0 or abs(mass - el.mass)/el.mass  < 1e-3,\
-            "avg mass for %s is %g != %g"%(el.symbol,el.mass,mass)
-
-    
-if __name__ == "__main__": test()

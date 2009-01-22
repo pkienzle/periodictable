@@ -10,6 +10,9 @@ The property is set to None if there is no neutron scattering information
 for the element.  Individual isotopes may have their own scattering
 information
 
+Example
+=======
+
 The following plots the symbol versus scattering length density for
 all elements::
 
@@ -27,7 +30,26 @@ of a particular element::
     for iso in elements.Ni:
         if iso.neutron.has_sld(): print iso,iso.neutron.sld()[0]
 
-This table is reproduced from the Atomic Institute for Austrian Universities::
+Details
+=======
+
+There are a number of functions available in elements.nsf::
+
+    neutron_sld(molecule)
+        computes sld for a molecule (available as elements.neutron_sld()).
+    neutron_sld_from_atoms({isotope:quantity}, density)
+        computes sld from a set of isotopes, a density and a wavelength
+    energy_dependent_table()
+        lists energy dependent isotopes
+    sld_table()
+        lists all elements in natural abundance
+    absorption_comparison_table()
+        compares el.neutron.b_c_i and el.neutron.absorption
+    coherent_comparison_table()
+        compares el.neutron.b_c and el.neutron.coherent
+
+The neutron scattering information table is reproduced from the Atomic 
+Institute for Austrian Universities (2007 version)::
 
     http://www.ati.ac.at/~neutropt/scattering/table.html
 
@@ -45,16 +67,13 @@ H.Schopper Ed. Chap. 6. Springer: Berlin.
 [3] L. Koester, H. Rauch, E. Seymann. Atomic Data Nuclear 
 Data Tables 49 (1991) 65
 """
+from core import periodic_table, Element, Isotope
 from density import avogadro_number
-from elements import periodic_table
 import mass, density
-import elements
 
 __all__ = ['init']
 
-use_imaginary = False
-
-class Neutron:
+class Neutron(object):
     """
     Neutron scattering factors.
 
@@ -208,8 +227,8 @@ def _init():
 
     # Defaults for missing neutron information
     missing = Neutron()
-    elements.Isotope.neutron = missing
-    elements.Element.neutron = missing
+    Isotope.neutron = missing
+    Element.neutron = missing
 
     for line in nsftable.split('\n'):
         columns = line.split(',')
@@ -337,7 +356,9 @@ def neutron_sld(input,density=None,wavelength=1):
     Raises AssertionError if density is missing.
     """
     import molecules
-    return neutron_sld_from_atoms(molecules.Molecule(input).atoms,
+    mol = molecules.Molecule(input)
+    if density is None: density = mol.density # defaults to molecule density
+    return neutron_sld_from_atoms(mol.atoms,
                                   density=density,wavelength=wavelength)
 
 def neutron_sld_from_atoms(atoms,density=None,wavelength=1):
@@ -796,7 +817,7 @@ nsftableI="""\
 def _diff(s,a,b):
     print "%10s %8.2f %8.2f %3.0f%%"%(s, a, b, 100*abs((a-b)/b))
 
-def _absorption_comparison_table():
+def absorption_comparison_table():
     """
     Print a table of b_c_i and -absorption/(2*1.798*1000) for each isotope.
     
@@ -810,7 +831,7 @@ def _absorption_comparison_table():
             if iso.neutron.b_c_i is not None:
                 _diff(iso, iso.neutron.b_c_i, -iso.neutron.absorption/2/1.798/1000)
 
-def _coherent_comparison_table():
+def coherent_comparison_table():
     """
     Print a table of 4*pi*b_c**2/100 and coherent for each isotope.
     
@@ -826,96 +847,21 @@ def _coherent_comparison_table():
                 _diff(iso, iso.neutron.b_c**2*4*numpy.pi/100, iso.neutron.coherent)
 
 
+def sld_plot():
+    """
+    Plot SLD as a function of element number.
+    """
+    import pylab
+
+    SLDs = [(el.number,el.neutron.sld()[0],el.symbol)
+            for el in periodic_table
+            if el.neutron.has_sld()]
+    for Z,sld,sym in SLDs:
+        if sld is not None: pylab.text(Z,sld,sym)
+    pylab.axis([0,100,-4,10])
+    pylab.xlabel('Element number')
+    pylab.ylabel('Scattering length density (10**-6 Nb)')
+    pylab.title('Neutron SLD for elements in natural abundance')
+
 _init()
 
-def test():
-    H,He = periodic_table.H,periodic_table.He
-    assert H.neutron.absorption == 0.3326
-    assert H.neutron.total == 82.02
-    assert H.neutron.incoherent == 80.26
-    assert H.neutron.coherent == 1.7568
-    assert periodic_table.Ru[101].neutron.bp == None
-    assert H[1].nuclear_spin == '1/2'
-    assert H[2].nuclear_spin == '1'
-    assert not H[6].neutron.has_sld()
-
-    assert He[3].neutron.b_c_i == -1.48
-    assert He[3].neutron.bm_i == -5.925
-
-    Nb = periodic_table.Nb
-    assert Nb.neutron.absorption == Nb[93].neutron.absorption
-
-    # Check abundance totals to 0% or 100%
-    for el in periodic_table:
-        if not hasattr(el,'neutron'): continue
-        abundance=0
-        for iso in el:
-            if iso.neutron == None: continue
-            if not hasattr(iso.neutron,'abundance'):
-                print "abundance missing for",iso
-            if iso.neutron.abundance == None:
-                print iso,"abundance=None"
-            else:
-                abundance += iso.neutron.abundance
-        # TODO: abundance tables are not very good
-        assert abs(abundance-100) < 1.1 or abundance==0,\
-            "total abundance for %s is %.15g%%"%(el.symbol,abundance)
-
-    # Check that b_c values match abundance-weighted values
-    # Note: Currently they do not for match within 5% for Ar,V,Sm or Gd
-    for el in periodic_table:
-        if not hasattr(el,'neutron'): continue
-        b_c = 0
-        complete = True
-        for iso in el:
-            if iso.neutron != None:
-                if iso.neutron.b_c == None:
-                    complete = False
-                else:
-                    b_c += iso.neutron.b_c*iso.neutron.abundance/100.
-        if complete and b_c != 0 and abs((b_c-el.neutron.b_c)/b_c) > 0.05:
-            err = abs((b_c-el.neutron.b_c)/b_c)
-            ## Printing suppressed for the release version
-            #print "%2s %.3f % 7.3f % 7.3f"%(el.symbol,err,b_c,el.neutron.b_c)
-    
-    sld_table(4.75)
-    #energy_dependent_table()
-
-    """
-    # Specific elements with b_c values different from Neutron News 1992.
-    # This is not a complete list.
-    for sym in ['Sc','Te','Xe','Sm','Eu','Gd','W','Au','Hg']:
-        el = getattr(periodic_table,sym)
-        print el.symbol,el.neutron.b_c,el.neutron.coherent,\
-            el.neutron.incoherent,el.neutron.absorption
-    """
-
-    # Check that neutron_sld works as expected
-    from molecules import Molecule
-    atoms = Molecule('SiO2').atoms
-    coh,absorp,inc = neutron_sld_from_atoms(atoms,2.2,wavelength=4.75)
-    assert abs(coh-3.475)<0.001
-    #assert abs(absorp-0.0001)<0.00001
-    atoms = Molecule('B4C').atoms
-    coh,absorp,inc = neutron_sld_from_atoms(atoms,2.52,wavelength=4.75)
-    assert abs(coh-7.649)<0.001
-    #assert abs(absorp-2.226)<0.001
-    Si = periodic_table.Si
-    
-    # Make sure molecular calculation corresponds to direct calculation
-    atoms = Molecule('Si').atoms
-    coh,absorp,inc = neutron_sld_from_atoms(atoms,Si.density,wavelength=4.75)
-    coh2,absorp2,inc2 = Si.neutron.sld(wavelength=4.75)
-    assert abs(coh-coh2)<0.001
-    assert abs(absorp-absorp2)<0.001
-
-    """
-    # Table of scattering length densities for various molecules
-    for molecule,density in [('SiO2',2.2),('B4C',2.52)]:
-        atoms = Molecule(molecule).atoms
-        rho,mu,inc = neutron_sld(atoms,density,wavelength=4.75)
-        print "sld for %s(%g g/cm**3)  rho=%.4g mu=%.4g inc=%.4g"\
-            %(molecule,density,rho,mu,inc)
-    """
-
-if __name__ == "__main__": test()

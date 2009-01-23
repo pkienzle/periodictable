@@ -78,7 +78,7 @@ Work with molecules::
 -----------
 Disclaimer:
 
-This data has been compiled from the above sources for the user's 
+This data has been compiled from the above sources for the user's
 convenience and does not represent a critical evaluation by the authors.
 While we have made efforts to verify that the values we use match
 published values, the values themselves are based on measurements
@@ -88,10 +88,10 @@ whose conditions may differ from those of your experiment.
 __docformat__ = 'restructuredtext en'
 
 # Pull in periodic table and elements
-import core
-import mass
-import density
-from core import *
+from . import core
+from . import mass
+from . import density
+from elements.core import *
 __all__ = core.__all__ + ['neutron_sld','xray_sld','molecule']
 
 # Allow elements.table as a shorthand for elements.periodic_table
@@ -100,7 +100,7 @@ table = periodic_table
 def _load_covalent_radius():
     """
     Add covalent_radius property to the elements.
-    
+
     Note: covalent radii data source is unknown.
     """
     import covalent_radius
@@ -110,7 +110,7 @@ core.delayed_load(['covalent_radius'],_load_covalent_radius)
 def _load_crystal_structure():
     """
     Add crystal_structure property to the elements.
-    
+
     Ashcroft and Mermin
     """
     import crystal_structure
@@ -135,7 +135,7 @@ def _load_xray():
 
     Center for X-Ray Optics.
     L. Henke, E. M. Gullikson, and J. C. Davis
-    
+
     K_alpha and K_beta1 emission lines for selected elements.
 
     D. C. Creagh and J. H. Hubbell
@@ -150,11 +150,11 @@ core.Element.K_beta1_units = "angstrom"
 # Constructors and functions
 def molecule(value=None, density=None, name=None):
     """
-    Molecule representation.  
+    Molecule representation.
 
     Example initializers:
 
-       string: 
+       string:
           m = Molecule( "CaCO3+6H2O" )
        sequence of fragments:
           m = Molecule( [(1,Ca),(2,C),(3,O),(6,[(2,H),(1,O)]] )
@@ -166,9 +166,9 @@ def molecule(value=None, density=None, name=None):
           m = Molecule( Ca )
        nothing:
           m = Molecule()
-          
+
     Additional information can be provided:
-    
+
        density (g / cm**3)   material density
        name (string) common name for the molecule
 
@@ -176,19 +176,19 @@ def molecule(value=None, density=None, name=None):
        m.atoms returns a dictionary of isotope: count for the
           entire molecule
 
-    Molecule strings consist of counts and atoms such as "CaCO3+6H2O".  
-    Groups can be separated by '+' or space, so "CaCO3 6H2O" works as well. 
+    Molecule strings consist of counts and atoms such as "CaCO3+6H2O".
+    Groups can be separated by '+' or space, so "CaCO3 6H2O" works as well.
     Groups and be defined using parentheses, such as "CaCO3(H2O)6".
     Parentheses can nest: "(CaCO3(H2O)6)1"
-    Isotopes are represented by index, e.g., "CaCO[18]3+6H2O". 
+    Isotopes are represented by index, e.g., "CaCO[18]3+6H2O".
     Counts can be integer or decimal, e.g. "CaCO3+(3HO0.5)2".
 
     For full details see help(elements.molecules.molecule_grammar)
-        
-    This is designed for calculating molar mass and scattering 
-    length density, not for representing bonds or atom positions.  
-    We do preserve the structure of the formula so that it can 
-    be used as a basis for a rich text representation such as 
+
+    This is designed for calculating molar mass and scattering
+    length density, not for representing bonds or atom positions.
+    We do preserve the structure of the formula so that it can
+    be used as a basis for a rich text representation such as
     matplotlib TeX markup.
     """
     import molecules
@@ -216,4 +216,3 @@ def xray_sld(molecule,density=None,wavelength=None,energy=None):
                         wavelength=wavelength,energy=energy)
 
 del core, mass, density
-

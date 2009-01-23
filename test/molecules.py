@@ -42,7 +42,7 @@ def test():
     # Test isotopes; make sure this is last since it changes ikaite!
     assert ikaite!=molecule("CaCO[18]3+6H2O")
     assert molecule("O[18]").mass == O[18].mass
-    
+
     # Check x-ray and neutron sld
     import density,xsf,nsf
     rho,mu,inc = molecule('Si',Si.density).neutron_sld(wavelength=4.5)
@@ -55,7 +55,7 @@ def test():
     rhoSi,muSi = Si.xray.sld(wavelength=1.54)
     assert abs(rho - rhoSi) < 1e-14
     assert abs(mu - muSi) < 1e-14
-    
+
     # Check that names work
     permalloy = molecule('Ni8Fe2',8.692,name='permalloy')
     assert str(permalloy)=='permalloy'

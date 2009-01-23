@@ -49,7 +49,7 @@ def test():
             err = abs((b_c-el.neutron.b_c)/b_c)
             ## Printing suppressed for the release version
             #print "%2s %.3f % 7.3f % 7.3f"%(el.symbol,err,b_c,el.neutron.b_c)
-    
+
     import elements.nsf
     neutron_sld_from_atoms = elements.nsf.neutron_sld_from_atoms
     #elements.nsf.sld_table(4.75)
@@ -74,7 +74,7 @@ def test():
     assert abs(coh-7.649)<0.001
     #assert abs(absorp-2.226)<0.001
     Si = periodic_table.Si
-    
+
     # Make sure molecular calculation corresponds to direct calculation
     atoms = molecule('Si').atoms
     coh,absorp,inc = neutron_sld_from_atoms(atoms,Si.density,wavelength=4.75)

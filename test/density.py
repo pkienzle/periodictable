@@ -6,7 +6,7 @@ def test():
     assert periodic_table.Cm.density_units == "g/cm**3"
 
     #periodic_table.list('symbol','density','density_caveat', format="%3s %10s   %s")
-    
+
     #import mass
     #mass.init()
     #periodic_table.list('symbol','interatomic_distance')

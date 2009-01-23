@@ -1,11 +1,11 @@
 # This program is public domain
 """
 Adds density properties to the periodic table.
-    
+
     density (g/cm^3)
-        Densities for solids and liquids are given as specific gravities 
-        at 20 C unless other wise indicated by density_caveat.  Densities 
-        for the gaseous elements are given for the liquids at their 
+        Densities for solids and liquids are given as specific gravities
+        at 20 C unless other wise indicated by density_caveat.  Densities
+        for the gaseous elements are given for the liquids at their
         boiling points.  Missing data are represented by None.
     density_caveat (string)
         Comments on the density, if not taken in standard conditions.
@@ -15,19 +15,20 @@ Adds density properties to the periodic table.
 From the X-ray data book:
     http://xdb.lbl.gov/Section5/Sec_5-2.html
 
-Data were taken mostly from D. R. Lide, Ed., CRC Handbook of Chemistry and 
+Data were taken mostly from D. R. Lide, Ed., CRC Handbook of Chemistry and
 Physics, 80th ed. (CRC Press, Boca Raton, Florida, 1999).
 
 These values are reproduced in the ILL Neutron Data Booklet, Second Edition.
 """
 
-from core import periodic_table, Element
-import mass # required for number density
-
-avogadro_number = 6.02214179e23 #(30) mol-1 
+from .core import periodic_table, Element
+from .constants import avogadro_number
 
 def density(element):
-    """Element density for natural abundance (g/cm**3).
+    """
+    Element density for natural abundance (g/cm**3).
+
+    Returns None for isotopes.
 
     ILL Neutron Data Booklet, original values from
     CRC Handbook of Chemistry and Physics, 80th ed. (1999).
@@ -70,7 +71,7 @@ def _init():
         = property(number_density,
                    "number density estimated from mass and density")
     Element.number_density_units = ""
-    
+
     for k,v in element_densities.iteritems():
         el = getattr(periodic_table,k)
         if isinstance(v,tuple):

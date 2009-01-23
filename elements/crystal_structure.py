@@ -2,7 +2,7 @@
 This data is from Ashcroft and Mermin.
 '''
 
-from core import periodic_table
+from .core import periodic_table
 
 crystal_structures = [\
     None, #X

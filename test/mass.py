@@ -36,5 +36,5 @@ def test():
         assert abundance==0 or abs(mass - el.mass)/el.mass  < 1e-3,\
             "avg mass for %s is %g != %g"%(el.symbol,el.mass,mass)
 
-    
+
 if __name__ == "__main__": test()

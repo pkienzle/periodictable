@@ -2,29 +2,31 @@
 """
 Operations on molecules.
 
-As of this writing, this includes parsing, computing molar mass and 
+As of this writing, this includes parsing, computing molar mass and
 computing scattering length density.
 
 Requires that the pyparsing module is installed.
 """
 from copy import copy
-from pyparsing import Literal, Optional, White, Regex, \
-    ZeroOrMore, OneOrMore, Forward, StringEnd
-from core import periodic_table, Element, Isotope
+
+from pyparsing import (Literal, Optional, White, Regex,
+                       ZeroOrMore, OneOrMore, Forward, StringEnd)
+
+from .core import periodic_table, Element, Isotope
 
 class Molecule(object):
     """
-    Simple molecule representation.  
+    Simple molecule representation.
 
-    This is designed for calculating molar mass and scattering 
-    length density, not for representing bonds or atom positions.  
-    We preserve the structure of the formula so that it can 
-    be used as a basis for a rich text representation such as 
+    This is designed for calculating molar mass and scattering
+    length density, not for representing bonds or atom positions.
+    We preserve the structure of the formula so that it can
+    be used as a basis for a rich text representation such as
     matplotlib TeX markup.
 
     Example initializers::
 
-       string: 
+       string:
           m = Molecule( "CaCO3+6H2O" )
        structure:
           m = Molecule( [(1,Ca),(2,C),(3,O),(6,[(2,H),(1,O)]] )
@@ -43,21 +45,21 @@ class Molecule(object):
        name (string) common name for the molecule
 
     Operations::
-    
+
         m.atoms returns a dictionary of {isotope: count} for each isotope
           in the molecule
         m.mass (u) returns the molar mass of the molecule
 
-    Molecule strings consist of counts and atoms such as "CaCO3+6H2O".  
+    Molecule strings consist of counts and atoms such as "CaCO3+6H2O".
 
-    Groups can be separated by '+' or space, so "CaCO3 6H2O" works as well. 
-    
+    Groups can be separated by '+' or space, so "CaCO3 6H2O" works as well.
+
     Groups and be defined using parentheses, such as "CaCO3(H2O)6".
-    
+
     Parentheses can nest: "(CaCO3(H2O)6)1"
-    
-    Isotopes are represented by index, e.g., "CaCO[18]3+6H2O". 
-    
+
+    Isotopes are represented by index, e.g., "CaCO[18]3+6H2O".
+
     Counts can be integer or decimal, e.g. "CaCO3+(3HO0.5)2".
 
     For full details see help(elements.molecule.molecule_grammar)
@@ -108,7 +110,7 @@ class Molecule(object):
         """
         return _count_atoms(self.structure)
     atoms = property(_atoms,doc=_atoms.__doc__)
-    
+
     def _mass(self):
         """
         Molar mass of the molecule.
@@ -121,7 +123,7 @@ class Molecule(object):
 
     def neutron_sld(self, wavelength=1):
         """
-        Neutron scattering information for the molecule.  
+        Neutron scattering information for the molecule.
         Returns (sld,absorption,incoherent scattering).
         Returns None if the density is not known.
         """
@@ -156,7 +158,7 @@ class Molecule(object):
         """
         #print "adding",self,other
         if not isinstance(other,Molecule):
-           raise TypeError("expected molecule+molecule")
+            raise TypeError("expected molecule+molecule")
         ret = Molecule()
         ret.structure = tuple(list(self.structure) + list(other.structure))
         return ret
@@ -177,10 +179,10 @@ class Molecule(object):
 
     def __str__(self):
         return self.name if self.name else _str_atoms(self.structure)
-    
+
     def __repr__(self):
         return "molecule('%s')"%(str(self))
-    
+
     def __getstate__(self):
         """
         Pickle molecule structure using a string representation since
@@ -197,18 +199,18 @@ class Molecule(object):
         """
         self.__dict__ = input
         self._parse_string(input['structure'])
-    
+
 
 def molecule_grammar():
     """
     Return a parser for molecular formulae.
-      
-    The parser.parseString() method returns a list of 
-    pairs (count,fragment),  where fragment is an isotope, an 
+
+    The parser.parseString() method returns a list of
+    pairs (count,fragment),  where fragment is an isotope, an
     element or a list of pairs (count,fragment).
 
     Molecules are parsed from strings using the following grammar::
-    
+
         number    :: [1-9][0-9]*
         fraction  :: ( | '0' | number) '.' [0-9]*
         count     :: number | fraction | ''
@@ -217,7 +219,7 @@ def molecule_grammar():
         element   :: symbol isotope count
         separator :: '+' | ' '
         group     :: count element+ | '(' formula ')' count
-        grammar   :: group separator formula | group    
+        grammar   :: group separator formula | group
     """
     # Recursive
     formula = Forward()
@@ -254,7 +256,7 @@ def molecule_grammar():
     element = element.setParseAction(convert_element)
 
     # Convert "count elements" to a pair
-    implicit_group = count+OneOrMore(element) 
+    implicit_group = count+OneOrMore(element)
     def convert_implicit(string,location,tokens):
         #print "convert_implicit received",tokens
         count = tokens[0]
@@ -286,13 +288,13 @@ def _count_atoms(seq):
     """
     total = {}
     for count,fragment in seq:
-         if isinstance(fragment,(list,tuple)):
-             partial = _count_atoms(fragment)
-         else:
-             partial = {fragment: 1}
-         for el,elcount in partial.iteritems():
-             if el not in total: total[el] = 0
-             total[el] += elcount*count 
+        if isinstance(fragment,(list,tuple)):
+            partial = _count_atoms(fragment)
+        else:
+            partial = {fragment: 1}
+        for el,elcount in partial.iteritems():
+            if el not in total: total[el] = 0
+            total[el] += elcount*count
     return total
 
 def _check_atoms(seq):

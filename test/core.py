@@ -22,7 +22,7 @@ def test():
     assert els[1].number == 1
     isotopes = tuple(iso for iso in O)
     assert isotopes[0].isotope == 12  # 12 is the first oxygen isotope listed
-        
+
     # Check that table lookup works and fails appropriately
     Fe.add_isotope(56)
     assert periodic_table.symbol('Fe') == Fe

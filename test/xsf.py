@@ -7,7 +7,7 @@ def test():
     # Check some K_alpha and K_beta1 values
     assert Cu.K_alpha == 1.5418
     assert Cu.K_beta1 == 1.3922
-    
+
     # Check scalar scattering factor lookup
     f1,f2 = Ni.xray.scattering_factors(xray_energy(Cu.K_alpha))
     assert abs(f1-25.0229)<0.0001
@@ -63,6 +63,6 @@ def test():
     atoms = molecule('B4C').atoms
     rho,mu = xray_sld_from_atoms(atoms,2.52,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-20.17)<0.1
-    
+
 
 if __name__ == "__main__": test()

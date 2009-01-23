@@ -30,7 +30,7 @@ the elements.  For example:
 To implement this, you will need the following in gammaray/core.py:
 
     from elements.core import periodic_table, Element
-    
+
     def _init():
         if 'gammadata' in periodic_table.properties: return
         periodic_table.properties.append('gammadata')
@@ -48,7 +48,7 @@ To implement this, you will need the following in gammaray/core.py:
 
     # Define the data
     gamma_table = dict(
-        Si="Silicon gamma values", 
+        Si="Silicon gamma values",
         O="Oxygen gamma values",
         )
 
@@ -88,7 +88,7 @@ contains something like:
 
      import elements
      table = elements.table  # Allow user to say e.g., gammaray.table.Si
-     
+
      import core
      del elements,core  # Clean up symbol space
 
@@ -103,7 +103,7 @@ shells immediately, then you can use delayed_load in __init__.py:
      def _load_shell():
          '''
          Electron shell information for isotopes.
-     
+
          T. Student, Tables of Shell Information
          '''
          import shelltable
@@ -127,33 +127,65 @@ def delayed_load(all_props,loader,element=True,isotope=False):
     function.  If it is an isotope property, be sure to set the
     keyword isotope=True.
     """
+    def clearprops():
+        """
+        Remove the properties so that the attribute can be accessed
+        directly.
+        """
+        if element:
+            for p in all_props:
+                delattr(Element, p)
+        if isotope:
+            for p in all_props:
+                delattr(Isotope, p)
+
     def getter(propname):
         """
-        Factory which returns a getter for prop
+        Property getter for attribute propname.
+
+        The first time the prop is accessed, the prop itself will be
+        deleted and the data loader for the property will be called
+        to set the real values.  Subsequent references to the property
+        will be to the actual data.
         """
         def getfn(el):
-            for p in all_props:
-                delattr(Element,p)
+            #print "get",el,propname
+            clearprops()
             loader()
-            return getattr(el,propname)
+            return getattr(el, propname)
         return getfn
 
     def setter(propname):
-        """Create property setter for attribute propname.
+        """
+        Property setter for attribute propname.
+
+        This function is assumed to be called when the data loader for the
+        attribute is called before the property is referenced (for example,
+        if somebody imports elements.xsf before referencing Ni.xray).  In
+        this case, we simply need to clear the delayed load property and
+        let the loader set the values as usual.
+
+        If the user tries to override a value in the table before first
+        referencing the table, then the above assumption is false.  E.g.,
+        "Ni.K_alpha=5" followed by "print Cu.K_alpha" will yield an
+        undefined Cu.K_alpha.  This will be difficult for future users
+        to debug.
         """
         def setfn(el, value):
-            el.__dict__[propname] = value
+            #print "set",el,propname,value
+            clearprops()
+            setattr(el, propname, value)
         return setfn
 
     if element:
         for p in all_props:
-            pprop = property(getter(p), setter(p), doc=loader.__doc__)
-            setattr(Element, p, pprop)
+            prop = property(getter(p), setter(p), doc=loader.__doc__)
+            setattr(Element, p, prop)
 
     if isotope:
         for p in all_props:
-            pprop = property(getter(p), setter(p), doc=loader.__doc__)
-            setattr(Isotope, p, pprop)
+            prop = property(getter(p), setter(p), doc=loader.__doc__)
+            setattr(Isotope, p, prop)
 
 
 # Define the element names from the element table.
@@ -165,7 +197,7 @@ class _PeriodicTable(object):
     table.name('Name'), table.symbol('Xx') or table.isotope('Xx').
     Individual isotopes are addressable by element[mass_number] or
     table.isotope('n-Xx').
-    
+
     For example, the following all retrieve iron:
         table[26]
         table.Fe
@@ -177,18 +209,18 @@ class _PeriodicTable(object):
         table[26][56]
         table.Fe[56]
         table.isotope('56-Fe')
-        
+
     Deuterium and tritium are defined as table.D and table.T.  Some
     neutron properties are available in table[0]
 
     To show all the elements in the table, use the iterator:
-    
+
         for element in periodic_table:  # lists the element symbols
             print el.symbol,el.number
 
     Elements have name, number, symbol and isotopes.
-    
-    Properties can be added to the elements as needed, including mass, nuclear 
+
+    Properties can be added to the elements as needed, including mass, nuclear
     and X-ray scattering cross sections.  See the help(elements) for details.
     """
     def __init__(self):
@@ -215,7 +247,7 @@ class _PeriodicTable(object):
         Retrieve element Z
         """
         return self._element[Z]
-    
+
     def __iter__(self):
         """
         Process the elements in Z order
@@ -223,7 +255,7 @@ class _PeriodicTable(object):
         Zlist = self._element.keys()
         Zlist.sort()
         for Z in Zlist:
-            yield self._element[Z]        
+            yield self._element[Z]
 
     def symbol(self, input):
         """
@@ -235,7 +267,7 @@ class _PeriodicTable(object):
             if isinstance(value,(Element,Isotope)):
                 return value
         raise ValueError("unknown element "+input)
-        
+
     def name(self, input):
         """
         Lookup the full name of the element in the period table.
@@ -245,7 +277,7 @@ class _PeriodicTable(object):
         if input == self.D.name: return self.D
         if input == self.T.name: return self.T
         raise ValueError("unknown element "+input)
-        
+
     def isotope(self, input):
         """
         Lookup the element or isotope in the periodic table. Elements
@@ -268,7 +300,7 @@ class _PeriodicTable(object):
         else:
             symbol = ''
             isotope = -1
-    
+
         # All elements are attributes of the table
         # Check that the attribute is an Element or an Isotope (for D or T)
         # If it is an element, check that the isotope exists
@@ -316,34 +348,36 @@ class _PeriodicTable(object):
 
 class Isotope(object):
     """Periodic table entry for an individual isotope.
-    
-    An isotope is associated with an element.  In addition to the element 
-    properties (symbol, name, atomic number), it has specific isotope 
-    properties (isotope number, nuclear spin, relative abundance).  
-    Properties not specific to the isotope (e.g., x-ray scattering factors) 
+
+    An isotope is associated with an element.  In addition to the element
+    properties (symbol, name, atomic number), it has specific isotope
+    properties (isotope number, nuclear spin, relative abundance).
+    Properties not specific to the isotope (e.g., x-ray scattering factors)
     are retrieved from the associated element.
     """
     def __init__(self,element,isotope_number):
         self.element = element
-        self.isotope = isotope_number 
+        self.isotope = isotope_number
     def __getattr__(self,attr):
         return getattr(self.element,attr)
-    def __repr__(self):
+    def __str__(self):
         # Deuterium and Tritium are special
         if 'symbol' in self.__dict__:
             return self.symbol
         else:
             return "%d-%s"%(self.isotope,self.element.symbol)
+    def __repr__(self):
+        return "%s[%d]"%(self.element.symbol,self.isotope)
     def __getstate__(self):
         """
-        Can't pickle isotopes without breaking extensibility.  
+        Can't pickle isotopes without breaking extensibility.
         Suppress it for now.
         """
         raise TypeError("cannot copy or pickle isotopes")
 
 class Element(object):
     """Periodic table entry for an element.
-    
+
     An element is a name, symbol and number, plus a set of properties.
     Individual isotopes can be referenced as element[isotope_number].
     """
@@ -371,20 +405,21 @@ class Element(object):
         for isotope in self.isotopes:
             yield self._isotopes[isotope]
 
-    # PJ FIXME: string returned by __repr__ should be convertible
-    # to an instance.  The method should be rather called
-    # __str__ than __repr__.
+    # Note: using repr rather than str for the element symbol so
+    # that lists of elements print nicely.  Since elements are
+    # effectively singletons, the symbol name is the representation
+    # of the instance.
     def __repr__(self):
         return self.symbol
-    
+
     def __getstate__(self):
         """
-        Can't pickle elements without breaking extensibility.  
+        Can't pickle elements without breaking extensibility.
         Suppress it for now.
         """
         raise TypeError("cannot copy or pickle elements")
 
-element_symbols = { 
+element_symbols = {
     0: ['Neutron','n'],
     1: ['Hydrogen', 'H'],
     2: ['Helium', 'He'],

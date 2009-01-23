@@ -48,7 +48,7 @@ There are a number of functions available in elements.nsf::
     coherent_comparison_table()
         compares el.neutron.b_c and el.neutron.coherent
 
-The neutron scattering information table is reproduced from the Atomic 
+The neutron scattering information table is reproduced from the Atomic
 Institute for Austrian Universities (2007 version)::
 
     http://www.ati.ac.at/~neutropt/scattering/table.html
@@ -64,12 +64,11 @@ Old City Publishing, Philidelphia, PA. pp 1.1-1 to 1.1-17.
 [2] H. Rauch, W. Waschkowski (2000). Landolt-Boernstein, New Series I/16A.
 H.Schopper Ed. Chap. 6. Springer: Berlin.
 
-[3] L. Koester, H. Rauch, E. Seymann. Atomic Data Nuclear 
+[3] L. Koester, H. Rauch, E. Seymann. Atomic Data Nuclear
 Data Tables 49 (1991) 65
 """
-from core import periodic_table, Element, Isotope
-from density import avogadro_number
-import mass, density
+from .core import periodic_table, Element, Isotope
+from .constants import avogadro_number
 
 __all__ = ['init']
 
@@ -77,14 +76,14 @@ class Neutron(object):
     """
     Neutron scattering factors.
 
-    Neutron scattering factors are attached to each element in the periodic 
-    table for which values are available.  If no information is available, 
-    then the neutron field of the element will be None.  Even when neutron 
+    Neutron scattering factors are attached to each element in the periodic
+    table for which values are available.  If no information is available,
+    then the neutron field of the element will be None.  Even when neutron
     information is available, it may not be complete, so individual fields
     may be None.
-    
+
     The following fields are used::
-    
+
     b_c (fm)
         Bound coherent scattering length.
     b_c_i (fm)
@@ -95,8 +94,8 @@ class Neutron(object):
         have been measured.
     bp,bm (fm)
         Spin-dependent scattering for I+1/2 and I-1/2 (not always available).
-        Incoherent scattering arises from the spin-dependent scattering b+ 
-        and b-.  The Neutron Data Booklet[1] gives formulas for calculating 
+        Incoherent scattering arises from the spin-dependent scattering b+
+        and b-.  The Neutron Data Booklet[1] gives formulas for calculating
         coherent and incoherent scattering from b+ and b- alone.
     bp_i,bm_i (fm)
         Imaginary portion.  See the Neutron Data Booklet[1] for details.
@@ -106,20 +105,20 @@ class Neutron(object):
         Coherent scattering cross section.  In theory this is 4*pi*b_c**2/100.
         In practice, b_c and coherent are different, with the following
         examples the worst::
-            Sc 3%  Ti 4%  V 34%  Mn 1%  Cd 4%  Te 4%  Xe 9%  Sm 100%  
+            Sc 3%  Ti 4%  V 34%  Mn 1%  Cd 4%  Te 4%  Xe 9%  Sm 100%
             Eu 46%  Gd 61%  Tb 1%  Ho 11%  W 4%  Au 7%  Hg 2%
     incoherent (barns)
         Incoherent scattering cross section.
-    total (barns) 
+    total (barns)
         Total scattering cross section.  This is just coherent+incoherent.
     absorption (barns)
         Absorption cross section at 1.798 angstroms.  Scale to your energy
         by dividing by 1.798 and multiplying by your wavelength.
 
-    For elements, the scattering cross-sections are based on the natural 
-    abundance of the individual isotopes.  Individual isotopes may have 
+    For elements, the scattering cross-sections are based on the natural
+    abundance of the individual isotopes.  Individual isotopes may have
     additional information as follows::
-    
+
     abundance (%)
         Abundance used in elemental measurements.
     nuclear_spin (string)
@@ -132,9 +131,9 @@ class Neutron(object):
     value of interest.  This is computed from the number_density of the
     individual elements, as derived from the element density and atomic
     mass.
-    
+
     Note: 1 barn = 100 fm^2
-    
+
     [1] H. Rauch and W. Waschkowski (2003). Neutron Scattering Lengths
     in ILL Neutron Data Booklet (second edition), A.-J. Dianoux, G. Lander, Eds.
     Old City Publishing, Philidelphia, PA. pp 1.1-1 to 1.1-17.
@@ -171,23 +170,23 @@ class Neutron(object):
         """
         Returns scattering density, absorption and incoherent scattering
         for the standard elemental density in units of 10**-6 angstrom**-2.
-        
+
         The coherent scattering returned is N * b_c * 10**-23, where N is
         the number density computed from the bulk density of the element
         and b_c is the bound coherent scattering length for the isotope.
         The effective scattering density may be larger when the element
         is part of a compound.
-        
+
         The incoherent scattering is returned as N * incoherent.
 
-        The absorption cross sections are tabulated at wavelength 1.798 A.  
-        In the thermal neutron range absorption is assumed to scale linearly 
+        The absorption cross sections are tabulated at wavelength 1.798 A.
+        In the thermal neutron range absorption is assumed to scale linearly
         with energy.  The elements for which this does not hold have
         neutron.is_energy_dependent set to False.  See [1] for details.
 
         The absorption cross section is related to the imaginary portion
         of the bound coherent scattering cross section by the formula[2]
-        absorption = 4*pi/k abs(Im(b_c)), where k is 2*pi/lambda, and 
+        absorption = 4*pi/k abs(Im(b_c)), where k is 2*pi/lambda, and
         there is an additional factor of 100 converting from barns to fm.
         The value we return for the SLD is thus::
             Im(b_c) = absorption*N/(2 * 1000 * 1.798) * wavelength
@@ -196,11 +195,11 @@ class Neutron(object):
         to match the b_c_i values given in the underlying tables.  Run
             elements.nsf._absorption_comparison_table()
         to show how well b_c_i corresponds to absorption.
-        
+
         [1] Lynn, JE and Seeger, PA (1990). Resonance effects in neutron
-        scattering lengths of rare-earth nuclides. Atomic Data and 
+        scattering lengths of rare-earth nuclides. Atomic Data and
         Nuclear Data Tables 44, 191-207
-        
+
         [2] Sears, VF (1999) 4.4.4 Scattering lengths for neutrons.
         In Wilson & Prince eds. Intl. Tables for Crystallography C
         Kluwer Academic Publishers. pp 448-449
@@ -259,8 +258,8 @@ def _init():
         # For new elements, clear out 'neutron' attribute for isotopes
         # This protects against isotope using the element data when
         # they don't have any specific neutron data.
-#        if isotope_number == 0 or not hasattr(element,'neutron'):
-#            for iso in element: iso.neutron = None
+        #if isotope_number == 0 or not hasattr(element,'neutron'):
+        #    for iso in element: iso.neutron = None
 
         if isotope_number == 0:
             # Bulk values using laboratory abundances of isotopes
@@ -298,8 +297,8 @@ def _init():
 
 def fix_number(str):
     """
-    Convert strings of the form e.g., 35.24(2)* into numbers without 
-    uncertainty.  Also accepts a limited range, e.g., <1e-6, which is 
+    Convert strings of the form e.g., 35.24(2)* into numbers without
+    uncertainty.  Also accepts a limited range, e.g., <1e-6, which is
     converted as 1e-6.  Missing values are set to 0.
     """
     if str == '': return None
@@ -338,10 +337,10 @@ def energy_dependent_table():
     for el in periodic_table:
         if not hasattr(el,'neutron'): continue
         dep = []
-        if el.neutron.is_energy_dependent: 
+        if el.neutron.is_energy_dependent:
             dep += [str(el)]
-        dep += [str(el)+'-'+str(iso.isotope) 
-                for iso in el 
+        dep += [str(el)+'-'+str(iso.isotope)
+                for iso in el
                 if iso.neutron != None and iso.neutron.is_energy_dependent]
         if len(dep) > 0: print "   "," ".join(dep)
 
@@ -383,7 +382,7 @@ def neutron_sld_from_atoms(atoms,density=None,wavelength=1):
         absorption += element.neutron.absorption*quantity
         incoherent += element.neutron.incoherent*quantity
         is_energy_dependent |= element.neutron.is_energy_dependent
-        
+
     N = (density/mass*avogadro_number*1e-23)
     coh = N*b_c
     absorp = N*absorption/(2*1.798)*wavelength*0.001 # Why 0.001??
@@ -395,9 +394,9 @@ def neutron_sld_from_atoms(atoms,density=None,wavelength=1):
 # We are including the complete original table here in case somebody in
 # future wants to extract uncertainties or other information.
 #
-# Z-Symbol-A 
+# Z-Symbol-A
 #   This is the atomic number, the symbol and the isotope.
-#   If Z-Symbol only, the line represents an element with scattering determined 
+#   If Z-Symbol only, the line represents an element with scattering determined
 #   by the natural abundance of the isotopes in laboratory samples.  If there
 #   is only one isotope, then there is no corresponding element definition.
 # concentration/half-life
@@ -407,7 +406,7 @@ def neutron_sld_from_atoms(atoms,density=None,wavelength=1):
 #   For isotopes, the nuclear spin.
 # b_c, bp, bm
 #   Bound coherent scattering length in fm
-#   b+/b- if present are spin dependent scattering for I+1/2 and I-1/2 
+#   b+/b- if present are spin dependent scattering for I+1/2 and I-1/2
 #   respectively
 # c
 #   'E' if there is a strong energy dependency.
@@ -416,7 +415,7 @@ def neutron_sld_from_atoms(atoms,density=None,wavelength=1):
 #   The coherent and incoherent scattering cross-sections in barns.
 # absorption
 #   The thermal absorption cross section in barns at 1.798 Angstroms/25.30 meV.
-#  
+#
 # Numbers in parenthesis represents uncertainty.
 # Numbers followed by '*' are estimated.
 # Numbers may be given as limit, e.g., <1.0e-6
@@ -820,7 +819,7 @@ def _diff(s,a,b):
 def absorption_comparison_table():
     """
     Print a table of b_c_i and -absorption/(2*1.798*1000) for each isotope.
-    
+
     This is useful for checking the integrity of the data and formula.
     """
     print "Comparison of b_c_i and absorption where b_c_i exists"
@@ -834,7 +833,7 @@ def absorption_comparison_table():
 def coherent_comparison_table():
     """
     Print a table of 4*pi*b_c**2/100 and coherent for each isotope.
-    
+
     This is useful for checking the integrity of the data and formula.
     """
     import numpy
@@ -864,4 +863,3 @@ def sld_plot():
     pylab.title('Neutron SLD for elements in natural abundance')
 
 _init()
-

@@ -16,18 +16,18 @@ X-ray scatting information.
         X-ray emission lines for various elements:
            Ag, Pd, Rh, Mo, Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti
         K_alpha is the average of K_alpha1 and K_alpha2 lines.
-   
+
 
 K-alpha and K-beta1 lines::
 
-    D.C. Creagh and J.H. Hubbell (1999), "4.2.4 X-ray absorption 
-    (or attenuation) coefficients" in A.J.C. Wilson, E.Prince Eds., 
-    International Tables for Crystallography Vol C p220-236.  
+    D.C. Creagh and J.H. Hubbell (1999), "4.2.4 X-ray absorption
+    (or attenuation) coefficients" in A.J.C. Wilson, E.Prince Eds.,
+    International Tables for Crystallography Vol C p220-236.
     Kluwer Academic Publishers, Dordrecht, The Netherlands.
 
 X-ray scattering factors::
 
-    Low-Energy X-ray Interaction Coefficients: Photoabsorption, 
+    Low-Energy X-ray Interaction Coefficients: Photoabsorption,
     Scattering, and Reflection E = 30-30,000 eV, Z = 1-92
 
     B. L. Henke, E. M. Gullikson, and J. C. Davis
@@ -40,7 +40,7 @@ The files contain three columns of data: Energy(eV), f_1, f_2,
 where f_1 and f_2 are the atomic (forward) scattering factors.
 There are 500+ points on a uniform logarithmic mesh with points
 added 0.1 eV above and below "sharp" absorption edges.
-(Note: below 29 eV f_1 is set equal to -9999.) 
+(Note: below 29 eV f_1 is set equal to -9999.)
 The tabulated values of f_1 contain a relativistic, energy independent,
 correction given by, Z* = Z - (Z/82.5)^(2.37).
 
@@ -48,7 +48,7 @@ correction given by, Z* = Z - (Z/82.5)^(2.37).
 The atomic photoabsorption cross section, mu_a, may be readily obtained
 from the values of f_2 using the relation,
 
-                        mu_a = 2*r_0*lambda*f_2 
+                        mu_a = 2*r_0*lambda*f_2
 
 where r_0 is the classical electron radius, and lambda is the wavelength.
 The index of refraction for a material with N atoms per unit volume
@@ -94,17 +94,17 @@ Sc                4/06          50-1300 eV
 Gd                6/07          12-450 eV
 La                6/07          14-440 eV
 
-Data available at: 
+Data available at:
   http://henke.lbl.gov/optical_constants/asf.html
   http://henke.lbl.gov/optical_constants/update.html
 
-[1] B.L. Henke, E.M. Gullikson, and J.C. Davis.  "X-ray interactions: 
-photoabsorption, scattering, transmission, and reflection at E=50-30000 eV, 
+[1] B.L. Henke, E.M. Gullikson, and J.C. Davis.  "X-ray interactions:
+photoabsorption, scattering, transmission, and reflection at E=50-30000 eV,
 Z=1-92", Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993).
 
-[2] J.H. Hubbell, W.J. Veigele, E.A. Briggs, R.T. Brown, D.T. Cromer, 
-and R.J. Howerton. "Atomic Form Factors, Incoherent Scattering Functions, 
-and Photon Scattering Cross Sections",  J. Phys. Chem. Ref. Data 4, 
+[2] J.H. Hubbell, W.J. Veigele, E.A. Briggs, R.T. Brown, D.T. Cromer,
+and R.J. Howerton. "Atomic Form Factors, Incoherent Scattering Functions,
+and Photon Scattering Cross Sections",  J. Phys. Chem. Ref. Data 4,
 471-538 (1975); erratum in 6, 615-616 (1977).
 
 """
@@ -112,15 +112,11 @@ from __future__ import with_statement
 import os.path
 import numpy
 
-from core import periodic_table, Element, Isotope
-from density import avogadro_number
-import mass,density
+from .core import periodic_table, Element, Isotope
+#from . import mass,density
+from .constants import (avogadro_number, plancks_constant, speed_of_light,
+                        electron_radius)
 
-# Need X-ray energy/wavelength conversions to lookup wavelengths in scattering
-# function tables.
-plancks_constant = 4.13566733e-15 #(10) eV s
-speed_of_light = 299792458 # m/s (exact)
-electron_radius = 2.8179402894e-15 #(58) m  
 
 def xray_wavelength(energy):
     """
@@ -150,8 +146,8 @@ class Xray(object):
     K_alpha and K_beta1 emission lines for selected elements.
 
     D. C. Creagh and J. H. Hubbell
-    International Tables for Crystallography Volume C.  
-    
+    International Tables for Crystallography Volume C.
+
     See help(elements.xsf) for details.
     """
     sftable_units = ["eV","",""]
@@ -159,8 +155,8 @@ class Xray(object):
     sld_units = ["Nb","Nb"]
     _table = None
     def __init__(self, element):
-       self._symbol = element.symbol
-       self._number_density = element.number_density
+        self._symbol = element.symbol
+        self._number_density = element.number_density
 
     def _gettable(self):
         if self._table is None:
@@ -183,7 +179,7 @@ class Xray(object):
         Energy can be a scalar or a vector.
 
         Data comes from the Henke Xray scattering factors database at the
-        Lawrence Berkeley Laboratory Center for X-ray Optics.  
+        Lawrence Berkeley Laboratory Center for X-ray Optics.
         """
         xsf = self.sftable
         if xsf is None:
@@ -216,12 +212,12 @@ class Xray(object):
 
         Data comes from the Henke Xray scattering factors database at the
         Lawrence Berkeley Laboratory Center for X-ray Optics.
-        
+
         Raises TypeError if neither wavelength or energy is specified.
         """
-        if wavelength is not None: 
+        if wavelength is not None:
             energy = xray_energy(wavelength)
-        if energy is None: 
+        if energy is None:
             raise TypeError('X-ray SLD needs wavelength or energy')
         f1,f2 = self.scattering_factors(energy)
         if f1 is None or self._number_density is None:
@@ -236,9 +232,9 @@ def xray_sld(input,density=None,wavelength=None,energy=None):
     Compute xray scattering length densities for molecules.
     Returns the scattering length density and absorption
     in units of 10**-6 angstrom**-2.
-    
+
     Wavelength is in angstroms.  Energy is in keV.
-    
+
     Raises AssertionError if density or wavelength/energy is not provided
     """
     import molecules
@@ -251,9 +247,9 @@ def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
     The underlying scattering length density calculator.  This
     works with a dictionary of atoms and quanties directly, such
     as returned by molecule.atoms.
-    
+
     Wavelength is in angstroms.  Energy is in keV.
-    
+
     Raises AssertionError if density or wavelength/energy is not provided
     """
 
@@ -281,11 +277,10 @@ def _init():
     if 'xray' in periodic_table.properties: return
     periodic_table.properties.append('xray')
     for el in periodic_table:
-        hasattr(el,'xray') # TODO why is this necessary?
         el.xray = Xray(el)
     Element.K_alpha_units = "angstrom"
     Element.K_beta1_units = "angstrom"
-        
+
     # Sets the K_alpha and K_beta1 wavelengths for select elements
     periodic_table.Ag.K_alpha = 0.5608
     periodic_table.Ag.K_beta1 = 0.4970

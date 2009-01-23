@@ -9,50 +9,50 @@ Fields::
     covalent_radius_uncertainty (A)
     covalent_radius_units ("angstrom")
 
-Data taken from Cordero 2008.[1]  
+Data taken from Cordero 2008.[1]
 
 From the abstract::
 
-    A new set of covalent atomic radii has been deduced from 
-    crystallographic data for most of the elements with atomic 
-    numbers up to 96. The proposed radii show a well behaved 
-    periodic dependence that allows us to interpolate a few 
-    radii for elements for which structural data is lacking, 
-    notably the noble gases. The proposed set of radii therefore 
-    fills most of the gaps and solves some inconsistencies in 
-    currently used covalent radii. The transition metal and 
-    lanthanide contractions as well as the differences in covalent 
-    atomic radii between low spin and high spin configurations in 
+    A new set of covalent atomic radii has been deduced from
+    crystallographic data for most of the elements with atomic
+    numbers up to 96. The proposed radii show a well behaved
+    periodic dependence that allows us to interpolate a few
+    radii for elements for which structural data is lacking,
+    notably the noble gases. The proposed set of radii therefore
+    fills most of the gaps and solves some inconsistencies in
+    currently used covalent radii. The transition metal and
+    lanthanide contractions as well as the differences in covalent
+    atomic radii between low spin and high spin configurations in
     transition metals are illustrated by the proposed radii set.
 
 Notes::
 
- #. Values are averages only.  The particular radius can be highly 
+ #. Values are averages only.  The particular radius can be highly
     dependent on oxidation state and chemical compound.
 
  #. The paper lists values for multiple spin states on select
     elements.  We are using sp3 for carbon and low spin for manganese,
     iron and cobalt.
-    
+
  #. Elements with zero or one measurements of covalent radius are
     assigned an uncertainty of 0.00.  These are He, Ne, Pm, At, Rn,
     Fr, Ac, Pa
 
  #. Elements above 96 are assigned a covalent radius and uncertainty
     of None.
-    
+
  #. Radii are measured from bonds to C, N or O.  The choice of which
     compound was used is element dependent.  Details are available in
     the references.
 
 
-[1] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés, 
-Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez. 
+[1] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés,
+Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez.
 Covalent radii revisited. Dalton Trans., 2008, 2832-2838
 doi:http://dx.doi.org/10.1039%2Fb801115j
 """
 
-from core import periodic_table, Element
+from .core import periodic_table, Element
 
 def _init():
     if 'covalent_radius' in periodic_table.properties: return
@@ -63,7 +63,7 @@ def _init():
     Element.covalent_radius = None
     Element.covalent_radius_uncertainty = None
 
-    
+
     for line in Cordero.split('\n'):
         fields = line.split()
         if len(fields) == 3: fields += ['0','0']  # Fill in uncertainties
@@ -73,7 +73,7 @@ def _init():
         r = float(fields[2])
         dr = float(fields[3])*0.01
         n = int(fields[4])
-        
+
         periodic_table[Z].covalent_radius = r
         periodic_table[Z].covalent_radius_uncertainty = dr
 
@@ -83,7 +83,7 @@ def _init():
 #Z  Symbol radius(A) uncertainty number of measurements
 Cordero = """\
 1    H    0.31    5    129
-2    He    0.28        
+2    He    0.28
 3    Li    1.28    7    5789
 4    Be    0.96    3    310
 5    B    0.84    3    1770
@@ -93,7 +93,7 @@ Cordero = """\
 7    N    0.71    1    2200
 8    O    0.66    2    10000
 9    F    0.57    3    10000
-10    Ne    0.58        
+10    Ne    0.58
 11    Na    1.66    9    1629
 12    Mg    1.41    7    3234
 13    Al    1.21    4    3206
@@ -147,7 +147,7 @@ Cordero = """\
 58    Ce    2.04    9    47
 59    Pr    2.03    7    58
 60    Nd    2.01    6    96
-61    Pm    1.99        
+61    Pm    1.99
 62    Sm    1.98    8    53
 63    Eu    1.98    6    167
 64    Gd    1.96    6    178
@@ -171,9 +171,9 @@ Cordero = """\
 82    Pb    1.46    5    112
 83    Bi    1.48    4    51
 84    Po    1.40    4    4
-85    At    1.50        
-86    Rn    1.50        
-87    Fr    2.60        
+85    At    1.50
+86    Rn    1.50
+87    Fr    2.60
 88    Ra    2.21    2    3
 89    Ac    2.15    0    1
 90    Th    2.06    6    11

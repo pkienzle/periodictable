@@ -4,10 +4,10 @@
 Element and isotope mass and abundances
 
 Adds average mass for the elements.
-    
+
     mass (u)
         The atomic mass averaged over natural abundances.
-        
+
     Adds mass and abundance information for isotopes.
 
     mass (u)
@@ -19,30 +19,30 @@ Adds average mass for the elements.
 Atomic Weights and Isotopic Composition
 
    J. S. Coursey, D. J. Schwab, and R. A. Dragoset
-   NIST, Physics Laboratory, 
+   NIST, Physics Laboratory,
    Office of Electronic Commerce in Scientific and Engineering Data
 
 The atomic weights are available for elements 1 through 112, 114, & 116 and
 isotopic compositions or abundances are given when appropriate. The atomic
-weights data were published by T.B. Coplen[1] in Atomic Weights of the 
-Elements 1999, (and include changes reported from the 2001 review in 
-Chem. Int., 23, 179 (2001)) and the isotopic compositions data were 
-published by K.J.R. Rosman[2] and P.D.P. Taylor[3] in Isotopic Compositions 
-of the Elements 1997.  The relative atomic masses of the isotopes data were 
-published by G. Audi[4] and A. H. Wapstra[5] in The 1995 Update To The 
+weights data were published by T.B. Coplen[1] in Atomic Weights of the
+Elements 1999, (and include changes reported from the 2001 review in
+Chem. Int., 23, 179 (2001)) and the isotopic compositions data were
+published by K.J.R. Rosman[2] and P.D.P. Taylor[3] in Isotopic Compositions
+of the Elements 1997.  The relative atomic masses of the isotopes data were
+published by G. Audi[4] and A. H. Wapstra[5] in The 1995 Update To The
 Atomic Mass Evaluation.
 
-This data has been compiled from the above sources for the user's convenience 
+This data has been compiled from the above sources for the user's convenience
 and does not represent a critical evaluation by the NIST Physics Laboratory.
 
-1 T. B. Coplen : U.S. Geological Survey, Reston, Virginia, USA 
-2 K. J. R. Rosman : Department of Applied Physics, 
-  Curtin University of Technology, Australia 
-3 P. D. P. Taylor : Institute for Reference Materials and Measurements, 
-  European Commission, Belgium 
-4 G. Audi : Centre de Spectrométrie Nucléaire et de Spectrométrie de Masse, 
-  Orsay Campus, France 
-5 A. H. Wapstra : National Institute of Nuclear Physics and High-Energy Physics, 
+1 T. B. Coplen : U.S. Geological Survey, Reston, Virginia, USA
+2 K. J. R. Rosman : Department of Applied Physics,
+  Curtin University of Technology, Australia
+3 P. D. P. Taylor : Institute for Reference Materials and Measurements,
+  European Commission, Belgium
+4 G. Audi : Centre de Spectrométrie Nucléaire et de Spectrométrie de Masse,
+  Orsay Campus, France
+5 A. H. Wapstra : National Institute of Nuclear Physics and High-Energy Physics,
   Amsterdam, The Netherlands
 
 http://physics.nist.gov/PhysRefData/Compositions/
@@ -51,7 +51,7 @@ Neutron mass from NIST Reference on Constants, Units, and Uncertainty
     http://physics.nist.gov/cuu/index.html
 """
 
-from core import periodic_table, Element, Isotope
+from .core import periodic_table, Element, Isotope
 
 __all__ = ['init']
 
@@ -68,7 +68,7 @@ def getval(str):
 def mass(isotope):
     """
     Atomic weight (u).
-    
+
     J. S. Coursey, D. J. Schwab, and R. A. Dragoset
     NIST Atomic Weights and Isotopic Composition database.
     """
@@ -77,7 +77,7 @@ def mass(isotope):
 def abundance(isotope):
     """
     Natural abundance (%).
-    
+
     J. S. Coursey, D. J. Schwab, and R. A. Dragoset
     NIST Atomic Weights and Isotopic Composition database.
     """
@@ -91,7 +91,7 @@ def _init():
     Isotope.abundance = property(abundance,doc=abundance.__doc__)
     Element.mass_units = "u"
     Element.abundance_units = "%"
-    
+
     for line in massdata.split('\n'):
         isotope,m,p,avg = line.split(',')
         el,sym,iso = isotope.split('-')
@@ -102,16 +102,16 @@ def _init():
         el._mass = getval(avg)
         iso._mass = getval(m)
         iso._abundance = getval(p)
-        
+
     # From NIST Reference on Constants, Units, and Uncertainty
     #   http://physics.nist.gov/cuu/index.html
-    # neutron mass = 1.008 664 915 97(43) u 
+    # neutron mass = 1.008 664 915 97(43) u
     el = periodic_table[0]
     iso = el.add_isotope(1)
     iso._mass = 1.00866491597
     el._mass = iso.mass
     iso._abundance = 0
-    
+
 massdata="""\
 1-H-1,1.0078250321(4),99.9885(70),1.00794(7)
 1-H-2,2.0141017780(4),0.0115(70),1.00794(7)

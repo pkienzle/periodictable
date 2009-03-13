@@ -121,6 +121,34 @@ class Molecule(object):
         return mass
     mass = property(_mass,doc=_mass.__doc__)
 
+    def volume(self,packing_fraction=0.68):
+        """
+        Estimate molecular volume.
+
+        The volume is estimated from the element covalent
+        radius and a given packing fraction.  Density is
+        approximately chem.mass/chem.volume().
+
+        The default packing fraction is 0.68.
+
+        Common fractions are::
+
+           simple cubic: 0.52
+           body-centered cubic: 0.68
+           hexabonal close-packed: 0.74
+           face-centered cubic: 0.74
+           diamond cubic: 0.34
+
+        Volume can be more accurately estimated from the lattice
+        parameters for the crystalline form, but that is beyond
+        the scope of this package.
+        """
+        V = 0
+        for el,count in self.atoms.items():
+            V += el.covalent_radius**3*count
+        V *= 4./3*math.pi
+        return V*packing_fraction
+
     def neutron_sld(self, wavelength=1):
         """
         Neutron scattering information for the molecule.
@@ -199,7 +227,6 @@ class Molecule(object):
         """
         self.__dict__ = input
         self._parse_string(input['structure'])
-
 
 def molecule_grammar():
     """

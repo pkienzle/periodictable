@@ -2,15 +2,25 @@
 """
 Adds density properties to the periodic table.
 
-    density (g/cm^3)
+The following properties are added::
+
+    density
+    density_units ('g/cm^3')
         Densities for solids and liquids are given as specific gravities
         at 20 C unless other wise indicated by density_caveat.  Densities
         for the gaseous elements are given for the liquids at their
         boiling points.  Missing data are represented by None.
-    density_caveat (string)
+    density_caveat
         Comments on the density, if not taken in standard conditions.
-    interatomic_distance (Angstroms)
+
+    interatomic_distance
+    interatomic_distance_units ('angstrom')
         Interatomic distance estimated from element density.
+        string 'angstrom'
+
+    number_density
+    number_density_units ('')
+        number density estimated from mass and density
 
 From the X-ray data book:
     http://xdb.lbl.gov/Section5/Sec_5-2.html
@@ -35,6 +45,7 @@ def density(element):
     """
     if hasattr(element,'isotope'): return None
     return element._density
+
 def interatomic_distance(element):
     """
     Estimated interatomic distance from atomic weight and density:
@@ -58,9 +69,9 @@ def number_density(element):
     if element.density is None or element.mass is None: return None
     return (element.density/element.mass)*avogadro_number
 
-def _init():
-    if 'density' in elements.properties: return
-    elements.properties.append('density')
+def init(table, reload=False):
+    if 'density' in elements.properties and not reload: return
+    table.properties.append('density')
     Element.density_units = "g/cm**3"
 
     Element.interatomic_distance \
@@ -201,5 +212,3 @@ element_densities = dict(
     Uuq=None,
     Uuh=None,
     )
-
-_init()

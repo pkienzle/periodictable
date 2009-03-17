@@ -110,11 +110,9 @@ crystal_structures = [\
     None,#No
     None]#Lw
 
-def _init():
-    if 'crystal_structure' in elements.properties: return
-    elements.properties.append('crystal_structure')
+def init(table, reload=False):
+    if 'crystal_structure' in elements.properties and not reload: return
+    table.properties.append('crystal_structure')
 
     for Z,struct in enumerate(crystal_structures):
-        elements[Z].crystal_structure = struct
-
-_init()
+        table[Z].crystal_structure = struct

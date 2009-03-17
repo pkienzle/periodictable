@@ -17,6 +17,8 @@ X-ray scatting information.
            Ag, Pd, Rh, Mo, Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti
         K_alpha is the average of K_alpha1 and K_alpha2 lines.
 
+For private tables, use init(table) and spectral_lines(table) to set
+the data.
 
 K-alpha and K-beta1 lines::
 
@@ -274,41 +276,40 @@ def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
     Element.K_alpha_units = "angstrom"
     Element.K_beta1_units = "angstrom"
 
-def spectral_lines():
+def init_spectral_lines(table):
     """
     Sets the K_alpha and K_beta1 wavelengths for select elements
     """
-    elements.Ag.K_alpha = 0.5608
-    elements.Ag.K_beta1 = 0.4970
-    elements.Pd.K_alpha = 0.5869
-    elements.Pd.K_beta1 = 0.5205
-    elements.Rh.K_alpha = 0.6147
-    elements.Rh.K_beta1 = 0.5456
-    elements.Mo.K_alpha = 0.7107
-    elements.Mo.K_beta1 = 0.6323
-    elements.Zn.K_alpha = 1.4364
-    elements.Zn.K_beta1 = 1.2952
-    elements.Cu.K_alpha = 1.5418
-    elements.Cu.K_beta1 = 1.3922
-    elements.Ni.K_alpha = 1.6591
-    elements.Ni.K_beta1 = 1.5001
-    elements.Co.K_alpha = 1.7905
-    elements.Co.K_beta1 = 1.6208
-    elements.Fe.K_alpha = 1.9373
-    elements.Fe.K_beta1 = 1.7565
-    elements.Mn.K_alpha = 2.1031
-    elements.Mn.K_beta1 = 1.9102
-    elements.Cr.K_alpha = 2.2909
-    elements.Cr.K_beta1 = 2.0848
-    elements.Ti.K_alpha = 2.7496
-    elements.Ti.K_beta1 = 2.5138
+    table.Ag.K_alpha = 0.5608
+    table.Ag.K_beta1 = 0.4970
+    table.Pd.K_alpha = 0.5869
+    table.Pd.K_beta1 = 0.5205
+    table.Rh.K_alpha = 0.6147
+    table.Rh.K_beta1 = 0.5456
+    table.Mo.K_alpha = 0.7107
+    table.Mo.K_beta1 = 0.6323
+    table.Zn.K_alpha = 1.4364
+    table.Zn.K_beta1 = 1.2952
+    table.Cu.K_alpha = 1.5418
+    table.Cu.K_beta1 = 1.3922
+    table.Ni.K_alpha = 1.6591
+    table.Ni.K_beta1 = 1.5001
+    table.Co.K_alpha = 1.7905
+    table.Co.K_beta1 = 1.6208
+    table.Fe.K_alpha = 1.9373
+    table.Fe.K_beta1 = 1.7565
+    table.Mn.K_alpha = 2.1031
+    table.Mn.K_beta1 = 1.9102
+    table.Cr.K_alpha = 2.2909
+    table.Cr.K_beta1 = 2.0848
+    table.Ti.K_alpha = 2.7496
+    table.Ti.K_beta1 = 2.5138
 
-def _init():
-    if 'xray' in elements.properties: return
-    elements.properties.append('xray')
-    for el in elements:
+def init(table, reload=False):
+    if 'xray' in table.properties and not reload: return
+    table.properties.append('xray')
+    for el in table:
         el.xray = Xray(el)
-    spectral_lines()
 
 def plot_xsf(el):
     import pylab
@@ -321,28 +322,26 @@ def plot_xsf(el):
     pylab.legend(['f1','f2'])
     pylab.show()
 
-def sld_table(wavelength):
+def sld_table(wavelength, table=elements):
     ## Cu K-alpha Zeff and dZ table
-    #for el in elements:
-    #    f1,f2 = el.xsf(elements.Cu.K_alpha)
+    #for el in table:
+    #    f1,f2 = el.xsf(table.Cu.K_alpha)
     #    if f1 is not None:
     #        print el.Z,el.symbol,"%.1f"%f1,"%.4f"%(f1-el.Z)
 
     # NBCU spreadsheet format
     print "X-ray scattering length density and absorption for",wavelength,"A"
     print "%3s %6s %6s"%('El','rho','mu')
-    for el in elements:
-        rho,mu = el.xray.sld(elements.Cu.K_alpha)
+    for el in table:
+        rho,mu = el.xray.sld(table.Cu.K_alpha)
         if rho is not None:
             print "%3s %6.2f %6.2f"%(el.symbol,rho,mu)
 
-def emission_table():
+def emission_table(table=elements):
     """
     Print a table of emission lines.
     """
     print "%3s %7s %7s"%('El','Kalpha','Kbeta1')
-    for el in elements:
+    for el in table:
         if hasattr(el,'K_alpha'):
             print "%3s %7.4f %7.4f"%(el.symbol,el.K_alpha,el.K_beta1)
-
-_init()

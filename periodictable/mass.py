@@ -5,14 +5,17 @@ Element and isotope mass and abundances
 
 Adds average mass for the elements.
 
-    mass (u)
+    mass
+    mass_units ('u')
         The atomic mass averaged over natural abundances.
 
-    Adds mass and abundance information for isotopes.
+Adds mass and abundance information for isotopes.
 
-    mass (u)
+    mass
+    mass_units ('u')
         The individual isotope mass.
-    abundance (%)
+    abundance
+    abundance_units ('%')
         Natural abundance for the isotope.
 
 
@@ -83,9 +86,9 @@ def abundance(isotope):
     """
     return isotope._abundance
 
-def _init():
-    if 'mass' in elements.properties: return
-    elements.properties.append('mass')
+def init(table, reload=False):
+    if 'mass' in elements.properties and not reload: return
+    table.properties.append('mass')
     Element.mass = property(mass,doc=mass.__doc__)
     Isotope.mass = property(mass,doc=mass.__doc__)
     Isotope.abundance = property(abundance,doc=abundance.__doc__)
@@ -95,7 +98,7 @@ def _init():
     for line in massdata.split('\n'):
         isotope,m,p,avg = line.split(',')
         el,sym,iso = isotope.split('-')
-        el = elements[int(el)]
+        el = table[int(el)]
         assert el.symbol == sym, \
             "Symbol %s does not match %s"%(sym,el.symbol)
         iso = el.add_isotope(int(iso))
@@ -106,7 +109,7 @@ def _init():
     # From NIST Reference on Constants, Units, and Uncertainty
     #   http://physics.nist.gov/cuu/index.html
     # neutron mass = 1.008 664 915 97(43) u
-    el = elements[0]
+    el = table[0]
     iso = el.add_isotope(1)
     iso._mass = 1.00866491597
     el._mass = iso.mass
@@ -3049,5 +3052,3 @@ massdata="""\
 114-Uuq-289,,,[289]
 116-Uuh-292,,,[292]\
 """
-
-_init() # Load the data

@@ -48,6 +48,8 @@ There are a number of functions available in periodictable.nsf::
     coherent_comparison_table()
         compares el.neutron.b_c and el.neutron.coherent
 
+For private tables use init(table) to set the data.
+
 The neutron scattering information table is reproduced from the Atomic
 Institute for Austrian Universities (2007 version)::
 
@@ -214,14 +216,14 @@ class Neutron(object):
         inc = self.incoherent*N
         return coh,absorp,inc
 
-def _init():
+def init(table, reload=False):
     """
     Load the Rauch table from the neutron data book.
     """
-    if 'neutron' in elements.properties: return
-    elements.properties.append('neutron')
-    assert ('density' in elements.properties and
-        'mass' in elements.properties), \
+    if 'neutron' in table.properties and not reload: return
+    table.properties.append('neutron')
+    assert ('density' in table.properties and
+        'mass' in table.properties), \
         "Neutron table requires mass and density properties"
 
     # Defaults for missing neutron information
@@ -246,7 +248,7 @@ def _init():
         isotope_number = int(parts[2]) if len(parts)==3 else 0
 
         # Fetch element from the table and check that the symbol matches
-        element = elements[Z]
+        element = table[Z]
         assert element.symbol == symbol, \
             "Symbol %s does not match %s"%(symbol,element.symbol)
 
@@ -286,7 +288,7 @@ def _init():
         Z = int(parts[0])
         symbol = parts[1]
         isotope_number = int(parts[2]) if len(parts)==3 else 0
-        element = elements[Z]
+        element = table[Z]
         if isotope_number == 0:
             nsf = element.neutron
         else:
@@ -307,7 +309,7 @@ def fix_number(str):
     if str[0] == '<': str = str[1:]
     return float(str)
 
-def sld_table(wavelength=1):
+def sld_table(wavelength=1, table=elements):
     """
     Scattering length density and absorption table for wavelength 4.75 A
     """
@@ -319,7 +321,7 @@ def sld_table(wavelength=1):
     print " Neutron scattering length density table"
     print "%2s %6s %8s %7s %6s %6s %6s"%('  ','mass','b_c','density',
                                          'coh','absorp','incoh')
-    for el in elements:
+    for el in table:
         if el.neutron.has_sld():
             coh,absorp,inc = el.neutron.sld(wavelength)
             print "%-2s %6.2f %8.4f %7.2f %6.2f %6.2f %6.2f%s"\
@@ -328,13 +330,13 @@ def sld_table(wavelength=1):
                   '*' if el.neutron.is_energy_dependent else ' ')
     print "* Energy dependent cross sections"
 
-def energy_dependent_table():
+def energy_dependent_table(table=elements):
     """
     Print a table of energy dependent isotopes.
     """
     # List of energy dependent elements and isotopes
     print "Elements and isotopes with energy dependent absorption:"
-    for el in elements:
+    for el in table:
         if not hasattr(el,'neutron'): continue
         dep = []
         if el.neutron.is_energy_dependent:
@@ -346,7 +348,7 @@ def energy_dependent_table():
 
 
 # Note: docs and function prototype are reproduced in __init__
-def neutron_sld(input,density=None,wavelength=1):
+def neutron_sld(input, density=None, wavelength=1):
     """
     Compute neutron scattering length densities for molecules.
     Returns the scattering length density, the absorption and
@@ -354,13 +356,14 @@ def neutron_sld(input,density=None,wavelength=1):
 
     Raises AssertionError if density is missing.
     """
-    import molecules
-    mol = molecules.Molecule(input)
+    import formulas
+    mol = formulas.Formula(input)
     if density is None: density = mol.density # defaults to molecule density
     return neutron_sld_from_atoms(mol.atoms,
-                                  density=density,wavelength=wavelength)
+                                  density=density,
+                                  wavelength=wavelength)
 
-def neutron_sld_from_atoms(atoms,density=None,wavelength=1):
+def neutron_sld_from_atoms(atoms, density=None, wavelength=1):
     """
     The underlying scattering length density calculator.  This
     works with a dictionary of atoms and quanties directly, such
@@ -816,21 +819,21 @@ nsftableI="""\
 def _diff(s,a,b):
     print "%10s %8.2f %8.2f %3.0f%%"%(s, a, b, 100*abs((a-b)/b))
 
-def absorption_comparison_table():
+def absorption_comparison_table(table=elements):
     """
     Print a table of b_c_i and -absorption/(2*1.798*1000) for each isotope.
 
     This is useful for checking the integrity of the data and formula.
     """
     print "Comparison of b_c_i and absorption where b_c_i exists"
-    for el in elements:
+    for el in table:
         if el.neutron.b_c_i is not None:
             _diff(el, el.neutron.b_c_i, -el.neutron.absorption/2/1.798/1000)
         for iso in el:
             if iso.neutron.b_c_i is not None:
                 _diff(iso, iso.neutron.b_c_i, -iso.neutron.absorption/2/1.798/1000)
 
-def coherent_comparison_table():
+def coherent_comparison_table(table=elements):
     """
     Print a table of 4*pi*b_c**2/100 and coherent for each isotope.
 
@@ -838,7 +841,7 @@ def coherent_comparison_table():
     """
     import numpy
     print "Comparison of b_c and coherent where b_c exists"
-    for el in elements:
+    for el in table:
         if el.neutron.b_c is not None:
             _diff(el, el.neutron.b_c**2*4*numpy.pi/100, el.neutron.coherent)
         for iso in el:
@@ -846,14 +849,14 @@ def coherent_comparison_table():
                 _diff(iso, iso.neutron.b_c**2*4*numpy.pi/100, iso.neutron.coherent)
 
 
-def sld_plot():
+def sld_plot(table=elements):
     """
     Plot SLD as a function of element number.
     """
     import pylab
 
     SLDs = [(el.number,el.neutron.sld()[0],el.symbol)
-            for el in elements
+            for el in table
             if el.neutron.has_sld()]
     for Z,sld,sym in SLDs:
         if sld is not None: pylab.text(Z,sld,sym)
@@ -861,5 +864,3 @@ def sld_plot():
     pylab.xlabel('Element number')
     pylab.ylabel('Scattering length density (10**-6 Nb)')
     pylab.title('Neutron SLD for elements in natural abundance')
-
-_init()

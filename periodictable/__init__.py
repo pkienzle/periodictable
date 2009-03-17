@@ -87,12 +87,16 @@ whose conditions may differ from those of your experiment.
 """
 __docformat__ = 'restructuredtext en'
 
-# Pull in periodic table and elements
+# Define external symbols
+from periodictable.core import *
+__all__ = core.__all__ + ['neutron_sld','xray_sld','formula']
+
+# Always make mass and density available
 from . import core
 from . import mass
 from . import density
-from periodictable.core import *
-__all__ = core.__all__ + ['neutron_sld','xray_sld','formula']
+mass.init(core.elements)
+density.init(core.elements)
 
 def _load_covalent_radius():
     """
@@ -101,7 +105,7 @@ def _load_covalent_radius():
     Note: covalent radii data source is unknown.
     """
     import covalent_radius
-    covalent_radius._init()
+    covalent_radius.init(elements)
 core.delayed_load(['covalent_radius'],_load_covalent_radius)
 
 def _load_crystal_structure():
@@ -111,6 +115,7 @@ def _load_crystal_structure():
     Ashcroft and Mermin
     """
     import crystal_structure
+    crystal_structure.init(elements)
 core.delayed_load(['crystal_structure'], _load_crystal_structure)
 
 # Delayed loading of neutron properties
@@ -123,6 +128,7 @@ def _load_neutron():
     ILL Neutron Data Booklet.
     """
     import nsf
+    nsf.init(elements)
 core.delayed_load(['neutron'],_load_neutron)
 
 # Delayed loading of xray properties
@@ -139,6 +145,8 @@ def _load_xray():
     International Tables for Crystallography Volume C.
     """
     import xsf
+    xsf.init(elements)
+    xsf.init_spectral_lines(elements)
 core.delayed_load(['xray','K_alpha','K_beta1'],_load_xray)
 core.Element.K_alpha_units = "angstrom"
 core.Element.K_beta1_units = "angstrom"
@@ -212,4 +220,4 @@ def xray_sld(formula,density=None,wavelength=None,energy=None):
     return xsf.xray_sld(formula,density=density,
                         wavelength=wavelength,energy=energy)
 
-del core, mass, density
+#del core, mass, density

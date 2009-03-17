@@ -3,11 +3,14 @@
 
 Average covalent radii for the elements.
 
-Fields::
+This module adds the following fields to the periodic table::
 
     covalent_radius (A)
     covalent_radius_uncertainty (A)
     covalent_radius_units ("angstrom")
+
+Use periodictable.covalent_radius.init(table) to initialize a
+private table.
 
 Data taken from Cordero 2008.[1]
 
@@ -54,11 +57,11 @@ doi:http://dx.doi.org/10.1039%2Fb801115j
 
 from .core import elements, Element
 
-def _init():
-    if 'covalent_radius' in elements.properties: return
-    elements.properties.append('covalent_radius')
+def init(table, reload=False):
+    if 'covalent_radius' in table.properties and not reload: return
+    table.properties.append('covalent_radius')
 
-    elements[0].covalent_radius = 0.20
+    table[0].covalent_radius = 0.20
     Element.covalent_radius_units = 'angstrom'
     Element.covalent_radius = None
     Element.covalent_radius_uncertainty = None
@@ -74,8 +77,8 @@ def _init():
         dr = float(fields[3])*0.01
         n = int(fields[4])
 
-        elements[Z].covalent_radius = r
-        elements[Z].covalent_radius_uncertainty = dr
+        table[Z].covalent_radius = r
+        table[Z].covalent_radius_uncertainty = dr
 
 # Table of radii from Cordero.  Note that in cases where there are
 # multiple spin states (C,Mn,Fe,Co) only the first spin state is used.
@@ -184,5 +187,3 @@ Cordero = """\
 95    Am    1.80    6    11
 96    Cm    1.69    3    16\
 """
-
-_init()

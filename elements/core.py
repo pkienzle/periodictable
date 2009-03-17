@@ -23,17 +23,17 @@ add attributes to the table, and they will appear in all of
 the elements.  For example:
 
     import danse.gammaray  # loads gammaray data
-    from elements import *   # loads symbols for periodic_table, H, He, ...
+    from periodictable import *  # loads symbols for H, He, ...
 
-    for el in periodic_table: print el.symbol, el.gammadata
+    for el in periodictable.elements: print el.symbol, el.gammadata
 
 To implement this, you will need the following in gammaray/core.py:
 
-    from elements.core import periodic_table, Element
+    from periodictable.core import elements, Element
 
     def _init():
-        if 'gammadata' in periodic_table.properties: return
-        periodic_table.properties.append('gammadata')
+        if 'gammadata' in elements.properties: return
+        elements.properties.append('gammadata')
 
         # Set the default, if any
         Element.gamma = None
@@ -43,7 +43,7 @@ To implement this, you will need the following in gammaray/core.py:
 
         # Load the data
         for s,data in gamma_table.iteritems():
-            el = periodic_table.symbol(s)
+            el = elements.symbol(s)
             el.gammadata = data
 
     # Define the data
@@ -56,11 +56,11 @@ To implement this, you will need the following in gammaray/core.py:
 
 You can use similar tricks for isotope specific data:
 
-    from elements.core import periodic_table, Isotope
+    from periodictable.core import elements, Isotope
 
     def _init():
-        if 'shells' in periodic_table.properties: return
-        periodic_table.properties.append('shells')
+        if 'shells' in elements.properties: return
+        elements.properties.append('shells')
 
         # Set the default.  This is required, even if it is only
         # setting it to None.  If the attribute is missing then the
@@ -70,7 +70,7 @@ You can use similar tricks for isotope specific data:
 
         # Load the data
         for symbol,data in shell_table.iteritems():
-            el = periodic_table.symbol(symbol)
+            el = elements.symbol(symbol)
             for iso,isodata in data.iteritems():
                 el[iso].shells = isodata
 
@@ -83,21 +83,19 @@ You can use similar tricks for isotope specific data:
 
     _init()
 
-Since your data table is in its own package, you need an __init__.py, which
-contains something like:
+Since your data table is in its own package, you need an __init__.py to
+create the initial periodic table.  It should contain something like:
 
-     import elements
-     table = elements.table  # Allow user to say e.g., gammaray.table.Si
-
-     import core
-     del elements,core  # Clean up symbol space
+     import periodictable
+     ...
+     del periodictable  # Clean up symbol space
 
 You can also define attributes on import that are not loaded directly.
 For example, if you don't want to load all the isotope information for
 shells immediately, then you can use delayed_load in __init__.py:
 
 
-     from elements.core import delayed_load
+     from periodictable.core import delayed_load
 
      # Delayed loading of shell info
      def _load_shell():
@@ -116,7 +114,7 @@ each attribute in the first list.
 """
 import copy
 
-# Note: __all__ will include all the elements and periodic_table; it is
+# Note: __all__ will include all the elements and elements; it is
 # defined below.
 
 def delayed_load(all_props,loader,element=True,isotope=False):
@@ -161,7 +159,7 @@ def delayed_load(all_props,loader,element=True,isotope=False):
 
         This function is assumed to be called when the data loader for the
         attribute is called before the property is referenced (for example,
-        if somebody imports elements.xsf before referencing Ni.xray).  In
+        if somebody imports periodictable.xsf before referencing Ni.xray). In
         this case, we simply need to clear the delayed load property and
         let the loader set the values as usual.
 
@@ -191,37 +189,37 @@ def delayed_load(all_props,loader,element=True,isotope=False):
 # Define the element names from the element table.
 class _PeriodicTable(object):
     """
-    Defines the period table of the elements.
+    Defines the period table of the elements with isotopes.
 
-    Individidual elements are accessed either by table[Z], table.Xx,
-    table.name('Name'), table.symbol('Xx') or table.isotope('Xx').
+    Individidual elements are accessed by name, symbol or atomic number.
     Individual isotopes are addressable by element[mass_number] or
-    table.isotope('n-Xx').
+    elements.isotope('#-Xx').
 
-    For example, the following all retrieve iron:
-        table[26]
-        table.Fe
-        table.symbol('Fe')
-        table.name('iron')
-        table.isotope('Fe')
+    For example, the following all retrieve iron::
 
-    To get iron-56, use:
-        table[26][56]
-        table.Fe[56]
-        table.isotope('56-Fe')
+        elements[26]
+        elements.Fe
+        elements.symbol('Fe')
+        elements.name('iron')
+        elements.isotope('Fe')
 
-    Deuterium and tritium are defined as table.D and table.T.  Some
-    neutron properties are available in table[0]
+    To get iron-56, use::
+
+        elements[26][56]
+        elements.Fe[56]
+        elements.isotope('56-Fe')
+
+    Deuterium and tritium are defined as D and T.  Some
+    neutron properties are available in elements[0]
 
     To show all the elements in the table, use the iterator:
 
-        for element in periodic_table:  # lists the element symbols
+        for element in elements:  # lists the element symbols
             print el.symbol,el.number
 
-    Elements have name, number, symbol and isotopes.
-
     Properties can be added to the elements as needed, including mass, nuclear
-    and X-ray scattering cross sections.  See the help(elements) for details.
+    and X-ray scattering cross sections.  See the help(periodictable)
+    for details.
     """
     def __init__(self):
         """
@@ -541,16 +539,16 @@ element_symbols = {
 # Make a common copy of the table for everyone to use --- equivalent to
 # a singleton without incurring any complexity; this must be done after
 # the table data is defined.
-periodic_table = _PeriodicTable()
-for el in periodic_table:
+elements = _PeriodicTable()
+for el in elements:
     exec el.symbol+"=el"
     exec el.name+"=el"
-D = periodic_table.D
-T = periodic_table.T
+D = elements.D
+T = elements.T
 exec D.name+"=D"
 exec T.name+"=T"
 # Import all elements on "from core import *"
-__all__ = ([el.symbol for el in periodic_table]
-           + [el.name for el in periodic_table]
+__all__ = ([el.symbol for el in elements]
+           + [el.name for el in elements]
            + [D.symbol, D.name, T.symbol, T.name]
-           + ['periodic_table'])
+           + ['elements'])

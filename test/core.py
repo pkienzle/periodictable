@@ -1,4 +1,4 @@
-from elements import H, O, Fe, helium, periodic_table
+from periodictable import H, O, Fe, helium, elements
 
 def test():
     # Check that we can access element properties
@@ -16,8 +16,8 @@ def test():
     assert str(H[3])=='T'
     assert str(O[18])=='18-O'
 
-    # Check that "for el in periodic_table" works and for iso in el works
-    els = tuple(el for el in periodic_table)
+    # Check that "for el in elements" works and for iso in el works
+    els = tuple(el for el in elements)
     assert els[0].number == 0
     assert els[1].number == 1
     isotopes = tuple(iso for iso in O)
@@ -25,20 +25,20 @@ def test():
 
     # Check that table lookup works and fails appropriately
     Fe.add_isotope(56)
-    assert periodic_table.symbol('Fe') == Fe
-    assert periodic_table.name('iron') == Fe
-    assert periodic_table.isotope('Fe') == Fe
-    assert periodic_table.isotope('56-Fe') == Fe[56]
+    assert elements.symbol('Fe') == Fe
+    assert elements.name('iron') == Fe
+    assert elements.isotope('Fe') == Fe
+    assert elements.isotope('56-Fe') == Fe[56]
     try:
-        periodic_table.symbol('Qu')
+        elements.symbol('Qu')
     except ValueError,msg:
         assert str(msg) == "unknown element Qu"
     try:
-        periodic_table.name('Qu')
+        elements.name('Qu')
     except ValueError,msg:
         assert str(msg) == "unknown element Qu"
     try:
-        periodic_table.isotope('Qu')
+        elements.isotope('Qu')
     except ValueError,msg:
         assert str(msg) == "unknown element Qu"
 

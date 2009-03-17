@@ -1,6 +1,6 @@
-from elements import molecule
-from elements import Cu,Mo,Ni,Fe,Si
-from elements.xsf import xray_energy, xray_sld_from_atoms
+from periodictable import formula
+from periodictable import Cu,Mo,Ni,Fe,Si
+from periodictable.xsf import xray_energy, xray_sld_from_atoms
 
 def test():
 
@@ -44,7 +44,7 @@ def test():
     """
     # Table of scattering length densities for various molecules
     for molecule,density in [('SiO2',2.2),('B4C',2.52)]:
-        atoms = molecule(molecule).atoms
+        atoms = formula(molecule).atoms
         rho,mu = xray_sld(atoms,density,wavelength=Cu.K_alpha)
         print "sld for %s(%g g/cm**3)  rho=%.4g mu=%.4g"\
             %(molecule,density,rho,mu)
@@ -57,10 +57,10 @@ def test():
     assert abs(mu - muSi) < 1e-14
 
     # Check that neutron_sld works as expected
-    atoms = molecule('SiO2').atoms
+    atoms = formula('SiO2').atoms
     rho,mu = xray_sld_from_atoms(atoms,2.2,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-18.87)<0.1
-    atoms = molecule('B4C').atoms
+    atoms = formula('B4C').atoms
     rho,mu = xray_sld_from_atoms(atoms,2.52,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-20.17)<0.1
 

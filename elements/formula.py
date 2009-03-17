@@ -1,6 +1,6 @@
 # This program is public domain
 """
-Operations on molecules.
+Operations on chemical formulas.
 
 As of this writing, this includes parsing, computing molar mass and
 computing scattering length density.
@@ -12,11 +12,11 @@ from copy import copy
 from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd)
 
-from .core import periodic_table, Element, Isotope
+from .core import elements, Element, Isotope
 
-class Molecule(object):
+class Formula(object):
     """
-    Simple molecule representation.
+    Simple chemical formula representation.
 
     This is designed for calculating molar mass and scattering
     length density, not for representing bonds or atom positions.
@@ -27,17 +27,17 @@ class Molecule(object):
     Example initializers::
 
        string:
-          m = Molecule( "CaCO3+6H2O" )
+          m = Formula( "CaCO3+6H2O" )
        structure:
-          m = Molecule( [(1,Ca),(2,C),(3,O),(6,[(2,H),(1,O)]] )
-       molecular math:
-          m = Molecule( "CaCO3" ) + 6*Molecule( "H2O" )
-       another molecule (makes a copy):
-          m = Molecule( Molecule("CaCO3+6H2O") )
+          m = Formula( [(1,Ca),(2,C),(3,O),(6,[(2,H),(1,O)]] )
+       formula math:
+          m = Formula( "CaCO3" ) + 6*Formula( "H2O" )
+       another formula (makes a copy):
+          m = Formula( Formula("CaCO3+6H2O") )
        an atom:
-          m = Molecule( Ca )
+          m = Formula( Ca )
        nothing:
-          m = Molecule()
+          m = Formula()
 
     Additional information can be provided::
 
@@ -47,10 +47,10 @@ class Molecule(object):
     Operations::
 
         m.atoms returns a dictionary of {isotope: count} for each isotope
-          in the molecule
+          in the formula
         m.mass (u) returns the molar mass of the molecule
 
-    Molecule strings consist of counts and atoms such as "CaCO3+6H2O".
+    Formula strings consist of counts and atoms such as "CaCO3+6H2O".
 
     Groups can be separated by '+' or space, so "CaCO3 6H2O" works as well.
 
@@ -62,17 +62,17 @@ class Molecule(object):
 
     Counts can be integer or decimal, e.g. "CaCO3+(3HO0.5)2".
 
-    For full details see help(elements.molecule.molecule_grammar)
+    For full details see help(periodictable.formulas.formula_grammar)
 
     """
     def __init__(self,value=None,density=None,name=None):
         """
-        Initialize molecule with a string, a structure or another molecule.
+        Initialize formula with a string, a structure or another formula.
         """
         self.density,self.name = None,None
         if value==None:
             self.structure = []
-        elif isinstance(value,Molecule):
+        elif isinstance(value,Formula):
             self.__dict__ = copy(value.__dict__)
         elif _isatom(value):
             self.structure = ((1,value),)
@@ -87,26 +87,26 @@ class Molecule(object):
             try:
                 self._parse_structure(value)
             except:
-                raise TypeError("not a valid molecule structure")
+                raise TypeError("not a valid chemical formula")
         if density: self.density = density
         if name: self.name = name
 
     def _parse_structure(self,input):
         """
-        Set the molecule to the given structure, checking that it is valid.
+        Set the formula to the given structure, checking that it is valid.
         """
         _check_atoms(input)
         self.structure = _immutable(input)
 
     def _parse_string(self,input):
         """
-        Parse the molecule string.
+        Parse the formula string.
         """
         self.structure = _immutable(parser.parseString(input))
 
     def _atoms(self):
         """
-        Dictionary of {isotope: count} for the molecule.
+        Dictionary of {isotope: count} for the formula.
         """
         return _count_atoms(self.structure)
     atoms = property(_atoms,doc=_atoms.__doc__)
@@ -173,34 +173,34 @@ class Molecule(object):
 
     def __eq__(self,other):
         """
-        Return True if two molecules represent the same structure.  Note
+        Return True if two formulas represent the same structure.  Note
         that they may still have different names and densities.
         Note: doesn't check order.
         """
-        if not isinstance(other,Molecule): return False
+        if not isinstance(other,Formula): return False
         return self.structure==other.structure
 
     def __add__(self,other):
         """
-        Join two molecules.
+        Join two formulas.
         """
         #print "adding",self,other
-        if not isinstance(other,Molecule):
-            raise TypeError("expected molecule+molecule")
-        ret = Molecule()
+        if not isinstance(other,Formula):
+            raise TypeError("expected formula+formula")
+        ret = Formula()
         ret.structure = tuple(list(self.structure) + list(other.structure))
         return ret
 
     def __rmul__(self,other):
         """
-        Provide a multiplier for molecule.
+        Provide a multiplier for formula.
         """
         #print "multiplying",self,other
         try:
             other += 0
         except TypeError:
-            raise TypeError("n*molecule expects numeric n")
-        ret = Molecule()
+            raise TypeError("n*formula expects numeric n")
+        ret = Formula()
         if self.structure != []:
             ret.structure = ((other,self.structure),)
         return ret
@@ -209,11 +209,11 @@ class Molecule(object):
         return self.name if self.name else _str_atoms(self.structure)
 
     def __repr__(self):
-        return "molecule('%s')"%(str(self))
+        return "formula('%s')"%(str(self))
 
     def __getstate__(self):
         """
-        Pickle molecule structure using a string representation since
+        Pickle formula structure using a string representation since
         elements can't be pickled.
         """
         output = copy(self.__dict__)
@@ -222,21 +222,21 @@ class Molecule(object):
 
     def __setstate__(self,input):
         """
-        Unpickle molecule structure from a string representation since
+        Unpickle formula structure from a string representation since
         elements can't be pickled.
         """
         self.__dict__ = input
         self._parse_string(input['structure'])
 
-def molecule_grammar():
+def formula_grammar():
     """
-    Return a parser for molecular formulae.
+    Return a parser for molecular formulas.
 
     The parser.parseString() method returns a list of
     pairs (count,fragment),  where fragment is an isotope, an
     element or a list of pairs (count,fragment).
 
-    Molecules are parsed from strings using the following grammar::
+    Formulas are parsed from strings using the following grammar::
 
         number    :: [1-9][0-9]*
         fraction  :: ( | '0' | number) '.' [0-9]*
@@ -253,7 +253,7 @@ def molecule_grammar():
 
     # Lookup the element in the element table
     symbol = Regex("[A-Z][a-z]*")
-    symbol = symbol.setParseAction(lambda s,l,t: periodic_table.symbol(t[0]))
+    symbol = symbol.setParseAction(lambda s,l,t: elements.symbol(t[0]))
 
     # Translate isotope
     openiso = Literal('[').suppress()
@@ -311,7 +311,7 @@ def molecule_grammar():
 
 def _count_atoms(seq):
     """
-    Traverse molecule structure, counting the total number of atoms.
+    Traverse formula structure, counting the total number of atoms.
     """
     total = {}
     for count,fragment in seq:
@@ -326,7 +326,7 @@ def _count_atoms(seq):
 
 def _check_atoms(seq):
     """
-    Traverse molecule structure, checking that the counts are numeric and
+    Traverse formula structure, checking that the counts are numeric and
     units are elements or isotopes.  Raises an error if this is not the
     case.
     """
@@ -342,7 +342,7 @@ def _immutable(seq):
 
 def _str_atoms(seq):
     """
-    Convert molecule structure to string.
+    Convert formula structure to string.
     """
     #print "str",seq
     ret = ""
@@ -376,5 +376,5 @@ def _is_string_like(val):
     except: return False
     return True
 
-parser = molecule_grammar()
+parser = formula_grammar()
 parser.setName('Chemical Formula')

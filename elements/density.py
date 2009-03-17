@@ -21,7 +21,7 @@ Physics, 80th ed. (CRC Press, Boca Raton, Florida, 1999).
 These values are reproduced in the ILL Neutron Data Booklet, Second Edition.
 """
 
-from .core import periodic_table, Element
+from .core import elements, Element
 from .constants import avogadro_number
 
 def density(element):
@@ -59,8 +59,8 @@ def number_density(element):
     return (element.density/element.mass)*avogadro_number
 
 def _init():
-    if 'density' in periodic_table.properties: return
-    periodic_table.properties.append('density')
+    if 'density' in elements.properties: return
+    elements.properties.append('density')
     Element.density_units = "g/cm**3"
 
     Element.interatomic_distance \
@@ -73,7 +73,7 @@ def _init():
     Element.number_density_units = ""
 
     for k,v in element_densities.iteritems():
-        el = getattr(periodic_table,k)
+        el = getattr(elements,k)
         if isinstance(v,tuple):
             el.density = v[0]
             el.density_caveat = v[1]

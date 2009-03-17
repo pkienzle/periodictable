@@ -2,7 +2,7 @@
 This data is from Ashcroft and Mermin.
 '''
 
-from .core import periodic_table
+from .core import elements
 
 crystal_structures = [\
     None, #X
@@ -111,10 +111,10 @@ crystal_structures = [\
     None]#Lw
 
 def _init():
-    if 'crystal_structure' in periodic_table.properties: return
-    periodic_table.properties.append('crystal_structure')
+    if 'crystal_structure' in elements.properties: return
+    elements.properties.append('crystal_structure')
 
     for Z,struct in enumerate(crystal_structures):
-        periodic_table[Z].crystal_structure = struct
+        elements[Z].crystal_structure = struct
 
 _init()

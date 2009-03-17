@@ -112,7 +112,7 @@ from __future__ import with_statement
 import os.path
 import numpy
 
-from .core import periodic_table, Element, Isotope
+from .core import elements, Element, Isotope
 #from . import mass,density
 from .constants import (avogadro_number, plancks_constant, speed_of_light,
                         electron_radius)
@@ -148,7 +148,7 @@ class Xray(object):
     D. C. Creagh and J. H. Hubbell
     International Tables for Crystallography Volume C.
 
-    See help(elements.xsf) for details.
+    See help(periodictable.xsf) for details.
     """
     sftable_units = ["eV","",""]
     scattering_factors_units = ["",""]
@@ -207,8 +207,8 @@ class Xray(object):
         radius and N is number density = density/mass * Avogadro's Number.
 
         The constants are available directly::
-            elements.xsf.electron_radius
-            elements.density.avogadro_number
+            periodictable.xsf.electron_radius
+            periodictable.constants.avogadro_number
 
         Data comes from the Henke Xray scattering factors database at the
         Lawrence Berkeley Laboratory Center for X-ray Optics.
@@ -271,41 +271,44 @@ def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
     #print "scattering",scattering,"absorption",absorption,"1/N",1/N
     return rho,mu
 
-
-
-def _init():
-    if 'xray' in periodic_table.properties: return
-    periodic_table.properties.append('xray')
-    for el in periodic_table:
-        el.xray = Xray(el)
     Element.K_alpha_units = "angstrom"
     Element.K_beta1_units = "angstrom"
 
-    # Sets the K_alpha and K_beta1 wavelengths for select elements
-    periodic_table.Ag.K_alpha = 0.5608
-    periodic_table.Ag.K_beta1 = 0.4970
-    periodic_table.Pd.K_alpha = 0.5869
-    periodic_table.Pd.K_beta1 = 0.5205
-    periodic_table.Rh.K_alpha = 0.6147
-    periodic_table.Rh.K_beta1 = 0.5456
-    periodic_table.Mo.K_alpha = 0.7107
-    periodic_table.Mo.K_beta1 = 0.6323
-    periodic_table.Zn.K_alpha = 1.4364
-    periodic_table.Zn.K_beta1 = 1.2952
-    periodic_table.Cu.K_alpha = 1.5418
-    periodic_table.Cu.K_beta1 = 1.3922
-    periodic_table.Ni.K_alpha = 1.6591
-    periodic_table.Ni.K_beta1 = 1.5001
-    periodic_table.Co.K_alpha = 1.7905
-    periodic_table.Co.K_beta1 = 1.6208
-    periodic_table.Fe.K_alpha = 1.9373
-    periodic_table.Fe.K_beta1 = 1.7565
-    periodic_table.Mn.K_alpha = 2.1031
-    periodic_table.Mn.K_beta1 = 1.9102
-    periodic_table.Cr.K_alpha = 2.2909
-    periodic_table.Cr.K_beta1 = 2.0848
-    periodic_table.Ti.K_alpha = 2.7496
-    periodic_table.Ti.K_beta1 = 2.5138
+def spectral_lines():
+    """
+    Sets the K_alpha and K_beta1 wavelengths for select elements
+    """
+    elements.Ag.K_alpha = 0.5608
+    elements.Ag.K_beta1 = 0.4970
+    elements.Pd.K_alpha = 0.5869
+    elements.Pd.K_beta1 = 0.5205
+    elements.Rh.K_alpha = 0.6147
+    elements.Rh.K_beta1 = 0.5456
+    elements.Mo.K_alpha = 0.7107
+    elements.Mo.K_beta1 = 0.6323
+    elements.Zn.K_alpha = 1.4364
+    elements.Zn.K_beta1 = 1.2952
+    elements.Cu.K_alpha = 1.5418
+    elements.Cu.K_beta1 = 1.3922
+    elements.Ni.K_alpha = 1.6591
+    elements.Ni.K_beta1 = 1.5001
+    elements.Co.K_alpha = 1.7905
+    elements.Co.K_beta1 = 1.6208
+    elements.Fe.K_alpha = 1.9373
+    elements.Fe.K_beta1 = 1.7565
+    elements.Mn.K_alpha = 2.1031
+    elements.Mn.K_beta1 = 1.9102
+    elements.Cr.K_alpha = 2.2909
+    elements.Cr.K_beta1 = 2.0848
+    elements.Ti.K_alpha = 2.7496
+    elements.Ti.K_beta1 = 2.5138
+
+def _init():
+    if 'xray' in elements.properties: return
+    elements.properties.append('xray')
+    for el in elements:
+        el.xray = Xray(el)
+    spectral_lines()
 
 def plot_xsf(el):
     import pylab
@@ -320,16 +323,16 @@ def plot_xsf(el):
 
 def sld_table(wavelength):
     ## Cu K-alpha Zeff and dZ table
-    #for el in periodic_table:
-    #    f1,f2 = el.xsf(periodic_table.Cu.K_alpha)
+    #for el in elements:
+    #    f1,f2 = el.xsf(elements.Cu.K_alpha)
     #    if f1 is not None:
     #        print el.Z,el.symbol,"%.1f"%f1,"%.4f"%(f1-el.Z)
 
     # NBCU spreadsheet format
     print "X-ray scattering length density and absorption for",wavelength,"A"
     print "%3s %6s %6s"%('El','rho','mu')
-    for el in periodic_table:
-        rho,mu = el.xray.sld(periodic_table.Cu.K_alpha)
+    for el in elements:
+        rho,mu = el.xray.sld(elements.Cu.K_alpha)
         if rho is not None:
             print "%3s %6.2f %6.2f"%(el.symbol,rho,mu)
 
@@ -338,7 +341,7 @@ def emission_table():
     Print a table of emission lines.
     """
     print "%3s %7s %7s"%('El','Kalpha','Kbeta1')
-    for el in periodic_table:
+    for el in elements:
         if hasattr(el,'K_alpha'):
             print "%3s %7.4f %7.4f"%(el.symbol,el.K_alpha,el.K_beta1)
 

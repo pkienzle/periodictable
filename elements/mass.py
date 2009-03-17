@@ -51,7 +51,7 @@ Neutron mass from NIST Reference on Constants, Units, and Uncertainty
     http://physics.nist.gov/cuu/index.html
 """
 
-from .core import periodic_table, Element, Isotope
+from .core import elements, Element, Isotope
 
 __all__ = ['init']
 
@@ -84,8 +84,8 @@ def abundance(isotope):
     return isotope._abundance
 
 def _init():
-    if 'mass' in periodic_table.properties: return
-    periodic_table.properties.append('mass')
+    if 'mass' in elements.properties: return
+    elements.properties.append('mass')
     Element.mass = property(mass,doc=mass.__doc__)
     Isotope.mass = property(mass,doc=mass.__doc__)
     Isotope.abundance = property(abundance,doc=abundance.__doc__)
@@ -95,7 +95,7 @@ def _init():
     for line in massdata.split('\n'):
         isotope,m,p,avg = line.split(',')
         el,sym,iso = isotope.split('-')
-        el = periodic_table[int(el)]
+        el = elements[int(el)]
         assert el.symbol == sym, \
             "Symbol %s does not match %s"%(sym,el.symbol)
         iso = el.add_isotope(int(iso))
@@ -106,7 +106,7 @@ def _init():
     # From NIST Reference on Constants, Units, and Uncertainty
     #   http://physics.nist.gov/cuu/index.html
     # neutron mass = 1.008 664 915 97(43) u
-    el = periodic_table[0]
+    el = elements[0]
     iso = el.add_isotope(1)
     iso._mass = 1.00866491597
     el._mass = iso.mass

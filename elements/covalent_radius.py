@@ -52,13 +52,13 @@ Covalent radii revisited. Dalton Trans., 2008, 2832-2838
 doi:http://dx.doi.org/10.1039%2Fb801115j
 """
 
-from .core import periodic_table, Element
+from .core import elements, Element
 
 def _init():
-    if 'covalent_radius' in periodic_table.properties: return
-    periodic_table.properties.append('covalent_radius')
+    if 'covalent_radius' in elements.properties: return
+    elements.properties.append('covalent_radius')
 
-    periodic_table[0].covalent_radius = 0.20
+    elements[0].covalent_radius = 0.20
     Element.covalent_radius_units = 'angstrom'
     Element.covalent_radius = None
     Element.covalent_radius_uncertainty = None
@@ -74,8 +74,8 @@ def _init():
         dr = float(fields[3])*0.01
         n = int(fields[4])
 
-        periodic_table[Z].covalent_radius = r
-        periodic_table[Z].covalent_radius_uncertainty = dr
+        elements[Z].covalent_radius = r
+        elements[Z].covalent_radius_uncertainty = dr
 
 # Table of radii from Cordero.  Note that in cases where there are
 # multiple spin states (C,Mn,Fe,Co) only the first spin state is used.

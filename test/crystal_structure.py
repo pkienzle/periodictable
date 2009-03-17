@@ -1,8 +1,8 @@
-from elements import periodic_table
-import elements.crystal_structure
+from periodictable import elements
+import periodictable.crystal_structure
 
 def test():
-    xtal = periodic_table.Hg.crystal_structure
+    xtal = elements.Hg.crystal_structure
     assert xtal['symmetry'] == 'Rhombohedral'
     assert xtal['a'] == 2.99
     assert xtal['alpha'] == 70.45

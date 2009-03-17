@@ -1,16 +1,16 @@
-import elements
+import periodictable
 
 def test():
 
-    assert elements.table.Be[12].mass == 12.026921
-    assert elements.table.Be.mass == 9.012182
-    assert elements.table.Pb[206].abundance == 24.1
-    assert elements.table.Pb[209].abundance == 0
-    assert elements.table.Pb.mass == 207.2
-    assert elements.table.n.mass == 1.00866491597
+    assert periodictable.Be[12].mass == 12.026921
+    assert periodictable.Be.mass == 9.012182
+    assert periodictable.Pb[206].abundance == 24.1
+    assert periodictable.Pb[209].abundance == 0
+    assert periodictable.Pb.mass == 207.2
+    assert periodictable.n.mass == 1.00866491597
 
     # Check abundance totals to 0% or 100%
-    for el in elements.table:
+    for el in periodictable.elements:
         abundance=0
         for iso in el:
             if iso.abundance == None:
@@ -24,7 +24,7 @@ def test():
     # Check average mass corresponds to abundance information
     # Note: should check that this is true within uncertainty, but
     # uncertainties are not being loaded.
-    for el in elements.table:
+    for el in periodictable.elements:
         abundance=0
         mass=0
         for iso in el:

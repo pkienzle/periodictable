@@ -5,7 +5,7 @@ Neutron scattering factors for the elements and isotopes, from the
 ILL Neutron Data Booklet[1].
 
 This module adds the neutron property to the periodic table.  For
-details of neutron scattering factor values, see `elements.nsf.Neutron`.
+details of neutron scattering factor values, see `periodictable.nsf.Neutron`.
 The property is set to None if there is no neutron scattering information
 for the element.  Individual isotopes may have their own scattering
 information
@@ -16,9 +16,9 @@ Example
 The following plots the symbol versus scattering length density for
 all elements::
 
-    import elements,pylab
+    import periodictable,pylab
     SLDs = [(el.number,el.neutron.sld()[0],el.symbol)
-            for el in elements.table
+            for el in periodictable.elements
             if el.neutron.has_sld()]
     for Z,sld,sym in SLDs:
         if sld is not None: pylab.text(Z,sld,sym)
@@ -27,16 +27,16 @@ all elements::
 Similarly, you can print a table of scattering length densities for isotopes
 of a particular element::
 
-    for iso in elements.Ni:
+    for iso in periodictable.Ni:
         if iso.neutron.has_sld(): print iso,iso.neutron.sld()[0]
 
 Details
 =======
 
-There are a number of functions available in elements.nsf::
+There are a number of functions available in periodictable.nsf::
 
     neutron_sld(molecule)
-        computes sld for a molecule (available as elements.neutron_sld()).
+        computes sld for a molecule (available as periodictable.neutron_sld()).
     neutron_sld_from_atoms({isotope:quantity}, density)
         computes sld from a set of isotopes, a density and a wavelength
     energy_dependent_table()
@@ -55,7 +55,7 @@ Institute for Austrian Universities (2007 version)::
 
 The above site has references to the published values for every entry in
 the table.  We have included these in the documentation directory
-associated with the elements package.
+associated with the periodictable package.
 
 [1] H. Rauch and W. Waschkowski (2003). Neutron Scattering Lengths
 in ILL Neutron Data Booklet (second edition), A.-J. Dianoux, G. Lander, Eds.
@@ -67,7 +67,7 @@ H.Schopper Ed. Chap. 6. Springer: Berlin.
 [3] L. Koester, H. Rauch, E. Seymann. Atomic Data Nuclear
 Data Tables 49 (1991) 65
 """
-from .core import periodic_table, Element, Isotope
+from .core import elements, Element, Isotope
 from .constants import avogadro_number
 
 __all__ = ['init']
@@ -193,7 +193,7 @@ class Neutron(object):
 
         Note: There is a factor of 10 unaccounted for, but required in order
         to match the b_c_i values given in the underlying tables.  Run
-            elements.nsf._absorption_comparison_table()
+            periodictable.nsf._absorption_comparison_table()
         to show how well b_c_i corresponds to absorption.
 
         [1] Lynn, JE and Seeger, PA (1990). Resonance effects in neutron
@@ -218,10 +218,10 @@ def _init():
     """
     Load the Rauch table from the neutron data book.
     """
-    if 'neutron' in periodic_table.properties: return
-    periodic_table.properties.append('neutron')
-    assert ('density' in periodic_table.properties and
-        'mass' in periodic_table.properties), \
+    if 'neutron' in elements.properties: return
+    elements.properties.append('neutron')
+    assert ('density' in elements.properties and
+        'mass' in elements.properties), \
         "Neutron table requires mass and density properties"
 
     # Defaults for missing neutron information
@@ -246,7 +246,7 @@ def _init():
         isotope_number = int(parts[2]) if len(parts)==3 else 0
 
         # Fetch element from the table and check that the symbol matches
-        element = periodic_table[Z]
+        element = elements[Z]
         assert element.symbol == symbol, \
             "Symbol %s does not match %s"%(symbol,element.symbol)
 
@@ -286,7 +286,7 @@ def _init():
         Z = int(parts[0])
         symbol = parts[1]
         isotope_number = int(parts[2]) if len(parts)==3 else 0
-        element = periodic_table[Z]
+        element = elements[Z]
         if isotope_number == 0:
             nsf = element.neutron
         else:
@@ -319,7 +319,7 @@ def sld_table(wavelength=1):
     print " Neutron scattering length density table"
     print "%2s %6s %8s %7s %6s %6s %6s"%('  ','mass','b_c','density',
                                          'coh','absorp','incoh')
-    for el in periodic_table:
+    for el in elements:
         if el.neutron.has_sld():
             coh,absorp,inc = el.neutron.sld(wavelength)
             print "%-2s %6.2f %8.4f %7.2f %6.2f %6.2f %6.2f%s"\
@@ -334,7 +334,7 @@ def energy_dependent_table():
     """
     # List of energy dependent elements and isotopes
     print "Elements and isotopes with energy dependent absorption:"
-    for el in periodic_table:
+    for el in elements:
         if not hasattr(el,'neutron'): continue
         dep = []
         if el.neutron.is_energy_dependent:
@@ -823,7 +823,7 @@ def absorption_comparison_table():
     This is useful for checking the integrity of the data and formula.
     """
     print "Comparison of b_c_i and absorption where b_c_i exists"
-    for el in periodic_table:
+    for el in elements:
         if el.neutron.b_c_i is not None:
             _diff(el, el.neutron.b_c_i, -el.neutron.absorption/2/1.798/1000)
         for iso in el:
@@ -838,7 +838,7 @@ def coherent_comparison_table():
     """
     import numpy
     print "Comparison of b_c and coherent where b_c exists"
-    for el in periodic_table:
+    for el in elements:
         if el.neutron.b_c is not None:
             _diff(el, el.neutron.b_c**2*4*numpy.pi/100, el.neutron.coherent)
         for iso in el:
@@ -853,7 +853,7 @@ def sld_plot():
     import pylab
 
     SLDs = [(el.number,el.neutron.sld()[0],el.symbol)
-            for el in periodic_table
+            for el in elements
             if el.neutron.has_sld()]
     for Z,sld,sym in SLDs:
         if sld is not None: pylab.text(Z,sld,sym)

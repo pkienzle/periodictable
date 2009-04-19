@@ -1,10 +1,10 @@
-# quick and dirty trick to fix executable permissions spuriously
-# set by the setuptools
+# Quick and dirty trick to fix executable permissions spuriously
+# set by the setuptools.
 
 __all__ = []
 
 # version
-__id__ = "$Id: fix_setuptools_chmod.py 787 2008-09-13 02:03:27Z juhas $"
+__id__ = "$Id$"
 
 import os
 import stat
@@ -49,14 +49,15 @@ def fixed_unpack_and_compile(self, egg_path, destination):
         for f in to_chmod:
 #           mode = ((os.stat(f)[stat.ST_MODE]) | 0555) & 07755
             mode = ((os.stat(f)[stat.ST_MODE]) | 0444) & 07755
-            os.chmod(f, mode)
+            chmod(f, mode)
 
     to_compile = []; to_chmod = []
     return
 
 
-# hack the easy_install class only for selected versions
-if parse_version(setuptools.__version__) <= parse_version('0.6c8'):
+# Hack the easy_install class for versions compatible with
+# fixed_unpack_and_compile
+if parse_version(setuptools.__version__) <= parse_version('0.6c9'):
     from setuptools.command.easy_install import easy_install
     easy_install.unpack_and_compile = fixed_unpack_and_compile
 

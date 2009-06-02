@@ -3,18 +3,18 @@
 
 Average covalent radii for the elements.
 
-This module adds the following fields to the periodic table::
+This module adds the following fields to the periodic table
 
-    covalent_radius (A)
-    covalent_radius_uncertainty (A)
-    covalent_radius_units ("angstrom")
+* covalent_radius (A)
+* covalent_radius_uncertainty (A)
+* covalent_radius_units ("angstrom")
 
 Use periodictable.covalent_radius.init(table) to initialize a
 private table.
 
 Data taken from Cordero 2008.[1]
 
-From the abstract::
+From the abstract
 
     A new set of covalent atomic radii has been deduced from
     crystallographic data for most of the elements with atomic
@@ -28,36 +28,42 @@ From the abstract::
     atomic radii between low spin and high spin configurations in
     transition metals are illustrated by the proposed radii set.
 
-Notes::
+Notes
 
- #. Values are averages only.  The particular radius can be highly
-    dependent on oxidation state and chemical compound.
+#. Values are averages only.  The particular radius can be highly
+   dependent on oxidation state and chemical compound.
 
- #. The paper lists values for multiple spin states on select
-    elements.  We are using sp3 for carbon and low spin for manganese,
-    iron and cobalt.
+#. The paper lists values for multiple spin states on select
+   elements.  We are using sp3 for carbon and low spin for manganese,
+   iron and cobalt.
 
- #. Elements with zero or one measurements of covalent radius are
-    assigned an uncertainty of 0.00.  These are He, Ne, Pm, At, Rn,
-    Fr, Ac, Pa
+#. Elements with zero or one measurements of covalent radius are
+   assigned an uncertainty of 0.00.  These are He, Ne, Pm, At, Rn,
+   Fr, Ac, Pa
 
- #. Elements above 96 are assigned a covalent radius and uncertainty
-    of None.
+#. Elements above 96 are assigned a covalent radius and uncertainty
+   of None.
 
- #. Radii are measured from bonds to C, N or O.  The choice of which
-    compound was used is element dependent.  Details are available in
-    the references.
+#. Radii are measured from bonds to C, N or O.  The choice of which
+   compound was used is element dependent.  Details are available in
+   the references.
 
 
 [1] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés,
 Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez.
 Covalent radii revisited. Dalton Trans., 2008, 2832-2838
-doi:http://dx.doi.org/10.1039%2Fb801115j
+doi:http://dx.doi.org/10.1039/b801115j
 """
 
 from .core import elements, Element
 
 def init(table, reload=False):
+    """
+    Add the covalent radius property to a private table.
+
+    Use reload=True to replace the covalent radius property on an
+    existing table.
+    """
     if 'covalent_radius' in table.properties and not reload: return
     table.properties.append('covalent_radius')
 

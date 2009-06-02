@@ -48,11 +48,17 @@ def density(element):
 
 def interatomic_distance(element):
     """
-    Estimated interatomic distance from atomic weight and density:
-        value: (atomic_weight/(density*0.602214179))**(1/3)
-        units: ( (g/mol)/((g/cm**3)*(atoms/mol)) * (10**8 A/cm)**3 )**(1/3) = A
+    Estimated interatomic distance from atomic weight and density
+
+    Returns (atomic_weight/(density*0.602214179))**(1/3) Angstroms
+
     The distance between isotopes is assumed to match that between
     atoms in the natural abundance.
+
+    A note on the units::
+
+        ( (g/mol)/((g/cm**3)*(atoms/mol)) * (10**8 A/cm)**3 )**(1/3) = A
+
     """
     if hasattr(element,'isotope'): element = element.element
     if element.density is None or element.mass is None: return None
@@ -60,8 +66,10 @@ def interatomic_distance(element):
 
 def number_density(element):
     """
-    Estimate the number density from atomic weight and density:
-        value: density/atomic_weight*avogadro_number
+    Estimate the number density from atomic weight and density.
+
+    Returns density/atomic_weight*avogadro_number
+
     The density for isotopes is assumed to match that between
     atoms in the natural abundance.
     """

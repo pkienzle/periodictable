@@ -3,17 +3,18 @@
 """
 Element and isotope mass and abundances
 
-Adds average mass for the elements.
+Adds average mass for the elements::
 
     mass
     mass_units ('u')
         The atomic mass averaged over natural abundances.
 
-Adds mass and abundance information for isotopes.
+Adds mass and abundance information for isotopes::
 
     mass
     mass_units ('u')
         The individual isotope mass.
+
     abundance
     abundance_units ('%')
         Natural abundance for the isotope.
@@ -38,15 +39,15 @@ Atomic Mass Evaluation.
 This data has been compiled from the above sources for the user's convenience
 and does not represent a critical evaluation by the NIST Physics Laboratory.
 
-1 T. B. Coplen : U.S. Geological Survey, Reston, Virginia, USA
-2 K. J. R. Rosman : Department of Applied Physics,
-  Curtin University of Technology, Australia
-3 P. D. P. Taylor : Institute for Reference Materials and Measurements,
-  European Commission, Belgium
-4 G. Audi : Centre de Spectrométrie Nucléaire et de Spectrométrie de Masse,
-  Orsay Campus, France
-5 A. H. Wapstra : National Institute of Nuclear Physics and High-Energy Physics,
-  Amsterdam, The Netherlands
+#. T. B. Coplen : U.S. Geological Survey, Reston, Virginia, USA
+#. K. J. R. Rosman : Department of Applied Physics,
+   Curtin University of Technology, Australia
+#. P. D. P. Taylor : Institute for Reference Materials and Measurements,
+   European Commission, Belgium
+#. G. Audi : Centre de Spectrométrie Nucléaire et de Spectrométrie de Masse,
+   Orsay Campus, France
+#. A. H. Wapstra : National Institute of Nuclear Physics and High-Energy Physics,
+   Amsterdam, The Netherlands
 
 http://physics.nist.gov/PhysRefData/Compositions/
 

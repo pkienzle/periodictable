@@ -14,112 +14,11 @@ Element
 Isotope
    A class to hold the properties for individual isotopes.
 
-Private table
--------------
+delayed_load(attrs, loader, element=True, isotope=False)
+   Delay loading the element attributes until they are needed.
 
-You can create your own private instance of PeriodicTable and
-populate it with values
-
-Extending the table
--------------------
-
-The periodic table is extensible.  Third party packages can
-add attributes to the table, and they will appear in all of
-the elements.  For example:
-
-    import danse.gammaray  # loads gammaray data
-    from periodictable import *  # loads symbols for H, He, ...
-
-    for el in periodictable.elements: print el.symbol, el.gammadata
-
-To implement this, you will need the following in gammaray/core.py:
-
-    from periodictable.core import elements, Element
-
-    def init(table, reload=False):
-        if 'gammadata' in table.properties and not reload: return
-        table.properties.append('gammadata')
-
-        # Set the default, if any
-        Element.gamma = None
-
-        # Set the units
-        Element.gamma_units = "Ev"
-
-        # Load the data
-        for s,data in gamma_table.iteritems():
-            el = table.symbol(s)
-            el.gammadata = data
-
-    # Define the data
-    gamma_table = dict(
-        Si="Silicon gamma values",
-        O="Oxygen gamma values",
-        )
-
-You can use similar tricks for isotope specific data.  For example,
-in shelltable/core.py you might have:
-
-    from periodictable.core import elements, Isotope
-
-    def init(table, reload=False):
-        if 'shells' in elements.properties and not reload: return
-        elements.properties.append('shells')
-
-        # Set the default.  This is required, even if it is only
-        # setting it to None.  If the attribute is missing then the
-        # isotope data reverts to the element to supply the value,
-        # which is almost certainly not what you want.
-        Isotope.shells = None
-
-        # Load the data
-        for symbol,data in shell_table.iteritems():
-            el = table.symbol(symbol)
-            for iso,isodata in data.iteritems():
-                el[iso].shells = isodata
-
-    # Define the data
-    shell_table = dict(
-        Fe={56: "56-Fe shell info",
-            58: "58-Fe shell info",
-            }
-        )
-
-
-Initializing the table
-----------------------
-
-Since your data table is in its own package, you need an __init__.py to
-create the initial periodic table.  The simplest form would be the following:
-
-     import periodictable
-     from . import core
-     core.init(periodictable.elements)
-     ...
-     del periodictable,core  # Clean up symbol space
-
-You can instead define attributes on import that are not loaded directly.
-For example, if you don't want to load all the isotope information for
-shells immediately, then you can use delayed_load in __init__.py:
-
-
-     from periodictable.core import delayed_load, elements
-
-     # Delayed loading of shell info
-     def _load_shell():
-         '''
-         Electron shell information for isotopes.
-
-         T. Student, Tables of Shell Information
-         '''
-         from . import core
-         core.init(elements)
-     delayed_load(['shells'],_load_shell)
-
-The first argument to delayed_load is the list of all attributes that will
-be defined when the module is loaded.  The second argument is the loading
-function, whose docstring will appear as the attribute description for
-each attribute in the first list.
+See the user manual for information on extending the periodic table
+with your own attributes.
 """
 import copy
 

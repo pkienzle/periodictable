@@ -13,8 +13,8 @@ X-ray scatting information.
 
     K_alpha, K_beta1 (Angstrom)
 
-        X-ray emission lines for various elements:
-           Ag, Pd, Rh, Mo, Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti
+        X-ray emission lines for various elements, including
+        Ag, Pd, Rh, Mo, Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti
         K_alpha is the average of K_alpha1 and K_alpha2 lines.
 
 For private tables, use init(table) and spectral_lines(table) to set

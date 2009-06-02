@@ -1,22 +1,35 @@
 # This program is public domain
 """
-Proposed chemical properties table interface.
+Chemical properties table interface.
+
+***Not implemented***
 
 Chemical
     Class following the structure of Template::chembox new
-    from wikipedia.  The following properties are available:
-        density, formula, CASid, IUCname, all_names
+    from wikipedia.
 
-    Numeric properties are rich structures with a number
-    of fields:
-    - value: median property value
-    - variance: range of values for the property (1-sigma)
-    - units: SI units for property (string, eg g/cm**3)
-    - notes: caveats on value to present to user (e.g.,
-      temperature or pressure for the measurement)
-    - reference: source of data
-    - value_as('units'): value in particular units
-    - valriance_as('units'): value in particular units
+    The basic properties are
+
+        * IUCname - standard name
+        * CASid - standard identifier
+        * all_names - other names
+        * formula - chemical formula string
+
+    A variety of numeric properties may be available such as
+
+        * density - usual density
+        * boiling_point - boiling temperature
+        * ...
+
+    Numeric properties are rich structures with a number of fields
+
+        * value: median property value
+        * variance: range of values for the property (1-sigma)
+        * units: SI units for property (string, eg g/cm**3)
+        * notes: caveats on value to present to user (e.g., temperature or pressure for the measurement)
+        * reference: source of data
+        * value_as('units'): value in particular units
+        * variance_as('units'): variance in particular units
 
 lookup(chemical, properties=['formula','density'])
     Return information for the named chemical or formula,

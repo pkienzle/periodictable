@@ -194,3 +194,10 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+# Which class/__init__ docstring to use: class, init, or both
+autoclass_content = 'both'
+
+# Autodoc member sort order: by class or by type
+autodoc_member_order = 'groupwise'
+

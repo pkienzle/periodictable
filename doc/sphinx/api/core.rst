@@ -10,5 +10,6 @@ Core table
 .. automodule:: periodictable.core
    :members:
    :undoc-members:
+   :inherited-members:
    :show-inheritance:
 

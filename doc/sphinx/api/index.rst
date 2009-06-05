@@ -3,21 +3,22 @@
 .. _api-index:
 
 ##############################################################################
-   Extensible Periodic Table API
+   Reference
 ##############################################################################
 
-.. htmlonly::
+.. only:: html
+
    :Release: |version|
    :Date: |today|
 
 .. toctree::
 
-   core_api.rst
-   chemicals_api.rst
-   formulas_api.rst
-   covalent_radius_api.rst
-   crystal_structure_api.rst
-   density_api.rst
-   mass_api.rst
-   nsf_api.rst
-   xsf_api.rst
+   core.rst
+   formulas.rst
+   covalent_radius.rst
+   crystal_structure.rst
+   density.rst
+   mass.rst
+   nsf.rst
+   xsf.rst
+   chemicals.rst

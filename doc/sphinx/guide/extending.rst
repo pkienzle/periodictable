@@ -23,6 +23,25 @@ Example::
         for iso in el.isotopes:
             iso.mass /= scale
 
+You will need to add individual properties by hand for all additional
+desired properties using module.init(elements).
+
+Note that if you are using chemical formulas, you will need to
+define your own parser using::
+
+	from periodictable.formulas import formula_grammar
+	parser = formula_grammar(table=elements)
+
+Support for private tables could be made much smoother by delegating
+all properties not defined in the private table back to the base table,
+much like is currently done for Isotope and Ion.  That way you only
+need to replace the properties of interest rather than defining all
+new properties.
+
+Instead of using private tables, you can replace a dataset in the
+base table using e.g., mymass.init(elements, reload=True), but you
+are strongly discouraged from doing so.
+
 .. _extending:
 
 **************

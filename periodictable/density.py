@@ -31,7 +31,7 @@ Physics, 80th ed. (CRC Press, Boca Raton, Florida, 1999).
 These values are reproduced in the ILL Neutron Data Booklet, Second Edition.
 """
 
-from .core import elements, Element
+from .core import Element
 from .constants import avogadro_number
 
 def density(element):
@@ -78,7 +78,7 @@ def number_density(element):
     return (element.density/element.mass)*avogadro_number
 
 def init(table, reload=False):
-    if 'density' in elements.properties and not reload: return
+    if 'density' in table.properties and not reload: return
     table.properties.append('density')
     Element.density_units = "g/cm**3"
 
@@ -92,7 +92,7 @@ def init(table, reload=False):
     Element.number_density_units = ""
 
     for k,v in element_densities.iteritems():
-        el = getattr(elements,k)
+        el = getattr(table,k)
         if isinstance(v,tuple):
             el.density = v[0]
             el.density_caveat = v[1]

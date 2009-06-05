@@ -3,27 +3,37 @@
 Periodic table definition, with classes for elements and isotopes.
 
 PeriodTable
-   Creates an empty periodic table.  Properties are added to it
-   separately.  Note this is not a singleton.  But unless you are
-   very careful you should use the default table defined for the
-   package.
+    Creates an empty periodic table.  Properties are added to it
+    separately.  Note this is not a singleton.  But unless you are
+    very careful you should use the default table defined for the
+    package.
 
 Element
-   A class to hold the properties for each element.
+    A class to hold the properties for each element.
 
 Isotope
-   A class to hold the properties for individual isotopes.
+    A class to hold the properties for individual isotopes.
+
+Ion
+    A class to hold the properties for individual ions.
+
+Elements are accessed from a periodic table using table[number], table.name
+or table.symbol where symbol is the two letter symbol.  Individual isotopes
+are accessed using el[isotope].  Individual ions are references using
+el.ion[charge].  If there are properties specific to the ion and the isotope,
+they will be referenced by el[isotope].ion[charge].
 
 delayed_load(attrs, loader, element=True, isotope=False)
-   Delay loading the element attributes until they are needed.
+    Delay loading the element attributes until they are needed.
 
 See the user manual for information on extending the periodic table
 with your own attributes.
 """
-import copy
+__docformat__ = 'restructuredtext en'
+__all__ = ['delayed_load', 'define_elements',
+           'Ion', 'Isotope', 'Element', 'PeriodicTable']
 
-# Note: __all__ will include all the elements and elements; it is
-# defined below.
+import copy
 
 def delayed_load(all_props,loader,element=True,isotope=False):
     """
@@ -120,7 +130,7 @@ class PeriodicTable(object):
     Deuterium and tritium are defined as D and T.  Some
     neutron properties are available in elements[0]
 
-    To show all the elements in the table, use the iterator:
+    To show all the elements in the table, use the iterator::
 
         for element in elements:  # lists the element symbols
             print el.symbol,el.number
@@ -130,9 +140,6 @@ class PeriodicTable(object):
     for details.
     """
     def __init__(self):
-        """
-        Create one element for each entry in the periodic table.
-        """
         self.properties = []
         self._element = {}
         for Z,name in element_symbols.iteritems():
@@ -281,23 +288,77 @@ class Isotope(object):
         """
         raise TypeError("cannot copy or pickle isotopes")
 
+class Ion(object):
+    """Periodic table entry for an individual ion.
+
+    An ion is associated with an element.  In addition to the element
+    properties (symbol, name, atomic number), it has specific ion
+    properties (charge).  Properties not specific to the ion (e.g., mass)
+    are retrieved from the associated element.
+    """
+    def __init__(self, element, charge):
+        self.element = element
+        self.charge = charge
+    def __getattr__(self, attr):
+        return getattr(self.element,attr)
+    def __str__(self):
+        el = str(self.element)
+        if self.charge > 0:
+            return el+'^{%d+}'%self.charge
+        elif self.charge < 0:
+            return el+'^{%d-}'%(-self.charge)
+        else:
+            return el
+    def __repr__(self):
+        return repr(self.element)+'.ion[%d]'%self.charge
+    def __getstate__(self):
+        """
+        Can't pickle ions without breaking extensibility.
+        Suppress it for now.
+        """
+        raise TypeError("cannot copy or pickle ions")
+
 class Element(object):
     """Periodic table entry for an element.
 
     An element is a name, symbol and number, plus a set of properties.
     Individual isotopes can be referenced as element[isotope_number].
+    Individual ionization states can be referenced by element.ion[charge]
     """
     def __init__(self,name,symbol,Z):
         self.name = name
         self.symbol = symbol
         self.number = Z
         self._isotopes = {} # The actual isotopes
+        self.ion = {} # Ionization states
+
+    # Ion support
+    def ions(self):
+        """
+        Iterate over the ionization states.
+        """
+        keys = self.ion.keys()
+        keys.sort()
+        for k in keys:
+            yield self.ion[k]
+    def add_ion(self, charge):
+        """
+        Add an ionization state for the element.
+        """
+        if charge not in self.ion:
+            self.ion[charge] = Ion(self, charge)
+        return self.ion[charge]
+
+    # Isotope support
     def _getisotopes(self):
         L = self._isotopes.keys()
         L.sort()
         return L
     isotopes = property(_getisotopes,doc="List of all isotopes")
     def add_isotope(self,number):
+        """
+        Add an isotope for the element.
+        """
         if number not in self._isotopes:
             self._isotopes[number] = Isotope(self,number)
         return self._isotopes[number]
@@ -443,20 +504,49 @@ element_symbols = {
     116: ['Ununhexium', 'Uuh'],
 }
 
+def default_table(table=None):
+    """
+    Return the default table unless a specific table has been requested.
 
-# Make a common copy of the table for everyone to use --- equivalent to
-# a singleton without incurring any complexity; this must be done after
-# the table data is defined.
-elements = PeriodicTable()
-for el in elements:
-    exec el.symbol+"=el"
-    exec el.name+"=el"
-D = elements.D
-T = elements.T
-exec D.name+"=D"
-exec T.name+"=T"
-# Import all elements on "from core import *"
-__all__ = ([el.symbol for el in elements]
-           + [el.name for el in elements]
-           + [D.symbol, D.name, T.symbol, T.name]
-           + ['elements'])
+    Used in a context like::
+
+        def summary(table=None):
+            table = core.default_table(table)
+            ...
+    """
+    if table == None:
+        import periodictable
+        table = periodictable.elements
+    return table
+
+def define_elements(table, namespace):
+    """
+    Define external variables for each element in namespace.
+
+    Elements are defined both by name and by symbol.
+
+    Returns the list of names defined.
+
+    This is called from __init__ as::
+
+        elements = core.PeriodicTable()
+        __all__  += core.define_elements(elements, globals())
+
+    Note that this will only work namespace as globals(), not as locals()!
+    """
+
+    # Build the dictionary of element symbols
+    names = {}
+    for el in table:
+        names[el.symbol] = el
+        names[el.name] = el
+    for el in [table.D,table.T]:
+        names[el.symbol] = el
+        names[el.name] = el
+
+    # Copy it to the namespace
+    for k,v in names.items():
+        namespace[k] = v
+
+    # return the keys
+    return names.keys()

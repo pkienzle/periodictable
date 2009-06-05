@@ -12,7 +12,7 @@ from copy import copy
 from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd)
 
-from .core import elements, Element, Isotope
+from .core import Element, Isotope, default_table
 
 class Formula(object):
     """
@@ -228,7 +228,7 @@ class Formula(object):
         self.__dict__ = input
         self._parse_string(input['structure'])
 
-def formula_grammar():
+def formula_grammar(table=None):
     """
     Return a parser for molecular formulas.
 
@@ -247,13 +247,18 @@ def formula_grammar():
         separator :: '+' | ' '
         group     :: count element+ | '(' formula ')' count
         grammar   :: group separator formula | group
+
+    If table is specified, then elements and their associated fields
+    will be chosen from that periodic table rather than the default.
     """
+    table = default_table(table)
+
     # Recursive
     formula = Forward()
 
     # Lookup the element in the element table
     symbol = Regex("[A-Z][a-z]*")
-    symbol = symbol.setParseAction(lambda s,l,t: elements.symbol(t[0]))
+    symbol = symbol.setParseAction(lambda s,l,t: table.symbol(t[0]))
 
     # Translate isotope
     openiso = Literal('[').suppress()

@@ -29,8 +29,6 @@ E.g.,::
 This data is from Ashcroft and Mermin.
 '''
 
-from .core import elements
-
 crystal_structures = [\
     None, #X
     {'symmetry': 'diatom', 'd': 0.74}, #H
@@ -138,7 +136,7 @@ crystal_structures = [\
     None]#Lw
 
 def init(table, reload=False):
-    if 'crystal_structure' in elements.properties and not reload: return
+    if 'crystal_structure' in table.properties and not reload: return
     table.properties.append('crystal_structure')
 
     for Z,struct in enumerate(crystal_structures):

@@ -55,7 +55,7 @@ Neutron mass from NIST Reference on Constants, Units, and Uncertainty
     http://physics.nist.gov/cuu/index.html
 """
 
-from .core import elements, Element, Isotope
+from .core import Element, Isotope
 
 __all__ = ['init']
 
@@ -88,7 +88,7 @@ def abundance(isotope):
     return isotope._abundance
 
 def init(table, reload=False):
-    if 'mass' in elements.properties and not reload: return
+    if 'mass' in table.properties and not reload: return
     table.properties.append('mass')
     Element.mass = property(mass,doc=mass.__doc__)
     Isotope.mass = property(mass,doc=mass.__doc__)

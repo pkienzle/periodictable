@@ -111,11 +111,15 @@ and Photon Scattering Cross Sections",  J. Phys. Chem. Ref. Data 4,
 
 """
 from __future__ import with_statement
+__all__ = ['Xray', 'init', 'init_spectral_lines',
+           'xray_energy','xray_wavelength',
+           'xray_sld','xray_sld_from_atoms',
+           'emission_table','sld_table','plot_xsf',
+           ]
 import os.path
 import numpy
 
-from .core import elements, Element, Isotope
-#from . import mass,density
+from .core import Element, Isotope, default_table
 from .constants import (avogadro_number, plancks_constant, speed_of_light,
                         electron_radius)
 
@@ -306,12 +310,19 @@ def init_spectral_lines(table):
     table.Ti.K_beta1 = 2.5138
 
 def init(table, reload=False):
+    """
+    Initialize a periodic table with the Lawrence Berkeley Laboratory
+    Center for X-Ray Optics xray scattering factors.
+    """
     if 'xray' in table.properties and not reload: return
     table.properties.append('xray')
     for el in table:
         el.xray = Xray(el)
 
 def plot_xsf(el):
+    """
+    Plot the xray scattering factors for a given element.
+    """
     import pylab
     xsf = el.xray.sftable
     pylab.title('X-ray scattering factors for '+el.name)
@@ -322,7 +333,11 @@ def plot_xsf(el):
     pylab.legend(['f1','f2'])
     pylab.show()
 
-def sld_table(wavelength, table=elements):
+def sld_table(wavelength, table=None):
+    """
+    Print the xray SLD table for the given wavelength
+    """
+    table = default_table(table)
     ## Cu K-alpha Zeff and dZ table
     #for el in table:
     #    f1,f2 = el.xsf(table.Cu.K_alpha)
@@ -337,10 +352,11 @@ def sld_table(wavelength, table=elements):
         if rho is not None:
             print "%3s %6.2f %6.2f"%(el.symbol,rho,mu)
 
-def emission_table(table=elements):
+def emission_table(table=None):
     """
     Print a table of emission lines.
     """
+    table = default_table(table)
     print "%3s %7s %7s"%('El','Kalpha','Kbeta1')
     for el in table:
         if hasattr(el,'K_alpha'):

@@ -24,17 +24,23 @@ whose conditions may differ from those of your experiment.
 
 """
 __docformat__ = 'restructuredtext en'
+__all__ = ['elements', 'neutron_sld','xray_sld','formula'] # and all elements
 
-# Define external symbols
-from periodictable.core import *
-__all__ = core.__all__ + ['neutron_sld','xray_sld','formula']
-
-# Always make mass and density available
 from . import core
 from . import mass
 from . import density
-mass.init(core.elements)
-density.init(core.elements)
+
+# Make a common copy of the table for everyone to use --- equivalent to
+# a singleton without incurring any complexity.
+elements = core.PeriodicTable()
+
+# Always make mass and density available
+mass.init(elements)
+density.init(elements)
+
+# Export variables for each element name and symbol.
+__all__ += core.define_elements(elements, globals())
+
 
 def _load_covalent_radius():
     """
@@ -44,7 +50,9 @@ def _load_covalent_radius():
     """
     import covalent_radius
     covalent_radius.init(elements)
-core.delayed_load(['covalent_radius'],_load_covalent_radius)
+core.delayed_load(['covalent_radius','covalent_radius_units',
+                   'covalent_radius_uncertainty'],
+                  _load_covalent_radius)
 
 def _load_crystal_structure():
     """
@@ -85,9 +93,8 @@ def _load_xray():
     import xsf
     xsf.init(elements)
     xsf.init_spectral_lines(elements)
-core.delayed_load(['xray','K_alpha','K_beta1'],_load_xray)
-core.Element.K_alpha_units = "angstrom"
-core.Element.K_beta1_units = "angstrom"
+core.delayed_load(['xray','K_alpha','K_beta1','K_alpha_units','K_beta1_units'],
+                  _load_xray)
 
 
 # Constructors and functions

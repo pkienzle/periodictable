@@ -55,7 +55,7 @@ Covalent radii revisited. Dalton Trans., 2008, 2832-2838
 doi:http://dx.doi.org/10.1039/b801115j
 """
 
-from .core import elements, Element
+from .core import Element
 
 def init(table, reload=False):
     """

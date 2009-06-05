@@ -28,12 +28,13 @@ Similarly, you can print a table of scattering length densities for isotopes
 of a particular element::
 
     for iso in periodictable.Ni:
-        if iso.neutron.has_sld(): print iso,iso.neutron.sld()[0]
+        if iso.neutron.has_sld():
+            print iso,iso.neutron.sld()[0]
 
 Details
 =======
 
-There are a number of functions available in periodictable.nsf::
+There are a number of functions available in periodictable.nsf
 
     neutron_sld(molecule)
         computes sld for a molecule (available as periodictable.neutron_sld()).
@@ -69,10 +70,14 @@ H.Schopper Ed. Chap. 6. Springer: Berlin.
 [3] L. Koester, H. Rauch, E. Seymann. Atomic Data Nuclear
 Data Tables 49 (1991) 65
 """
-from .core import elements, Element, Isotope
+from .core import Element, Isotope, default_table
 from .constants import avogadro_number
 
-__all__ = ['init']
+__all__ = ['init', 'Neutron',
+           'absorption_comparison_table', 'coherent_comparison_table',
+           'energy_dependent_table',
+           'neutron_sld', 'neutron_sld_from_atoms', 'sld_plot', 'sld_table'
+           ]
 
 class Neutron(object):
     """
@@ -84,7 +89,7 @@ class Neutron(object):
     information is available, it may not be complete, so individual fields
     may be None.
 
-    The following fields are used::
+    The following fields are used
 
     b_c (fm)
         Bound coherent scattering length.
@@ -104,11 +109,17 @@ class Neutron(object):
     is_energy_dependent (boolean)
         Do not use this data if scattering is energy dependent.
     coherent (barns)
-        Coherent scattering cross section.  In theory this is 4*pi*b_c**2/100.
-        In practice, b_c and coherent are different, with the following
-        examples the worst::
-            Sc 3%  Ti 4%  V 34%  Mn 1%  Cd 4%  Te 4%  Xe 9%  Sm 100%
-            Eu 46%  Gd 61%  Tb 1%  Ho 11%  W 4%  Au 7%  Hg 2%
+        Coherent scattering cross section.  In theory coherent scattering
+        is related to bound coherent scattering by :math:`4 \pi b_c^2 / 100`.
+        In practice, these values are different, with the following examples
+        the worst
+
+        +--------+--------+-------+--------+-------+-------+-------+---------+
+        +========+========+=======+========+=======+=======+=======+=========+
+        | Sc  3% | Ti  4% | V 34% | Mn  1% | Cd 4% | Te 4% | Xe 9% | Sm 100% |
+        +--------+--------+-------+--------+-------+-------+-------+---------+
+        | Eu 46% | Gd 61% | Tb 1% | Ho 11% | W  4% | Au 7% | Hg 2% |         |
+        +--------+--------+-------+--------+-------+-------+-------+---------+
     incoherent (barns)
         Incoherent scattering cross section.
     total (barns)
@@ -119,14 +130,14 @@ class Neutron(object):
 
     For elements, the scattering cross-sections are based on the natural
     abundance of the individual isotopes.  Individual isotopes may have
-    additional information as follows::
+    additional information as follows
 
     abundance (%)
         Abundance used in elemental measurements.
     nuclear_spin (string)
         Spin on the nucleus: '0', '1/2', '3/2', etc.
 
-    Each field above has a corresponding *_units field with the string
+    Each field above has a corresponding \*_units field with the string
     value for the units.
 
     For scattering calculations, the scattering length density is the
@@ -191,11 +202,14 @@ class Neutron(object):
         absorption = 4*pi/k abs(Im(b_c)), where k is 2*pi/lambda, and
         there is an additional factor of 100 converting from barns to fm.
         The value we return for the SLD is thus::
+
             Im(b_c) = absorption*N/(2 * 1000 * 1.798) * wavelength
 
         Note: There is a factor of 10 unaccounted for, but required in order
-        to match the b_c_i values given in the underlying tables.  Run
+        to match the b_c_i values given in the underlying tables.  Run::
+
             periodictable.nsf._absorption_comparison_table()
+
         to show how well b_c_i corresponds to absorption.
 
         [1] Lynn, JE and Seeger, PA (1990). Resonance effects in neutron
@@ -309,10 +323,11 @@ def fix_number(str):
     if str[0] == '<': str = str[1:]
     return float(str)
 
-def sld_table(wavelength=1, table=elements):
+def sld_table(wavelength=1, table=None):
     """
     Scattering length density and absorption table for wavelength 4.75 A
     """
+    table = default_table(table)
     # Table for comparison with scattering length density calculators
     # b_c for Sc, Te, Xe, Sm, Eu, Gd, W, Au, Hg are different from Neutron News
     # The Rauch data have cited references to back up the numbers
@@ -330,10 +345,11 @@ def sld_table(wavelength=1, table=elements):
                   '*' if el.neutron.is_energy_dependent else ' ')
     print "* Energy dependent cross sections"
 
-def energy_dependent_table(table=elements):
+def energy_dependent_table(table=None):
     """
     Print a table of energy dependent isotopes.
     """
+    table = default_table(table)
     # List of energy dependent elements and isotopes
     print "Elements and isotopes with energy dependent absorption:"
     for el in table:
@@ -819,12 +835,13 @@ nsftableI="""\
 def _diff(s,a,b):
     print "%10s %8.2f %8.2f %3.0f%%"%(s, a, b, 100*abs((a-b)/b))
 
-def absorption_comparison_table(table=elements):
+def absorption_comparison_table(table=None):
     """
     Print a table of b_c_i and -absorption/(2*1.798*1000) for each isotope.
 
     This is useful for checking the integrity of the data and formula.
     """
+    table = default_table(table)
     print "Comparison of b_c_i and absorption where b_c_i exists"
     for el in table:
         if el.neutron.b_c_i is not None:
@@ -833,12 +850,13 @@ def absorption_comparison_table(table=elements):
             if iso.neutron.b_c_i is not None:
                 _diff(iso, iso.neutron.b_c_i, -iso.neutron.absorption/2/1.798/1000)
 
-def coherent_comparison_table(table=elements):
+def coherent_comparison_table(table=None):
     """
     Print a table of 4*pi*b_c**2/100 and coherent for each isotope.
 
     This is useful for checking the integrity of the data and formula.
     """
+    table = default_table(table)
     import numpy
     print "Comparison of b_c and coherent where b_c exists"
     for el in table:
@@ -849,10 +867,11 @@ def coherent_comparison_table(table=elements):
                 _diff(iso, iso.neutron.b_c**2*4*numpy.pi/100, iso.neutron.coherent)
 
 
-def sld_plot(table=elements):
+def sld_plot(table=None):
     """
     Plot SLD as a function of element number.
     """
+    table = default_table(table)
     import pylab
 
     SLDs = [(el.number,el.neutron.sld()[0],el.symbol)

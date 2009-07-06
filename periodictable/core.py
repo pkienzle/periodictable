@@ -333,14 +333,14 @@ class Element(object):
         self.ion = {} # Ionization states
 
     # Ion support
-    def ions(self):
+    def _getions(self):
         """
         Iterate over the ionization states.
         """
         keys = self.ion.keys()
         keys.sort()
-        for k in keys:
-            yield self.ion[k]
+        return keys
+    ions = property(_getions,doc="List of all ions")
     def add_ion(self, charge):
         """
         Add an ionization state for the element.

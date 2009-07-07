@@ -149,11 +149,6 @@ class Xray(object):
     Center for X-Ray Optics.
     L. Henke, E. M. Gullikson, and J. C. Davis
 
-    K_alpha and K_beta1 emission lines for selected elements.
-
-    D. C. Creagh and J. H. Hubbell
-    International Tables for Crystallography Volume C.
-
     See help(periodictable.xsf) for details.
     """
     sftable_units = ["eV","",""]

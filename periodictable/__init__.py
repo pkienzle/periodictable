@@ -64,7 +64,6 @@ def _load_crystal_structure():
     crystal_structure.init(elements)
 core.delayed_load(['crystal_structure'], _load_crystal_structure)
 
-# Delayed loading of neutron properties
 def _load_neutron():
     """
     Neutron scattering factors, nuclear_spin and abundance
@@ -77,24 +76,53 @@ def _load_neutron():
     nsf.init(elements)
 core.delayed_load(['neutron'],_load_neutron)
 
-# Delayed loading of xray properties
 def _load_xray():
     """
     X-ray scattering properties for the elements.
 
     Center for X-Ray Optics.
     L. Henke, E. M. Gullikson, and J. C. Davis
-
-    K_alpha and K_beta1 emission lines for selected elements.
-
-    D. C. Creagh and J. H. Hubbell
-    International Tables for Crystallography Volume C.
     """
     import xsf
     xsf.init(elements)
+core.delayed_load(['xray'], _load_xray)
+
+def _load_emission_lines():
+    """
+    K_alpha and K_beta1 emission lines for selected elements.
+
+    D. C. Creagh and J. H. Hubbell
+    International Tables for Crystallography Volume C, A.J.C. Wilson (ed)
+    """
+    import xsf
     xsf.init_spectral_lines(elements)
-core.delayed_load(['xray','K_alpha','K_beta1','K_alpha_units','K_beta1_units'],
-                  _load_xray)
+core.delayed_load(['K_alpha','K_beta1','K_alpha_units','K_beta1_units'],
+                  _load_emission_lines)
+
+
+def _load_magnetic_ff():
+    """
+    Magnetic Form Factors.
+
+    These values are taken directly from CrysFML.
+
+    P. J. Brown (Section 4.4.5)
+    International Tables for Crystallography Volume C, A. J. C. Wilson (ed)
+    """
+    import magnetic_ff
+    magnetic_ff.init(elements)
+core.delayed_load(['magnetic_ff'], _load_magnetic_ff)
+
+def _load_ionic_radius():
+    """
+    Ionic radii for various charges.
+
+    These values are taken directly from CrysFML.
+    """
+    import ionic_radius
+    ionic_radius.init(elements)
+core.delayed_load(['ionic_radius'], _load_ionic_radius)
+
 
 
 # Constructors and functions

@@ -1,12 +1,15 @@
 """
 Magnetic form factor tables from CrysFML.
 
-Adds ion[n].magnetic_ff.j<n> for n = 0, 2, 4, 6.
+Adds magnetic_ff[charge].t for t in j0, j2, j4, j6, and J.
 
-The magnetic_ff object defines J and M as well.
+J should be the dipole approximation <j0> + (1 - 2/g) <j2>, according to the
+documentation for CrysFML, but that does not seem to be the case in practice.
 
-These are taken from the Internation Tables of Crystallography Volume C
-section 4.4.5 based on data by P. J. Brown.
+Refs.
+
+    P. J. Brown (Section 4.4.5)
+    International Tables for Crystallography Volume C, A. J. C. Wilson (ed)
 """
 from numpy import pi, exp
 
@@ -106,21 +109,21 @@ def init(table, reload=False):
         # Parse <EL><ION> into element symbol and ion state
         if state[1].isdigit():
             symbol = state[0]
-            ion_state = int(state[1])
+            charge = int(state[1])
         else:
             symbol = state[0:2].capitalize()
-            ion_state = int(state[2])
+            charge = int(state[2])
 
-        # Find the correct ion, creating it if it is not present.
+        # Add the magnetic form factor info to the element
         el = table.symbol(symbol)
-        ion = el.add_ion(ion_state)
+        if not hasattr(el, 'magnetic_ff'):
+            el.magnetic_ff = dict()
+        if charge not in el.magnetic_ff:
+            el.magnetic_ff[charge] = MagneticFormFactor()
+        setattr(el.magnetic_ff[charge], jn, values)
 
-        # Make sure the ion has the magnetic_ff attribute
-        if not hasattr(ion, 'magnetic_ff'):
-            ion.magnetic_ff = MagneticFormFactor()
-
-        # Add the correct form factor attribute to magnetic_ff.
-        setattr(ion.magnetic_ff, jn, values)
+        # Make sure the ion exists, and user can say ion.magnetic_ff[ion.charge]
+        ion = el.add_ion(charge)
 
 CFML_DATA = """
        Magnetic_Form(  1) = Magnetic_Form_Type("MSC0", &

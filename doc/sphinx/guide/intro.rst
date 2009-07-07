@@ -34,6 +34,9 @@ Isotopes
    Mass and relative abundance of isotopes are included for known isotopes.
    Formulas can include isotope composition.
 
+Ions
+   Magnetic form factors and ionic radii for various ions.
+
 Neutron and X-ray scattering factors
    Provides neutron and wavelength dependent X-ray scattering factors for
    elements, isotopes, and formulas.

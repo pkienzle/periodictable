@@ -49,6 +49,12 @@ Process all the isotopes for an element::
     for iso in periodictable.Fe:
         print iso,iso.mass
 
+Look at ionic radii::
+
+    for ion in periodictable.Cl.ions:
+        print "ionic radius",ion,ion.ionic_radius[ion.charge]
+
+
 Missing properties generally evaluate to None::
 
     print "Radon density",periodictable.Rn.density

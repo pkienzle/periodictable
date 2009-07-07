@@ -21,7 +21,7 @@ Elements are accessed from a periodic table using table[number], table.name
 or table.symbol where symbol is the two letter symbol.  Individual isotopes
 are accessed using el[isotope].  Individual ions are references using
 el.ion[charge].  If there are properties specific to the ion and the isotope,
-they will be referenced by el[isotope].ion[charge].
+they will be referenced by el[isotope].property[charge].
 
 delayed_load(attrs, loader, element=True, isotope=False)
     Delay loading the element attributes until they are needed.
@@ -338,8 +338,8 @@ class Element(object):
         Iterate over the ionization states.
         """
         keys = self.ion.keys()
-        keys.sort()
-        return keys
+        for charge in keys:
+            yield self.ion[charge]
     ions = property(_getions,doc="List of all ions")
     def add_ion(self, charge):
         """

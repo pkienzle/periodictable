@@ -122,9 +122,6 @@ def init(table, reload=False):
             el.magnetic_ff[charge] = MagneticFormFactor()
         setattr(el.magnetic_ff[charge], jn, values)
 
-        # Make sure the ion exists, and user can say ion.magnetic_ff[ion.charge]
-        ion = el.add_ion(charge)
-
 CFML_DATA = """
        Magnetic_Form(  1) = Magnetic_Form_Type("MSC0", &
                                               (/  0.251200, 90.029602,  0.329000, 39.402100,  0.423500, 14.322200, -0.004300/) )

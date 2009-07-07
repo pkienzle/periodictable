@@ -49,11 +49,29 @@ Process all the isotopes for an element::
     for iso in periodictable.Fe:
         print iso,iso.mass
 
-Look at ionic radii::
+Retrieve ion specific properties such as ionic radius and magnetic_ff::
 
-    for ion in periodictable.Cl.ions:
-        print "ionic radius",ion,ion.ionic_radius[ion.charge]
+    from periodictable import Cl
+    for charge, radius in Cl.ionic_radius.items():
+        print "ionic radius", charge, radius
 
+You can create a unique handle to an individual ion.  In addition to storing
+the ion charge, this can be used to reference the underlying properties of
+the element or isotope::
+
+    Ni58_2 = periodictable.Ni[58].ion[2]
+    Ni_2 = periodictable.Ni.ion[2]
+    print "charge for Ni2+",Ni_2.charge
+    print "mass for Ni[58] and for natural abundance", Ni58_2.mass, Ni_2.mass
+
+The ion specific properties can be accessed from the ion using ion.charge
+for the ion index::
+
+    import pylab
+    Fe_2 = periodictable.Fe.ion[2]
+    Q = pylab.linspace(0,6,200)
+    M = Fe_2.magnetic_ff[Fe_2.charge].j0_Q(Q)
+    pylab.plot(Q,M)
 
 Missing properties generally evaluate to None::
 

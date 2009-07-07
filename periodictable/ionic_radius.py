@@ -23,7 +23,6 @@ def init(table, reload=False):
         for charge,radius in zip(states,radii):
             if radius != 0.0:
                 el.ionic_radius[charge] = radius
-                el.add_ion(charge)
 
 
 CFML_DATA = """[

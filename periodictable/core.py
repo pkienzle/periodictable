@@ -259,41 +259,21 @@ class PeriodicTable(object):
                     print "format",format,"args",L
                     raise
 
-class Isotope(object):
-    """Periodic table entry for an individual isotope.
-
-    An isotope is associated with an element.  In addition to the element
-    properties (symbol, name, atomic number), it has specific isotope
-    properties (isotope number, nuclear spin, relative abundance).
-    Properties not specific to the isotope (e.g., x-ray scattering factors)
-    are retrieved from the associated element.
-    """
-    def __init__(self,element,isotope_number):
-        self.element = element
-        self.isotope = isotope_number
-    def __getattr__(self,attr):
-        return getattr(self.element,attr)
-    def __str__(self):
-        # Deuterium and Tritium are special
-        if 'symbol' in self.__dict__:
-            return self.symbol
-        else:
-            return "%d-%s"%(self.isotope,self.element.symbol)
-    def __repr__(self):
-        return "%s[%d]"%(self.element.symbol,self.isotope)
-    def __getstate__(self):
-        """
-        Can't pickle isotopes without breaking extensibility.
-        Suppress it for now.
-        """
-        raise TypeError("cannot copy or pickle isotopes")
+class IonSet(object):
+    def __init__(self, element_or_isotope):
+        self.element_or_isotope = element_or_isotope
+        self.ionset = {}
+    def __getitem__(self, charge):
+        if charge not in self.ionset:
+            self.ionset[charge] = Ion(self.element_or_isotope, charge)
+        return self.ionset[charge]
 
 class Ion(object):
     """Periodic table entry for an individual ion.
 
     An ion is associated with an element.  In addition to the element
     properties (symbol, name, atomic number), it has specific ion
-    properties (charge).  Properties not specific to the ion (e.g., mass)
+    properties (charge).  Properties not specific to the ion (i.e., charge)
     are retrieved from the associated element.
     """
     def __init__(self, element, charge):
@@ -318,6 +298,36 @@ class Ion(object):
         """
         raise TypeError("cannot copy or pickle ions")
 
+class Isotope(object):
+    """Periodic table entry for an individual isotope.
+
+    An isotope is associated with an element.  In addition to the element
+    properties (symbol, name, atomic number), it has specific isotope
+    properties (isotope number, nuclear spin, relative abundance).
+    Properties not specific to the isotope (e.g., x-ray scattering factors)
+    are retrieved from the associated element.
+    """
+    def __init__(self,element,isotope_number):
+        self.element = element
+        self.isotope = isotope_number
+        self.ion = IonSet(self)
+    def __getattr__(self,attr):
+        return getattr(self.element,attr)
+    def __str__(self):
+        # Deuterium and Tritium are special
+        if 'symbol' in self.__dict__:
+            return self.symbol
+        else:
+            return "%d-%s"%(self.isotope,self.element.symbol)
+    def __repr__(self):
+        return "%s[%d]"%(self.element.symbol,self.isotope)
+    def __getstate__(self):
+        """
+        Can't pickle isotopes without breaking extensibility.
+        Suppress it for now.
+        """
+        raise TypeError("cannot copy or pickle isotopes")
+
 class Element(object):
     """Periodic table entry for an element.
 
@@ -330,24 +340,7 @@ class Element(object):
         self.symbol = symbol
         self.number = Z
         self._isotopes = {} # The actual isotopes
-        self.ion = {} # Ionization states
-
-    # Ion support
-    def _getions(self):
-        """
-        Iterate over the ionization states.
-        """
-        keys = self.ion.keys()
-        for charge in keys:
-            yield self.ion[charge]
-    ions = property(_getions,doc="List of all ions")
-    def add_ion(self, charge):
-        """
-        Add an ionization state for the element.
-        """
-        if charge not in self.ion:
-            self.ion[charge] = Ion(self, charge)
-        return self.ion[charge]
+        self.ion = IonSet(self)
 
     # Isotope support
     def _getisotopes(self):

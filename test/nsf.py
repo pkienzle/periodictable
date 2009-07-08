@@ -91,4 +91,7 @@ def test():
             %(molecule,density,rho,mu,inc)
     """
 
+    coh,absorp,inc = periodictable.nsf.neutron_sld('', density=0)
+    assert coh == absorp == inc == 0
+
 if __name__ == "__main__": test()

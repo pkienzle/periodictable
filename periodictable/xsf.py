@@ -238,8 +238,8 @@ def xray_sld(input,density=None,wavelength=None,energy=None):
 
     Raises AssertionError if density or wavelength/energy is not provided
     """
-    import molecules
-    return xray_sld_from_atoms(molecules.Molecule(input).atoms,
+    import formulas
+    return xray_sld_from_atoms(formulas.Formula(input).atoms,
                                density=density,wavelength=wavelength,
                                energy=energy)
 
@@ -265,11 +265,12 @@ def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
         #print element,f1,f2,wavelength
         scattering += f1*quantity
         absorption += f2*quantity
-    N = (density/mass*avogadro_number*1e-8)
-    rho = N*scattering*electron_radius
-    mu = N*absorption*electron_radius
-    #print "ro",electron_radius
-    #print "scattering",scattering,"absorption",absorption,"1/N",1/N
+    if mass == 0: # because the formula is empty
+        rho,mu = 0,0
+    else:
+        N = (density/mass*avogadro_number*1e-8)
+        rho = N*scattering*electron_radius
+        mu = N*absorption*electron_radius
     return rho,mu
 
     Element.K_alpha_units = "angstrom"

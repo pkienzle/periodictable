@@ -1,6 +1,6 @@
 from periodictable import formula
 from periodictable import Cu,Mo,Ni,Fe,Si
-from periodictable.xsf import xray_energy, xray_sld_from_atoms
+from periodictable.xsf import xray_energy, xray_sld_from_atoms, xray_sld
 
 def test():
 
@@ -64,5 +64,7 @@ def test():
     rho,mu = xray_sld_from_atoms(atoms,2.52,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-20.17)<0.1
 
+    rho,mu = xray_sld('', density=0, wavelength=Cu.K_alpha)
+    assert rho==mu==0
 
 if __name__ == "__main__": test()

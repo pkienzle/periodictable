@@ -246,7 +246,7 @@ def formula_grammar(table=None):
         element   :: symbol isotope count
         separator :: '+' | ' '
         group     :: count element+ | '(' formula ')' count
-        grammar   :: group separator formula | group
+        grammar   :: group separator formula | group | ''
 
     If table is specified, then elements and their associated fields
     will be chosen from that periodic table rather than the default.
@@ -310,7 +310,7 @@ def formula_grammar(table=None):
     group = implicit_group | explicit_group
     separator = Literal('+').suppress()
     formula << group + ZeroOrMore(Optional(separator)+group)
-    grammar = formula + StringEnd()
+    grammar = Optional(formula) + StringEnd()
 
     return grammar
 

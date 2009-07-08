@@ -402,13 +402,16 @@ def neutron_sld_from_atoms(atoms, density=None, wavelength=1):
         incoherent += element.neutron.incoherent*quantity
         is_energy_dependent |= element.neutron.is_energy_dependent
 
-    N = (density/mass*avogadro_number*1e-23)
-    coh = N*b_c
-    absorp = N*absorption/(2*1.798)*wavelength*0.001 # Why 0.001??
-    inc = N*incoherent
-    #print "b_c",b_c,"absorption",absorption,"incoherent",incoherent
-    #print "1/N",1/N
-    return coh,absorp,inc
+    if mass == 0:  # for empty formula
+        return 0,0,0
+    else:
+        N = (density/mass*avogadro_number*1e-23)
+        coh = N*b_c
+        absorp = N*absorption/(2*1.798)*wavelength*0.001 # Why 0.001??
+        inc = N*incoherent
+        #print "b_c",b_c,"absorption",absorption,"incoherent",incoherent
+        #print "1/N",1/N
+        return coh,absorp,inc
 
 # We are including the complete original table here in case somebody in
 # future wants to extract uncertainties or other information.

@@ -42,4 +42,13 @@ def test():
     except ValueError,msg:
         assert str(msg) == "unknown element Qu"
 
+    # Check that ions work
+    assert Fe.ion[2].charge==2
+    assert Fe.ions == (2,3)
+    try:
+        Fe.ion[1]
+        raise Exception("accepts invalid ions")
+    except ValueError,msg:
+        assert str(msg) == "1 is not a valid charge for Fe"
+
 if __name__ == "__main__": test()

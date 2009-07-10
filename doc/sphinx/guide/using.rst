@@ -49,11 +49,11 @@ Process all the isotopes for an element::
     for iso in periodictable.Fe:
         print iso,iso.mass
 
-Retrieve ion specific properties such as ionic radius and magnetic_ff::
+Retrieve ion specific properties such as magnetic_ff::
 
     from periodictable import Cl
-    for charge, radius in Cl.ionic_radius.items():
-        print "ionic radius", charge, radius
+    for charge, ff in Cl.magnetic_ff.items():
+        print "ff.j0", charge, ff.j0
 
 You can create a unique handle to an individual ion.  In addition to storing
 the ion charge, this can be used to reference the underlying properties of

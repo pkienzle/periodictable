@@ -16,6 +16,9 @@ Atomic density
 Covalent Radii
     Cordero, et al., Dalton Trans., 2008, 2832-2838 `doi:10.1039/801115j <http://dx.doi.org/10.1039/b801115j>`_
 
+Magnetic form factors
+    P. J. Brown, in International Tables for Crystallography Volume C, A. J. C. Wilson (ed), section 4.4.5
+
 Neutron scattering factors
    `Atomic Institute for Austrian Universities <http://www.ati.ac.at/~neutropt/scattering/table.html>`_
 

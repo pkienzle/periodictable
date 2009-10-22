@@ -187,15 +187,16 @@ class Neutron(object):
         The coherent scattering returned is N * b_c * 10**-23, where N is
         the number density computed from the bulk density of the element
         and b_c is the bound coherent scattering length for the isotope.
-        The effective scattering density may be larger when the element
-        is part of a compound.
+        For most elements, the coherent scattering cross section is
+        independent of energy.  Those elements and isotopes for which this 
+        does not hold have neutron.is_energy_dependent set to True.
 
         The incoherent scattering is returned as N * incoherent.
 
         The absorption cross sections are tabulated at wavelength 1.798 A.
-        In the thermal neutron range absorption is assumed to scale linearly
-        with energy.  The elements for which this does not hold have
-        neutron.is_energy_dependent set to False.  See [1] for details.
+        In the thermal neutron energy range the absorption cross section
+        is assumed to scale linearly with wavelength.  See [1] for
+        details.
 
         The absorption cross section is related to the imaginary portion
         of the bound coherent scattering cross section by the formula[2]
@@ -208,7 +209,7 @@ class Neutron(object):
         Note: There is a factor of 10 unaccounted for, but required in order
         to match the b_c_i values given in the underlying tables.  Run::
 
-            periodictable.nsf._absorption_comparison_table()
+            periodictable.nsf.absorption_comparison_table()
 
         to show how well b_c_i corresponds to absorption.
 

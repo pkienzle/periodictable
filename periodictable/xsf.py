@@ -141,6 +141,34 @@ def xray_energy(wavelength):
     """
     return plancks_constant*speed_of_light/numpy.asarray(wavelength)*1e7
 
+def _get_nff_path():
+    # Check for data path in the environment
+    key = 'PERIODICTABLE_DATA'
+    if os.environ.has_key(key):
+        path = os.path.join(os.environ[key],'xsf')
+        if not os.path.isdir(path):
+            raise RuntimeError('Path in environment %s not a directory'%key)
+        return path
+
+    # Check for data path in the package
+    path = os.path.join(os.path.dirname(__file__), 'xsf')
+    if os.path.isdir(path):
+        return path
+
+    # Check for data path next to exe/zip file.
+    # If we are inside a py2exe zip file, we need to go up
+    # two levels to get to the directory containing the exe
+    # We will check if the exe and the xsf are in the same
+    # directory.
+    path= os.path.dirname(__file__)
+    path,_ = os.path.split(path)
+    path,_ = os.path.split(path)
+    path = os.path.join(path, 'xsf')
+    if os.path.isdir(path):
+        return path
+
+    raise RuntimeError('Could not find the periodic table data files')
+
 
 class Xray(object):
     """
@@ -151,6 +179,7 @@ class Xray(object):
 
     See help(periodictable.xsf) for details.
     """
+    _nff_path = _get_nff_path()
     sftable_units = ["eV","",""]
     scattering_factors_units = ["",""]
     sld_units = ["Nb","Nb"]
@@ -164,7 +193,7 @@ class Xray(object):
             # Load table when necessary; note there is no table for
             # neutrons (n), and lowercase nitrogen=> n.nff, so it must
             # be checked for explicitly.
-            filename = os.path.join(os.path.dirname(__file__),'xsf',
+            filename = os.path.join(self._nff_path,
                                     self._symbol.lower()+".nff")
             if self._symbol != 'n' and os.path.exists(filename):
                 xsf = numpy.loadtxt(filename,skiprows=1).T

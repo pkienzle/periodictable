@@ -117,6 +117,7 @@ __all__ = ['Xray', 'init', 'init_spectral_lines',
            'emission_table','sld_table','plot_xsf',
            ]
 import os.path
+import glob
 import numpy
 
 from .core import Element, Isotope, default_table
@@ -140,6 +141,24 @@ def xray_energy(wavelength):
     Find X-ray energy in keV given wavelength in angstroms.
     """
     return plancks_constant*speed_of_light/numpy.asarray(wavelength)*1e7
+
+def setup_data_files():
+    """
+    Returns the tuple (path,files) which is required for loading xray periodic
+    table information at runtime.  This tuple should be added to the list of
+    data files used in setup.py when building bundled executables.
+    
+    Within setup.py, use::
+    
+        import periodictable.xsf
+        data_files = [periodictable.xsf.setup_data_files()]
+        ...
+        setup(..., data_files=data_files, ...)
+    """
+    path = _get_nff_path()
+    files = glob.glob(os.path.join(path,"*.nff"))
+    files.append(os.path.join(path,"read.me"))
+    return (path,files)
 
 def _get_nff_path():
     # Check for data path in the environment

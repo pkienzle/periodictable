@@ -2,6 +2,8 @@
 """
 X-ray scatting information.
 
+The following attributes are added to each element::
+
     xray.sftable (eV,?,?)
         Three column table of energy vs. scattering factors f1,f2.
     xray.scattering_factors(wavelength)
@@ -17,8 +19,8 @@ X-ray scatting information.
         Ag, Pd, Rh, Mo, Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti
         K_alpha is the average of K_alpha1 and K_alpha2 lines.
 
-For private tables, use init(table) and spectral_lines(table) to set
-the data.
+For private tables, use periodictable.xsf.init(table) and
+periodictable.xsf.spectral_lines(table) to set the data.
 
 K-alpha and K-beta1 lines::
 
@@ -142,47 +144,6 @@ def xray_energy(wavelength):
     Find X-ray energy in keV given wavelength in angstroms.
     """
     return plancks_constant*speed_of_light/numpy.asarray(wavelength)*1e7
-
-def old_setup_data_files():
-    """
-    Returns the tuple (path,files) which is required for loading xray periodic
-    table information at runtime.  This tuple should be added to the list of
-    data files used in setup.py when building bundled executables.
-    
-    Within setup.py, use::
-    
-        import periodictable.xsf
-        data_files = [periodictable.xsf.setup_data_files()]
-        ...
-        setup(..., data_files=data_files, ...)
-    """
-    data_files= []
-    path = _get_nff_path()
-    files = glob.glob(os.path.join(path,"*.nff"))
-    files.append(os.path.join(path,"read.me"))
-    return (path,files)
-
-def setup_data_files():
-    """
-    Returns the list of tuple [(path,file1)...(path, filen)] which is required
-    for loading xray periodic table information at runtime.
-    This tuple should be added to the list of
-    data files used in setup.py when building bundled executables.
-    
-    Within setup.py, use::
-    
-        import periodictable.xsf
-        data_files = periodictable.xsf.setup_data_files()
-        ...
-        setup(..., data_files=data_files, ...)
-    """
-    data_files= []
-    path= _get_nff_path()
-    for f in findall(path):
-        #if os.path.split(f)[0].count('.svn')==0:
-        data_files.append(('xsf', [f]))
-    
-    return data_files
 
 def _get_nff_path():
     # Check for data path in the environment

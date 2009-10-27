@@ -124,7 +124,8 @@ from .core import Element, Isotope, default_table
 from .constants import (avogadro_number, plancks_constant, speed_of_light,
                         electron_radius)
 
-
+import logging
+from distutils.filelist import findall
 def xray_wavelength(energy):
     """
     Find X-ray wavelength in angstroms given energy in keV.
@@ -142,7 +143,7 @@ def xray_energy(wavelength):
     """
     return plancks_constant*speed_of_light/numpy.asarray(wavelength)*1e7
 
-def setup_data_files():
+def old_setup_data_files():
     """
     Returns the tuple (path,files) which is required for loading xray periodic
     table information at runtime.  This tuple should be added to the list of
@@ -155,10 +156,33 @@ def setup_data_files():
         ...
         setup(..., data_files=data_files, ...)
     """
+    data_files= []
     path = _get_nff_path()
     files = glob.glob(os.path.join(path,"*.nff"))
     files.append(os.path.join(path,"read.me"))
     return (path,files)
+
+def setup_data_files():
+    """
+    Returns the list of tuple [(path,file1)...(path, filen)] which is required
+    for loading xray periodic table information at runtime.
+    This tuple should be added to the list of
+    data files used in setup.py when building bundled executables.
+    
+    Within setup.py, use::
+    
+        import periodictable.xsf
+        data_files = periodictable.xsf.setup_data_files()
+        ...
+        setup(..., data_files=data_files, ...)
+    """
+    data_files= []
+    path= _get_nff_path()
+    for f in findall(path):
+        #if os.path.split(f)[0].count('.svn')==0:
+        data_files.append(('xsf', [f]))
+    
+    return data_files
 
 def _get_nff_path():
     # Check for data path in the environment
@@ -171,6 +195,7 @@ def _get_nff_path():
 
     # Check for data path in the package
     path = os.path.join(os.path.dirname(__file__), 'xsf')
+    
     if os.path.isdir(path):
         return path
 

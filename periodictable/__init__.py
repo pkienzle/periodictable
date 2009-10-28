@@ -31,7 +31,7 @@ from . import mass
 from . import density
 
 # Data needed for setup.py when bundling the package into an exe
-package_data = dict('periodictable', ['xsf/*.nff','xsf/read.me'])
+package_data = dict(periodictable = ['xsf/*.nff','xsf/read.me'])
 
 # Make a common copy of the table for everyone to use --- equivalent to
 # a singleton without incurring any complexity.

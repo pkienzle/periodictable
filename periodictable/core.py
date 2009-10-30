@@ -549,3 +549,40 @@ def define_elements(table, namespace):
 
     # return the keys
     return names.keys()
+
+def get_data_path(data):
+    """
+    Locate the directory for the tables for the named extension.  For example,
+    the xsf extension has data in the 'xsf' data directory.
+    """
+    import os
+    def is_data_path(path):
+        return os.path.isdir(path)
+        
+    # Check for data path in the environment
+    key = 'PERIODICTABLE_DATA'
+    if os.environ.has_key(key):
+        path = os.path.join(os.environ[key],data)
+        if not os.path.isdir(path):
+            raise RuntimeError('Path in environment %s not a directory'%key)
+        return path
+
+    # Check for data path in the package
+    path = os.path.join(os.path.dirname(__file__), data)
+    if os.path.isdir(path):
+        return path
+
+    # Check for data path next to exe/zip file.
+    # If we are inside a py2exe zip file, we need to go up
+    # two levels to get to the directory containing the exe
+    # We will check if the exe and the xsf are in the same
+    # directory.
+    path= os.path.dirname(__file__)
+    path,_ = os.path.split(path)
+    path,_ = os.path.split(path)
+    path = os.path.join(path, 'periodictable-data', data)
+    if os.path.isdir(path):
+        return path
+
+    raise RuntimeError('Could not find the periodic table data files')
+

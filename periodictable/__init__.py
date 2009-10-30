@@ -31,7 +31,25 @@ from . import mass
 from . import density
 
 # Data needed for setup.py when bundling the package into an exe
-package_data = dict(periodictable = ['xsf/*.nff','xsf/read.me'])
+def data_files():
+    """
+    Return the data files associated with all periodic table attributes.
+    
+    The format is a list of (directory, [files...]) pairs which can be
+    used directly in setup(...,data_files=...) for setup.py.
+
+    """
+    import os, glob
+    def _finddata(ext, patterns):
+        files = []
+        path = core.get_data_path(ext)
+        for p in patterns:
+            files += glob.glob(os.path.join(path,p))
+            return files
+
+    data_files = [('periodictable-data/xsf', 
+                   _finddata('xsf', ['*.nff','read.me']))]
+    return data_files
 
 # Make a common copy of the table for everyone to use --- equivalent to
 # a singleton without incurring any complexity.

@@ -8,6 +8,7 @@ computing scattering length density.
 Requires that the pyparsing module is installed.
 """
 from copy import copy
+from math import pi, sqrt
 
 from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd)
@@ -76,7 +77,6 @@ class Formula(object):
             self.__dict__ = copy(value.__dict__)
         elif _isatom(value):
             self.structure = ((1,value),)
-            self.density = value.density
         elif _is_string_like(value):
             try:
                 self._parse_string(value)
@@ -88,8 +88,18 @@ class Formula(object):
                 self._parse_structure(value)
             except:
                 raise TypeError("not a valid chemical formula")
+            
         if density: self.density = density
         if name: self.name = name
+
+        if self.density is None:
+            # Density defaults to element density if only one element.
+            # Users can estimate the density as:
+            #    self.density = self.mass/self.volume()
+            # if they feel so inclined, but it is too misleading to
+            # make that assumption by default.
+            if len(self.atoms) == 1:
+                self.density = self.atoms.keys()[0].density
 
     def _parse_structure(self,input):
         """
@@ -121,33 +131,45 @@ class Formula(object):
         return mass
     mass = property(_mass,doc=_mass.__doc__)
 
-    def volume(self,packing_fraction=0.68):
+    _packing_factors = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
+                            fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
+
+    def volume(self,packing_factor='hcp'):
         """
         Estimate molecular volume.
 
-        The volume is estimated from the element covalent
-        radius and a given packing fraction.  Density is
-        approximately chem.mass/chem.volume().
+        The crystal volume is estimated from the element covalent
+        radius and the atomic packing factor using::
+        
+            *packing_factor* = N_atoms V_atom / V_crystal
 
-        The default packing fraction is 0.68.
+        The default packing factor is for hexagonal close-packed.
 
-        Common fractions are::
+        *packing_factor* can also be given as the name of the crystal lattice.
 
-           simple cubic: 0.52
-           body-centered cubic: 0.68
-           hexabonal close-packed: 0.74
-           face-centered cubic: 0.74
-           diamond cubic: 0.34
+        .. table:: Crystal lattice names and packing factors
 
-        Volume can be more accurately estimated from the lattice
-        parameters for the crystalline form, but that is beyond
-        the scope of this package.
+           =======  ====================== ============= ==============
+           Code     Description            Formula       Packing factor
+           =======  ====================== ============= ==============
+           cubic    simple cubic           pi 1/6         0.52360
+           bcc      body-centered cubic    pi sqrt(3)/8   0.68017
+           hcp      hexagonal close-packed pi 1/sqrt(18)  0.74048
+           fcc      face-centered cubic    pi 1/sqrt(18)  0.74048
+           diamond  diamond cubic          pi sqrt(3)/16  0.34009
+           =======  ====================== ============= ==============
+
         """
+        # Compute atomic volume
         V = 0
         for el,count in self.atoms.items():
             V += el.covalent_radius**3*count
-        V *= 4./3*math.pi
-        return V*packing_fraction
+        V *= 4.*pi/3
+
+        # Translate packing factor from string
+        try: packing_factor = Formula._packing_factors[packing_factor.lower()]
+        except: pass
+        return V/packing_factor
 
     def neutron_sld(self, wavelength=1):
         """

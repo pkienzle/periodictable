@@ -95,7 +95,7 @@ def _load_neutron():
     """
     import nsf
     nsf.init(elements)
-core.delayed_load(['neutron'],_load_neutron)
+core.delayed_load(['neutron'],_load_neutron, isotope=True)
 
 def _load_xray():
     """

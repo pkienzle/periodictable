@@ -23,7 +23,7 @@ are accessed using el[isotope].  Individual ions are references using
 el.ion[charge].  If there are properties specific to the ion and the isotope,
 they will be referenced by el[isotope].property[charge].
 
-delayed_load(attrs, loader, element=True, isotope=False)
+delayed_load(attrs, loader, element=True, isotope=False, ion=False)
     Delay loading the element attributes until they are needed.
 
 See the user manual for information on extending the periodic table
@@ -35,13 +35,19 @@ __all__ = ['delayed_load', 'define_elements',
 
 import copy
 
-def delayed_load(all_props,loader,element=True,isotope=False):
+def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
     """
     Delayed loading of an element property table.  When any of props
     is first accessed the loader will be called to load the associated
     data.  The help string starts out as the help string for the loader
-    function.  If it is an isotope property, be sure to set the
-    keyword isotope=True.
+    function.
+    
+    The attribute may be associated any of isotope, ion or element.
+    Some properties, such as mass, have both an isotope property for the
+    mass of specific isotopes, as well as an element property for the
+    mass of the collection of isotopes at natural abundance.  Set the 
+    keyword flags *element*, *isotope* and/or *ion* to specify which
+    of these classes will be assigned specific information on load.
     """
     def clearprops():
         """
@@ -54,6 +60,9 @@ def delayed_load(all_props,loader,element=True,isotope=False):
         if isotope:
             for p in all_props:
                 delattr(Isotope, p)
+        if ion:
+            for p in all_props:
+                delattr(Ion, p)
 
     def getter(propname):
         """
@@ -103,6 +112,10 @@ def delayed_load(all_props,loader,element=True,isotope=False):
             prop = property(getter(p), setter(p), doc=loader.__doc__)
             setattr(Isotope, p, prop)
 
+    if ion:
+        for p in all_props:
+            prop = property(getter(p), setter(p), doc=loader.__doc__)
+            setattr(Ion, p, prop)
 
 # Define the element names from the element table.
 class PeriodicTable(object):

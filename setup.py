@@ -12,7 +12,7 @@ dist = setup(
         name = 'periodictable',
         version = '0.9',
         packages = find_packages(),
-        package_data = {'periodictable' : ['xsf/*.nff','read.me']}, 
+        package_data = {'periodictable' : ['xsf/*.nff','read.me']},
         #data_files = periodictable.data_files(),
         install_requires = ['pyparsing'],
 )

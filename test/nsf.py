@@ -1,3 +1,4 @@
+import periodictable
 from periodictable import elements, formula
 
 def test():
@@ -50,7 +51,6 @@ def test():
             ## Printing suppressed for the release version
             #print "%2s %.3f % 7.3f % 7.3f"%(el.symbol,err,b_c,el.neutron.b_c)
 
-    import periodictable.nsf
     neutron_sld_from_atoms = periodictable.nsf.neutron_sld_from_atoms
     #periodictable.nsf.sld_table(4.75)
     #periodictable.nsf.energy_dependent_table()

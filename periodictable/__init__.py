@@ -48,7 +48,7 @@ def data_files():
             return files
 
     data_files = [('periodictable-data/xsf', 
-                   _finddata('xsf', ['*.nff','read.me']))]
+                   _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat']))]
     return data_files
 
 # Make a common copy of the table for everyone to use --- equivalent to
@@ -106,7 +106,7 @@ def _load_xray():
     """
     import xsf
     xsf.init(elements)
-core.delayed_load(['xray'], _load_xray)
+core.delayed_load(['xray'], _load_xray, ion=True)
 
 def _load_emission_lines():
     """
@@ -196,8 +196,10 @@ def formula(value=None, density=None, name=None):
 def neutron_sld(formula,density=None,wavelength=1):
     """
     Compute neutron scattering length densities for molecules.
-    Returns the scattering length density, the absorption and
-    the incoherent scattering in units of 10**-6 Nb.
+
+    Returns scattering length density (real, imaginary and incoherent).
+    
+    See :class:`periodictable.nsf.Neutron` for details.  
     """
     import nsf
     return nsf.neutron_sld(formula,density,wavelength)
@@ -205,10 +207,12 @@ def neutron_sld(formula,density=None,wavelength=1):
 def xray_sld(formula,density=None,wavelength=None,energy=None):
     """
     Compute neutron scattering length densities for molecules.
-    Returns the scattering length density, the absorption and
-    the incoherent scattering in units of 10**-6 Nb.
-
+    
     Either supply the wavelength (A) or the energy (keV) of the X-rays.
+
+    Returns scattering length density (real, imaginary).
+    
+    See :class:`periodictable.xsf.Xray` for details.
     """
     import xsf
     return xsf.xray_sld(formula,density=density,

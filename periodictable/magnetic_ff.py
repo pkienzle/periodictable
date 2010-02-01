@@ -11,16 +11,25 @@ Refs.
     P. J. Brown (Section 4.4.5)
     International Tables for Crystallography Volume C, A. J. C. Wilson (ed)
 """
+import numpy
 from numpy import pi, exp
 
-def formfactor_0(ff, q):
+def formfactor_0(j0, q):
+    """
+    Return the scattering potential for form factor *j0* at the given *q*.
+    """
+    q = numpy.asarray(q)
     s_sq = (q/(4*pi))**2
-    A,a,B,b,C,c,D = ff
+    A,a,B,b,C,c,D = j0
     return A * exp(-a*s_sq) + B * exp(-b*s_sq) + C * exp(-c*s_sq) + D
 
-def formfactor_n(ff, q):
+def formfactor_n(jn, q):
+    """
+    Return the scattering potential for form factor *jn* at the given *q*.
+    """
+    q = numpy.asarray(q)
     s_sq = (q/(4*pi))**2
-    A,a,B,b,C,c,D = ff
+    A,a,B,b,C,c,D = jn
     return s_sq * (A * exp(-a*s_sq) + B * exp(-b*s_sq) + C * exp(-c*s_sq) + D)
 
 
@@ -28,27 +37,34 @@ class MagneticFormFactor(object):
     """
     Magnetic form factor for the ion.
 
-    M = <j0> form factor
-    J = <j0> + C2 <j2> form factor
-    jn = <jn> form factor for n = 0, 2, 4, 6
+    The available form factors are::
+    
+        M = <j0> form factor coefficients
+        J = <j0> + C2 <j2> form factor coeffients
+        jn = <jn> form factor coefficients for n = 0, 2, 4, 6
 
-    Note that not all form factors exist for all ions.
+    Not all form factors are available for all ions.  Use the
+    expression hasattr(ion.magnetic_ff, '<ff>') to test for the
+    particular form factor <ff>.
 
-    To return the form factor
+    The form factor coefficients are a tuple (A, a, B, b, C, c, D).  The
+    following expression computes the M/j0 and J form factors from the
+    corresponding coefficients::
 
-    The form factor is a tuple (A, a, B, b, C, c, D)
+        s = q^2 / 16 pi^2
+        ff = A exp(-a s^2) + B exp(-b s^2) + C exp(-c s^2) + D
 
-    To calculate the <j0> form factor for a particular set of q values,
-    where q = 4 pi s, use the following expression::
+    The remaining form factors j2, j4 and j6 are scalled by an additional s^2.
 
-        A exp(-a s^2) + B exp(-b s^2) + C exp(-c s^2) + D
+    The form factor calculation is performed by the <ff>_Q method for <ff>
+    in M, J, j0, j2, j4, j6.  For example, here is the calculation for
+    the M form factor for Fe^{2+} computed at 0, 0.1 and 0.2::
+    
+        >> import periodictable
+        >> ion = periodictable.Fe.ion[2]
+        >> print ion.magnetic_ff[ion.charge].M_Q([0,0.1,0.2])
+        [ 1.          0.99935255  0.99741366]
 
-    For higher order <jn> use the jn form factor coefficients and multiply
-    the result by s^2.  These expressions are encoded in the magnetic_ff
-    module as::
-
-        periodictable.magnetic_ff.formfactor_j0(ff, q)
-        periodictable.magnetic_ff.formfactor_jn(ff, q)
     """
     def _getM(self): return self.j0
     M = property(_getM, doc="j0")
@@ -60,8 +76,7 @@ class MagneticFormFactor(object):
         return formfactor_n(self.j4, Q)
     def j6_Q(self, Q):
         return formfactor_n(self.j6, Q)
-    def M_Q(self, Q):
-        return formfactor_0(self.j0, Q)
+    M_Q = j0_Q
     def J_Q(self, Q):
         return formfactor_0(self.J, Q)
 

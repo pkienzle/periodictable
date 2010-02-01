@@ -5,7 +5,7 @@ from periodictable import (mass, density, xsf, nsf,
 
 def test():
     # Create private table
-    private = PeriodicTable()
+    private = PeriodicTable("mine")
     mass.init(private)
     density.init(private)
     xsf.init(private)
@@ -32,3 +32,14 @@ def test():
     assert elements.Cm.covalent_radius != private.Cm.covalent_radius
     private.Cm.xray.newfield = 5
     assert not hasattr(elements.Cm.xray,'newfield')
+
+    # Check that the formula parser can use a private table
+    formula = periodictable.formulas.formula_grammar(private)
+    H2O = formula('H2O')
+    for el in H2O.atoms.keys():
+        assert id(el) == private[el.number]
+
+    # A more user friendly approach may be to use a formula parsed against
+    # the default table, but somehow evaluate it against the private
+    # table within a context.  This will likely require a restructured
+    # periodic table class for this to be practical.

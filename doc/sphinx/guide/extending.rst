@@ -9,9 +9,9 @@ populate it with values.
 
 Example::
 
-	from periodictable import core, mass, density
+    from periodictable import core, mass, density
 
-    elements = core.PeriodicTable()
+    elements = core.PeriodicTable("H=1")
     mass.init(elements)
     density.init(elements)
 
@@ -26,6 +26,11 @@ Example::
 You will need to add individual properties by hand for all additional
 desired properties using module.init(elements).
 
+The table name ("H=1" above) must be unique within the session.  If you
+are pickling elements from a private table, you must create a private
+table of the same name before attempting to restore them.  The default
+table is just a private table with the name "default".
+
 Note that if you are using chemical formulas, you will need to
 define your own parser using::
 
@@ -38,7 +43,7 @@ much like is currently done for Isotope and Ion.  That way you only
 need to replace the properties of interest rather than defining all
 new properties.
 
-Instead of using private tables, you can replace a dataset in the
+Instead of using private tables, you could replace a dataset in the
 base table using e.g., mymass.init(elements, reload=True), but you
 are strongly discouraged from doing so.
 
@@ -82,8 +87,8 @@ To implement this, you will need the following in gammaray/core.py::
         O="Oxygen gamma values",
         )
 
-You can use similar tricks for isotope specific data.  For example,
-in shelltable/core.py you might have::
+Isotope specific data is also supported.  For example, in shelltable/core.py 
+you might have::
 
     from periodictable.core import elements, Isotope
 
@@ -109,6 +114,21 @@ in shelltable/core.py you might have::
             58: "58-Fe shell info",
             }
         )
+
+Ion specific data is more complicated, particularly because of the
+interaction with isotopes.  For example, Ni[58].ion[3] should have
+the same mass as Ni[58] (the mass of the electron is negligible), but
+a different mass from Ni.ion[3].  However,  Ni[58].ion[3].xray and
+Ni.ion[3].xray are the same as each other, but different from Ni.xray.
+
+Current support for ion dependent properties is awkward.  The example
+in :module:`periodictable.xsf` creates a specialized Xray structure
+for each ion as it is requested.  The example in 
+:module:`periodictable.magnetic_ff` does not try to support ion.magnetic_ff
+directly, but instead requires ion.magnetic_ff[ion.charge].  Properties 
+dependent on both isotope and ion can probably be implemented, but there 
+are no examples yet.  The extension interface may change in future if there 
+is sufficient demand and contributions from the community.
 
 
 Initializing the table

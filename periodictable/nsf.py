@@ -70,6 +70,7 @@ H.Schopper Ed. Chap. 6. Springer: Berlin.
 [3] L. Koester, H. Rauch, E. Seymann. Atomic Data Nuclear
 Data Tables 49 (1991) 65
 """
+from numpy import sqrt, pi
 from .core import Element, Isotope, default_table
 from .constants import avogadro_number
 
@@ -181,10 +182,10 @@ class Neutron(object):
         return None not in [self.b_c, self._number_density]
     def sld(self,wavelength=1.798):
         """
-        Returns scattering density, absorption and incoherent scattering
-        for the standard elemental density in units of 10**-6 angstrom**-2.
+        Returns scattering length density (real, imaginary, incoherent)
+        for the element at natural density.
 
-        The coherent scattering returned is N * b_c * 10**-23, where N is
+        The coherent scattering returned is N * b_c*10, where N is
         the number density computed from the bulk density of the element
         and b_c is the bound coherent scattering length for the isotope.
         For most elements, the coherent scattering cross section is
@@ -200,11 +201,11 @@ class Neutron(object):
 
         The absorption cross section is related to the imaginary portion
         of the bound coherent scattering cross section by the formula[2]
-        absorption = 4*pi/k abs(Im(b_c)), where k is 2*pi/lambda, and
-        there is an additional factor of 100 converting from barns to fm.
+        absorption = 4*pi/k b'', where k is 2*pi/lambda, and there is an 
+        additional factor of 100 converting from barns to fm^2.
         The value we return for the SLD is thus::
 
-            Im(b_c) = absorption*N/(2 * 1000 * 1.798) * wavelength
+            Im(b_c) = 0.01 * absorption*N/(2 * 1.798) * wavelength
 
         Note: There is a factor of 10 unaccounted for, but required in order
         to match the b_c_i values given in the underlying tables.  Run::
@@ -225,11 +226,11 @@ class Neutron(object):
         # Compute number and absorption density assuming isotope has
         # same structure as the bulk element
         if not self.has_sld(): return None,None,None
-        N = self._number_density*1e-23
-        coh = self.b_c*N
-        absorp = self.absorption*N/(2*1.798)*wavelength*0.001  # Why 0.001??
-        inc = self.incoherent*N
-        return coh,absorp,inc
+        N = self._number_density*1e-24
+        bp = self.b_c*10*N
+        bpp = self.absorption/(2*1.798)*N*0.01
+        binc = self.incoherent*N*0.01
+        return bp,bpp,binc
 
 def init(table, reload=False):
     """
@@ -368,8 +369,8 @@ def energy_dependent_table(table=None):
 def neutron_sld(input, density=None, wavelength=1):
     """
     Compute neutron scattering length densities for molecules.
-    Returns the scattering length density, the absorption and
-    the incoherent scattering in units of 10**-6 angstrom**-2.
+
+    Returns the scattering length density (real, imaginary incoherent).
 
     Raises AssertionError if density is missing.
     """
@@ -386,6 +387,8 @@ def neutron_sld_from_atoms(atoms, density=None, wavelength=1):
     works with a dictionary of atoms and quanties directly, such
     as returned by molecule.atoms.
 
+    Returns the scattering length density (real, imaginary, incoherent).
+
     Raises AssertionError if density is missing.
     """
     assert density is not None, "neutron_sld needs density"
@@ -399,20 +402,18 @@ def neutron_sld_from_atoms(atoms, density=None, wavelength=1):
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.incoherent
         mass += element.mass*quantity
         b_c += element.neutron.b_c*quantity
-        absorption += element.neutron.absorption*quantity
+        absorption += element.neutron.absorption*quantity*wavelength/1.798
         incoherent += element.neutron.incoherent*quantity
         is_energy_dependent |= element.neutron.is_energy_dependent
 
     if mass == 0:  # for empty formula
         return 0,0,0
     else:
-        N = (density/mass*avogadro_number*1e-23)
-        coh = N*b_c
-        absorp = N*absorption/(2*1.798)*wavelength*0.001 # Why 0.001??
-        inc = N*incoherent
-        #print "b_c",b_c,"absorption",absorption,"incoherent",incoherent
-        #print "1/N",1/N
-        return coh,absorp,inc
+        cell_volume = mass/(density*avogadro_number*1e-24) # (10^8 A/cm)^3
+        bp = 10*b_c/cell_volume
+        bpp = 0.01*absorption/(2*wavelength)/cell_volume  # b'' = sigma_a/(2*lambda)
+        binc = 0.01*incoherent/cell_volume
+        return bp,bpp,binc
 
 # We are including the complete original table here in case somebody in
 # future wants to extract uncertainties or other information.
@@ -842,6 +843,10 @@ def _diff(s,a,b):
 def absorption_comparison_table(table=None):
     """
     Print a table of b_c_i and -absorption/(2*1.798*1000) for each isotope.
+    
+    The factor of 100 is required to go from barn to fm^2.
+    
+    This author does not know where the remaining factor of 10 comes from.
 
     This is useful for checking the integrity of the data and formula.
     """

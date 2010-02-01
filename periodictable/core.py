@@ -152,11 +152,15 @@ class PeriodicTable(object):
     and X-ray scattering cross sections.  See the help(periodictable)
     for details.
     """
-    def __init__(self):
+    def __init__(self, table="default"):
+        if table in PRIVATE_TABLES:
+            raise ValueError("Table %s is already defined"%table)
+        PRIVATE_TABLES[table] = self
         self.properties = []
         self._element = {}
         for Z,(name,symbol,ions) in element_base.iteritems():
-            element = Element(name.lower(),symbol,Z,ions)
+            element = Element(name=name.lower(),symbol=symbol,Z=Z,
+                              ions=ions,table=table)
             self._element[element.number] = element
             setattr(self,symbol,element)
 
@@ -308,12 +312,16 @@ class Ion(object):
             return el
     def __repr__(self):
         return repr(self.element)+'.ion[%d]'%self.charge
-    def __getstate__(self):
-        """
-        Can't pickle ions without breaking extensibility.
-        Suppress it for now.
-        """
-        raise TypeError("cannot copy or pickle ions")
+    def __reduce__(self):
+        try:
+            return _make_isotope_ion,(self.element.table,
+                                      self.element.number, 
+                                      self.element.isotope, 
+                                      self.charge)
+        except:
+            return _make_ion, (self.element.table,
+                               self.element.number,
+                               self.charge)
 
 class Isotope(object):
     """Periodic table entry for an individual isotope.
@@ -338,12 +346,10 @@ class Isotope(object):
             return "%d-%s"%(self.isotope,self.element.symbol)
     def __repr__(self):
         return "%s[%d]"%(self.element.symbol,self.isotope)
-    def __getstate__(self):
-        """
-        Can't pickle isotopes without breaking extensibility.
-        Suppress it for now.
-        """
-        raise TypeError("cannot copy or pickle isotopes")
+    def __reduce__(self):
+        return _make_isotope,(self.element.table, 
+                              self.element.number, 
+                              self.isotope)
 
 class Element(object):
     """Periodic table entry for an element.
@@ -352,13 +358,17 @@ class Element(object):
     Individual isotopes can be referenced as element[isotope_number].
     Individual ionization states can be referenced by element.ion[charge]
     """
-    def __init__(self,name,symbol,Z,ions):
+    table = "default"
+    charge = 0
+    def __init__(self,name,symbol,Z,ions,table):
         self.name = name
         self.symbol = symbol
         self.number = Z
         self._isotopes = {} # The actual isotopes
         self.ions = ions
         self.ion = IonSet(self)
+        # Remember the table name for pickle dump/load
+        if table != self.table: self.table = table
 
     # Isotope support
     def _getisotopes(self):
@@ -390,12 +400,25 @@ class Element(object):
     def __repr__(self):
         return self.symbol
 
-    def __getstate__(self):
-        """
-        Can't pickle elements without breaking extensibility.
-        Suppress it for now.
-        """
-        raise TypeError("cannot copy or pickle elements")
+    def __reduce__(self):
+        return _make_element,(self.table,self.number,)
+
+PRIVATE_TABLES = {}
+def _get_table(table):
+    try:
+        return PRIVATE_TABLES[table]
+    except KeyError:
+        raise ValueError("Periodic table %s is not initialized"%table)
+        
+def _make_element(table,Z):
+    return _get_table(table)[Z]
+def _make_isotope(table,Z,n):
+    return _get_table(table)[Z][n]
+def _make_ion(table,Z,c):
+    return _get_table(table)[Z].ion[c]
+def _make_isotope_ion(table,Z,n,c):
+    return _get_table(table)[Z][n].ion[c]
+
 
 element_base = {
                 # number: name symbol ions

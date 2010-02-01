@@ -1,3 +1,4 @@
+from numpy import pi, isnan
 from periodictable import formula
 from periodictable import Cu,Mo,Ni,Fe,Si
 from periodictable.xsf import xray_energy, xray_sld_from_atoms, xray_sld
@@ -66,5 +67,26 @@ def test():
 
     rho,mu = xray_sld('', density=0, wavelength=Cu.K_alpha)
     assert rho==mu==0
+
+    # Check f0 calculation for scalar and vector
+    Q1,Q2 = 4*pi/Cu.K_alpha, 4*pi/Mo.K_alpha
+    f0 = Ni.xray.f0(Q=Q1)
+    assert abs(f0-10.11303) < 0.00001
+    assert isnan(Ni.xray.f0(Q=7*4*pi))
+
+    f0 = Ni.xray.f0(Q=Q1)
+    m0 = Ni.xray.f0(Q=Q2)
+    B0 = Ni.xray.f0(Q=[Q1,Q2])
+    assert (B0==[f0,m0]).all()
+
+    # Check f0 calculation for ion
+    Ni_2p_f0 = Ni.ion[2].xray.f0(Q=Q1)
+    assert abs(Ni_2p_f0-10.09535) < 0.00001
+    Ni58_2p_f0 = Ni[58].ion[2].xray.f0(Q=Q1)
+    assert Ni_2p_f0 == Ni58_2p_f0
+    
+    # The following test is implementation specific, and is not guaranteed
+    # to succeed if the extension interface changes.
+    assert '_xray' not in Ni[58].__dict__
 
 if __name__ == "__main__": test()

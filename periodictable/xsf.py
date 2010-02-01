@@ -8,9 +8,11 @@ The following attributes are added to each element::
         Three column table of energy vs. scattering factors f1,f2.
     xray.scattering_factors(wavelength)
         Returns f1,f2, the X-ray scattering factors for the given wavelengths
-        interploted from sftable.
+        interpolated from sftable.
+    xray.f0(Q)
+        Returns f0 for the given vector Q.  Valid for Q in [0,24pi] inv Ang.
     xray.sld(wavelength=A or energy=keV)
-        Returns scattering length density and absorption for the
+        Returns scattering length density (real, imaginary) for the
         given wavelengths or energies.
 
     K_alpha, K_beta1 (Angstrom)
@@ -38,6 +40,12 @@ X-ray scattering factors::
     Center for X-Ray Optics, 2-400
     Lawrence Berkeley Laboratory
     Berkeley, California 94720
+
+X-ray f0 factors::
+
+    D. Wassmaier, A. Kirfel, Acta Crystallogr. A51 (1995) 416.
+    http://dx.doi.org/10.1107/S0108767394013292
+
 
 These files were used to generate the tables published in reference [1].
 The files contain three columns of data: Energy(eV), f_1, f_2,
@@ -121,9 +129,10 @@ __all__ = ['Xray', 'init', 'init_spectral_lines',
 import os.path
 import glob
 import numpy
+from numpy import nan
 
 from . import core
-from .core import Element, Isotope, default_table
+from .core import Element, Ion, default_table
 from .constants import (avogadro_number, plancks_constant, speed_of_light,
                         electron_radius)
 
@@ -161,8 +170,7 @@ class Xray(object):
     sld_units = ["Nb","Nb"]
     _table = None
     def __init__(self, element):
-        self._symbol = element.symbol
-        self._number_density = element.number_density
+        self.element = element
 
     def _gettable(self):
         if self._table is None:
@@ -170,8 +178,8 @@ class Xray(object):
             # neutrons (n), and lowercase nitrogen=> n.nff, so it must
             # be checked for explicitly.
             filename = os.path.join(self._nff_path,
-                                    self._symbol.lower()+".nff")
-            if self._symbol != 'n' and os.path.exists(filename):
+                                    self.element.symbol.lower()+".nff")
+            if self.element.symbol != 'n' and os.path.exists(filename):
                 xsf = numpy.loadtxt(filename,skiprows=1).T
                 xsf[1,xsf[1]==-9999.] = numpy.NaN
                 xsf[0] *= 0.001  # Use keV in table rather than eV
@@ -181,7 +189,7 @@ class Xray(object):
 
     def scattering_factors(self, energy):
         """
-        Return the X-ray scattering factors f1,f2 for the given energy (keV).
+        Return the X-ray scattering factors f',f'' for the given energy (keV).
         Energy can be a scalar or a vector.
 
         Data comes from the Henke Xray scattering factors database at the
@@ -194,16 +202,27 @@ class Xray(object):
         scalar = numpy.isscalar(energy)
         if scalar:
             energy = numpy.array([energy])
-        f1 = numpy.interp(energy,xsf[0],xsf[1])
-        f2 = numpy.interp(energy,xsf[0],xsf[2])
+        f1 = numpy.interp(energy,xsf[0],xsf[1],left=nan,right=nan)
+        f2 = numpy.interp(energy,xsf[0],xsf[2],left=nan,right=nan)
         if scalar:
             f1,f2 = f1[0],f2[0]
         return f1,f2
 
+    def f0(self, Q):
+        from . import cromermann
+        scalar = numpy.isscalar(Q)
+        if scalar:
+            Q = numpy.array([Q])
+        f = cromermann.fxrayatq(Q=Q, 
+                                symbol=self.element.symbol,
+                                charge=self.element.charge)
+        if scalar:
+            f = f[0]
+        return f
+
     def sld(self, wavelength=None, energy=None):
         """
-        Return the X ray scattering length density and absorption in
-        units of 10**-6 angstrom**-2.
+        Return the X ray scattering length density (real, imaginary).
 
         If wavelength is given it is converted to energy, ignoring whatever
         energy was specified.  Wavelength is in angstroms. Energy is in keV.
@@ -226,18 +245,18 @@ class Xray(object):
         if energy is None:
             raise TypeError('X-ray SLD needs wavelength or energy')
         f1,f2 = self.scattering_factors(energy)
-        if f1 is None or self._number_density is None:
+        if f1 is None or self.element.number_density is None:
             return None,None
-        scattering = f1*electron_radius*self._number_density*1e-8
-        absorption = f2*electron_radius*self._number_density*1e-8
-        return scattering,absorption
+        rho = f1*electron_radius*self.element.number_density*1e-8
+        irho = f2*electron_radius*self.element.number_density*1e-8
+        return rho,irho
 
 # Note: docs and function prototype are reproduced in __init__
 def xray_sld(input,density=None,wavelength=None,energy=None):
     """
     Compute xray scattering length densities for molecules.
-    Returns the scattering length density and absorption
-    in units of 10**-6 angstrom**-2.
+
+    Returns scattering length density (real, imaginary).
 
     Wavelength is in angstroms.  Energy is in keV.
 
@@ -254,6 +273,8 @@ def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
     works with a dictionary of atoms and quanties directly, such
     as returned by molecule.atoms.
 
+    Returns scattering length density (real, imaginary).
+
     Wavelength is in angstroms.  Energy is in keV.
 
     Raises AssertionError if density or wavelength/energy is not provided
@@ -263,20 +284,20 @@ def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
     assert density is not None, "xray_sld needs density"
     assert energy is not None, "xray_sld needs energy or wavelength"
 
-    mass,scattering,absorption = 0,0,0
+    mass,sum_f1,sum_f2 = 0,0,0
     for element,quantity in atoms.iteritems():
         mass += element.mass*quantity
         f1,f2 = element.xray.scattering_factors(energy)
         #print element,f1,f2,wavelength
-        scattering += f1*quantity
-        absorption += f2*quantity
+        sum_f1 += f1*quantity
+        sum_f2 += f2*quantity
     if mass == 0: # because the formula is empty
-        rho,mu = 0,0
+        rho,irho = 0,0
     else:
         N = (density/mass*avogadro_number*1e-8)
-        rho = N*scattering*electron_radius
-        mu = N*absorption*electron_radius
-    return rho,mu
+        rho = N*sum_f1*electron_radius
+        irho = N*sum_f2*electron_radius
+    return rho,irho
 
     Element.K_alpha_units = "angstrom"
     Element.K_beta1_units = "angstrom"
@@ -317,8 +338,27 @@ def init(table, reload=False):
     """
     if 'xray' in table.properties and not reload: return
     table.properties.append('xray')
-    for el in table:
-        el.xray = Xray(el)
+    
+    # Create an xray object for the particular element/ion.  Note that
+    # we must not use normal attribute tests such as "hasattr(el,'attr')" 
+    # or "try: el.attr; except:" since the delegation methods on Ion will
+    # just return the attribute from the base element.  Instead we check
+    # for an instance specific xray object for the particular ion prior
+    # to delegating.
+    # TODO: is there a better way to set up delegation on a field by
+    # field basis?
+    def _cache_xray(el): 
+        if '_xray' not in el.__dict__ and isinstance(el, (Element,Ion)):
+            el._xray = Xray(el)
+        return el._xray
+    Element.xray = property(_cache_xray)
+    Ion.xray = property(_cache_xray)
+    
+    ## Note: the simple approach below fails for e.g., Ni[58].ion[3].xray
+    #for el in table:
+    #    for charge in el.ions:
+    #        el.ion[charge].xray = Xray(el.ion[charge])
+    #    el.xray = Xray(el)
 
 def plot_xsf(el):
     """
@@ -346,12 +386,12 @@ def sld_table(wavelength, table=None):
     #        print el.Z,el.symbol,"%.1f"%f1,"%.4f"%(f1-el.Z)
 
     # NBCU spreadsheet format
-    print "X-ray scattering length density and absorption for",wavelength,"A"
-    print "%3s %6s %6s"%('El','rho','mu')
+    print "X-ray scattering length density for",wavelength,"A"
+    print "%3s %6s %6s"%('El','rho','irho')
     for el in table:
-        rho,mu = el.xray.sld(table.Cu.K_alpha)
+        rho,irho = el.xray.sld(table.Cu.K_alpha)
         if rho is not None:
-            print "%3s %6.2f %6.2f"%(el.symbol,rho,mu)
+            print "%3s %6.2f %6.2f"%(el.symbol,rho,irho)
 
 def emission_table(table=None):
     """

@@ -171,10 +171,11 @@ class Formula(object):
         except: pass
         return V/packing_factor
 
+    # TODO: move neutron/xray sld to extension
     def neutron_sld(self, wavelength=1):
         """
         Neutron scattering information for the molecule.
-        Returns (sld,absorption,incoherent scattering).
+        Returns scattering length density (real, imaginary, incoherent).
         Returns None if the density is not known.
         """
         if self.density is None: return None,None,None
@@ -185,7 +186,7 @@ class Formula(object):
     def xray_sld(self, energy=None, wavelength=None):
         """
         X-ray scattering information for the molecule.
-        Returns (sld,absorption,incoherent scattering).
+        Returns complex scattering length density (real, imaginary).
         Returns None if the density is not known.
         """
         if self.density is None: return None,None

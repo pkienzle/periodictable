@@ -210,14 +210,9 @@ class Xray(object):
 
     def f0(self, Q):
         from . import cromermann
-        scalar = numpy.isscalar(Q)
-        if scalar:
-            Q = numpy.array([Q])
         f = cromermann.fxrayatq(Q=Q, 
                                 symbol=self.element.symbol,
                                 charge=self.element.charge)
-        if scalar:
-            f = f[0]
         return f
 
     def sld(self, wavelength=None, energy=None):

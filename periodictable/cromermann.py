@@ -139,9 +139,6 @@ class CromerMannFormula(object):
 
         Return float or numpy.array.
         '''
-        #if numpy.max(stol) > self.stollimit:
-        #    logging.warning("Cromer-Mann formula not reliable for "
-        #            "sin(theta)/lambda > %.1g/A.", self.stollimit)
         stolflat = numpy.array(stol).flatten()
         n = len(stolflat)
         stol2row = numpy.reshape(stolflat ** 2, (1, n))
@@ -150,8 +147,8 @@ class CromerMannFormula(object):
         adiag = numpy.diag(self.a)
         rvrows = numpy.dot(adiag, numpy.exp(-bstol2))
         rvflat = rvrows.sum(axis=0) + self.c
+        rvflat[stolflat > self.stollimit] = numpy.nan
         rv = rvflat.reshape(numpy.shape(stol))
-        rv[stol>self.stollimit] = numpy.nan
         return rv
 
 # class CromerMannFormula

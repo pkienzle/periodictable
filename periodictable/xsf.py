@@ -209,6 +209,18 @@ class Xray(object):
         return f1,f2
 
     def f0(self, Q):
+        """
+        Return the isotropic X-ray scattering factors f0 for the input Q.
+
+        Q should be given in inverse angstroms.
+
+        Note that f0 is often given as a function of sin(theta)/lambda 
+        whereas we are using  Q = 4*pi*sin(theta)/lambda, or in terms
+        of energy Q = 4*pi*sin(theta)*E/(h c).
+
+        D. Wassmaier, A. Kirfel, Acta Crystallogr. A51 (1995) 416.
+        http://dx.doi.org/10.1107/S0108767394013292
+        """
         from . import cromermann
         f = cromermann.fxrayatq(Q=Q, 
                                 symbol=self.element.symbol,

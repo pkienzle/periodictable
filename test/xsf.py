@@ -68,7 +68,7 @@ def test():
     rho,mu = xray_sld('', density=0, wavelength=Cu.K_alpha)
     assert rho==mu==0
 
-    # Check f0 calculation for scalar, vector and empty
+    # Check f0 calculation for scalar, vector, array and empty
     Q1,Q2 = 4*pi/Cu.K_alpha, 4*pi/Mo.K_alpha
     f0 = Ni.xray.f0(Q=Q1)
     assert abs(f0-10.11303) < 0.00001
@@ -82,6 +82,12 @@ def test():
 
     f0 = Ni.xray.f0(Q=[])
     assert len(f0) == 0
+
+    f0 = Ni.xray.f0(Q=[[1,2],[3,4]])
+    assert f0[0,0] == Ni.xray.f0(1)
+    assert f0[0,1] == Ni.xray.f0(2)
+    assert f0[1,0] == Ni.xray.f0(3)
+    assert f0[1,1] == Ni.xray.f0(4)
 
     # Check f0 calculation for ion
     Ni_2p_f0 = Ni.ion[2].xray.f0(Q=Q1)

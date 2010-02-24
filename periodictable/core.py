@@ -534,7 +534,7 @@ element_base = {
     109: ['Meitnerium',    'Mt', ()],
     110: ['Ununnilium',    'Uun', ()],
     111: ['Unununium',     'Uuu', ()],
-    112: ['Ununbium',      'Uub', ()],
+    112: ['Copernicium',   'Cn', ()],
     114: ['Ununquadium',   'Uuq', ()],
     116: ['Ununhexium',    'Uuh', ()],
 }

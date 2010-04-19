@@ -325,9 +325,9 @@ def fix_number(str):
     if str[0] == '<': str = str[1:]
     return float(str)
 
-def sld_table(wavelength=1, table=None):
+def sld_table(wavelength=1, table=None, isotopes=True):
     """
-    Scattering length density and absorption table for wavelength 4.75 A
+    Scattering length density table for wavelength 4.75 A
     """
     table = default_table(table)
     # Table for comparison with scattering length density calculators
@@ -336,15 +336,23 @@ def sld_table(wavelength=1, table=None):
     # (see doc directory), though it is not clear what criteria are
     # used to select amongst the available measurements.
     print " Neutron scattering length density table"
-    print "%2s %6s %8s %7s %6s %6s %6s"%('  ','mass','b_c','density',
-                                         'coh','absorp','incoh')
+    print "%-7s %7s %7s %7s %7s %7s"%('atom','mass','density',
+                                         'sld','imag','incoh')
     for el in table:
         if el.neutron.has_sld():
-            coh,absorp,inc = el.neutron.sld(wavelength)
-            print "%-2s %6.2f %8.4f %7.2f %6.2f %6.2f %6.2f%s"\
-                %(el.symbol,el.mass,el.neutron.b_c/10,el.density,
-                  coh,absorp,inc,
-                  '*' if el.neutron.is_energy_dependent else ' ')
+            coh,jcoh,inc = el.neutron.sld(wavelength)
+            print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f %s"\
+                %(el,el.mass,el.density,coh,jcoh,inc,
+                  '*' if el.neutron.is_energy_dependent else '')
+            if isotopes:
+                isos = [iso for iso in el if iso.neutron != None and iso.neutron.has_sld()]
+            else:
+                isos = []
+            for iso in isos:
+                    coh,jcoh,inc = iso.neutron.sld(wavelength)
+                    print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f %s"\
+                        %(iso,iso.mass,iso.density,coh,jcoh,inc,
+                          '*' if iso.neutron.is_energy_dependent else '')
     print "* Energy dependent cross sections"
 
 def energy_dependent_table(table=None):

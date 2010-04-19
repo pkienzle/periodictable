@@ -31,20 +31,23 @@ Physics, 80th ed. (CRC Press, Boca Raton, Florida, 1999).
 These values are reproduced in the ILL Neutron Data Booklet, Second Edition.
 """
 
-from .core import Element
+from .core import Element, Isotope
 from .constants import avogadro_number
 
-def density(element):
+def density(iso_el):
     """
     Element density for natural abundance (g/cm**3).
 
-    Returns None for isotopes.
+    For isotopes, return the equivalent density assuming identical inter-atomic
+    spacing as the naturally occurring material.
 
     ILL Neutron Data Booklet, original values from
     CRC Handbook of Chemistry and Physics, 80th ed. (1999).
     """
-    if hasattr(element,'isotope'): return None
-    return element._density
+    if hasattr(iso_el,'element'):
+        return iso_el.element._density * (iso_el.mass/iso_el.element.mass)
+    else:
+        return iso_el._density
 
 def interatomic_distance(element):
     """
@@ -80,6 +83,8 @@ def number_density(element):
 def init(table, reload=False):
     if 'density' in table.properties and not reload: return
     table.properties.append('density')
+    Isotope.density = property(density, "density using inter-atomic spacing from naturally occurring form")
+    Element.density = property(density, "density using inter-atomic spacing from naturally occurring form")
     Element.density_units = "g/cm**3"
 
     Element.interatomic_distance \
@@ -94,13 +99,13 @@ def init(table, reload=False):
     for k,v in element_densities.iteritems():
         el = getattr(table,k)
         if isinstance(v,tuple):
-            el.density = v[0]
+            el._density = v[0]
             el.density_caveat = v[1]
         elif v is None:
-            el.density = None
+            el._density = None
             el.density_caveat = "unavailable"
         else:
-            el.density = v
+            el._density = v
             el.density_caveat = ""
 
 element_densities = dict(

@@ -1,3 +1,7 @@
+Extensible periodic table of the elements
+
+Release 1.2, April 28, 2010
+
 This package provides a periodic table of the elements with
 support for mass, density and xray/neutron scattering information.
 
@@ -33,6 +37,24 @@ Features under consideration:
    magnetic scattering parameters
 
 Change history:
+
+== 1.2  2010-04-28 ==
+
+New:
+* support pickle: id(H) == id(loads(dumps(H)))
+* support ions, with magnetic form factors and x-ray f0 scattering factor
+* support py2exe wrappers
+* allow density to be calculated from structure (bcc, fcc, hcp, cubic, diamond)
+* estimate molecular volume
+* support private tables with some values replaced by application
+
+Modified:
+* rename package periodictable
+* rename table to periodictable.elements
+* neutron sld returns real and imaginary coherent and incoherent
+  instead of coherent, absorption and incoherent
+* bug fix: sld for H[2] was wrong when queried before sld for H.
+* remove CrysFML ionic radius definitions
 
 == 1.1  2009-01-20 ==
 

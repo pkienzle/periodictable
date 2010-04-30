@@ -47,26 +47,37 @@ X-ray f0 factors::
     http://dx.doi.org/10.1107/S0108767394013292
 
 
-These files were used to generate the tables published in reference [1].
-The files contain three columns of data: Energy(eV), f_1, f_2,
+X-ray f1 and f2 tables
+======================
+
+The data for the tables is stored in periodictable/xsf/*.nff.  The
+following information is from periodictable/xsf/read.me, with
+minor formatting changes.
+
+These [*.nff] files were used to generate the tables published in 
+reference [1]. The files contain three columns of data::
+
+    Energy(eV), f_1, f_2,
+
 where f_1 and f_2 are the atomic (forward) scattering factors.
 There are 500+ points on a uniform logarithmic mesh with points
-added 0.1 eV above and below "sharp" absorption edges.
-(Note: below 29 eV f_1 is set equal to -9999.)
-The tabulated values of f_1 contain a relativistic, energy independent,
-correction given by, Z* = Z - (Z/82.5)^(2.37).
+added 0.1 eV above and below "sharp" absorption edges.  (Note: below 
+29 eV f_1 is set equal to -9999.) The tabulated values of f_1 contain 
+a relativistic, energy independent, correction given by::
+
+    Z* = Z - (Z/82.5)^(2.37).
 
 
 The atomic photoabsorption cross section, mu_a, may be readily obtained
-from the values of f_2 using the relation,
+from the values of f_2 using the relation::
 
-                        mu_a = 2*r_0*lambda*f_2
+    mu_a = 2*r_0*lambda*f_2
 
 where r_0 is the classical electron radius, and lambda is the wavelength.
 The index of refraction for a material with N atoms per unit volume
-is calculated by,
+is calculated by::
 
-                n = 1 - N*r_0*(lambda)^2*(f_1+if_2)/(2*pi).
+    n = 1 - N*r_0*(lambda)^2*(f_1+if_2)/(2*pi).
 
 These (semi-empirical) atomic scattering factors are based upon
 photoabsorption measurements of elements in their elemental state.
@@ -83,7 +94,7 @@ rely on theoretical calculations and interpolations across Z.
 In order to improve the accuracy in the future considerably more
 experimental measurements are needed.
 
-Please send any comments to EMGullikson@lbl.gov.
+Please send any comments about the tables to EMGullikson@lbl.gov.
 
 Note that the following elements have been updated since the publication
 of Ref. [1] in July 1993.

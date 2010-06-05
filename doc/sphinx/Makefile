@@ -27,7 +27,7 @@ help:
 	@echo "  doctest   to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	-rm -rf _build/*
+	-rm -rf _build/* build/* plots/*.pyc plots/*.png
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
@@ -71,8 +71,12 @@ latex:
 	@echo "Run \`make all-pdf' or \`make all-ps' in that directory to" \
 	      "run these through (pdf)latex."
 
-pdf: latex
+pdf: latex _build/html/PeriodicTable.pdf
 	$(MAKE) -C _build/latex all-pdf
+
+_build/html/PeriodicTable.pdf:
+	-mkdir _build/html
+	ln -s $$PWD/_build/latex/PeriodicTable.pdf _build/html/PeriodicTable.pdf
 
 changes:
 	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) _build/changes
@@ -86,7 +90,7 @@ linkcheck:
 	      "or in _build/linkcheck/output.txt."
 
 doctest:
-	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
+	PYTHONPATH=. $(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
 

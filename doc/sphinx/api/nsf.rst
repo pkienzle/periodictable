@@ -4,6 +4,10 @@
 Neutron scattering potentials
 ******************************************************************************
 
+.. topic:: Section summary
+
+   Module for adding neutron property to the periodictable.
+
 :mod:`periodictable.nsf`
 ==============================================================================
 

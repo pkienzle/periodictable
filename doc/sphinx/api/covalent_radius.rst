@@ -4,6 +4,10 @@
 Covalent radius
 ******************************************************************************
 
+.. topic:: Section summary
+
+   Module for adding covalent radius properties to the periodictable.
+
 :mod:`periodictable.covalent_radius`
 ==============================================================================
 

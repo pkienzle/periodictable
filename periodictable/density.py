@@ -1,49 +1,71 @@
 # This program is public domain
 """
-Adds density properties to the periodic table.
 
-The following properties are added::
+The following properties are added:
 
-    density
-    density_units ('g/cm^3')
-        Densities for solids and liquids are given as specific gravities
-        at 20 C unless other wise indicated by density_caveat.  Densities
-        for the gaseous elements are given for the liquids at their
-        boiling points.  Missing data are represented by None.
-    density_caveat
+*    density
+*    density_units (g/cm^3)
+        Densities for solids and liquids are given as specific
+        gravities at 20 C unless other wise indicated by
+        *density_caveat*. Densities for gaseous elements
+        are given for the liquids at their boiling points.
+        Missing data are represented by *None*.
+*   density_caveat
         Comments on the density, if not taken in standard conditions.
-
-    interatomic_distance
-    interatomic_distance_units ('angstrom')
+*   interatomic_distance
+*   interatomic_distance_units (angstrom)
         Interatomic distance estimated from element density.
-        string 'angstrom'
+*   number_density
+*   number_density_units (unitless)
+        Number density estimated from mass and density.
 
-    number_density
-    number_density_units ('')
-        number density estimated from mass and density
+Density for the isotope is computed assuming that the atomic spacing
+is the same as that for the element in the natural abundance.
 
-From the X-ray data book:
-    http://xdb.lbl.gov/Section5/Sec_5-2.html
+.. doctest::
 
-Data were taken mostly from D. R. Lide, Ed., CRC Handbook of Chemistry and
-Physics, 80th ed. (CRC Press, Boca Raton, Florida, 1999).
+    >>> from periodictable import D, H
+    >>> print "H :",H.density,", D :",D.density
+    H : 0.0708 , D : 0.141475093639
+    >>> print (D.density/H.density) / (D.mass/H.mass)
+    1.0
 
-These values are reproduced in the ILL Neutron Data Booklet, Second Edition.
+The following plot shows density for all elements:
+
+.. plot:: plots/density_plot.py
+   
+From the X-ray data book: http://xdb.lbl.gov/Section5/Sec_5-2.html
+
+Data were taken mostly from [#Lide1999]_. These values are reproduced in [#ILL]_.
+
+.. [#Lide1999] Lide. D. R., Ed., CRC Handbook of Chemistry and Physics, 80th ed.
+       (CRC Press, Boca Raton, Florida, 1999)
+.. [#ILL] The ILL Neutron Data Booklet, Second Edition.
 """
 
 from .core import Element, Isotope
 from .constants import avogadro_number
 
 def density(iso_el):
+   
     """
-    Element density for natural abundance (g/cm**3).
+    Element density for natural abundance. For isotopes, return
+    the equivalent density assuming identical inter-atomic spacing as the
+    naturally occuring material.
+   
+    :Parameters:
+        *iso_el* : isotope or element
+            Name of the element or isotope.
+        
+    :Returns:
+        *density* : float | g/cm^3
 
-    For isotopes, return the equivalent density assuming identical inter-atomic
-    spacing as the naturally occurring material.
+    Reference:
+        *ILL Neutron Data Booklet, original values from CRC Handbook of Chemistry and Physics,
+        80th ed. (1999).*
 
-    ILL Neutron Data Booklet, original values from
-    CRC Handbook of Chemistry and Physics, 80th ed. (1999).
     """
+
     if hasattr(iso_el,'element'):
         return iso_el.element._density * (iso_el.mass/iso_el.element.mass)
     else:
@@ -51,31 +73,47 @@ def density(iso_el):
 
 def interatomic_distance(element):
     """
-    Estimated interatomic distance from atomic weight and density
+    Estimated interatomic distance from atomic weight and density. The
+    distance between isotopes is assumed to match that between atoms in
+    the natural abundance.
 
-    Returns (atomic_weight/(density*0.602214179))**(1/3) Angstroms
+    :Parameters: 
+        *element* : Element
+            Name of the element whose interatomic distance needs to be calculated.
+               
+    :Returns:
+        *distance* : float | A
 
-    The distance between isotopes is assumed to match that between
-    atoms in the natural abundance.
+	
+    Interatomic distance is computed using::
 
-    A note on the units::
+	d = atomic_weight/(density*0.602214179))^(1/3).
 
-        ( (g/mol)/((g/cm**3)*(atoms/mol)) * (10**8 A/cm)**3 )**(1/3) = A
+    with units::
+
+        ((g/mol)/((g/cm^3)(atoms/mol))(10^8A/cm^3)^{1/3} = A
 
     """
+    
     if hasattr(element,'isotope'): element = element.element
     if element.density is None or element.mass is None: return None
     return (element.mass/(element.density*avagadro_number*1e24))**(1./3.)
 
 def number_density(element):
     """
-    Estimate the number density from atomic weight and density.
+    Estimate the number density from atomic weight and density. The density
+    for isotopes is assumed to match that of between atoms in natural abundance.
 
-    Returns density/atomic_weight*avogadro_number
+    :Parameters: 
+        *element* : element
+            Name of the element whose number density needs to be calculated.
+               
+    :Returns:
+            *Nb* : float | unitless
+                Number density of a element.
 
-    The density for isotopes is assumed to match that between
-    atoms in the natural abundance.
     """
+
     if hasattr(element,'isotope'): element = element.element
     if element.density is None or element.mass is None: return None
     return (element.density/element.mass)*avogadro_number

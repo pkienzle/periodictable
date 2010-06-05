@@ -4,6 +4,10 @@
 X-ray scattering potentials
 ******************************************************************************
 
+.. topic:: Section summary
+
+   Adds X-ray scatting information.
+
 :mod:`periodictable.xsf`
 ==============================================================================
 

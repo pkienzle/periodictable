@@ -1,30 +1,40 @@
 '''
-Crystal structure data
+Crystal structure data.
 
-Adds the crystal_structure property, which is a dictionary of symmetry type
-and symmetry parameters.  The following types are available::
+Adds *crystal_structure* to the periodic table.  Each crystal structure
+is a dictionary which contains the key 'symmetry'.  Depending on the
+value of crystal_structure['symmetry'], one or more parameters
+'a', 'c/a', 'b/a', 'd', and 'alpha' may be present according to
+the following table:
 
-    atom:
-    diatom: d
-    BCC: a
-    fcc: a
-    hcp: c/a, a
-    Tetragonal: c/a, a
-    Cubic: a
-    Diamond: a
-    Orthorhombic: c/a, a, b/a
-    Rhombohedral: a, alpha
-    SC: a
-    Monoclinic:
+.. table:: Crystal lattice parameters
 
-E.g.,::
+    ============ ===========
+    Symmetry     Parameters
+    ============ ===========
+    atom
+    diatom       d
+    BCC          a
+    fcc          a
+    hcp          c/a, a
+    Tetragonal   c/a, a
+    Cubic        a
+    Diamond      a
+    Orthorhombic c/a, a, b/a
+    Rhombohedral a, alpha
+    SC           a
+    Monoclinic
+    ============ ===========
+    
+Example:
 
-    >> import periodictable as elements
-    >> print elements.C.crystal_structure['symmetry']
+.. doctest::
+
+    >>> import periodictable as elements
+    >>> print elements.C.crystal_structure['symmetry']
     Diamond
-    >> print elements.C.crystal_structure['a']
+    >>> print elements.C.crystal_structure['a']
     3.57
-
 
 This data is from Ashcroft and Mermin.
 '''

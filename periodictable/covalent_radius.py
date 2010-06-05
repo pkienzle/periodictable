@@ -1,34 +1,30 @@
 # -*- coding: latin-1 -*-
 """
 
-Average covalent radii for the elements.
-
 This module adds the following fields to the periodic table
 
-* covalent_radius (A)
-* covalent_radius_uncertainty (A)
-* covalent_radius_units ("angstrom")
+*   covalent_radius
+*   covalent_radius_uncertainty
+*   covalent_radius_units = 'angstrom'
 
-Use periodictable.covalent_radius.init(table) to initialize a
-private table.
+Use :func:`init` to initialize a private table.
 
-Data taken from Cordero 2008.[1]
-
-From the abstract
+Data is taken from Cordero 2008 [#Cordero2008]_. The abstract
+of this paper reads as follows:
 
     A new set of covalent atomic radii has been deduced from
-    crystallographic data for most of the elements with atomic
-    numbers up to 96. The proposed radii show a well behaved
-    periodic dependence that allows us to interpolate a few
+    crystallographic data for most of the elements with atomic 
+    numbers up to 96.  The proposed radii show a well behaved 
+    periodic dependence that allows us to interpolate a few 
     radii for elements for which structural data is lacking,
-    notably the noble gases. The proposed set of radii therefore
-    fills most of the gaps and solves some inconsistencies in
-    currently used covalent radii. The transition metal and
-    lanthanide contractions as well as the differences in covalent
+    notably the noble gases. The proposed set of radii therefore 
+    fills most of the gaps and solves some inconsistencies in 
+    currently used covalent radii.  The transition metal and 
+    lanthanide contractions as well as the differences in covalent 
     atomic radii between low spin and high spin configurations in
     transition metals are illustrated by the proposed radii set.
 
-Notes
+Notes:
 
 #. Values are averages only.  The particular radius can be highly
    dependent on oxidation state and chemical compound.
@@ -39,7 +35,7 @@ Notes
 
 #. Elements with zero or one measurements of covalent radius are
    assigned an uncertainty of 0.00.  These are He, Ne, Pm, At, Rn,
-   Fr, Ac, Pa
+   Fr, Ac, Pa.
 
 #. Elements above 96 are assigned a covalent radius and uncertainty
    of None.
@@ -48,11 +44,9 @@ Notes
    compound was used is element dependent.  Details are available in
    the references.
 
-
-[1] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés,
-Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez.
-Covalent radii revisited. Dalton Trans., 2008, 2832-2838
-doi:http://dx.doi.org/10.1039/b801115j
+.. [#Cordero2008] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés,
+       Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez.
+       Covalent radii revisited. Dalton Trans., 2008, 2832-2838. `doi:10.1039/b801115j <http://dx.doi.org//10.1039/b801115j>`_
 """
 
 from .core import Element
@@ -60,8 +54,7 @@ from .core import Element
 def init(table, reload=False):
     """
     Add the covalent radius property to a private table.
-
-    Use reload=True to replace the covalent radius property on an
+    Use *reload = True* to replace the covalent radius property on an
     existing table.
     """
     if 'covalent_radius' in table.properties and not reload: return
@@ -90,6 +83,8 @@ def init(table, reload=False):
 # multiple spin states (C,Mn,Fe,Co) only the first spin state is used.
 #
 #Z  Symbol radius(A) uncertainty number of measurements
+
+
 Cordero = """\
 1    H    0.31    5    129
 2    He    0.28
@@ -193,3 +188,6 @@ Cordero = """\
 95    Am    1.80    6    11
 96    Cm    1.69    3    16\
 """
+
+
+

@@ -4,6 +4,10 @@
 Chemical formula operations
 ******************************************************************************
 
+.. topic:: Section summary
+
+   Module for operations on chemical formulas.
+
 :mod:`periodictable.formulas`
 ==============================================================================
 

@@ -16,7 +16,11 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+#sys.path.append(os.path.abspath('_extensions'+(os.path.dirname('../../periodictable'))))
+
+sys.path.append(os.path.abspath(os.path.dirname('../../periodictable')))
 sys.path.append(os.path.abspath('_extensions'))
+
 
 # -- General configuration -----------------------------------------------------
 
@@ -24,7 +28,12 @@ sys.path.append(os.path.abspath('_extensions'))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
               'sphinx.ext.coverage', 'sphinx.ext.pngmath',
-              'only_directives', ]
+              #'only_directives',
+              'matplotlib.sphinxext.mathmpl',
+              'matplotlib.sphinxext.only_directives',
+              'matplotlib.sphinxext.plot_directive',
+              'inheritance_diagram',
+             ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -94,10 +103,26 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
 html_theme = 'default'
+html_theme_options = {
+    "rightsidebar":"False",
+    "relbarbgcolor": "Gainsboro",
+    #"codebgcolor": "Beige",
+    "footertextcolor": "orange",
+    "relbartextcolor": "Blue",
+    "sidebarbgcolor": "white",
+    "sidebarlinkcolor": "OrangeRed",
+    "sidebartextcolor": "Navy",
+    "linkcolor": "Blue",
+    "relbarlinkcolor": "Blue"
+    #"headtextcolor": "Teal"
+    #"headbgcolor": "Oldlace",
+}
+
+html_style = 'mpl.css'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
-# documentation.
+# documentation PaleTurquoise.
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -105,14 +130,14 @@ html_theme = 'default'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-#html_title = None
+html_title = "PeriodicTable"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-#html_short_title = None
+html_short_title = "Home"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+#html_logo = '_static/periodic_logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

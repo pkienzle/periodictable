@@ -4,6 +4,11 @@
 User's Guide
 ############
 
+This section gives an overview and introduction to Periodic Table.
+Read this to have an idea about what Periodic Table can do for you (and how) 
+and if you want to know in detail about Periodic Table, refer to the 
+:ref:`Periodic Table Modules Reference <api-index>`.
+
 .. htmlonly:
 
    :Release: |version|
@@ -15,7 +20,9 @@ User's Guide
    intro.rst
    installing.rst
    using.rst
+   bundle.rst
    extending.rst
+   customizing.rst
    data_sources.rst
    license.rst
-   credits.rst
+   

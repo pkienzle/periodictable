@@ -53,7 +53,6 @@ def genfiles(package, package_name, modules, dir='api'):
 
 modules=[
     ('core', 'Core table'),
-    #('constants', 'Physical constants'),
     ('formulas', 'Chemical formula operations'),
     ('covalent_radius', 'Covalent radius'),
     ('crystal_structure', 'Crystal structure'),
@@ -61,7 +60,8 @@ modules=[
     ('mass', 'Mass'),
     ('nsf', 'Neutron scattering potentials'),
     ('xsf', 'X-ray scattering potentials'),
-    ('chemicals', 'Chemical database'),
+    ('magnetic_ff', 'Magnetic Form Factor'),
+    
 ]
 package='periodictable'
 package_name='Reference'

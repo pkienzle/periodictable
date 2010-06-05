@@ -4,6 +4,10 @@
 Density
 ******************************************************************************
 
+.. topic:: Section summary
+
+   Module for adding density properties to the periodictable.
+
 :mod:`periodictable.density`
 ==============================================================================
 

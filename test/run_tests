@@ -1,4 +1,5 @@
 #!/bin/sh
 
+export PYTHONPATH="..:$PYTHONPATH"
 files=`grep -l "def test" *.py`
 for f in $files; do echo $f; python $f; done

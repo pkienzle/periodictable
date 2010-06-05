@@ -3,13 +3,16 @@
 .. _api-index:
 
 ##############################################################################
-   Reference
+Reference
 ##############################################################################
 
-.. only:: html
+If you are new to Periodic Table, start with the :ref:`User's Guide <users-guide-index>`.
+This section provides details about how Periodic Table works internally.
+Most of the features are already documented in this document, which is automatically 
+generated using Periodic Table’s docstrings.
 
-   :Release: |version|
-   :Date: |today|
+Click the “modules” (:ref:`Module Index <modindex>`) link in the top right corner to 
+easily access any Periodic Table module, or use this contents.
 
 .. toctree::
 
@@ -21,4 +24,7 @@
    mass.rst
    nsf.rst
    xsf.rst
-   chemicals.rst
+   magnetic_ff.rst
+   
+   
+   

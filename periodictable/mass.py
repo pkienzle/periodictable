@@ -1,63 +1,58 @@
 # -*- coding: iso-8859-15 -*-
 # This program is public domain
 """
-Element and isotope mass and abundances
 
-Adds average mass for the elements::
+Adds average mass for the elements:
 
-    mass
-    mass_units ('u')
-        The atomic mass averaged over natural abundances.
+*    mass
+*    mass_units ('u')
+         The atomic mass averaged over natural abundances.
 
-Adds mass and abundance information for isotopes::
+Adds mass and abundance information for isotopes:
 
-    mass
-    mass_units ('u')
-        The individual isotope mass.
+*    mass
+*    mass_units ('u')
+         The individual isotope mass.
 
-    abundance
-    abundance_units ('%')
-        Natural abundance for the isotope.
-
-
-Atomic Weights and Isotopic Composition
-
-   J. S. Coursey, D. J. Schwab, and R. A. Dragoset
-   NIST, Physics Laboratory,
-   Office of Electronic Commerce in Scientific and Engineering Data
+*    abundance
+*    abundance_units ('%')
+         Natural abundance for the isotope.
+    
+Atomic Weights and Isotopic Composition [#Coursey]_.
 
 The atomic weights are available for elements 1 through 112, 114, & 116 and
 isotopic compositions or abundances are given when appropriate. The atomic
-weights data were published by T.B. Coplen[1] in Atomic Weights of the
+weights data were published by Coplen [#Coplen]_ in Atomic Weights of the
 Elements 1999, (and include changes reported from the 2001 review in
 Chem. Int., 23, 179 (2001)) and the isotopic compositions data were
-published by K.J.R. Rosman[2] and P.D.P. Taylor[3] in Isotopic Compositions
+published by Rosman [#Rosman]_ and Taylor [#Taylor]_ in Isotopic Compositions
 of the Elements 1997.  The relative atomic masses of the isotopes data were
-published by G. Audi[4] and A. H. Wapstra[5] in The 1995 Update To The
+published by Audi [#Audi]_ and Wapstra [#Wapstra]_ in the 1995 Update To The
 Atomic Mass Evaluation.
 
 This data has been compiled from the above sources for the user's convenience
 and does not represent a critical evaluation by the NIST Physics Laboratory.
-
-#. T. B. Coplen : U.S. Geological Survey, Reston, Virginia, USA
-#. K. J. R. Rosman : Department of Applied Physics,
-   Curtin University of Technology, Australia
-#. P. D. P. Taylor : Institute for Reference Materials and Measurements,
-   European Commission, Belgium
-#. G. Audi : Centre de Spectrométrie Nucléaire et de Spectrométrie de Masse,
-   Orsay Campus, France
-#. A. H. Wapstra : National Institute of Nuclear Physics and High-Energy Physics,
-   Amsterdam, The Netherlands
-
 http://physics.nist.gov/PhysRefData/Compositions/
 
 Neutron mass from NIST Reference on Constants, Units, and Uncertainty
-    http://physics.nist.gov/cuu/index.html
+http://physics.nist.gov/cuu/index.html
+
+.. [#Coursey] Coursey. J. S., Schwab. D. J., and Dragoset. R. A., NIST, Physics Laboratory,
+       Office of Electronic Commerce in Scientific and Engineering Data.
+.. [#Coplen] Coplen. T. B. : U.S. Geological Survey, Reston, Virginia, USA.
+.. [#Rosman] Rosman. K. J. R. : Department of Applied Physics, Curtin University of
+       Technology, Australia.
+.. [#Taylor] Taylor. P. D. P. : Institute for Reference Materials and Measurements,
+       European Commission, Belgium.
+.. [#Audi] Audi. G. : Centre de SpectromÃ©trie NuclÃ©aire et de SpectromÃ©trie de Masse,
+       Orsay Campus, France.
+.. [#Wapstra] Wapstra. A. H. : National Institute of Nuclear Physics and High-Energy Physics,
+       Amsterdam, The Netherlands.
 """
 
 from .core import Element, Isotope
 
-__all__ = ['init']
+#__all__ = ['init']
 
 def getval(str):
     idx = str.find('(')
@@ -71,19 +66,34 @@ def getval(str):
 
 def mass(isotope):
     """
-    Atomic weight (u).
+    Atomic weight.
+   
+    :Parameters: 
+        *isotope* : Isotope
+               
+    :Returns:
+        *mass* : float | u
+            Atomic weight of the element.
 
-    J. S. Coursey, D. J. Schwab, and R. A. Dragoset
-    NIST Atomic Weights and Isotopic Composition database.
+    Reference:
+        *Coursey. J. S., Schwab. D. J, and Dragoset. R. A., NIST Atomic Weights and Isotopic Composition
+        Database.*
     """
     return isotope._mass
 
 def abundance(isotope):
     """
-    Natural abundance (%).
+    Natural abundance.
 
-    J. S. Coursey, D. J. Schwab, and R. A. Dragoset
-    NIST Atomic Weights and Isotopic Composition database.
+    :Parameters: 
+        *isotope* : Isotope
+               
+    :Returns:
+        *abundance* : float | %
+
+    :Reference:
+        *Coursey. J. S., Schwab. D. J, and Dragoset. R. A., NIST Atomic 
+        Weights and Isotopic Composition Database.*
     """
     return isotope._abundance
 

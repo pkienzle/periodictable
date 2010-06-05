@@ -1,22 +1,19 @@
 """
-Magnetic form factor tables from CrysFML.
 
 Adds magnetic_ff[charge].t for t in j0, j2, j4, j6, and J.
-
 J should be the dipole approximation <j0> + (1 - 2/g) <j2>, according to the
-documentation for CrysFML, but that does not seem to be the case in practice.
+documentation for CrysFML [#Brown]_ , but that does not seem to be the case in practice.
 
-Refs.
 
-    P. J. Brown (Section 4.4.5)
-    International Tables for Crystallography Volume C, A. J. C. Wilson (ed)
+.. [#Brown] Brown. P. J. (Section 4.4.5) International Tables for Crystallography
+        Volume C, Wilson. A. J. C.(ed).
 """
 import numpy
 from numpy import pi, exp
 
 def formfactor_0(j0, q):
     """
-    Return the scattering potential for form factor *j0* at the given *q*.
+    Returns the scattering potential for form factor *j0* at the given *q*.
     """
     q = numpy.asarray(q)
     s_sq = (q/(4*pi))**2
@@ -25,7 +22,7 @@ def formfactor_0(j0, q):
 
 def formfactor_n(jn, q):
     """
-    Return the scattering potential for form factor *jn* at the given *q*.
+    Returns the scattering potential for form factor *jn* at the given *q*.
     """
     q = numpy.asarray(q)
     s_sq = (q/(4*pi))**2
@@ -44,9 +41,8 @@ class MagneticFormFactor(object):
         jn = <jn> form factor coefficients for n = 0, 2, 4, 6
 
     Not all form factors are available for all ions.  Use the
-    expression hasattr(ion.magnetic_ff, '<ff>') to test for the
+    expression ``hasattr(ion.magnetic_ff, '<ff>')`` to test for the
     particular form factor <ff>.
-
     The form factor coefficients are a tuple (A, a, B, b, C, c, D).  The
     following expression computes the M/j0 and J form factors from the
     corresponding coefficients::
@@ -54,33 +50,48 @@ class MagneticFormFactor(object):
         s = q^2 / 16 pi^2
         ff = A exp(-a s^2) + B exp(-b s^2) + C exp(-c s^2) + D
 
-    The remaining form factors j2, j4 and j6 are scalled by an additional s^2.
-
+    The remaining form factors *j2*, *j4* and *j6* are scalled by an additional s^2.
     The form factor calculation is performed by the <ff>_Q method for <ff>
-    in M, J, j0, j2, j4, j6.  For example, here is the calculation for
-    the M form factor for Fe^{2+} computed at 0, 0.1 and 0.2::
+    in *M*, *J*, *j0*, *j2*, *j4*, *j6*.  For example, here is the calculation for
+    the *M* form factor for Fe^2+ computed at 0, 0.1 and 0.2:
     
-        >> import periodictable
-        >> ion = periodictable.Fe.ion[2]
-        >> print ion.magnetic_ff[ion.charge].M_Q([0,0.1,0.2])
+    .. doctest::
+
+        >>> import periodictable
+        >>> ion = periodictable.Fe.ion[2]
+        >>> print ion.magnetic_ff[ion.charge].M_Q([0,0.1,0.2])
         [ 1.          0.99935255  0.99741366]
 
     """
+    
+    
     def _getM(self): return self.j0
+
     M = property(_getM, doc="j0")
+
     def j0_Q(self, Q):
+        """Returns *j0* scattering potential at *Q* (inverse Angstroms)"""
         return formfactor_0(self.j0, Q)
+
     def j2_Q(self, Q):
+        """Returns *j2* scattering potential at *Q* (inverse Angstroms)"""
         return formfactor_n(self.j2, Q)
+
     def j4_Q(self, Q):
+        """Returns *j4* scattering potential at *Q* (inverse Angstroms)"""
         return formfactor_n(self.j4, Q)
+
     def j6_Q(self, Q):
+        """Returns j6 scattering potential at *Q* (inverse Angstroms)"""
         return formfactor_n(self.j6, Q)
-    M_Q = j0_Q
+
     def J_Q(self, Q):
+        """Returns J scattering potential at *Q* (inverse Angstroms)"""
         return formfactor_0(self.J, Q)
 
-
+    M_Q = j0_Q
+    
+   
 def init(table, reload=False):
     if 'magnetic_ff' in table.properties and not reload: return
     table.properties.append('magnetic_ff')

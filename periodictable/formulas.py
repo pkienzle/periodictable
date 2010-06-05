@@ -1,14 +1,14 @@
 # This program is public domain
 """
-Operations on chemical formulas.
 
-As of this writing, this includes parsing, computing molar mass and
+As of this writing, this module includes formula for parsing, computing molar mass and
 computing scattering length density.
-
-Requires that the pyparsing module is installed.
 """
+
 from copy import copy
 from math import pi, sqrt
+
+# Requires that the pyparsing module is installed.
 
 from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd)
@@ -16,62 +16,50 @@ from pyparsing import (Literal, Optional, White, Regex,
 from .core import Element, Isotope, default_table
 
 class Formula(object):
-    """
+    r"""
     Simple chemical formula representation.
-
     This is designed for calculating molar mass and scattering
     length density, not for representing bonds or atom positions.
     We preserve the structure of the formula so that it can
     be used as a basis for a rich text representation such as
-    matplotlib TeX markup.
+    `matplotlib TeX markup <http://matplotlib.sourceforge.net/users/mathtext.html>`_.
 
-    Example initializers::
+    :Parameters:
+       *formula* : see below
+           Chemical formula.
 
-       string:
-          m = Formula( "CaCO3+6H2O" )
-       structure:
-          m = Formula( [(1,Ca),(2,C),(3,O),(6,[(2,H),(1,O)]] )
-       formula math:
-          m = Formula( "CaCO3" ) + 6*Formula( "H2O" )
-       another formula (makes a copy):
-          m = Formula( Formula("CaCO3+6H2O") )
-       an atom:
-          m = Formula( Ca )
-       nothing:
-          m = Formula()
+       *density* : float | g/cm**3
+           Material density.
 
-    Additional information can be provided::
+       *name* : string
+           Common name for the molecule.
 
-       density (g / cm**3)   material density
-       name (string) common name for the molecule
+    Formula initializers can have a variety of forms:
 
-    Operations::
+    * string:
+        m = Formula( "CaCO3+6H2O" )
 
-        m.atoms returns a dictionary of {isotope: count} for each isotope
-          in the formula
-        m.mass (u) returns the molar mass of the molecule
+        For full details see :ref:`Formula grammar <formula>`
+    
+    * structure:
+        m = Formula( [(1,Ca),(2,C),(3, O),(6,[(2,H),(1,O)]] )
 
-    Formula strings consist of counts and atoms such as "CaCO3+6H2O".
+    * formula math:
+        m = Formula( "CaCO3" ) + 6*Formula( "H2O" )
 
-    Groups can be separated by '+' or space, so "CaCO3 6H2O" works as well.
+    * another formula (makes a copy):
+        m = Formula( Formula("CaCO3+6H2O") )
 
-    Groups and be defined using parentheses, such as "CaCO3(H2O)6".
+    * an atom:
+        m = Formula(Ca)
 
-    Parentheses can nest: "(CaCO3(H2O)6)1"
-
-    Isotopes are represented by index, e.g., "CaCO[18]3+6H2O".
-
-    Counts can be integer or decimal, e.g. "CaCO3+(3HO0.5)2".
-
-    For full details see help(periodictable.formulas.formula_grammar)
+    * nothing:
+        m = Formula()
 
     """
     def __init__(self,value=None,density=None,name=None):
-        """
-        Initialize formula with a string, a structure or another formula.
-        """
         self.density,self.name = None,None
-        if value==None:
+        if value == None or value == '':
             self.structure = []
         elif isinstance(value,Formula):
             self.__dict__ = copy(value.__dict__)
@@ -116,14 +104,22 @@ class Formula(object):
 
     def _atoms(self):
         """
-        Dictionary of {isotope: count} for the formula.
+        { *atom*: *count*, ... } 
+
+        Composition of the molecule.  Referencing this attribute computes 
+        the *count* as the total number of each element or isotope in the 
+        chemical formula, summed across all subgroups.
         """
         return _count_atoms(self.structure)
     atoms = property(_atoms,doc=_atoms.__doc__)
 
     def _mass(self):
         """
-        Molar mass of the molecule.
+        atomic mass units u (C[12] = 12 u)
+
+        Atomic mass of the molecule.
+        
+        Referencing this attribute computes the mass of the chemical formula.
         """
         mass = 0
         for el,count in self.atoms.iteritems():
@@ -134,31 +130,40 @@ class Formula(object):
     _packing_factors = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
                             fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
 
-    def volume(self,packing_factor='hcp'):
+    def volume(self, packing_factor='hcp'):
         """
-        Estimate molecular volume.
+        Estimate molecular volume. 
 
-        The crystal volume is estimated from the element covalent
-        radius and the atomic packing factor using::
+        The crystal volume can be estimated from the element covalent radius 
+        and the atomic packing factor using::
         
-            *packing_factor* = N_atoms V_atom / V_crystal
+            packing_factor = N_atoms V_atom / V_crystal
 
-        The default packing factor is for hexagonal close-packed.
-
-        *packing_factor* can also be given as the name of the crystal lattice.
+        Packing factors for a number of crystal lattice structures are defined.
 
         .. table:: Crystal lattice names and packing factors
+            
+            ========   =======================   =============    ==============
+            Code       Description               Formula          Packing factor
+            ========   =======================   =============    ==============
+            cubic      simple cubic              pi 1/6           0.52360
+            bcc        body-centered cubic       pi sqrt(3)/8     0.68017
+            hcp        hexagonal close-packed    pi 1/sqrt(18)    0.74048
+            fcc        face-centered cubic       pi 1/sqrt(18)    0.74048
+            diamond    diamond cubic             pi sqrt(3)/16    0.34009
+            ========   =======================   =============    ==============
+         
+        :Parameters:
+            *packing_factor*  = 'hcp' : float or string
+                Atomic packing factor.  If *packing_factor* is the name of
+                a crystal lattice, use the *lattice* packing factor.
+        
+        :Returns: *volume* : float | A^3 
+             Molecular volume. 
 
-           =======  ====================== ============= ==============
-           Code     Description            Formula       Packing factor
-           =======  ====================== ============= ==============
-           cubic    simple cubic           pi 1/6         0.52360
-           bcc      body-centered cubic    pi sqrt(3)/8   0.68017
-           hcp      hexagonal close-packed pi 1/sqrt(18)  0.74048
-           fcc      face-centered cubic    pi 1/sqrt(18)  0.74048
-           diamond  diamond cubic          pi sqrt(3)/16  0.34009
-           =======  ====================== ============= ==============
+        :Raises:
 
+             *ValueError* : *lattice* is not defined
         """
         # Compute atomic volume
         V = 0
@@ -167,16 +172,29 @@ class Formula(object):
         V *= 4.*pi/3
 
         # Translate packing factor from string
-        try: packing_factor = Formula._packing_factors[packing_factor.lower()]
-        except: pass
+        try:
+            _ = packing_factor + ""
+        except:
+            pass
+        else:
+            packing_factor = Formula._packing_factors[packing_factor.lower()]
         return V/packing_factor
 
     # TODO: move neutron/xray sld to extension
     def neutron_sld(self, wavelength=1):
         """
         Neutron scattering information for the molecule.
-        Returns scattering length density (real, imaginary, incoherent).
-        Returns None if the density is not known.
+
+        :Parameters:
+            *wavelength* : float | A
+                Wavelength of the neutron beam.
+        
+        :Returns: *sld* : (float, float, float) | inv A^2
+ 
+             Neutron scattering length density is returned as the tuple
+             (*real*, *imaginary*, *incoherent*), or as (None, None, None) 
+             if the mass density is not known.
+
         """
         if self.density is None: return None,None,None
         from nsf import neutron_sld_from_atoms
@@ -185,9 +203,23 @@ class Formula(object):
 
     def xray_sld(self, energy=None, wavelength=None):
         """
-        X-ray scattering information for the molecule.
-        Returns complex scattering length density (real, imaginary).
-        Returns None if the density is not known.
+        X-ray scattering length density for the molecule.
+
+        :Parameters:
+
+            *energy* : float | keV
+                Energy of atom.
+
+            *wavelength* : float | A
+                Wavelength of atom.
+
+            .. Note: One of *wavelength* or *energy* is required.
+
+        :Returns: *sld* : (float, float) | inv A^2
+                X-ray scattering length density is return as the tuple
+                (*real*, *imaginary*), or as (None, None) if the mass 
+                density is not known.
+
         """
         if self.density is None: return None,None
         from xsf import xray_sld_from_atoms
@@ -196,7 +228,7 @@ class Formula(object):
 
     def __eq__(self,other):
         """
-        Return True if two formulas represent the same structure.  Note
+        Return True if two formulas represent the same structure. Note
         that they may still have different names and densities.
         Note: doesn't check order.
         """
@@ -253,26 +285,17 @@ class Formula(object):
 
 def formula_grammar(table=None):
     """
-    Return a parser for molecular formulas.
+    Construct a parser for molecular formulas. 
 
-    The parser.parseString() method returns a list of
-    pairs (count,fragment),  where fragment is an isotope, an
-    element or a list of pairs (count,fragment).
-
-    Formulas are parsed from strings using the following grammar::
-
-        number    :: [1-9][0-9]*
-        fraction  :: ( | '0' | number) '.' [0-9]*
-        count     :: number | fraction | ''
-        symbol    :: [A-Z][a-z]*
-        isotope   :: '[' number ']' | ''
-        element   :: symbol isotope count
-        separator :: '+' | ' '
-        group     :: count element+ | '(' formula ')' count
-        grammar   :: group separator formula | group | ''
-
-    If table is specified, then elements and their associated fields
-    will be chosen from that periodic table rather than the default.
+    :Parameters:
+        *table* = None : PeriodicTable
+             If table is specified, then elements and their associated fields
+             will be chosen from that periodic table rather than the default.
+    :Returns: *parser* : pyparsing.ParserElement
+         The ``parser.parseString()`` method returns a list of 
+         pairs (*count,fragment*), where fragment is an *isotope*, 
+         an *element* or a list of pairs (*count,fragment*).    
+                
     """
     table = default_table(table)
 

@@ -4,116 +4,170 @@
 Basic usage
 ***********
 
-Access particular elements by name::
+This section provides various examples on how to get started with Periodic table.
+These examples should work on all periodic table supported platforms.
 
-    from periodictable import hydrogen
-    print "H mass", hydrogen.mass, hydrogen.mass_units
+Access particular elements by name:
 
-Access particular elements as symbols::
+.. doctest::
 
-    from periodictable import H,B,Cu,Ni
-    print "H mass", H.mass, H.mass_units
-    print "B absorption", B.neutron.absorption, B.neutron.absorption_units
-    print "Ni f1/f2 for Cu K-alpha X-rays", Ni.xray.scattering_factors(Cu.K_alpha)
+    >>> from periodictable import hydrogen
+    >>> print "H mass", hydrogen.mass, hydrogen.mass_units
+    H mass 1.00794 u
 
-Access isotopes using mass number subscripts::
+Access particular elements as symbols:
 
-    print "58-Ni vs 62-Ni scattering", \\
-        Ni[58].neutron.coherent, Ni[62].neutron.coherent
+.. doctest::
 
-Access elements indirectly::
+    >>> from periodictable import H,B,Cu,Ni
+    >>> print "B absorption", B.neutron.absorption
+    B absorption 767.0
+    >>> print "Ni f1/f2 for Cu K-alpha X-rays", Ni.xray.scattering_factors(Cu.K_alpha)
+    Ni f1/f2 for Cu K-alpha X-rays (27.13235204490778, 8.4032444506816351)
 
-    import periodictable
-    print "Cd density", periodictable.Cd.density, periodictable.Cd.density_units
+Access isotopes using mass number subscripts:
 
-Import all elements::
+.. doctest::
 
-    from periodictable import *
+    >>> print "58-Ni vs 62-Ni scattering", Ni[58].neutron.coherent, Ni[62].neutron.coherent
+    58-Ni vs 62-Ni scattering 26.1 9.5
+
+Access elements indirectly:
+
+.. doctest::
+
+    >>> import periodictable
+    >>> print "Cd density", periodictable.Cd.density, periodictable.Cd.density_units
+    Cd density 8.65 g/cm**3
+
+Import all elements:
+
+.. doctest::
+
+    >>> from periodictable import *
+    >>> print periodictable.H
+    H
+    >>> print periodictable.H.mass
+    1.00794
 
 Deuterium and tritium are special isotopes named D and T
-some neutron information is available as 'n'::
+some neutron information is available as 'n':
 
-    print "D mass",D.mass
-    print "neutron mass",n.mass
+.. doctest::
 
-Process all the elements::
+    >>> print "D mass",D.mass
+    D mass 2.014101778
+    >>> print "neutron mass",n.mass
+    neutron mass 1.00866491597
 
-    for el in periodictable.elements: # if you used "import periodictable"
-        print el.symbol,el.name
+Process all the elements:
 
-    for el in elements: # if you used "from periodictable import *"
-        print el.symbol,el.number
+.. doctest::
 
-Process all the isotopes for an element::
+    >>> # importing periodic table as "import periodictable"
+    >>> for el in periodictable.elements: # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    ...     print el.symbol,el.name
+    n neutron
+    H hydrogen
+    He helium
+       ...
+    Uuh ununhexium
 
-    for iso in periodictable.Fe:
-        print iso,iso.mass
+Another example for processing all elements:
 
-Retrieve ion specific properties such as magnetic_ff::
+.. doctest::
 
-    from periodictable import Cl
-    for charge, ff in Cl.magnetic_ff.items():
-        print "ff.j0", charge, ff.j0
+    >>> # importing periodic table as "from periodictable import *"
+    >>> for el in elements: # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    ...     print el.symbol,el.number
+    n 0
+    H 1
+    He 2
+       ...
+
+Process all the :class:`isotopes <periodictable.core.Isotope>` for an element:
+
+.. doctest::
+
+    >>> for iso in periodictable.H:
+    ...     print iso,iso.mass
+    1-H 1.0078250321
+    D 2.014101778
+    T 3.0160492675
+    4-H 4.02783
+    5-H 5.03954
+    6-H 6.04494
+
+Retrieve ion specific properties such as :class:`magentic form factor <periodictable.magnetic_ff.MagneticFormFactor>`:
+
+.. doctest::
+
+    >>> import periodictable
+    >>> ion = periodictable.Fe.ion[2]
+    >>> print ion.magnetic_ff[ion.charge].M_Q([0,0.1,0.2])
+    [ 1.          0.99935255  0.99741366]
 
 You can create a unique handle to an individual ion.  In addition to storing
 the ion charge, this can be used to reference the underlying properties of
-the element or isotope::
+the element or isotope:
 
-    Ni58_2 = periodictable.Ni[58].ion[2]
-    Ni_2 = periodictable.Ni.ion[2]
-    print "charge for Ni2+",Ni_2.charge
-    print "mass for Ni[58] and for natural abundance", Ni58_2.mass, Ni_2.mass
+.. doctest::
+
+    >>> Ni58_2 = periodictable.Ni[58].ion[2]
+    >>> Ni_2 = periodictable.Ni.ion[2]
+    >>> print "charge for Ni2+",Ni_2.charge
+    charge for Ni2+ 2
+    >>> print "mass for Ni[58] and for natural abundance", Ni58_2.mass, Ni_2.mass
+    mass for Ni[58] and for natural abundance 57.9353479 58.6934
 
 The ion specific properties can be accessed from the ion using ion.charge
-for the ion index::
+for the ion index:
 
-    import pylab
-    Fe_2 = periodictable.Fe.ion[2]
-    Q = pylab.linspace(0,6,200)
-    M = Fe_2.magnetic_ff[Fe_2.charge].j0_Q(Q)
-    pylab.plot(Q,M)
+.. doctest::
 
-Missing properties generally evaluate to None::
+    >>> import pylab
+    >>> import periodictable
+    >>> Fe_2 = periodictable.Fe.ion[2]
+    >>> Q = pylab.linspace(0,16,200)
+    >>> M = Fe_2.magnetic_ff[Fe_2.charge].j0_Q(Q)
+    >>> pylab.xlabel(r'Magnetic Form Factor for Fe') # doctest: +SKIP
+    >>> pylab.ylabel(r'$\AA^{-1}$') # doctest: +SKIP
+    >>> pylab.title('Ion specific property for Fe') # doctest: +SKIP
+    >>> pylab.plot(Q,M) # doctest: +SKIP
 
-    print "Radon density",periodictable.Rn.density
+.. plot:: plots/magnetic_ff.py
 
-Helper function for listing only the defined properties::
+Missing properties generally evaluate to *None*:
 
-    elements.list('symbol','K_alpha',format="%s K-alpha=%s")
+.. doctest::
 
-Work with molecules::
+    >>> print "Radon density",periodictable.Rn.density
+    Radon density None
 
-    SiO2 = periodictable.formula('SiO2')
-    hydrated = SiO2 + periodictable.formula('3H2O')
-    print hydrated,'mass',hydrated.mass
-    rho,mu,inc = periodictable.neutron_sld('SiO2+3H2O',density=1.5,
-                                           wavelength=4.75)
-    print hydrated,'neutron sld','%.3g'%rho
-    rho,mu = periodictable.xray_sld(hydrated,density=1.5,wavelength=Cu.K_alpha)
-    print hydrated,'X-ray sld','%.3g'%rho
+Specific defined properties related to elements can be accessed in a table format as shown in following example :
 
-.. _bundling:
+.. doctest::
 
-********************
-Bundling with py2exe
-********************
+    >>> elements.list('symbol','K_alpha',format="%s K-alpha = %s") # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    Ti K-alpha = 2.7496
+    Cr K-alpha = 2.2909
+    Mn K-alpha = 2.1031
+       ...
+    Ag K-alpha = 0.5608
 
-When using periodictable as part of a bundled package, you need to be sure to
-include the data associated with the tables.  This can be done by adding a
-periodictable entry into the package_data property of the distutils setup file::
+Working with molecules:
 
-    import periodictable
-    ...
-    setup(..., package_data=periodictable.package_data, ...)
+.. doctest::
 
-If you have a number of packages which add package data (for example, periodic
-table extensions), then you can use the following::
+    >>> SiO2 = periodictable.formula('SiO2')
+    >>> hydrated = SiO2 + periodictable.formula('3H2O')
+    >>> print hydrated,'mass',hydrated.mass
+    SiO2(H2O)3 mass 114.13014
+    >>> rho,mu,inc = periodictable.neutron_sld('SiO2+3H2O',density=1.5,wavelength=4.75)
+    >>> print hydrated,'neutron sld','%.3g'%rho
+    SiO2(H2O)3 neutron sld 0.849
+    >>> rho,mu = periodictable.xray_sld(hydrated,density=1.5,wavelength=Cu.K_alpha)
+    >>> print hydrated,'X-ray sld','%.3g'%rho
+    SiO2(H2O)3 X-ray sld 13.5
 
-    import periodictable
-
-    package_data = {}
-    ...
-    package_data.update(periodictable.package_data)
-    ...
-    setup(..., package_data=package_data, ...)
 

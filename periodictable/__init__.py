@@ -4,11 +4,11 @@
 Extensible periodic table of elements
 
 The periodictable package contains mass for the isotopes and density for the
-elements.  It calculates xray and neutron scattering information for
-isotopes and elements.  Composite values can be calculated from
+elements. It calculates xray and neutron scattering information for
+isotopes and elements. Composite values can be calculated from
 chemical formula and density.
 
-The table is extensible.  See the user manual for details.
+The table is extensible. See the user manual for details.
 
 ----
 
@@ -67,32 +67,54 @@ def _load_covalent_radius():
     """
     Add covalent_radius property to the elements.
 
-    Note: covalent radii data source is unknown.
+    .. Note:: covalent radii data source is unknown.
     """
     import covalent_radius
     covalent_radius.init(elements)
-core.delayed_load(['covalent_radius','covalent_radius_units',
-                   'covalent_radius_uncertainty'],
+core.delayed_load(['covalent_radius'],
+                  _load_covalent_radius)
+
+def _load_covalent_radius():
+    """
+    Add covalent_radius units property to the elements.
+    """
+
+    import covalent_radius
+    covalent_radius.init(elements)
+core.delayed_load(['covalent_radius_units'],
+                  _load_covalent_radius)
+
+def _load_covalent_radius():
+    """
+    Add covalent_radius uncertainty property to the elements.
+    """
+
+    import covalent_radius
+    covalent_radius.init(elements)
+core.delayed_load(['covalent_radius_uncertainty'],
                   _load_covalent_radius)
 
 def _load_crystal_structure():
     """
     Add crystal_structure property to the elements.
 
-    Ashcroft and Mermin
+    Reference:
+        *Ashcroft and Mermin.*
     """
+
     import crystal_structure
     crystal_structure.init(elements)
 core.delayed_load(['crystal_structure'], _load_crystal_structure)
 
 def _load_neutron():
     """
-    Neutron scattering factors, nuclear_spin and abundance
+    Neutron scattering factors, *nuclear_spin* and *abundance*
     properties for elements and isotopes.
 
-    H. Rauch and W. Waschkowski
-    ILL Neutron Data Booklet.
+    Reference:
+        *Rauch. H. and Waschkowski. W., ILL Nuetron Data Booklet.*
     """
+
     import nsf
     nsf.init(elements)
 core.delayed_load(['neutron'],_load_neutron, isotope=True)
@@ -100,45 +122,42 @@ core.delayed_load(['neutron'],_load_neutron, isotope=True)
 def _load_xray():
     """
     X-ray scattering properties for the elements.
-
-    Center for X-Ray Optics.
-    L. Henke, E. M. Gullikson, and J. C. Davis
+     
+    Reference:
+        *Center for X-Ray optics. Henke. L., Gullikson. E. M., and Davis. J. C.*
     """
+
     import xsf
     xsf.init(elements)
 core.delayed_load(['xray'], _load_xray, ion=True)
 
 def _load_emission_lines():
     """
-    K_alpha and K_beta1 emission lines for selected elements.
-
-    D. C. Creagh and J. H. Hubbell
-    International Tables for Crystallography Volume C, A.J.C. Wilson (ed)
+    X-ray emission lines for various elements, including Ag, Pd, Rh, Mo,
+    Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti. *K_alpha* is the average of
+    K_alpha1 and K_alpha2 lines.
     """
+ 
     import xsf
     xsf.init_spectral_lines(elements)
 core.delayed_load(['K_alpha','K_beta1','K_alpha_units','K_beta1_units'],
                   _load_emission_lines)
 
-
 def _load_magnetic_ff():
     """
-    Magnetic Form Factors.
+    Magnetic Form Fators. These values are directly from CrysFML.
 
-    These values are taken directly from CrysFML.
-
-    P. J. Brown (Section 4.4.5)
-    International Tables for Crystallography Volume C, A. J. C. Wilson (ed)
+    Reference:
+        *Brown. P. J.(Section 4.4.5) International Tables for Crystallography Volume C, Wilson. A.J.C.(ed).*
     """
+
     import magnetic_ff
     magnetic_ff.init(elements)
 core.delayed_load(['magnetic_ff'], _load_magnetic_ff)
 
 def _load_ionic_radius():
     """
-    Ionic radii for various charges.
-
-    These values are taken directly from CrysFML.
+    Ionic radii for various charges.These values are directly from CrysFML. 
     """
     import ionic_radius
     ionic_radius.init(elements)
@@ -217,5 +236,6 @@ def xray_sld(formula,density=None,wavelength=None,energy=None):
     import xsf
     return xsf.xray_sld(formula,density=density,
                         wavelength=wavelength,energy=energy)
+
 
 #del core, mass, density

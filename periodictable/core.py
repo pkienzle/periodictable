@@ -1,49 +1,63 @@
 # This program is public domain
 """
-Periodic table definition, with classes for elements and isotopes.
+Core classes for the periodic table.
 
-PeriodTable
-    Creates an empty periodic table.  Properties are added to it
-    separately.  Note this is not a singleton.  But unless you are
-    very careful you should use the default table defined for the
-    package.
+* :class:`PeriodicTable`
+   The periodic table with attributes for each element.
 
-Element
-    A class to hold the properties for each element.
+   .. Note:: PeriodicTable is not a singleton class.  Use *periodictable.elements*
+      to access the common table.
 
-Isotope
-    A class to hold the properties for individual isotopes.
+* :class:`Element`
+   Element properties such as name, symbol, mass, density, etc.
 
-Ion
-    A class to hold the properties for individual ions.
+* :class:`Isotope`
+   Isotope properties such as mass, density and neutron scattering factors.
 
-Elements are accessed from a periodic table using table[number], table.name
-or table.symbol where symbol is the two letter symbol.  Individual isotopes
-are accessed using el[isotope].  Individual ions are references using
-el.ion[charge].  If there are properties specific to the ion and the isotope,
-they will be referenced by el[isotope].property[charge].
+* :class:`Ion`
+   Ion properties such as charge.
 
-delayed_load(attrs, loader, element=True, isotope=False, ion=False)
+Elements are accessed from a periodic table using ``table[number]``, 
+``table.name`` or ``table.symbol`` where *symbol* is the two letter symbol. 
+Individual isotopes are accessed using ``element[isotope]``. Individual ions 
+are references using ``element.ion[charge]``.  There are presently no
+properties specific to both ion and isotope.
+
+Helper functions:
+
+* :func:`delayed_load`
     Delay loading the element attributes until they are needed.
 
-See the user manual for information on extending the periodic table
-with your own attributes.
+* :func:`get_data_path`
+    Return the path to the periodic table data files.
+
+* :func:`define_elements`
+    Define external variables for each element in namespace.    
+
+* :func:`default_table`
+    Returns the common periodic table.
+
+.. seealso::
+
+    :ref:`Adding properties <extending>` for details on extending the periodic table with your own attributes.
+
+    :ref:`Private tables <private-table>` for details on managing your own periodic table with custom values for the attributes.
+
 """
 __docformat__ = 'restructuredtext en'
-__all__ = ['delayed_load', 'define_elements',
+__all__ = ['delayed_load', 'define_elements', 'get_data_path', 'default_table',
            'Ion', 'Isotope', 'Element', 'PeriodicTable']
 
 import copy
 
 def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
     """
-    Delayed loading of an element property table.  When any of props
+    Delayed loading of an element property table.  When any of property
     is first accessed the loader will be called to load the associated
-    data.  The help string starts out as the help string for the loader
+    data. The help string starts out as the help string for the loader
     function.
-    
-    The attribute may be associated any of isotope, ion or element.
-    Some properties, such as mass, have both an isotope property for the
+    The attribute may be associated with any of :class:`Isotope`, :class:`Ion`, or :class:`Element`.
+    Some properties, such as :mod:`mass <periodictable.mass>`, have both an isotope property for the
     mass of specific isotopes, as well as an element property for the
     mass of the collection of isotopes at natural abundance.  Set the 
     keyword flags *element*, *isotope* and/or *ion* to specify which
@@ -86,14 +100,14 @@ def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
 
         This function is assumed to be called when the data loader for the
         attribute is called before the property is referenced (for example,
-        if somebody imports periodictable.xsf before referencing Ni.xray). In
-        this case, we simply need to clear the delayed load property and
+        if somebody imports periodictable.xsf before referencing Ni.xray). 
+        In this case, we simply need to clear the delayed load property and
         let the loader set the values as usual.
 
         If the user tries to override a value in the table before first
-        referencing the table, then the above assumption is false.  E.g.,
+        referencing the table, then the above assumption is false. E.g.,
         "Ni.K_alpha=5" followed by "print Cu.K_alpha" will yield an
-        undefined Cu.K_alpha.  This will be difficult for future users
+        undefined Cu.K_alpha. This will be difficult for future users
         to debug.
         """
         def setfn(el, value):
@@ -120,37 +134,61 @@ def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
 # Define the element names from the element table.
 class PeriodicTable(object):
     """
-    Defines the period table of the elements with isotopes.
-
+    Defines the periodic table of the elements with isotopes.
     Individidual elements are accessed by name, symbol or atomic number.
-    Individual isotopes are addressable by element[mass_number] or
-    elements.isotope('#-Xx').
+    Individual isotopes are addressable by ``element[mass_number]`` or
+    ``elements.isotope(element name)``, ``elements.isotope(element symbol)``.
 
-    For example, the following all retrieve iron::
+    For example, the following all retrieve iron:
 
-        elements[26]
-        elements.Fe
-        elements.symbol('Fe')
-        elements.name('iron')
-        elements.isotope('Fe')
+    .. doctest::
 
-    To get iron-56, use::
+        >>> from periodictable import *
+        >>> print elements[26]
+        Fe
+        >>> print elements.Fe
+        Fe
+        >>> print elements.symbol('Fe')
+        Fe
+        >>> print elements.name('iron')
+        Fe
+        >>> print elements.isotope('Fe')
+        Fe
 
-        elements[26][56]
-        elements.Fe[56]
-        elements.isotope('56-Fe')
 
-    Deuterium and tritium are defined as D and T.  Some
-    neutron properties are available in elements[0]
+    To get iron-56, use:
 
-    To show all the elements in the table, use the iterator::
+    .. doctest::
 
-        for element in elements:  # lists the element symbols
-            print el.symbol,el.number
+        >>> print elements[26][56]
+        56-Fe
+        >>> print elements.Fe[56]
+        56-Fe
+        >>> print elements.isotope('56-Fe')
+        56-Fe
 
-    Properties can be added to the elements as needed, including mass, nuclear
-    and X-ray scattering cross sections.  See the help(periodictable)
-    for details.
+    
+    Deuterium and tritium are defined as 'D' and 'T'.  Some
+    neutron properties are available in ``elements[0]``.
+
+    To show all the elements in the table, use the iterator:
+
+    .. doctest::
+        
+        >>> from periodictable import *
+        >>> for el in elements:  # lists the element symbols
+        ...     print el.symbol,el.name  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        n neutron
+        H hydrogen
+        He helium
+        ...
+        Uuh ununhexium 
+
+
+    .. Note::
+           Properties can be added to the elements as needed, including *mass*,
+           *nuclear* and *X-ray* scattering cross sections. 
+           See section :ref:`Adding properties <extending>` for details.
     """
     def __init__(self, table="default"):
         if table in PRIVATE_TABLES:
@@ -174,7 +212,7 @@ class PeriodicTable(object):
 
     def __getitem__(self, Z):
         """
-        Retrieve element Z
+        Retrieve element Z.
         """
         return self._element[Z]
 
@@ -189,8 +227,25 @@ class PeriodicTable(object):
 
     def symbol(self, input):
         """
-        Lookup the symbol in the periodic table (and make sure it is an element
-        or deuterium or tritium (D or T).
+        Lookup the an element in the periodic table using its symbol.  Symbols
+        are included for 'D' and 'T', deuterium and tritium.
+        
+        :Parameters:
+            *input* : string
+                Element symbol to be looked up in periodictable.
+        
+        :Returns: Element
+
+        :Raises:
+            ValueError if the element symbol is not defined.
+
+        :Example: Print the element corresponding to 'Fe'.
+
+        .. doctest::
+
+            >>> import periodictable
+            >>> print periodictable.elements.symbol('Fe')
+            Fe
         """
         if hasattr(self,input):
             value = getattr(self,input)
@@ -200,7 +255,24 @@ class PeriodicTable(object):
 
     def name(self, input):
         """
-        Lookup the full name of the element in the period table.
+        Lookup an element given its name.
+     
+        :Parameters:
+            *input* : string
+                Element name to be looked up in periodictable.
+        
+        :Returns: Element
+
+        :Raises:
+            *ValueError* if element does not exist.
+
+        :Example: Print the element corresponding to 'iron'.
+
+        .. doctest::
+
+            >>> import periodictable
+            >>> print periodictable.elements.name('iron')
+            Fe
         """
         for el in self:
             if input == el.name: return el
@@ -211,8 +283,25 @@ class PeriodicTable(object):
     def isotope(self, input):
         """
         Lookup the element or isotope in the periodic table. Elements
-        are assumed to be given by the standard element symbols.  Isotopes
-        are given by number-symbol, or D and T for 2-H and 3-H.
+        are assumed to be given by the standard element symbols. Isotopes
+        are given by number-symbol, or 'D' and 'T' for 2-H and 3-H.
+
+        :Parameters:
+            *input* : string
+                Element name or isotope to be looked up in periodictable.
+        
+        :Returns: Element
+
+        :Raises:
+            *ValueError* if element or isotope is not defined.
+
+        :Example: Print the element corresponding to '58-Ni'.
+
+        .. doctest::
+
+            >>> import periodictable
+            >>> print periodictable.elements.isotope('58-Ni')
+            58-Ni
         """
         # Parse #-Sym or Sym
         # If # is not an integer, set isotope to -1 so that the isotope
@@ -253,11 +342,33 @@ class PeriodicTable(object):
 
     def list(self,*props,**kw):
         """
-        list('prop1','prop2',...,format='format')
-            Print a list of elements with the given set of properties.
+        Print a list of elements with the given set of properties. 
 
-        If format is given, then it must contain one %s for each property.
+        :Parameters:
+            *prop1*, *prop2*, ... : string
+                Name of the properties to print
+            *format*: string
+                Template for displaying the element properties, with one
+                % for each property.
+        
+        :Returns: None
+
+        :Example:
+            Print a table of mass and density.
+
+        .. doctest::
+
+            >>> from periodictable import elements
+            >>> elements.list('symbol','mass','density',
+            ...     format="%-2s: %6.2f u %5.2f g/cm^3") # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+            H :   1.01 u   0.07 g/cm^3
+            He:   4.00 u   0.12 g/cm^3
+            Li:   6.94 u   0.53 g/cm^3
+            ...
+            Bk: 247.00 u  14.00 g/cm^3
         """
+        #TODO: override signature in sphinx with
+        #    .. method:: list(prop1, prop2, ..., format='')
         format = kw.pop('format',None)
         assert len(kw) == 0
         for el in self:
@@ -266,6 +377,8 @@ class PeriodicTable(object):
             except AttributeError:
                 # Skip elements which don't define all the attributes
                 continue
+            # Skip elements with a value of None
+            if any(v==None for v in L): continue
 
             if format is None:
                 print " ".join(str(p) for p in L)
@@ -275,6 +388,8 @@ class PeriodicTable(object):
                 except:
                     print "format",format,"args",L
                     raise
+
+
 
 class IonSet(object):
     def __init__(self, element_or_isotope):
@@ -291,10 +406,9 @@ class IonSet(object):
 
 class Ion(object):
     """Periodic table entry for an individual ion.
-
-    An ion is associated with an element.  In addition to the element
-    properties (symbol, name, atomic number), it has specific ion
-    properties (charge).  Properties not specific to the ion (i.e., charge)
+    An ion is associated with an element. In addition to the element
+    properties (*symbol*, *name*, *atomic number*), it has specific ion
+    properties (*charge*). Properties not specific to the ion (i.e., *charge*)
     are retrieved from the associated element.
     """
     def __init__(self, element, charge):
@@ -325,11 +439,10 @@ class Ion(object):
 
 class Isotope(object):
     """Periodic table entry for an individual isotope.
-
     An isotope is associated with an element.  In addition to the element
-    properties (symbol, name, atomic number), it has specific isotope
-    properties (isotope number, nuclear spin, relative abundance).
-    Properties not specific to the isotope (e.g., x-ray scattering factors)
+    properties (*symbol*, *name*, *atomic number*), it has specific isotope
+    properties (*isotope number*, *nuclear spin*, *relative abundance*).
+    Properties not specific to the isotope (e.g., *x-ray scattering factors*)
     are retrieved from the associated element.
     """
     def __init__(self,element,isotope_number):
@@ -353,10 +466,9 @@ class Isotope(object):
 
 class Element(object):
     """Periodic table entry for an element.
-
     An element is a name, symbol and number, plus a set of properties.
-    Individual isotopes can be referenced as element[isotope_number].
-    Individual ionization states can be referenced by element.ion[charge]
+    Individual isotopes can be referenced as element[*isotope_number*].
+    Individual ionization states can be referenced by element.ion[*charge*].
     """
     table = "default"
     charge = 0
@@ -379,16 +491,23 @@ class Element(object):
     def add_isotope(self,number):
         """
         Add an isotope for the element.
+
+        :Parameters:
+            *number* : integer
+                Isotope number, which is the number protons plus neutrons.
+        
+        :Returns: None
         """
         if number not in self._isotopes:
             self._isotopes[number] = Isotope(self,number)
         return self._isotopes[number]
+    
     def __getitem__(self,number):
         return self._isotopes[number]
 
     def __iter__(self):
         """
-        Process the elements in Z order
+        Process the elements in Z order.
         """
         for isotope in self.isotopes:
             yield self._isotopes[isotope]
@@ -543,7 +662,7 @@ def default_table(table=None):
     """
     Return the default table unless a specific table has been requested.
 
-    Used in a context like::
+    This is to be used in a context like::
 
         def summary(table=None):
             table = core.default_table(table)
@@ -556,18 +675,23 @@ def default_table(table=None):
 
 def define_elements(table, namespace):
     """
-    Define external variables for each element in namespace.
+    Define external variables for each element in namespace. Elements 
+    are defined both by name and by symbol.
 
-    Elements are defined both by name and by symbol.
+    This is called from *__init__* as::
 
-    Returns the list of names defined.
-
-    This is called from __init__ as::
-
-        elements = core.PeriodicTable()
+        elements = core.default_table()
         __all__  += core.define_elements(elements, globals())
 
-    Note that this will only work namespace as globals(), not as locals()!
+    :Parameters:
+         *table* : PeriodicTable
+             Set of elements
+         *namespace* : dict
+             Namespace in which to add the symbols.
+    :Returns: [string, ...]
+        A sequence listing the names defined.
+
+    .. Note:: This will only work for the *namespace* globals(), not locals()!
     """
 
     # Build the dictionary of element symbols
@@ -586,10 +710,18 @@ def define_elements(table, namespace):
     # return the keys
     return names.keys()
 
+
 def get_data_path(data):
     """
-    Locate the directory for the tables for the named extension.  For example,
-    the xsf extension has data in the 'xsf' data directory.
+    Locate the directory for the tables for the named extension.
+
+    :Parameters:
+         *data* : string
+              Name of the extension data directory.  For example, the xsf
+              extension has data in the 'xsf' data directory.
+
+    :Returns: string
+         Path to the data.
     """
     import os
     def is_data_path(path):
@@ -621,4 +753,5 @@ def get_data_path(data):
         return path
 
     raise RuntimeError('Could not find the periodic table data files')
+
 

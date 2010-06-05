@@ -4,6 +4,10 @@
 Crystal structure
 ******************************************************************************
 
+.. topic:: Section summary
+
+   Module for adding crystal_structure property to the periodictable.
+
 :mod:`periodictable.crystal_structure`
 ==============================================================================
 

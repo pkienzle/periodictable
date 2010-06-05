@@ -1,80 +1,96 @@
 # This program is public domain
-"""
-X-ray scatting information.
+r"""
+This module has one class and nine fuctions.
 
-The following attributes are added to each element::
+   :class:`Xray`
+       X-ray scattering properties for the elements.
 
-    xray.sftable (eV,?,?)
-        Three column table of energy vs. scattering factors f1,f2.
-    xray.scattering_factors(wavelength)
-        Returns f1,f2, the X-ray scattering factors for the given wavelengths
-        interpolated from sftable.
-    xray.f0(Q)
-        Returns f0 for the given vector Q.  Valid for Q in [0,24pi] inv Ang.
-    xray.sld(wavelength=A or energy=keV)
-        Returns scattering length density (real, imaginary) for the
-        given wavelengths or energies.
+The following attributes are added to each element:
 
-    K_alpha, K_beta1 (Angstrom)
+   :func:`Xray.sftable`
+       Three column table of energy vs. scattering factors f1, f2.
 
-        X-ray emission lines for various elements, including
-        Ag, Pd, Rh, Mo, Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti
-        K_alpha is the average of K_alpha1 and K_alpha2 lines.
+   :func:`Xray.scattering_factors`
+       Returns f1, f2, the X-ray scattering factors for the given wavelengths
+       interpolated from sftable.
 
-For private tables, use periodictable.xsf.init(table) and
-periodictable.xsf.spectral_lines(table) to set the data.
+   :func:`Xray.f0`
+       Returns f0 for the given vector Q, with q_i in [0,24\pi] inv Ang.
 
-K-alpha and K-beta1 lines::
+   :func:`Xray.sld`
+       Returns scattering length density (*real*, *imaginary*) for the
+       given wavelengths or energies.
 
-    D.C. Creagh and J.H. Hubbell (1999), "4.2.4 X-ray absorption
-    (or attenuation) coefficients" in A.J.C. Wilson, E.Prince Eds.,
-    International Tables for Crystallography Vol C p220-236.
-    Kluwer Academic Publishers, Dordrecht, The Netherlands.
+The following functions are available for X-ray scatting information processing:
 
-X-ray scattering factors::
+     :func:`xray_wavelength`
+         Finds X-ray wavelength in angstroms given energy in keV.
 
+     :func:`xray_energy`
+         Finds X-ray energy in keV given wavelength in angstroms.
+         
+     :func:`init`
+         Initializes a periodic table with the Lawrence Berkeley Laboratory
+         Center for X-Ray Optics xray scattering factors.
+
+     :func:`init_spectral_lines`
+         Sets the K_alpha and K_beta1 wavelengths for select elements.
+
+     :func:`sld_table`
+         Prints the xray SLD table for the given wavelength.
+
+     :func:`xray_sld`
+         Computes xray scattering length densities for molecules.
+
+     :func:`xray_sld_from_atoms`
+         The underlying scattering length density calculator. This works with
+         a dictionary of atoms and quanties directly.
+
+     :func:`emission_table`
+         Prints a table of emission lines.
+
+K_alpha, K_beta1 (Angstrom):
+    X-ray emission lines for various elements, including Ag, Pd, Rh, Mo,
+    Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti. K_alpha is the average of
+    K_alpha1 and K_alpha2 lines.
+
+X-ray scattering factors:
     Low-Energy X-ray Interaction Coefficients: Photoabsorption,
-    Scattering, and Reflection E = 30-30,000 eV, Z = 1-92
+    Scattering, and Reflection E = 30-30,000 *eV*, Z = 1-92.
 
-    B. L. Henke, E. M. Gullikson, and J. C. Davis
-    Center for X-Ray Optics, 2-400
-    Lawrence Berkeley Laboratory
-    Berkeley, California 94720
+.. Note::
 
-X-ray f0 factors::
-
-    D. Wassmaier, A. Kirfel, Acta Crystallogr. A51 (1995) 416.
-    http://dx.doi.org/10.1107/S0108767394013292
+    For private tables, use :func:`init` and :func:`init_spectral_lines` to set the data.
 
 
 X-ray f1 and f2 tables
 ======================
-
-The data for the tables is stored in periodictable/xsf/*.nff.  The
-following information is from periodictable/xsf/read.me, with
-minor formatting changes.
-
-These [*.nff] files were used to generate the tables published in 
-reference [1]. The files contain three columns of data::
+The data for the tables is stored in the ``periodictable/xsf``. 
+directory.  The following information is from ``periodictable/xsf/read.me``, 
+with minor formatting changes.
+These ``[*.nff]`` files were used to generate the tables published in 
+reference [#Henke1993]_. The files contain three columns of data::
 
     Energy(eV), f_1, f_2,
 
-where f_1 and f_2 are the atomic (forward) scattering factors.
+where *f_1* and *f_2* are the atomic (forward) scattering factors.
 There are 500+ points on a uniform logarithmic mesh with points
-added 0.1 eV above and below "sharp" absorption edges.  (Note: below 
-29 eV f_1 is set equal to -9999.) The tabulated values of f_1 contain 
-a relativistic, energy independent, correction given by::
+added 0.1 eV above and below "sharp" absorption edges. The
+tabulated values of *f_1* contain a relativistic, energy 
+independent, correction given by::
 
     Z* = Z - (Z/82.5)^(2.37).
 
+.. Note::
+    Below 29 *eV* *f_1* is set equal to -9999.
 
 The atomic photoabsorption cross section, mu_a, may be readily obtained
-from the values of f_2 using the relation::
+from the values of *f_2* using the relation::
 
     mu_a = 2*r_0*lambda*f_2
 
-where r_0 is the classical electron radius, and lambda is the wavelength.
-The index of refraction for a material with N atoms per unit volume
+where *r_0* is the classical electron radius, and lambda is the wavelength.
+The index of refraction for a material with *N* atoms per unit volume
 is calculated by::
 
     n = 1 - N*r_0*(lambda)^2*(f_1+if_2)/(2*pi).
@@ -96,39 +112,40 @@ experimental measurements are needed.
 
 Please send any comments about the tables to EMGullikson@lbl.gov.
 
-Note that the following elements have been updated since the publication
-of Ref. [1] in July 1993.
+.. table:: Note that the following elements have been updated since the 
+           publication of Ref. [#Henke1993]_ in July 1993.
 
-Element         Updated         Energy Range
-Mg              1/15/94         30-50 eV
-Al              1/15/94         30-73 eV
-Si              1/15/94         30-100 eV
-Au              11/7/94         2000-6500 eV
-Li              11/15/94        2000-30000 eV
-Si                6/95          30-500 eV
-Fe               10/95          600-800 eV
-Mo               11/97          10-930 eV
-Be                8/04          40-250 eV
-Mo                8/04          25-60 eV
-W                 8/04          35-250 eV
-Ru                8/04          40-1300 eV
-Ti                8/04          20-150 eV
-Sc                4/06          50-1300 eV
-Gd                6/07          12-450 eV
-La                6/07          14-440 eV
+
+
+           ========  ==========   ==============   
+           Element   Updated      Energy Range       
+           ========  ==========   ==============   
+           Mg        1/15/94      30-50 eV
+           Al        1/15/94      30-73 eV
+	   Si        1/15/94      30-100 eV
+	   Au        11/7/94      2000-6500 eV
+ 	   Li        11/15/94     2000-30000 eV
+	   Si        6/95         30-500 eV
+	   Fe        10/95        600-800 eV
+	   Mo        11/97        10-930 eV
+	   Be        8/04         40-250 eV
+	   Mo        8/04         25-60 eV
+	   W         8/04         35-250 eV
+	   Ru        8/04         40-1300 eV
+	   Ti        8/04         20-150 eV
+	   Sc        4/06         50-1300 eV
+	   Gd        6/07         12-450 eV
+	   La        6/07         14-440 eV
+           ========  ==========   ==============  
+          
 
 Data available at:
-  http://henke.lbl.gov/optical_constants/asf.html
-  http://henke.lbl.gov/optical_constants/update.html
+  #. http://henke.lbl.gov/optical_constants/asf.html
+  #. http://henke.lbl.gov/optical_constants/update.html
 
-[1] B.L. Henke, E.M. Gullikson, and J.C. Davis.  "X-ray interactions:
-photoabsorption, scattering, transmission, and reflection at E=50-30000 eV,
-Z=1-92", Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993).
-
-[2] J.H. Hubbell, W.J. Veigele, E.A. Briggs, R.T. Brown, D.T. Cromer,
-and R.J. Howerton. "Atomic Form Factors, Incoherent Scattering Functions,
-and Photon Scattering Cross Sections",  J. Phys. Chem. Ref. Data 4,
-471-538 (1975); erratum in 6, 615-616 (1977).
+.. [#Henke1993] B. L. Henke, E. M. Gullikson, and J. C. Davis.  "X-ray interactions:
+       photoabsorption, scattering, transmission, and reflection at E=50-30000 eV,
+       Z=1-92", Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993).
 
 """
 from __future__ import with_statement
@@ -151,29 +168,43 @@ import logging
 from distutils.filelist import findall
 def xray_wavelength(energy):
     """
-    Find X-ray wavelength in angstroms given energy in keV.
+    Convert X-ray energy to wavelength.
 
-    lambda = h c / E
+    :Parameters:
+        *energy* : float or vector | keV
 
-    h = planck's constant in eV s
-    c = speed of light in m/s
+    :Returns:
+
+    :Algorithm:
+
+        Use the formula:
+
+            lambda = h c / E
+
+        where:
+
+            h = planck's constant in eV s
+            c = speed of light in m/s
     """
     return plancks_constant*speed_of_light/numpy.asarray(energy)*1e7
 
 def xray_energy(wavelength):
     """
-    Find X-ray energy in keV given wavelength in angstroms.
+    Convert X-ray wavelength to energy.
+
+    :Parameters:
+        *wavelength* : float or vector | A
+
+    :Returns:
+        *energy* : float or vector | keV
+
     """
     return plancks_constant*speed_of_light/numpy.asarray(wavelength)*1e7
 
 class Xray(object):
     """
-    X-ray scattering properties for the elements.
-
-    Center for X-Ray Optics.
-    L. Henke, E. M. Gullikson, and J. C. Davis
-
-    See help(periodictable.xsf) for details.
+    X-ray scattering properties for the elements. Refer help(periodictable.xsf)
+    from command prompt for details.
     """
     _nff_path = core.get_data_path('xsf')
     sftable_units = ["eV","",""]
@@ -200,11 +231,21 @@ class Xray(object):
 
     def scattering_factors(self, energy):
         """
-        Return the X-ray scattering factors f',f'' for the given energy (keV).
-        Energy can be a scalar or a vector.
+        X-ray scattering factors f',f''.
 
-        Data comes from the Henke Xray scattering factors database at the
-        Lawrence Berkeley Laboratory Center for X-ray Optics.
+        :Parameters: 
+            *energy* : float or vector | keV
+                X-ray energy.
+               
+        :Returns:
+            *scattering_factors* : (float, float)
+                Values outside the range return NaN.
+
+        :Algorithm:
+
+            Linear interpolation within the Henke Xray scattering factors 
+            database at the Lawrence Berkeley Laboratory Center for X-ray 
+            Optics.
         """
         xsf = self.sftable
         if xsf is None:
@@ -220,17 +261,26 @@ class Xray(object):
         return f1,f2
 
     def f0(self, Q):
-        """
-        Return the isotropic X-ray scattering factors f0 for the input Q.
+        r"""
+        Isotropic X-ray scattering factors f0 for the input Q.
 
-        Q should be given in inverse angstroms.
+        :Parameters: 
+            *Q* : float or vector in [0, 24*pi] | inv A
+                X-ray scattering properties for the elements.
+               
+        :Returns:
+            *f0* : float
+                Values outside the valid range return NaN.
+      
 
-        Note that f0 is often given as a function of sin(theta)/lambda 
-        whereas we are using  Q = 4*pi*sin(theta)/lambda, or in terms
-        of energy Q = 4*pi*sin(theta)*E/(h c).
+        .. Note:: f0 is often given as a function of sin(theta)/lambda
+                  whereas we are using  Q = 4*pi*sin(theta)/lambda, or
+                  in terms of energy Q = 4*pi*sin(theta)*E/(h c).
+        
 
-        D. Wassmaier, A. Kirfel, Acta Crystallogr. A51 (1995) 416.
-        http://dx.doi.org/10.1107/S0108767394013292
+	:Reference:
+             D. Wassmaier, A. Kerfel, Acta Crystallogr. A51 (1995) 416.
+             http://dx.doi.org/10.1107/S0108767394013292
         """
         from . import cromermann
         f = cromermann.fxrayatq(Q=Q, 
@@ -240,23 +290,37 @@ class Xray(object):
 
     def sld(self, wavelength=None, energy=None):
         """
-        Return the X ray scattering length density (real, imaginary).
+        X ray scattering length density.
 
-        If wavelength is given it is converted to energy, ignoring whatever
-        energy was specified.  Wavelength is in angstroms. Energy is in keV.
-        Energy/wavelength can be a scalar or vector.
+        :Parameters: 
 
-        The element SLD is r_e * N * (f1 + 1j*f2), where r_e is the electron
-        radius and N is number density = density/mass * Avogadro's Number.
+            *wavelength* : float or vector | A
+                Wavelength of the X-ray.
 
-        The constants are available directly::
-            periodictable.xsf.electron_radius
-            periodictable.constants.avogadro_number
+            *energy* : float or vector | keV
+                Energy of the X-ray (if *wavelength* not specified).
+
+            .. note:
+                Only one of *wavelength* and *energy* is needed.
+               
+        :Returns:
+            *sld* : (float, float) | inv A^2
+                (*real*, *imaginary*) X-ray scattering length density.
+
+        :Raises:
+            *TypeError* : neither *wavelength* nor *energy* was specified.
+
+	:Algorithm:
+            The element SLD is r_eN(f1+1jf2), where *r_e* is the electron
+            radius and *N* is number density = density/mass * Avogadro's Number.
+
+            The constants are available directly::
+     
+                *r_e* = periodictable.xsf.electron_radius
+                *N_A* = periodictable.constants.avogadro_number
 
         Data comes from the Henke Xray scattering factors database at the
         Lawrence Berkeley Laboratory Center for X-ray Optics.
-
-        Raises TypeError if neither wavelength or energy is specified.
         """
         if wavelength is not None:
             energy = xray_energy(wavelength)
@@ -270,32 +334,54 @@ class Xray(object):
         return rho,irho
 
 # Note: docs and function prototype are reproduced in __init__
-def xray_sld(input,density=None,wavelength=None,energy=None):
+def xray_sld(compound,density=None,wavelength=None,energy=None):
     """
-    Compute xray scattering length densities for molecules.
+    Compute xray scattering length densities for molecules. 
 
-    Returns scattering length density (real, imaginary).
+    :Parameters: 
+        *compound* : Formula initializer
+            Chemical formula initializer.
+        *density* : float | g/cm^3
+            Density of the compound. 
+        *wavelength* : float | A
+            Wavelength of the X-ray.
+        *energy* : float | keV
+            Energy of the X-ray, if *wavelength* is not specified.
+               
+    :Returns:
+        *sld* : (float, float) | inv A^2
+            (*real*, *imaginary*) scattering length density. 
 
-    Wavelength is in angstroms.  Energy is in keV.
-
-    Raises AssertionError if density or wavelength/energy is not provided
+    :Raises:
+        *AssertionError* :  *density* or *wavelength*/*energy* is missing.
     """
     import formulas
-    return xray_sld_from_atoms(formulas.Formula(input).atoms,
+    return xray_sld_from_atoms(formulas.Formula(compound).atoms,
                                density=density,wavelength=wavelength,
                                energy=energy)
 
 def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
     """
-    The underlying scattering length density calculator.  This
-    works with a dictionary of atoms and quanties directly, such
-    as returned by molecule.atoms.
+    The underlying scattering length density calculator. This works with
+    a dictionary of atoms and quanties directly, such as returned by
+    molecule.atoms.
+    
+    :Parameters: 
+        *atoms* : { Isotope: float, ... }
+            Atoms of the compound.
+        *density* : float | g/cm^3
+            Density of the compound.
+        *wavelength* : float | A
+            Wavelength of X-ray.
+        *energy* : float | keV
+            Energy of X-ray if *wavelength* is not specified.
+               
+    :Returns:
+        *sld* : (float, float) | inv A^2
+            (*real*, *imaginary*) scattering length density.
 
-    Returns scattering length density (real, imaginary).
-
-    Wavelength is in angstroms.  Energy is in keV.
-
-    Raises AssertionError if density or wavelength/energy is not provided
+    :Raises:
+        *AssertionError* :  *density* or *wavelength*/*energy* is missing.
     """
 
     if wavelength is not None: energy = xray_energy(wavelength)
@@ -350,10 +436,7 @@ def init_spectral_lines(table):
     table.Ti.K_beta1 = 2.5138
 
 def init(table, reload=False):
-    """
-    Initialize a periodic table with the Lawrence Berkeley Laboratory
-    Center for X-Ray Optics xray scattering factors.
-    """
+    
     if 'xray' in table.properties and not reload: return
     table.properties.append('xray')
     
@@ -380,7 +463,12 @@ def init(table, reload=False):
 
 def plot_xsf(el):
     """
-    Plot the xray scattering factors for a given element.
+    Plots the xray scattering factors for the given element.
+
+    :Parameters: 
+        *el* : Element
+               
+    :Returns: None
     """
     import pylab
     xsf = el.xray.sftable
@@ -394,7 +482,15 @@ def plot_xsf(el):
 
 def sld_table(wavelength, table=None):
     """
-    Print the xray SLD table for the given wavelength
+    Prints the xray SLD table for the given wavelength.
+
+    :Parameters: 
+        *wavelength* : float | A
+            X-ray wavelength.
+        *table* : PeriodicTable
+            The default periodictable unless a specific table has been requested.
+               
+    :Returns: None
     """
     table = default_table(table)
     ## Cu K-alpha Zeff and dZ table
@@ -413,10 +509,18 @@ def sld_table(wavelength, table=None):
 
 def emission_table(table=None):
     """
-    Print a table of emission lines.
+    Prints a table of emission lines.
+
+    :Parameters: 
+        *table* : PeriodicTable.
+            The default periodictable unless a specific table has been requested.
+               
+    :Returns: None
     """
     table = default_table(table)
     print "%3s %7s %7s"%('El','Kalpha','Kbeta1')
     for el in table:
         if hasattr(el,'K_alpha'):
             print "%3s %7.4f %7.4f"%(el.symbol,el.K_alpha,el.K_beta1)
+
+

@@ -51,7 +51,7 @@ def test():
             ## Printing suppressed for the release version
             #print "%2s %.3f % 7.3f % 7.3f"%(el.symbol,err,b_c,el.neutron.b_c)
 
-    neutron_sld_from_atoms = periodictable.nsf.neutron_sld_from_atoms
+    neutron_sld = periodictable.nsf.neutron_sld
     #periodictable.nsf.sld_table(4.75)
     #periodictable.nsf.energy_dependent_table()
 
@@ -66,18 +66,18 @@ def test():
 
     # Check that neutron_sld works as expected
     atoms = formula('SiO2').atoms
-    coh,absorp,inc = neutron_sld_from_atoms(atoms,2.2,wavelength=4.75)
+    coh,absorp,inc = neutron_sld(atoms,2.2,wavelength=4.75)
     assert abs(coh-3.475)<0.001
     #assert abs(absorp-0.0001)<0.00001
     atoms = formula('B4C').atoms
-    coh,absorp,inc = neutron_sld_from_atoms(atoms,2.52,wavelength=4.75)
+    coh,absorp,inc = neutron_sld(atoms,2.52,wavelength=4.75)
     assert abs(coh-7.649)<0.001
     #assert abs(absorp-2.226)<0.001
     Si = elements.Si
 
     # Make sure molecular calculation corresponds to direct calculation
     atoms = formula('Si').atoms
-    coh,absorp,inc = neutron_sld_from_atoms(atoms,Si.density,wavelength=4.75)
+    coh,absorp,inc = neutron_sld(atoms,Si.density,wavelength=4.75)
     coh2,absorp2,inc2 = Si.neutron.sld(wavelength=4.75)
     assert abs(coh-coh2)<0.001
     assert abs(absorp-absorp2)<0.001

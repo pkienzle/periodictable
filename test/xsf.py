@@ -52,17 +52,17 @@ def test():
     """
 
     # Cross check against mo
-    rho,mu = xray_sld_from_atoms({Si:1},density=Si.density,wavelength=1.54)
+    rho,mu = xray_sld({Si:1},density=Si.density,wavelength=1.54)
     rhoSi,muSi = Si.xray.sld(wavelength=1.54)
     assert abs(rho - rhoSi) < 1e-14
     assert abs(mu - muSi) < 1e-14
 
     # Check that neutron_sld works as expected
     atoms = formula('SiO2').atoms
-    rho,mu = xray_sld_from_atoms(atoms,2.2,energy=xray_energy(Cu.K_alpha))
+    rho,mu = xray_sld(atoms,2.2,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-18.87)<0.1
     atoms = formula('B4C').atoms
-    rho,mu = xray_sld_from_atoms(atoms,2.52,energy=xray_energy(Cu.K_alpha))
+    rho,mu = xray_sld(atoms,2.52,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-20.17)<0.1
 
     rho,mu = xray_sld('', density=0, wavelength=Cu.K_alpha)

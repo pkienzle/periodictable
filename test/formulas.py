@@ -26,6 +26,8 @@ def test():
     assert ikaite==formula("CaCO3 6H2O")
     assert ikaite==formula("CaCO3(H2O)6")
     assert ikaite==formula("(CaCO3(H2O)6)1")
+    assert ikaite.hill==formula("CCaO3(H2O)6").hill
+    assert str(ikaite.hill) == "CH12CaO9"
     assert formula([(0.75,Fe),(0.25,Ni)])==formula("Fe0.75Ni0.25")
 
     # Test composition

@@ -41,7 +41,7 @@ Helper functions:
 
     :ref:`Adding properties <extending>` for details on extending the periodic table with your own attributes.
 
-    :ref:`Private tables <private-table>` for details on managing your own periodic table with custom values for the attributes.
+    :ref:`Custom tables <custom-table>` for details on managing your own periodic table with custom values for the attributes.
 
 """
 __docformat__ = 'restructuredtext en'
@@ -192,7 +192,7 @@ class PeriodicTable(object):
     """
     def __init__(self, table="default"):
         if table in PRIVATE_TABLES:
-            raise ValueError("Table %s is already defined"%table)
+            raise ValueError("Table '%s' is already defined"%table)
         PRIVATE_TABLES[table] = self
         self.properties = []
         self._element = {}

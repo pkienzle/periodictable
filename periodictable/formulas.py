@@ -15,6 +15,10 @@ from pyparsing import (Literal, Optional, White, Regex,
 
 from .core import Element, Isotope, default_table
 
+PACKING_FACTORS = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
+                       fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
+
+
 class Formula(object):
     r"""
     Simple chemical formula representation.
@@ -25,14 +29,17 @@ class Formula(object):
     `matplotlib TeX markup <http://matplotlib.sourceforge.net/users/mathtext.html>`_.
 
     :Parameters:
-       *formula* : see below
-           Chemical formula.
+        *formula* : see below
+            Chemical formula.
 
-       *density* : float | g/cm**3
-           Material density.
+        *density* : float | g/cm**3
+            Material density.
 
-       *name* : string
-           Common name for the molecule.
+        *name* : string
+            Common name for the molecule.
+    
+    :Exceptions:
+        *ValueError* : invalid formula initializer
 
     Formula initializers can have a variety of forms:
 
@@ -55,7 +62,6 @@ class Formula(object):
 
     * nothing:
         m = Formula()
-
     """
     def __init__(self,value=None,density=None,name=None):
         self.density,self.name = None,None
@@ -65,6 +71,8 @@ class Formula(object):
             self.__dict__ = copy(value.__dict__)
         elif _isatom(value):
             self.structure = ((1,value),)
+        elif isinstance(value,dict):
+            self.structure = _convert_to_hill_notation(value)
         elif _is_string_like(value):
             try:
                 self._parse_string(value)
@@ -75,7 +83,7 @@ class Formula(object):
             try:
                 self._parse_structure(value)
             except:
-                raise TypeError("not a valid chemical formula")
+                raise ValueError("not a valid chemical formula")
             
         if density: self.density = density
         if name: self.name = name
@@ -113,6 +121,18 @@ class Formula(object):
         return _count_atoms(self.structure)
     atoms = property(_atoms,doc=_atoms.__doc__)
 
+
+    def _hill(self):
+        """
+        Formula
+        
+        Convert the formula to a formula in Hill notation.  Carbon appears
+        first followed by hydrogen then the remaining elements in alphabetical
+        order.
+        """
+        return Formula(self.atoms)
+    hill = property(_hill, doc=_hill.__doc__)
+
     def _mass(self):
         """
         atomic mass units u (C[12] = 12 u)
@@ -127,8 +147,20 @@ class Formula(object):
         return mass
     mass = property(_mass,doc=_mass.__doc__)
 
-    _packing_factors = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
-                            fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
+    def _mass(self):
+        """
+        atomic mass units u (C[12] = 12 u)
+
+        Atomic mass of the molecule.
+        
+        Referencing this attribute computes the mass of the chemical formula.
+        """
+        mass = 0
+        for el,count in self.atoms.iteritems():
+            mass += el.mass*count
+        return mass
+    mass = property(_mass,doc=_mass.__doc__)
+
 
     def volume(self, packing_factor='hcp'):
         """
@@ -177,7 +209,7 @@ class Formula(object):
         except:
             pass
         else:
-            packing_factor = Formula._packing_factors[packing_factor.lower()]
+            packing_factor = PACKING_FACTORS[packing_factor.lower()]
         return V/packing_factor
 
     # TODO: move neutron/xray sld to extension
@@ -189,7 +221,7 @@ class Formula(object):
             *wavelength* : float | A
                 Wavelength of the neutron beam.
         
-        :Returns: *sld* : (float, float, float) | inv A^2
+        :Returns: *sld* : (float, float, float) | 10^-6 inv A^2
  
              Neutron scattering length density is returned as the tuple
              (*real*, *imaginary*, *incoherent*), or as (None, None, None) 
@@ -230,7 +262,7 @@ class Formula(object):
         """
         Return True if two formulas represent the same structure. Note
         that they may still have different names and densities.
-        Note: doesn't check order.
+        Note: use hill representation for an order independent comparison.
         """
         if not isinstance(other,Formula): return False
         return self.structure==other.structure
@@ -390,6 +422,29 @@ def _immutable(seq):
     """Converts lists to tuples so that structure is immutable."""
     if _isatom(seq): return seq
     return tuple( (count,_immutable(fragment)) for count,fragment in seq )
+
+def _hill_compare(a,b):
+    """
+    Compare elements in standard order.
+    """
+    if a.symbol == b.symbol:
+        a = a.isotope if isinstance(a, Isotope) else 0
+        b = b.isotope if isinstance(b, Isotope) else 0
+        return cmp(a,b)
+    elif a.symbol in ("C", "H"):
+        if b.symbol in ("C", "H"):
+            return cmp(a.symbol, b.symbol)
+        else:
+            return -1
+    else:
+        return cmp(a.symbol, b.symbol)
+
+def _convert_to_hill_notation(atoms):
+    """
+    Return elements listed in standard order.
+    """
+    return [(atoms[el], el) for el in sorted(atoms.keys(), cmp=_hill_compare)]
+
 
 def _str_atoms(seq):
     """

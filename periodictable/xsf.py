@@ -55,12 +55,13 @@ K_alpha, K_beta1 (Angstrom):
     K_alpha1 and K_alpha2 lines.
 
 X-ray scattering factors:
-    Low-Energy X-ray Interaction Coefficients: Photoabsorption,
-    Scattering, and Reflection E = 30-30,000 *eV*, Z = 1-92.
+    Low-Energy X-ray Interaction Coefficients: Photoabsorption, scattering
+    and reflection for E in 30 to 30,000 eV, and Z in 1 to 92.
 
 .. Note::
 
-    For private tables, use :func:`init` and :func:`init_spectral_lines` to set the data.
+    For :ref:`custom tables <custom-table>`, use :func:`init` and 
+    :func:`init_spectral_lines` to set the data.
 
 
 X-ray f1 and f2 tables
@@ -82,7 +83,7 @@ independent, correction given by::
     Z* = Z - (Z/82.5)^(2.37).
 
 .. Note::
-    Below 29 *eV* *f_1* is set equal to -9999.
+    Below 29 eV *f_1* is set equal to -9999.
 
 The atomic photoabsorption cross section, mu_a, may be readily obtained
 from the values of *f_2* using the relation::
@@ -209,7 +210,7 @@ class Xray(object):
     _nff_path = core.get_data_path('xsf')
     sftable_units = ["eV","",""]
     scattering_factors_units = ["",""]
-    sld_units = ["Nb","Nb"]
+    sld_units = ["10^-6 inv A^2","10^-6 invA^2"]
     _table = None
     def __init__(self, element):
         self.element = element
@@ -278,7 +279,7 @@ class Xray(object):
                   in terms of energy Q = 4*pi*sin(theta)*E/(h c).
         
 
-	:Reference:
+        :Reference:
              D. Wassmaier, A. Kerfel, Acta Crystallogr. A51 (1995) 416.
              http://dx.doi.org/10.1107/S0108767394013292
         """
@@ -310,7 +311,7 @@ class Xray(object):
         :Raises:
             *TypeError* : neither *wavelength* nor *energy* was specified.
 
-	:Algorithm:
+        :Algorithm:
             The element SLD is r_eN(f1+1jf2), where *r_e* is the electron
             radius and *N* is number density = density/mass * Avogadro's Number.
 
@@ -347,42 +348,16 @@ def xray_sld(compound,density=None,wavelength=None,energy=None):
             Wavelength of the X-ray.
         *energy* : float | keV
             Energy of the X-ray, if *wavelength* is not specified.
-               
+
     :Returns:
-        *sld* : (float, float) | inv A^2
+        *sld* : (float, float) | 10^-6 inv A^2
             (*real*, *imaginary*) scattering length density. 
 
     :Raises:
         *AssertionError* :  *density* or *wavelength*/*energy* is missing.
     """
     import formulas
-    return xray_sld_from_atoms(formulas.Formula(compound).atoms,
-                               density=density,wavelength=wavelength,
-                               energy=energy)
-
-def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
-    """
-    The underlying scattering length density calculator. This works with
-    a dictionary of atoms and quanties directly, such as returned by
-    molecule.atoms.
-    
-    :Parameters: 
-        *atoms* : { Isotope: float, ... }
-            Atoms of the compound.
-        *density* : float | g/cm^3
-            Density of the compound.
-        *wavelength* : float | A
-            Wavelength of X-ray.
-        *energy* : float | keV
-            Energy of X-ray if *wavelength* is not specified.
-               
-    :Returns:
-        *sld* : (float, float) | inv A^2
-            (*real*, *imaginary*) scattering length density.
-
-    :Raises:
-        *AssertionError* :  *density* or *wavelength*/*energy* is missing.
-    """
+    atoms = formulas.Formula(compound).atoms
 
     if wavelength is not None: energy = xray_energy(wavelength)
     assert density is not None, "xray_sld needs density"
@@ -403,13 +378,20 @@ def xray_sld_from_atoms(atoms,density=None,wavelength=None,energy=None):
         irho = N*sum_f2*electron_radius
     return rho,irho
 
-    Element.K_alpha_units = "angstrom"
-    Element.K_beta1_units = "angstrom"
+def xray_sld_from_atoms(*args, **kw):
+    """
+    .. deprecated:: 0.91
+        :func:`xray_sld` now accepts dictionaries of {atom: count} directly.
+    """
+    return xray_sld(*args, **kw)
+
 
 def init_spectral_lines(table):
     """
     Sets the K_alpha and K_beta1 wavelengths for select elements
     """
+    Element.K_alpha_units = "angstrom"
+    Element.K_beta1_units = "angstrom"
     table.Ag.K_alpha = 0.5608
     table.Ag.K_beta1 = 0.4970
     table.Pd.K_alpha = 0.5869

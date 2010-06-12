@@ -212,7 +212,7 @@ class Neutron(object):
             *wavelength* : float | A
                
         :Returns:
-            *sld* : (float, float, float) | inv A^2
+            *sld* : (float, float, float) | 10^-6 inv A^2
                 (*real*, *imaginary*, *incoherent*) scattering length density.
 
         The coherent scattering returned is N*b_c*10, where N is
@@ -416,6 +416,52 @@ def energy_dependent_table(table=None):
 
 
 # Note: docs and function prototype are reproduced in __init__
+def neutron_xs(compound, density=None, wavelength=1):
+    """
+    Computes neutron scattering cross section for molecules.
+
+    :Parameters: 
+        *compound* : Formula initializer
+            Chemical formula
+        *density* : float | g/cm^3
+            Mass density
+        *wavelength* : float | A
+            Neutron wavelength.
+               
+    :Returns:
+        *xs* : (float, float, float) | 10^-6 inv A^2
+            (*coherent*, *absorptin*, *incoherent*) cross sections. 
+
+    :Raises:
+        *AssertionError* : density is missing.
+    """
+    import formulas
+    atoms = formulas.Formula(compound).atoms
+    if density is None: density = compound.density # defaults to molecule density
+    assert density is not None, "neutron_sld needs density"
+
+    coh = 0
+    absorp = 0
+    inc = 0
+    mass = 0
+    is_energy_dependent = False
+    for element,quantity in atoms.iteritems():
+        #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.incoherent
+        mass += element.mass*quantity
+        coh += element.neutron.coherent*quantity
+        absorp += element.neutron.absorption*quantity
+        inc += element.neutron.incoherent*quantity
+        is_energy_dependent |= element.neutron.is_energy_dependent
+
+    if mass == 0:  # for empty formula
+        return 0,0,0
+
+    cell_volume = mass/(density*avogadro_number*1e-24) # (10^8 A/cm)^3
+    coh = 10*coh/cell_volume
+    absorp = 0.01*absorp/(2*1.798)/cell_volume  # b'' = sigma_a/(2*lambda)
+    inc = 0.01*inc/cell_volume
+    return coh,absorp,inc
+
 def neutron_sld(compound, density=None, wavelength=1):
     """
     Computes neutron scattering length densities for molecules.
@@ -429,65 +475,46 @@ def neutron_sld(compound, density=None, wavelength=1):
             Neutron wavelength.
                
     :Returns:
-        *sld* : (float, float, float) | inv A^2
+        *sld* : (float, float, float) | 10^-6 inv A^2
             (*real*, *imaginary*, *incoherent*) scattering length density. 
 
     :Raises:
         *AssertionError* : density is missing.
     """
     import formulas
-    mol = formulas.Formula(compound)
-    if density is None: density = mol.density # defaults to molecule density
-    return neutron_sld_from_atoms(mol.atoms,
-                                  density=density,
-                                  wavelength=wavelength)
-
-def neutron_sld_from_atoms(atoms, density=None, wavelength=1):
-    """
-    The underlying scattering length density calculator. This
-    works with a dictionary of atoms and quanties directly, such
-    as returned by molecule.atoms. Returns the scattering length 
-    density (*real*, *imaginary*, *incoherent*). Raises *AssertionError*
-    if density is missing.
-
-    :Parameters: 
-        *atoms* : { Isotope: count, ... }
-            Chemical composition.
-        *density* : float | g/cm^3
-            Mass density.
-        *wavelength* : float | A
-            Neutron wavelength.
-               
-    :Returns:
-        *sld* : (float, float, float) | inv A^2
-            (*real*, *imaginary*, *incoherent*) scattering length density. 
-
-    :Raises:
-        *AssertionError* : density is missing.
-    """
+    atoms = formulas.Formula(compound).atoms
+    if density is None: density = compound.density # defaults to molecule density
     assert density is not None, "neutron_sld needs density"
 
-    b_c = 0
-    absorption = 0
-    incoherent = 0
+    bp = 0
+    bpp = 0
+    binc = 0
     mass = 0
     is_energy_dependent = False
     for element,quantity in atoms.iteritems():
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.incoherent
         mass += element.mass*quantity
-        b_c += element.neutron.b_c*quantity
-        absorption += element.neutron.absorption*quantity*wavelength/1.798
-        incoherent += element.neutron.incoherent*quantity
+        bp += element.neutron.b_c*quantity
+        bpp += element.neutron.absorption*quantity
+        binc += element.neutron.incoherent*quantity
         is_energy_dependent |= element.neutron.is_energy_dependent
 
     if mass == 0:  # for empty formula
         return 0,0,0
-    else:
-        cell_volume = mass/(density*avogadro_number*1e-24) # (10^8 A/cm)^3
-        bp = 10*b_c/cell_volume
-        bpp = 0.01*absorption/(2*wavelength)/cell_volume  # b'' = sigma_a/(2*lambda)
-        binc = 0.01*incoherent/cell_volume
-        return bp,bpp,binc
+
+    cell_volume = mass/(density*avogadro_number*1e-24) # (10^8 A/cm)^3
+    bp = 10*bp/cell_volume
+    bpp = 0.01*bpp/(2*1.798)/cell_volume  # b'' = sigma_a/(2*lambda)
+    binc = 0.01*binc/cell_volume
+    return bp,bpp,binc
+
+def neutron_sld_from_atoms(*args, **kw):
+    """
+    .. deprecated:: 0.91
+        :func:`neutron_sld` now accepts dictionaries of {atom: count} directly.
+    """
+    return neutron_sld(*args, **kw)
+
 
 # We are including the complete original table here in case somebody in
 # future wants to extract uncertainties or other information.
@@ -974,28 +1001,15 @@ def sld_plot(table=None):
 
     :Returns: None
     """
+    from .plot import table_plot
+
     table = default_table(table)
-    import pylab
     
-    SLDs = [(el.number,el.neutron.sld()[0],el.symbol)
-        for el in table
-        if el.neutron.has_sld()]
-    SLDs += [(table.D.number, table.D.neutron.sld()[0],table.D.symbol)]
-    #for iso in table.H[2], table.Ni[58]:
-    #    SLDs += [(iso.number, iso.neutron.sld()[0],r'$^{%d}{\rm %s}$'%(iso.isotope,iso.element.symbol))]
-    fig_width = 10
-    fig_height = 8
-    fig_size =  [fig_width,fig_height]
-    params = {'figure.figsize': fig_size}
-    pylab.rcParams.update(params)
-    bbox = dict(boxstyle="round",lw=1,ec=(0,0,0),fc=(0.85,0.8,0.8))
-    for Z,sld,sym in SLDs:
-        if sld is not None:
-            pylab.text(Z,sld,sym,bbox=bbox,va='center',ha='center')
-	    pylab.axis([0,100,-4,12])
-            pylab.xlabel('Element number')
-            pylab.ylabel('Scattering length density ($10^{-6}$ Nb)')
-            pylab.title('Neutron SLD for elements in natural abundance')
-    pylab.savefig('sld_plot')
-    
+    SLDs = dict((el,el.neutron.sld()[0])
+                for el in table
+                if el.neutron.has_sld())
+    SLDs[table.D] = table.D.neutron.sld()[0]
+
+    table_plot(SLDs, label='Scattering length density ($10^{-6}$ Nb)',
+               title='Neutron SLD for elements in natural abundance')
 

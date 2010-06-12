@@ -4,10 +4,6 @@
 Core table
 ******************************************************************************
 
-.. topic:: Section summary
-
-   Periodic table definition, with classes for elements and isotopes.
-
 :mod:`periodictable.core`
 ==============================================================================
 

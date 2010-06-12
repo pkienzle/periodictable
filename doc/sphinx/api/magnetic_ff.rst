@@ -4,10 +4,6 @@
 Magnetic Form Factor
 ******************************************************************************
 
-.. topic:: Section summary
-
-   Provides Magnetic form factor tables from CrysFML.
-
 :mod:`periodictable.magnetic_ff`
 ==============================================================================
 
@@ -16,3 +12,4 @@ Magnetic Form Factor
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+

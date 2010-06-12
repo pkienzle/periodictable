@@ -4,10 +4,6 @@
 Mass
 ******************************************************************************
 
-.. topic:: Section summary
-
-   This section details about Element and isotope mass and abundances.
-
 :mod:`periodictable.mass`
 ==============================================================================
 

@@ -20,6 +20,7 @@ and if you want to know in detail about Periodic Table, refer to the
    intro.rst
    installing.rst
    using.rst
+   formula_grammar.rst
    bundle.rst
    extending.rst
    customizing.rst

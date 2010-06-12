@@ -1,14 +1,12 @@
 import periodictable
 import pylab
+
+params = {'figure.figsize': (10,8)}
+pylab.rcParams.update(params)
+
 D = [(el.number,el.density,el.symbol)
     for el in periodictable.elements]
-D += [(iso.number,iso.density,iso.symbol)
-      for iso in (periodictable.T,)]
-fig_width = 10
-fig_height = 8
-fig_size =  [fig_width,fig_height]
-params = {'figure.figsize': fig_size}
-pylab.rcParams.update(params)
+
 bbox = dict(boxstyle="round",lw=1,ec=(0,0,0),fc=(0.85,0.8,0.8))
 for Z,density,sym in D:
     if density is not None:

@@ -30,7 +30,7 @@ clean:
 	-rm -rf _build/* build/* plots/*.pyc plots/*.png
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
+	PYTHONPATH=. $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
 

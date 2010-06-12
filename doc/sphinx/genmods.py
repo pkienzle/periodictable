@@ -52,6 +52,7 @@ def genfiles(package, package_name, modules, dir='api'):
 
 
 modules=[
+#    ('__init__', 'Top level namespace'),
     ('core', 'Core table'),
     ('formulas', 'Chemical formula operations'),
     ('covalent_radius', 'Covalent radius'),

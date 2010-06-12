@@ -118,7 +118,7 @@ html_theme_options = {
     #"headbgcolor": "Oldlace",
 }
 
-html_style = 'mpl.css'
+html_style = 'site.css'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

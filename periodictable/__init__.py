@@ -234,7 +234,7 @@ def neutron_scattering(formula,density=None,wavelength=1):
     See :func:`periodictable.nsf.neutron_scattering` for details.  
     """
     import nsf
-    return nsf.neutron_sld(formula,density,wavelength)
+    return nsf.neutron_scattering(formula,density,wavelength)
 
 def xray_sld(formula,density=None,wavelength=None,energy=None):
     """

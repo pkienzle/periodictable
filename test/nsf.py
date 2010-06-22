@@ -128,6 +128,14 @@ def test():
     assert all(v == 0 for v in sld)
     assert all(v == 0 for v in xs)
     assert numpy.isinf(depth)
+    
+    sld,xs,depth = periodictable.neutron_scattering('H2O',density=1,wavelength=4.75)
+    sld2,xs2,depth2 = neutron_scattering('H2O',density=1,wavelength=4.75)
+    assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
+    assert all(abs(v-w)<1e-10 for v,w in zip(xs,xs2))
+    assert depth==depth2
+    sld = periodictable.neutron_sld('H2O',density=1,wavelength=4.75)
+    assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
 
 def _summarize(M):
     from periodictable.nsf import neutron_sld, neutron_xs

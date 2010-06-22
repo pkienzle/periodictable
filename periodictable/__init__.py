@@ -218,7 +218,20 @@ def neutron_sld(formula,density=None,wavelength=1):
 
     Returns scattering length density (real, imaginary and incoherent).
     
-    See :class:`periodictable.nsf.Neutron` for details.  
+    See :class:`periodictable.nsf.neutron_sld` for details.  
+    """
+    import nsf
+    return nsf.neutron_sld(formula,density,wavelength)
+
+def neutron_scattering(formula,density=None,wavelength=1):
+    """
+    Compute neutron scattering cross sections for molecules.
+
+    Returns scattering length density (real, imaginary and incoherent),
+    cross sections (coherent, absorption, incoherent) and penetration
+    depth.
+    
+    See :func:`periodictable.nsf.neutron_scattering` for details.  
     """
     import nsf
     return nsf.neutron_sld(formula,density,wavelength)

@@ -34,6 +34,7 @@ The following is an example of hydrated quartz:
 
 .. doctest::
 
+    >>> import periodictable
     >>> SiO2 = periodictable.formula('SiO2')
     >>> hydrated = SiO2 + periodictable.formula('3H2O')
     >>> print hydrated,'mass',hydrated.mass
@@ -41,7 +42,8 @@ The following is an example of hydrated quartz:
     >>> rho,mu,inc = periodictable.neutron_sld('SiO2+3H2O',density=1.5,wavelength=4.75)
     >>> print hydrated,'neutron sld','%.3g'%rho
     SiO2(H2O)3 neutron sld 0.849
-    >>> rho,mu = periodictable.xray_sld(hydrated,density=1.5,wavelength=Cu.K_alpha)
+    >>> rho,mu = periodictable.xray_sld(hydrated,density=1.5,
+    ... wavelength=periodictable.Cu.K_alpha)
     >>> print hydrated,'X-ray sld','%.3g'%rho
     SiO2(H2O)3 X-ray sld 13.5
 

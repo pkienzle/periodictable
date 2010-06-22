@@ -116,27 +116,25 @@ Please send any comments about the tables to EMGullikson@lbl.gov.
 .. table:: Note that the following elements have been updated since the 
            publication of Ref. [#Henke1993]_ in July 1993.
 
-
-
            ========  ==========   ==============   
            Element   Updated      Energy Range       
            ========  ==========   ==============   
            Mg        1/15/94      30-50 eV
            Al        1/15/94      30-73 eV
-	   Si        1/15/94      30-100 eV
-	   Au        11/7/94      2000-6500 eV
- 	   Li        11/15/94     2000-30000 eV
-	   Si        6/95         30-500 eV
-	   Fe        10/95        600-800 eV
-	   Mo        11/97        10-930 eV
-	   Be        8/04         40-250 eV
-	   Mo        8/04         25-60 eV
-	   W         8/04         35-250 eV
-	   Ru        8/04         40-1300 eV
-	   Ti        8/04         20-150 eV
-	   Sc        4/06         50-1300 eV
-	   Gd        6/07         12-450 eV
-	   La        6/07         14-440 eV
+           Si        1/15/94      30-100 eV
+           Au        11/7/94      2000-6500 eV
+           Li        11/15/94     2000-30000 eV
+           Si        6/95         30-500 eV
+           Fe        10/95        600-800 eV
+           Mo        11/97        10-930 eV
+           Be        8/04         40-250 eV
+           Mo        8/04         25-60 eV
+           W         8/04         35-250 eV
+           Ru        8/04         40-1300 eV
+           Ti        8/04         20-150 eV
+           Sc        4/06         50-1300 eV
+           Gd        6/07         12-450 eV
+           La        6/07         14-440 eV
            ========  ==========   ==============  
           
 

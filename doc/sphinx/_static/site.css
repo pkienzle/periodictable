@@ -457,6 +457,13 @@ table.indextable tr.cap {
     background-color: #f2f2f2;
 }
 
+img.center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
 img.toggler {
     margin-right: 3px;
     margin-top: 3px;

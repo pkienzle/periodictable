@@ -51,6 +51,7 @@ http://physics.nist.gov/cuu/index.html
 """
 
 from .core import Element, Isotope
+from .constants import neutron_mass
 
 #__all__ = ['init']
 
@@ -117,14 +118,12 @@ def init(table, reload=False):
         iso._mass = getval(m)
         iso._abundance = getval(p)
 
-    # From NIST Reference on Constants, Units, and Uncertainty
-    #   http://physics.nist.gov/cuu/index.html
-    # neutron mass = 1.008 664 915 97(43) u
+    # A single neutron is an isotope of element 0
     el = table[0]
+    el._mass = neutron_mass
     iso = el.add_isotope(1)
-    iso._mass = 1.00866491597
-    el._mass = iso.mass
-    iso._abundance = 0
+    iso._mass = neutron_mass
+    iso._abundance = 100
 
 massdata="""\
 1-H-1,1.0078250321(4),99.9885(70),1.00794(7)

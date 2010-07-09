@@ -18,8 +18,12 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.append(os.path.abspath('_extensions'+(os.path.dirname('../../periodictable'))))
 
-sys.path.append(os.path.abspath(os.path.dirname('../../periodictable')))
-sys.path.append(os.path.abspath('_extensions'))
+import glob
+#sys.path.insert(0, os.path.abspath('.'))
+buildpath = glob.glob('../../build/lib*')[0]
+sys.path.insert(0, os.path.abspath(buildpath))
+#sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('_extensions'))
 
 
 # -- General configuration -----------------------------------------------------

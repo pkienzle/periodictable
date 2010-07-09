@@ -11,7 +11,7 @@ PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d _build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest
+.PHONY: help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest build
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -29,8 +29,8 @@ help:
 clean:
 	-rm -rf _build/* build/* plots/*.pyc plots/*.png
 
-html:
-	PYTHONPATH=. $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
+html: build
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
 
@@ -64,7 +64,7 @@ qthelp:
 	@echo "To view the help file:"
 	@echo "# assistant -collectionFile _build/qthelp/Periodic Table.qhc"
 
-latex:
+latex: build
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in _build/latex."
@@ -90,10 +90,13 @@ linkcheck:
 	      "or in _build/linkcheck/output.txt."
 
 doctest:
-	PYTHONPATH=. $(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
+	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
 
 upload:
 	scp -r _build/html/* reflectometry.org:web/elements
 	scp _build/latex/PeriodicTable.pdf reflectometry.org:web/elements
+
+build:
+	cd ../.. && python setup.py build

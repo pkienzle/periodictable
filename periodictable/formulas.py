@@ -1,8 +1,6 @@
 # This program is public domain
 """
-
-As of this writing, this module includes formula for parsing, computing molar mass and
-computing scattering length density.
+Chemical formula parser.
 """
 
 from copy import copy
@@ -132,20 +130,6 @@ class Formula(object):
         """
         return Formula(self.atoms)
     hill = property(_hill, doc=_hill.__doc__)
-
-    def _mass(self):
-        """
-        atomic mass units u (C[12] = 12 u)
-
-        Atomic mass of the molecule.
-        
-        Referencing this attribute computes the mass of the chemical formula.
-        """
-        mass = 0
-        for el,count in self.atoms.iteritems():
-            mass += el.mass*count
-        return mass
-    mass = property(_mass,doc=_mass.__doc__)
 
     def _mass(self):
         """

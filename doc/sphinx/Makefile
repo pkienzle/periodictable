@@ -95,8 +95,8 @@ doctest:
 	      "results in _build/doctest/output.txt."
 
 upload:
-	scp -r _build/html/* reflectometry.org:web/elements
-	scp _build/latex/PeriodicTable.pdf reflectometry.org:web/elements
+	scp -r _build/html/* reflectometry.org:web/danse/docs/elements
+	scp _build/latex/PeriodicTable.pdf reflectometry.org:web/danse/docs/elements
 
 build:
 	cd ../.. && python setup.py build

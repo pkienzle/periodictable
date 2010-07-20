@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import os
 for f in ['core','covalent_radius','crystal_structure',

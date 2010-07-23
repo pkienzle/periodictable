@@ -96,7 +96,7 @@ doctest:
 
 upload:
 	scp -r _build/html/* reflectometry.org:web/danse/docs/elements
-	scp _build/latex/PeriodicTable.pdf reflectometry.org:web/danse/docs/elements
+	scp _build/latex/PeriodicTable.pdf reflectometry.org:web/danse/download
 
 build:
 	cd ../.. && python setup.py build

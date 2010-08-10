@@ -148,7 +148,8 @@ class CromerMannFormula(object):
         rvrows = numpy.dot(adiag, numpy.exp(-bstol2))
         rvflat = rvrows.sum(axis=0) + self.c
         rvflat[stolflat > self.stollimit] = numpy.nan
-        rv = rvflat.reshape(numpy.shape(stol))
+        # when stol is scalar, addition of zero converts the rv array to float
+        rv = rvflat.reshape(numpy.shape(stol)) + 0.0
         return rv
 
 # class CromerMannFormula

@@ -5,7 +5,7 @@ Core classes for the periodic table.
 * :class:`PeriodicTable`
    The periodic table with attributes for each element.
 
-   .. Note:: PeriodicTable is not a singleton class.  Use *periodictable.elements*
+   .. Note:: PeriodicTable is not a singleton class.  Use ``periodictable.element``
       to access the common table.
 
 * :class:`Element`

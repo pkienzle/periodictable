@@ -80,7 +80,7 @@ added 0.1 eV above and below "sharp" absorption edges. The
 tabulated values of *f_1* contain a relativistic, energy 
 independent, correction given by::
 
-    Z* = Z - (Z/82.5)^(2.37).
+    Z* = Z - (Z/82.5)^(2.37)
 
 .. Note::
     Below 29 eV *f_1* is set equal to -9999.
@@ -277,7 +277,7 @@ class Xray(object):
                   in terms of energy Q = 4*pi*sin(theta)*E/(h c).
         
 
-        :Reference:
+        Reference:
              D. Wassmaier, A. Kerfel, Acta Crystallogr. A51 (1995) 416.
              http://dx.doi.org/10.1107/S0108767394013292
         """

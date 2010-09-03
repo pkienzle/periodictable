@@ -47,7 +47,6 @@ def test():
     assert formula("O[18]").mass == O[18].mass
 
     # Check x-ray and neutron sld
-    import density,xsf,nsf
     rho,mu,inc = formula('Si',Si.density).neutron_sld(wavelength=4.5)
     rhoSi,muSi,incSi = Si.neutron.sld(wavelength=4.5)
     assert abs(rho - rhoSi) < 1e-14

@@ -19,14 +19,14 @@ structure, a formula does all complete control over chemical composition.
 
 * Groups can be defined using parentheses, such as "CaCO3 (H2O)6". 
 
-* Parentheses can nest: "(CaCO3(H2O)6)1". 
+* Parentheses can nest, e.g., in polyethylene glycol: "HO ((CH2)2O)6 H".
 
 * Isotopes are represented by index, e.g., "CaCO[18]3+6H2O". 
 
 * Counts can be integer or decimal, e.g. "CaCO3+(3HO1.5)2".
 
 A formula string is translated into a formula using 
-:func:`periodictable.formula`.  Once the formula has been formed,
+:mod:`formula class <periodictable.formulas>`. Once the formula has been formed,
 you can perform algebra on the entire formula, such as adding
 together two formulas to make a more complex compound.
 

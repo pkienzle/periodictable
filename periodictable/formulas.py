@@ -27,6 +27,7 @@ class Formula(object):
     `matplotlib TeX markup <http://matplotlib.sourceforge.net/users/mathtext.html>`_.
 
     :Parameters:
+    
         *formula* : see below
             Chemical formula.
 
@@ -42,18 +43,18 @@ class Formula(object):
     Formula initializers can have a variety of forms:
 
     * string:
-        m = Formula( "CaCO3+6H2O" )
+        m = Formula("CaCO3+6H2O")
 
         For full details see :ref:`Formula grammar <formula>`
     
     * structure:
-        m = Formula( [(1,Ca),(2,C),(3, O),(6,[(2,H),(1,O)]] )
+        m = Formula( [ (1,Ca), (2,C), (3,O), (6,[(2,H),(1,O)]) ] )
 
     * formula math:
-        m = Formula( "CaCO3" ) + 6*Formula( "H2O" )
+        m = Formula("CaCO3") + 6*Formula("H2O")
 
     * another formula (makes a copy):
-        m = Formula( Formula("CaCO3+6H2O") )
+        m = Formula( Formula("CaCO3 + 6H2O"))
 
     * an atom:
         m = Formula(Ca)
@@ -147,7 +148,7 @@ class Formula(object):
 
 
     def volume(self, packing_factor='hcp'):
-        """
+        r"""
         Estimate molecular volume. 
 
         The crystal volume can be estimated from the element covalent radius 
@@ -158,15 +159,16 @@ class Formula(object):
         Packing factors for a number of crystal lattice structures are defined.
 
         .. table:: Crystal lattice names and packing factors
-            
+
+                  
             ========   =======================   =============    ==============
             Code       Description               Formula          Packing factor
             ========   =======================   =============    ==============
-            cubic      simple cubic              pi 1/6           0.52360
-            bcc        body-centered cubic       pi sqrt(3)/8     0.68017
-            hcp        hexagonal close-packed    pi 1/sqrt(18)    0.74048
-            fcc        face-centered cubic       pi 1/sqrt(18)    0.74048
-            diamond    diamond cubic             pi sqrt(3)/16    0.34009
+            cubic      simple cubic              pi/6             0.52360
+            bcc        body-centered cubic       pi*sqrt(3/8)     0.68017
+            hcp        hexagonal close-packed    pi/sqrt(18)      0.74048
+            fcc        face-centered cubic       pi/sqrt(18)      0.74048
+            diamond    diamond cubic             pi*sqrt(3/16)    0.34009
             ========   =======================   =============    ==============
          
         :Parameters:
@@ -174,8 +176,10 @@ class Formula(object):
                 Atomic packing factor.  If *packing_factor* is the name of
                 a crystal lattice, use the *lattice* packing factor.
         
-        :Returns: *volume* : float | A^3 
-             Molecular volume. 
+         
+        :Returns:
+            *volume* : float | A^3
+                Molecular volume. 
 
         :Raises:
 
@@ -205,11 +209,11 @@ class Formula(object):
             *wavelength* : float | A
                 Wavelength of the neutron beam.
         
-        :Returns: *sld* : (float, float, float) | 10^-6 inv A^2
- 
-             Neutron scattering length density is returned as the tuple
-             (*real*, *imaginary*, *incoherent*), or as (None, None, None) 
-             if the mass density is not known.
+        :Returns: 
+            *sld* : (float, float, float) | 10^-6 inv A^2
+                Neutron scattering length density is returned as the tuple
+                (*real*, *imaginary*, *incoherent*), or as (None, None, None) 
+                if the mass density is not known.
 
         """
         if self.density is None: return None,None,None
@@ -231,10 +235,11 @@ class Formula(object):
 
             .. Note: One of *wavelength* or *energy* is required.
 
-        :Returns: *sld* : (float, float) | inv A^2
-                X-ray scattering length density is return as the tuple
-                (*real*, *imaginary*), or as (None, None) if the mass 
-                density is not known.
+        :Returns: 
+            *sld* : (float, float) | inv A^2
+	        X-ray scattering length density is return as the tuple
+	        (*real*, *imaginary*), or as (None, None) if the mass 
+	        density is not known.
 
         """
         if self.density is None: return None,None
@@ -307,10 +312,11 @@ def formula_grammar(table=None):
         *table* = None : PeriodicTable
              If table is specified, then elements and their associated fields
              will be chosen from that periodic table rather than the default.
-    :Returns: *parser* : pyparsing.ParserElement
-         The ``parser.parseString()`` method returns a list of 
-         pairs (*count,fragment*), where fragment is an *isotope*, 
-         an *element* or a list of pairs (*count,fragment*).    
+    :Returns: 
+        *parser* : pyparsing.ParserElement.
+            The ``parser.parseString()`` method returns a list of 
+            pairs (*count,fragment*), where fragment is an *isotope*, 
+            an *element* or a list of pairs (*count,fragment*).    
                 
     """
     table = default_table(table)

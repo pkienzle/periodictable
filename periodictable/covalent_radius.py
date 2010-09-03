@@ -24,25 +24,26 @@ of this paper reads as follows:
     atomic radii between low spin and high spin configurations in
     transition metals are illustrated by the proposed radii set.
 
-Notes:
+.. Note::
 
-#. Values are averages only.  The particular radius can be highly
-   dependent on oxidation state and chemical compound.
+	#. Values are averages only.  The particular radius can be highly
+           dependent on oxidation state and chemical compound.
 
-#. The paper lists values for multiple spin states on select
-   elements.  We are using sp3 for carbon and low spin for manganese,
-   iron and cobalt.
+	#. The paper lists values for multiple spin states on select
+   	   elements.  We are using sp3 for carbon and low spin for manganese,
+   	   iron and cobalt.
 
-#. Elements with zero or one measurements of covalent radius are
-   assigned an uncertainty of 0.00.  These are He, Ne, Pm, At, Rn,
-   Fr, Ac, Pa.
+	#. Elements with zero or one measurements of covalent radius are
+           assigned an uncertainty of 0.00.  These are He, Ne, Pm, At, Rn,
+	   Fr, Ac, Pa.
 
-#. Elements above 96 are assigned a covalent radius and uncertainty
-   of None.
+	#. Elements above 96 are assigned a covalent radius and uncertainty
+	   of None.
 
-#. Radii are measured from bonds to C, N or O.  The choice of which
-   compound was used is element dependent.  Details are available in
-   the references.
+	#. Radii are measured from bonds to C, N or O.  The choice of which
+	   compound was used is element dependent.  Details are available in
+	   the references.
+
 
 .. [#Cordero2008] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés,
        Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez.

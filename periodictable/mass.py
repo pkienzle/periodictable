@@ -92,7 +92,7 @@ def abundance(isotope):
     :Returns:
         *abundance* : float | %
 
-    :Reference:
+    Reference:
         *Coursey. J. S., Schwab. D. J, and Dragoset. R. A., NIST Atomic 
         Weights and Isotopic Composition Database.*
     """

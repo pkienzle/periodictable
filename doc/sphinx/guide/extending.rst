@@ -11,16 +11,16 @@ the elements.
 In order to add a new property to to the table, you need to define
 a python package which contains the required information, and can
 attach the information to the periodic table so that it is
-available on demand.  This is done with the function *init* in
+available on demand.  This is done with the function ``init(table)`` in
 your table extension.
 
-This example adds the attribute *discoverer* to each element.  First
+This example adds the attribute ``discoverer`` to each element.  First
 create the file ``discoverer/core.py``:
 
 .. literalinclude:: /discoverer/core.py
    :language: python
 
-Now that we have defined the *init* function, we need a way to call it.
+Now that we have defined the ``init(table)`` function, we need a way to call it.
 The simplest solution is to load it directly when your package is imported.
 In the current example, this could be done by adding the following
 line to the end of the file::
@@ -30,8 +30,8 @@ line to the end of the file::
 This would be fine for the current example because the table size is
 small and load time is fast.  For large tables, you may wish to
 delay loading the table data until it is needed.  To do this, we
-use the :func:`periodictable.core.delayed_load` function in our
-package *__init__* file ``discoverer/__init__.py``:
+use the :func:`delayed_load <periodictable.core.delayed_load>` function in our
+package init file ``discoverer/__init__.py``:
 
 .. literalinclude:: /discoverer/__init__.py
    :language: python
@@ -54,7 +54,7 @@ Check that it works:
 Isotope and ion specific data is also supported.  In this case we
 need a data table that contains information for each isotope of
 each element.  The following example uses a dictionary of elements,
-with a dictionary of isotopes for each.  It adds the *shells* 
+with a dictionary of isotopes for each.  It adds the ``shells``
 attribute to Fe[56] and Fe[58]. 
 
 Define ``shelltable/core.py``:
@@ -63,8 +63,8 @@ Define ``shelltable/core.py``:
    :language: python
 
 Again, we are going to initialize the table with delayed loading.
-In this case it is very important that we set the *isotope=True*
-keyword in the *delayed_load* call.  If we don't, then the magic we
+In this case it is very important that we set the ``isotope=True``
+keyword in the ``delayed_load`` call.  If we don't, then the magic we
 use to return the correct value after loading the new table information
 fails.  Since unknown attributes are delegated to the underlying
 element, the value for the natural abundance will be returned
@@ -104,6 +104,6 @@ directly, but instead the user must request ``ion.magnetic_ff[ion.charge]``.
 Properties dependent on both isotope and ion can probably be implemented, 
 but there are no examples yet.
 
-Be sure to use the *ion=True* keyword for *delayed_load* when the
+Be sure to use the ``ion=True`` keyword for ``delayed_load`` when the
 table extension contains ion specific information.
 

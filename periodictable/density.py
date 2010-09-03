@@ -87,7 +87,7 @@ def interatomic_distance(element):
 	
     Interatomic distance is computed using::
 
-	d = atomic_weight/(density*0.602214179))^(1/3).
+	d = atomic_weight/(density*0.602214179))^(1/3)
 
     with units::
 

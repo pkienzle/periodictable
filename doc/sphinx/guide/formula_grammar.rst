@@ -8,7 +8,7 @@ Chemical Composition
 Some properties are available for groups of elements.  Groups are specified
 as a chemical formula string and either density or cell volume for the crystal
 structure.  While it does not provide any information about molecular 
-structure, a formula does all complete control over chemical composition. 
+structure, a formula does all com\ *pl*\ ete control over chemical composition. 
 
 * Individual atoms are represented by periodic table symbol.  These are
   case sensitive, so "CO" is different from "Co".

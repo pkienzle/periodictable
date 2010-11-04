@@ -230,3 +230,6 @@ autoclass_content = 'both'
 # Autodoc member sort order: by class or by type
 autodoc_member_order = 'groupwise'
 
+if os.path.exists('rst_prolog'):
+    with open('rst_prolog') as fid:
+        rst_prolog = fid.read()

@@ -15,7 +15,7 @@ The following attributes are added to each element:
        interpolated from sftable.
 
    :func:`Xray.f0`
-       Returns f0 for the given vector Q, with q_i in [0,24\pi] inv Ang.
+       Returns f0 for the given vector Q, with q_i in [0,24\pi] |1/A|.
 
    :func:`Xray.sld`
        Returns scattering length density (*real*, *imaginary*) for the
@@ -264,7 +264,7 @@ class Xray(object):
         Isotropic X-ray scattering factors f0 for the input Q.
 
         :Parameters: 
-            *Q* : float or vector in [0, 24*pi] | inv A
+            *Q* : float or vector in [0, 24*pi] | |1/A|
                 X-ray scattering properties for the elements.
                
         :Returns:
@@ -303,7 +303,7 @@ class Xray(object):
                 Only one of *wavelength* and *energy* is needed.
                
         :Returns:
-            *sld* : (float, float) | inv A^2
+            *sld* : (float, float) | |1/A^2|
                 (*real*, *imaginary*) X-ray scattering length density.
 
         :Raises:
@@ -341,7 +341,7 @@ def xray_sld(compound, density=None,
     :Parameters: 
         *compound* : Formula initializer
             Chemical formula initializer.
-        *density* : float | g/cm^3
+        *density* : float | |g/cm^3|
             Density of the compound. 
         *wavelength* : float | A
             Wavelength of the X-ray.
@@ -349,7 +349,7 @@ def xray_sld(compound, density=None,
             Energy of the X-ray, if *wavelength* is not specified.
 
     :Returns:
-        *sld* : (float, float) | 10^-6 inv A^2
+        *sld* : (float, float) | |1e-6/A^2|
             (*real*, *imaginary*) scattering length density. 
 
     :Raises:

@@ -1,6 +1,6 @@
 from numpy import pi, isnan
 from periodictable import formula
-from periodictable import Cu,Mo,Ni,Fe,Si
+from periodictable import Cu,Mo,Ni,Fe,Si,H,D,O
 from periodictable.xsf import xray_energy, xray_sld_from_atoms, xray_sld
 
 def test():
@@ -67,6 +67,13 @@ def test():
 
     rho,mu = xray_sld('', density=0, wavelength=Cu.K_alpha)
     assert rho==mu==0
+
+    # Check natural density calculations
+    D2O_density = (2*D.mass + O.mass)/(2*H.mass + O.mass)
+    rho,mu = xray_sld('D2O',natural_density=1,wavelength=1.54)
+    rho2,mu2 = xray_sld('D2O',density=D2O_density,wavelength=1.54)
+    assert abs(rho-rho2)<1e-15 and abs(mu-mu2)<1e-15
+
 
     # Check f0 calculation for scalar, vector, array and empty
     Q1,Q2 = 4*pi/Cu.K_alpha, 4*pi/Mo.K_alpha

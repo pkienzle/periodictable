@@ -333,7 +333,8 @@ class Xray(object):
         return rho,irho
 
 # Note: docs and function prototype are reproduced in __init__
-def xray_sld(compound,density=None,wavelength=None,energy=None):
+def xray_sld(compound, density=None, 
+             wavelength=None, energy=None, natural_density=None):
     """
     Compute xray scattering length densities for molecules. 
 
@@ -355,14 +356,19 @@ def xray_sld(compound,density=None,wavelength=None,energy=None):
         *AssertionError* :  *density* or *wavelength*/*energy* is missing.
     """
     import formulas
-    atoms = formulas.Formula(compound).atoms
+    compound = formulas.Formula(compound)
+    if density is None:
+        if natural_density is not None: 
+            density = natural_density/compound.natural_mass_ratio()
+        else:
+            density = compound.density # defaults to molecule density
+    assert density is not None, "scattering calculation needs density"
 
     if wavelength is not None: energy = xray_energy(wavelength)
-    assert density is not None, "xray_sld needs density"
-    assert energy is not None, "xray_sld needs energy or wavelength"
+    assert energy is not None, "scattering calculation needs energy or wavelength"
 
     mass,sum_f1,sum_f2 = 0,0,0
-    for element,quantity in atoms.iteritems():
+    for element,quantity in compound.atoms.iteritems():
         mass += element.mass*quantity
         f1,f2 = element.xray.scattering_factors(energy)
         #print element,f1,f2,wavelength

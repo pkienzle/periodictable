@@ -2,7 +2,7 @@
 """
 Chemical formula parser.
 """
-
+from __future__ import division
 from copy import copy
 from math import pi, sqrt
 
@@ -16,6 +16,158 @@ from .core import Element, Isotope, default_table
 PACKING_FACTORS = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
                        fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
 
+
+def mix_by_weight(*args, **kw):
+    """
+    Generate a mixture which apportions each formula by weight.
+    
+    :Parameters:
+
+        *formula1* : Formula OR string
+            Material
+
+        *quantity1* : float
+            Relative quantity of that material
+
+        *formula2* : Formula OR string
+            Material
+
+        *quantity2* : float
+            Relative quantity of that material
+
+        ...
+        
+        *density* : float
+            Density of the mixture, if known
+
+        *natural_density* : float
+            Density of the mixture with natural abundances, if known.
+            
+        *name* : string
+            Name of the mixture
+        
+    :Returns:
+    
+        *formula* : Formula
+        
+    If density is not given, then it will be computed from the density
+    of the components, assuming the components take up no more nor less
+    space because they are in the mixture.  If component densities are
+    not available, then the resulting density will not be computed.
+    """
+    density = kw.pop('density',None)
+    natural_density = kw.pop('natural_density',None)
+    name = kw.pop('name',None)
+    if kw: raise TypeError("Unexpected keyword "+kw.keys()[0])
+    
+    if len(args)%2 != 0:
+        raise ValueError("Need a quantity for each formula")
+    pairs = [(Formula(args[i]),args[i+1]) for i in range(0, len(args), 2)]
+
+    # Drop pairs with zero quantity
+    pairs = [(q,f) for q,f in pairs if q > 0]
+
+    result = Formula()
+    if len(pairs) > 0:
+        # cell mass = mass
+        # target mass = q
+        # cell mass * n = target mass 
+        #   => n = target mass / cell mass
+        #        = q / mass
+        # scale this so that n = 1 for the smallest quantity
+        scale = min(q/f.mass for f,q in pairs)
+        for f,q in pairs:
+            result += ((q/f.mass)/scale) * f
+    else:
+        scale = 1
+
+    if natural_density: result.natural_density = natural_density
+    if density: result.density = density
+    if name: result.name = name    
+    
+    if not result.density and all(f.density for f,_ in pairs):
+        volume = sum(q/f.density for f,q in pairs)/scale
+        result.density = result.mass/volume
+    
+    return result
+
+def mix_by_volume(*args, **kw):
+    """
+    Generate a mixture which apportions each formula by volume.
+    
+    :Parameters:
+
+        *formula1* : Formula OR string
+            Material
+
+        *quantity1* : float
+            Relative quantity of that material
+
+        *formula2* : Formula OR string
+            Material
+
+        *quantity2* : float
+            Relative quantity of that material
+
+        ...
+        
+        *density* : float
+            Density of the mixture, if known
+
+        *natural_density* : float
+            Density of the mixture with natural abundances, if known.
+            
+        *name* : string
+            Name of the mixture
+        
+    :Returns:
+    
+        *formula* : Formula
+
+    If density is not given, then it will be computed from the density
+    of the components, assuming the components take up no more nor less
+    space because they are in the mixture.  If component densities are
+    not available, then the resulting density will not be computed.
+    """
+    density = kw.pop('density',None)
+    natural_density = kw.pop('natural_density',None)
+    name = kw.pop('name',None)
+    if kw: raise TypeError("Unexpected keyword "+kw.keys()[0])
+    
+    if len(args)%2 != 0:
+        raise ValueError("Need a quantity for each formula")
+    pairs = [(Formula(args[i]),args[i+1]) for i in range(0, len(args), 2)]
+    
+    if not all(f.density for f,_ in pairs):
+        raise ValueError("Need a density for each formula")
+
+    # Drop pairs with zero quantity
+    pairs = [(f,q) for f,q in pairs if q > 0]
+
+    result = Formula()
+    if len(pairs) > 0:
+        # cell volume = mass/density
+        # target volume = q
+        # cell volume * n = target volume 
+        #   => n = target volume / cell volume
+        #        = q / (mass/density)
+        #        = q * density / mass
+        # scale this so that n = 1 for the smallest quantity
+        scale = min(q*f.density/f.mass for f,q in pairs)
+        for f,q in pairs:
+            result += ((q*f.density/f.mass)/scale) * f
+    else:
+        scale = 1
+
+    if natural_density: result.natural_density = natural_density
+    if density: result.density = density
+    if name: result.name = name    
+    
+    if not result.density:
+        volume = sum(q for _,q in pairs)/scale
+        result.density = result.mass/volume
+        
+    return result
 
 class Formula(object):
     r"""
@@ -33,6 +185,10 @@ class Formula(object):
 
         *density* : float | g/cm**3
             Material density.
+        
+        *natural_density*: float | g/cm**3
+            Material density assuming naturally occurring isotopes and no
+            change in cell volume.
 
         *name* : string
             Common name for the molecule.
@@ -62,7 +218,8 @@ class Formula(object):
     * nothing:
         m = Formula()
     """
-    def __init__(self,value=None,density=None,name=None):
+    def __init__(self, value=None, density=None, natural_density=None, 
+                 name=None):
         self.density,self.name = None,None
         if value == None or value == '':
             self.structure = []
@@ -82,8 +239,9 @@ class Formula(object):
             try:
                 self._parse_structure(value)
             except:
-                raise ValueError("not a valid chemical formula")
-            
+                raise ValueError("not a valid chemical formula: "+str(value))
+
+        if natural_density: self.natural_density = natural_density            
         if density: self.density = density
         if name: self.name = name
 
@@ -132,6 +290,41 @@ class Formula(object):
         return Formula(self.atoms)
     hill = property(_hill, doc=_hill.__doc__)
 
+    def natural_mass_ratio(self):
+        """
+        Natural mass to isotope mass ratio.
+        
+        :Returns:
+            *ratio* : float            
+        
+        The ratio is computed from the sum of the masses of the individual 
+        elements using natural abundance divided by the sum of the masses
+        of the isotopes used in the formula.  If the cell volume is
+        preserved with isotope substitution, then the ratio of the masses
+        will be the ratio of the densities.
+        """
+        total_natural_mass = total_isotope_mass = 0        
+        for el,count in self.atoms.items():
+            try:
+                natural_mass = el.element.mass
+            except AttributeError:
+                natural_mass = el.mass
+            total_natural_mass += count * natural_mass
+            total_isotope_mass += count * el.mass
+        return total_natural_mass/total_isotope_mass
+    def _get_natural_density(self):
+        """
+        g/cm^3
+        
+        Density of the formula with specific isotopes of each element 
+        replaced by the naturally occurring abundance of the element
+        without changing the cell volume.
+        """
+        return self.density/self.natural_mass_ratio()
+    def _set_natural_density(self, natural_density):
+        self.density = natural_density / self.natural_mass_ratio()
+    natural_density = property(_get_natural_density, _set_natural_density,
+                               doc=_get_natural_density.__doc__)
     def _mass(self):
         """
         atomic mass units u (C[12] = 12 u)
@@ -237,7 +430,7 @@ class Formula(object):
 
         :Returns: 
             *sld* : (float, float) | inv A^2
-	        X-ray scattering length density is return as the tuple
+	        X-ray scattering length density is returned as the tuple
 	        (*real*, *imaginary*), or as (None, None) if the mass 
 	        density is not known.
 
@@ -266,6 +459,13 @@ class Formula(object):
         ret = Formula()
         ret.structure = tuple(list(self.structure) + list(other.structure))
         return ret
+    
+    def __iadd__(self, other):
+        """
+        Extend a formula with another.
+        """
+        self.structure = tuple(list(self.structure) + list(other.structure))
+        return self
 
     def __rmul__(self,other):
         """
@@ -276,9 +476,13 @@ class Formula(object):
             other += 0
         except TypeError:
             raise TypeError("n*formula expects numeric n")
-        ret = Formula()
-        if self.structure != []:
-            ret.structure = ((other,self.structure),)
+        ret = Formula(self)
+        if other != 1 and self.structure:
+            if len(self.structure) == 1:
+                q,f = self.structure[0]
+                ret.structure = ((other*q,f),)
+            else:
+                ret.structure = ((other,ret.structure),)
         return ret
 
     def __str__(self):
@@ -453,9 +657,12 @@ def _str_atoms(seq):
                 ret += "%g"%count
         else:
             if count == 1:
-                ret += _str_atoms(fragment)
+                piece = _str_atoms(fragment)
             else:
-                ret += "(%s)%g"%(_str_atoms(fragment),count)
+                piece = "(%s)%g"%(_str_atoms(fragment),count)
+            #ret = ret+" "+piece if ret else piece
+            ret += piece
+
     return ret
 
 def _isatom(val):

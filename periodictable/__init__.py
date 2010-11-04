@@ -24,7 +24,8 @@ whose conditions may differ from those of your experiment.
 
 """
 __docformat__ = 'restructuredtext en'
-__all__ = ['elements', 'neutron_sld','xray_sld','formula'] # and all elements
+__all__ = ['elements', 'neutron_sld','xray_sld',
+           'formula','mix_by_weight','mix_by_volume'] # and all elements
 
 from . import core
 from . import mass
@@ -166,7 +167,7 @@ core.delayed_load(['ionic_radius'], _load_ionic_radius)
 
 
 # Constructors and functions
-def formula(value=None, density=None, name=None):
+def formula(value=None, density=None, natural_density=None, name=None):
     """
     Chemical formula representation.
 
@@ -188,6 +189,7 @@ def formula(value=None, density=None, name=None):
     Additional information can be provided:
 
        density (g / cm**3)   material density
+       natural_density (g / cm**3) material density with natural abundance
        name (string) common name for the molecule
 
     Operations:
@@ -203,16 +205,98 @@ def formula(value=None, density=None, name=None):
 
     For full details see help(periodictable.formulas.formula_grammar)
 
-    This is designed for calculating molar mass and scattering
-    length density, not for representing bonds or atom positions.
-    We do preserve the structure of the formula so that it can
+    The chemical formula is designed for simple calculations such
+    as molar mass, not for representing bonds or atom positions.
+    However, we preserve the structure of the formula so that it can
     be used as a basis for a rich text representation such as
     matplotlib TeX markup.
     """
     import formulas
-    return formulas.Formula(value=value,density=density, name=name)
+    return formulas.Formula(value=value, density=density, 
+                            natural_density=natural_density, name=name)
 
-def neutron_sld(formula,density=None,wavelength=1):
+def mix_by_weight(*args, **kw):
+    """
+    Generate a mixture which apportions each formula by weight.
+    
+    :Parameters:
+
+        *formula1* : Formula OR string
+            Material
+
+        *quantity1* : float
+            Relative quantity of that material
+
+        *formula2* : Formula OR string
+            Material
+
+        *quantity2* : float
+            Relative quantity of that material
+
+        ...
+        
+        *density* : float
+            Density of the mixture, if known
+
+        *natural_density* : float
+            Density of the mixture with natural abundances, if known.
+            
+        *name* : string
+            Name of the mixture
+        
+    :Returns:
+    
+        *formula* : Formula
+        
+    If density is not given, then it will be computed from the density
+    of the components, assuming equal volume.
+    """
+    import formulas
+    return formulas.mix_by_weight(*args, **kw)
+
+def mix_by_volume(*args, **kw):
+    """
+    Generate a mixture which apportions each formula by volume.
+    
+    :Parameters:
+
+        *formula1* : Formula OR string
+            Material
+
+        *quantity1* : float
+            Relative quantity of that material
+
+        *formula2* : Formula OR string
+            Material
+
+        *quantity2* : float
+            Relative quantity of that material
+
+        ...
+        
+        *density* : float
+            Density of the mixture, if known
+
+        *natural_density* : float
+            Density of the mixture with natural abundances, if known.
+            
+        *name* : string
+            Name of the mixture
+        
+    :Returns:
+    
+        *formula* : Formula
+        
+    Densities are required for each of the components.  If the density of 
+    the result is not given, it will be computed from the components
+    assuming the components take up no more nor less space because they 
+    are in the mixture.
+    """
+    import formulas
+    return formulas.mix_by_volume(*args, **kw)
+
+
+def neutron_sld(*args, **kw):
     """
     Compute neutron scattering length densities for molecules.
 
@@ -221,9 +305,9 @@ def neutron_sld(formula,density=None,wavelength=1):
     See :class:`periodictable.nsf.neutron_sld` for details.  
     """
     import nsf
-    return nsf.neutron_sld(formula,density,wavelength)
+    return nsf.neutron_sld(*args, **kw)
 
-def neutron_scattering(formula,density=None,wavelength=1):
+def neutron_scattering(*args, **kw):
     """
     Compute neutron scattering cross sections for molecules.
 
@@ -234,9 +318,9 @@ def neutron_scattering(formula,density=None,wavelength=1):
     See :func:`periodictable.nsf.neutron_scattering` for details.  
     """
     import nsf
-    return nsf.neutron_scattering(formula,density,wavelength)
+    return nsf.neutron_scattering(*args, **kw)
 
-def xray_sld(formula,density=None,wavelength=None,energy=None):
+def xray_sld(*args, **kw):
     """
     Compute neutron scattering length densities for molecules.
     
@@ -247,8 +331,7 @@ def xray_sld(formula,density=None,wavelength=None,energy=None):
     See :class:`periodictable.xsf.Xray` for details.
     """
     import xsf
-    return xsf.xray_sld(formula,density=density,
-                        wavelength=wavelength,energy=energy)
+    return xsf.xray_sld(*args, **kw)
 
 
 #del core, mass, density

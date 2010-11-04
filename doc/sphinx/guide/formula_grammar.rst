@@ -32,8 +32,6 @@ together two formulas to make a more complex compound.
 
 The following is an example of hydrated quartz:
 
-.. doctest::
-
     >>> import periodictable
     >>> SiO2 = periodictable.formula('SiO2')
     >>> hydrated = SiO2 + periodictable.formula('3H2O')
@@ -46,6 +44,28 @@ The following is an example of hydrated quartz:
     ... wavelength=periodictable.Cu.K_alpha)
     >>> print hydrated,'X-ray sld','%.3g'%rho
     SiO2(H2O)3 X-ray sld 13.5
+
+Density can be specified directly when the formula is created, or updated
+within a formula.  For isotope specific formulas, the density can be given
+either as the density of the formula using naturally occurring abundance
+if the unit cell is approximately the same, or using the density specific
+to those isotopes used.
+
+This makes heavy water density easily specified as:
+
+    >>> D2O = periodictable.formula('D2O',natural_density=1)
+    >>> print D2O,"%.4g"%D2O.density
+    D2O 1.112
+
+Mixtures can be created by weight or volume ratios, with the density of
+the result computed from the density of the materials.  For example, the
+following is a 2:1 mixture of water and heavy water:
+
+    >>> H2O = periodictable.formula('H2O',natural_density=1)
+    >>> D2O = periodictable.formula('D2O',natural_density=1)
+    >>> mix = periodictable.mix_by_volume(H2O,2,D2O,1)
+    >>> print mix,"%.4g"%mix.density
+    (H2O)2D2O 1.037
 
 Formulas are parsed from strings using the following grammar::
 

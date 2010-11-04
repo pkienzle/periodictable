@@ -553,8 +553,9 @@ def energy_dependent_table(table=None):
 
 
 # Note: docs and function prototype are reproduced in __init__
-def neutron_scattering(compound, density=None, 
-                       wavelength=ABSORPTION_WAVELENGTH, energy=None):
+def neutron_scattering(compound, density=None,
+                       wavelength=ABSORPTION_WAVELENGTH, energy=None,
+                       natural_density=None):
     r"""
     Computes neutron scattering cross sections for molecules.
 
@@ -567,6 +568,8 @@ def neutron_scattering(compound, density=None,
             Chemical formula
         *density* : float | g/cm^3
             Mass density
+        *natural_density* : float | g/cm^3
+            Mass density of formula with naturally occuring abundances
         *wavelength* 1.798 : float | A
             Neutron wavelength.
         *energy* : float | meV
@@ -838,16 +841,21 @@ def neutron_scattering(compound, density=None,
         \,+\, \Sigma_{\rm abs}\, 1/{\rm cm})
     """
     import formulas
-    atoms = formulas.Formula(compound).atoms
+    compound = formulas.Formula(compound)
+    if density is None:
+        if natural_density is not None: 
+            density = natural_density/compound.natural_mass_ratio()
+        else:
+            density = compound.density # defaults to molecule density
+    assert density is not None, "scattering calculations need density"
     if energy is not None: wavelength = neutron_wavelength(energy)
-    if density is None: density = compound.density # defaults to molecule density
-    assert density is not None, "neutron scattering calculations need density"
+    assert wavelength is not None, "scattering calculation needs energy or wavelength"
 
     # Sum over the quantities
     molar_mass = num_atoms = 0
     sigma_a = sigma_total = b_c = 0
     is_energy_dependent = False
-    for element,quantity in atoms.iteritems():
+    for element,quantity in compound.atoms.iteritems():
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
         molar_mass += element.mass*quantity
         num_atoms += quantity
@@ -904,6 +912,8 @@ def neutron_sld(*args, **kw):
             Chemical formula
         *density* : float | g/cm^3
             Mass density
+        *natural_density* : float | g/cm^3
+            Mass density of formula with naturally occuring abundances
         *wavelength* : float | A
             Neutron wavelength.
         *energy* : float | meV

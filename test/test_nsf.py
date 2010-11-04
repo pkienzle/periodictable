@@ -3,7 +3,7 @@ import periodictable
 from periodictable import elements, formula
 
 def test():
-    H,He = elements.H,elements.He
+    H,He,D,O = elements.H,elements.He,elements.D,elements.O
     assert H.neutron.absorption == 0.3326
     assert H.neutron.total == 82.02
     assert H.neutron.incoherent == 80.26
@@ -136,6 +136,14 @@ def test():
     assert depth==depth2
     sld = periodictable.neutron_sld('H2O',density=1,wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
+
+    D2O_density = (2*D.mass + O.mass)/(2*H.mass + O.mass)
+    sld,xs,depth = neutron_scattering('D2O',natural_density=1,wavelength=4.75)
+    sld2,xs2,depth2 = neutron_scattering('D2O',density=D2O_density,wavelength=4.75)
+    assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
+    assert all(abs(v-w)<1e-10 for v,w in zip(xs,xs2))
+    assert depth==depth2
+
 
 def _summarize(M):
     from periodictable.nsf import neutron_sld, neutron_xs

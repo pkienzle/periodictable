@@ -121,4 +121,18 @@ def test():
     # Pickle test
     assert loads(dumps(fm)) == fm
 
+    # zero quantities tests in mixtures
+    f = mix_by_weight(H2O,0,D2O,2)
+    assert f == D2O
+    f = mix_by_weight(H2O,2,D2O,0)
+    assert f == H2O
+    f = mix_by_weight(H2O,0,D2O,0)
+    assert f == formula()
+    f = mix_by_volume(H2O,0,D2O,2)
+    assert f == D2O
+    f = mix_by_volume(H2O,2,D2O,0)
+    assert f == H2O
+    f = mix_by_volume(H2O,0,D2O,0)
+    assert f == formula()
+
 if __name__ == "__main__": test()

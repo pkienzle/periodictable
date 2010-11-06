@@ -70,7 +70,7 @@ def mix_by_weight(*args, **kw):
              for i in range(0, len(args), 2)]
 
     # Drop pairs with zero quantity
-    pairs = [(q,f) for q,f in pairs if q > 0]
+    pairs = [(f,q) for f,q in pairs if q > 0]
 
     result = Formula()
     if len(pairs) > 0:
@@ -83,15 +83,15 @@ def mix_by_weight(*args, **kw):
         scale = min(q/f.mass for f,q in pairs)
         for f,q in pairs:
             result += ((q/f.mass)/scale) * f
+        volume = sum(q/f.density for f,q in pairs)/scale
     else:
-        scale = 1
+        volume = 1
 
     if natural_density: result.natural_density = natural_density
     if density: result.density = density
     if name: result.name = name    
     
     if not result.density and all(f.density for f,_ in pairs):
-        volume = sum(q/f.density for f,q in pairs)/scale
         result.density = result.mass/volume
     
     return result
@@ -166,15 +166,15 @@ def mix_by_volume(*args, **kw):
         scale = min(q*f.density/f.mass for f,q in pairs)
         for f,q in pairs:
             result += ((q*f.density/f.mass)/scale) * f
+        volume = sum(q for _,q in pairs)/scale
     else:
-        scale = 1
+        volume = 1
 
     if natural_density: result.natural_density = natural_density
     if density: result.density = density
     if name: result.name = name    
     
     if not result.density:
-        volume = sum(q for _,q in pairs)/scale
         result.density = result.mass/volume
         
     return result

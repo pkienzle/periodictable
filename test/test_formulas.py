@@ -135,4 +135,8 @@ def test():
     f = mix_by_volume(H2O,0,D2O,0)
     assert f == formula()
 
+    # mix by weight with unknown component density
+    # can't do mix by volume without component densities
+    glass = mix_by_weight('SiO2',75,'Na2O',15,'CaO',10,density=2.52)
+
 if __name__ == "__main__": test()

@@ -12,7 +12,7 @@ Example:
 .. doctest::
 
     >>> import periodictable
-    >>> from periodictable import core, mass, density, elements
+    >>> from periodictable import core, mass, density, elements, formula
 
     >>> mytable = core.PeriodicTable(table="H=1")
     >>> mass.init(mytable)
@@ -31,7 +31,8 @@ Example:
     1.0 11.9068286833
     >>> print periodictable.H[1].mass, periodictable.C[12].mass
     1.0078250321 12.0
-
+    >>> print formula('2H[1]', table=mytable).mass
+    2.0
 
 You will need to add individual properties by hand for all additional
 desired properties using ``module.init(elements)``.
@@ -39,7 +40,7 @@ desired properties using ``module.init(elements)``.
 The table name (*H=1* above) must be unique within the session.  If you
 are pickling elements from a custom table, you must create a custom
 table of the same name before attempting to restore them. The default
-table is just a custom table with the name *default*.
+table is just a custom table with the name *public*.
 
 .. Note: If you are using chemical formulas, you will need to
          define your own parser using::
@@ -59,6 +60,5 @@ The alternative to using custom tables is to replace a dataset in the
 base table using e.g., ``custom_mass.init(elements, reload = True)``, where
 custom_mass is your own version of the periodic table values.  Be aware,
 however, that this will have a global effect, changing the mass used by
-all packages, but you
-are strongly discouraged from doing so.
+all packages, so you are strongly discouraged from doing so.
 

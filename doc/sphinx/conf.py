@@ -20,7 +20,7 @@ import sys, os
 
 import glob
 sys.path.insert(0, os.path.abspath('.')) # needed for extension tests
-buildpath = glob.glob('../../build/lib*')[0]
+#buildpath = glob.glob('../../build/lib*')[0]
 #sys.path.insert(0, os.path.abspath(buildpath))
 #sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('_extensions'))

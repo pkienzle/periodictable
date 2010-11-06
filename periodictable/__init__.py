@@ -23,6 +23,7 @@ whose conditions may differ from those of your experiment.
 ----
 
 """
+
 __docformat__ = 'restructuredtext en'
 __all__ = ['elements', 'neutron_sld','xray_sld',
            'formula','mix_by_weight','mix_by_volume'] # and all elements
@@ -30,6 +31,12 @@ __all__ = ['elements', 'neutron_sld','xray_sld',
 from . import core
 from . import mass
 from . import density
+
+# Always make mass and density available
+elements = core.PUBLIC_TABLE
+mass.init(elements)
+density.init(elements)
+
 
 # Data needed for setup.py when bundling the package into an exe
 def data_files():
@@ -52,47 +59,18 @@ def data_files():
                    _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat']))]
     return data_files
 
-# Make a common copy of the table for everyone to use --- equivalent to
-# a singleton without incurring any complexity.
-elements = core.PeriodicTable()
-
-# Always make mass and density available
-mass.init(elements)
-density.init(elements)
-
 # Export variables for each element name and symbol.
 __all__ += core.define_elements(elements, globals())
 
-
 def _load_covalent_radius():
     """
-    Add covalent_radius property to the elements.
-
-    .. Note:: covalent radii data source is unknown.
+    covalent radius: average atomic radius when bonded to C, N or O.
     """
-    import covalent_radius
+    from . import covalent_radius
     covalent_radius.init(elements)
-core.delayed_load(['covalent_radius'],
-                  _load_covalent_radius)
-
-def _load_covalent_radius():
-    """
-    Add covalent_radius units property to the elements.
-    """
-
-    import covalent_radius
-    covalent_radius.init(elements)
-core.delayed_load(['covalent_radius_units'],
-                  _load_covalent_radius)
-
-def _load_covalent_radius():
-    """
-    Add covalent_radius uncertainty property to the elements.
-    """
-
-    import covalent_radius
-    covalent_radius.init(elements)
-core.delayed_load(['covalent_radius_uncertainty'],
+core.delayed_load(['covalent_radius', 
+                   'covalent_radius_units',
+                   'covalent_radius_uncertainty'],
                   _load_covalent_radius)
 
 def _load_crystal_structure():
@@ -103,7 +81,7 @@ def _load_crystal_structure():
         *Ashcroft and Mermin.*
     """
 
-    import crystal_structure
+    from . import crystal_structure
     crystal_structure.init(elements)
 core.delayed_load(['crystal_structure'], _load_crystal_structure)
 
@@ -116,7 +94,7 @@ def _load_neutron():
         *Rauch. H. and Waschkowski. W., ILL Nuetron Data Booklet.*
     """
 
-    import nsf
+    from . import nsf
     nsf.init(elements)
 core.delayed_load(['neutron'],_load_neutron, isotope=True)
 
@@ -128,7 +106,7 @@ def _load_xray():
         *Center for X-Ray optics. Henke. L., Gullikson. E. M., and Davis. J. C.*
     """
 
-    import xsf
+    from . import xsf
     xsf.init(elements)
 core.delayed_load(['xray'], _load_xray, ion=True)
 
@@ -139,7 +117,7 @@ def _load_emission_lines():
     K_alpha1 and K_alpha2 lines.
     """
  
-    import xsf
+    from . import xsf
     xsf.init_spectral_lines(elements)
 core.delayed_load(['K_alpha','K_beta1','K_alpha_units','K_beta1_units'],
                   _load_emission_lines)
@@ -152,22 +130,13 @@ def _load_magnetic_ff():
         *Brown. P. J.(Section 4.4.5) International Tables for Crystallography Volume C, Wilson. A.J.C.(ed).*
     """
 
-    import magnetic_ff
+    from . import magnetic_ff
     magnetic_ff.init(elements)
 core.delayed_load(['magnetic_ff'], _load_magnetic_ff)
 
-def _load_ionic_radius():
-    """
-    Ionic radii for various charges.These values are directly from CrysFML. 
-    """
-    import ionic_radius
-    ionic_radius.init(elements)
-core.delayed_load(['ionic_radius'], _load_ionic_radius)
-
-
 
 # Constructors and functions
-def formula(value=None, density=None, natural_density=None, name=None):
+def formula(*args, **kw):
     """
     Chemical formula representation.
 
@@ -188,9 +157,10 @@ def formula(value=None, density=None, natural_density=None, name=None):
 
     Additional information can be provided:
 
-       density (g / cm**3)   material density
-       natural_density (g / cm**3) material density with natural abundance
+       density (|g/cm^3|)   material density
+       natural_density (|g/cm^3|) material density with natural abundance
        name (string) common name for the molecule
+       table (PeriodicTable) periodic table with customized data
 
     Operations:
        m.atoms returns a dictionary of isotope: count for the
@@ -211,9 +181,8 @@ def formula(value=None, density=None, natural_density=None, name=None):
     be used as a basis for a rich text representation such as
     matplotlib TeX markup.
     """
-    import formulas
-    return formulas.Formula(value=value, density=density, 
-                            natural_density=natural_density, name=name)
+    from . import formulas
+    return formulas.formula(*args, **kw)
 
 def mix_by_weight(*args, **kw):
     """
@@ -251,7 +220,7 @@ def mix_by_weight(*args, **kw):
     If density is not given, then it will be computed from the density
     of the components, assuming equal volume.
     """
-    import formulas
+    from . import formulas
     return formulas.mix_by_weight(*args, **kw)
 
 def mix_by_volume(*args, **kw):
@@ -292,7 +261,7 @@ def mix_by_volume(*args, **kw):
     assuming the components take up no more nor less space because they 
     are in the mixture.
     """
-    import formulas
+    from . import formulas
     return formulas.mix_by_volume(*args, **kw)
 
 
@@ -304,7 +273,7 @@ def neutron_sld(*args, **kw):
     
     See :class:`periodictable.nsf.neutron_sld` for details.  
     """
-    import nsf
+    from . import nsf
     return nsf.neutron_sld(*args, **kw)
 
 def neutron_scattering(*args, **kw):
@@ -317,7 +286,7 @@ def neutron_scattering(*args, **kw):
     
     See :func:`periodictable.nsf.neutron_scattering` for details.  
     """
-    import nsf
+    from . import nsf
     return nsf.neutron_scattering(*args, **kw)
 
 def xray_sld(*args, **kw):
@@ -330,7 +299,7 @@ def xray_sld(*args, **kw):
     
     See :class:`periodictable.xsf.Xray` for details.
     """
-    import xsf
+    from . import xsf
     return xsf.xray_sld(*args, **kw)
 
 

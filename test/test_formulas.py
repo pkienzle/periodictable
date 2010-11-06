@@ -1,5 +1,6 @@
 from __future__ import division
 from copy import deepcopy
+from cPickle import loads, dumps
 
 from periodictable import Ca,C,O,H,Fe,Ni,Si,D
 from periodictable import formula, mix_by_weight, mix_by_volume
@@ -117,5 +118,7 @@ def test():
     H2O_fraction = (3/H2O.density) / (3/H2O.density + 2/D2O.density)
     assert abs(fm.density - (H2O.density*H2O_fraction + D2O.density*(1-H2O_fraction))) < 1e-14
 
+    # Pickle test
+    assert loads(dumps(fm)) == fm
 
 if __name__ == "__main__": test()

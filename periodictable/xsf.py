@@ -155,16 +155,14 @@ __all__ = ['Xray', 'init', 'init_spectral_lines',
            ]
 import os.path
 import glob
+
 import numpy
 from numpy import nan
 
-from . import core
-from .core import Element, Ion, default_table
+from .core import Element, Ion, default_table, get_data_path
 from .constants import (avogadro_number, plancks_constant, speed_of_light,
                         electron_radius)
 
-import logging
-from distutils.filelist import findall
 def xray_wavelength(energy):
     """
     Convert X-ray energy to wavelength.
@@ -205,7 +203,7 @@ class Xray(object):
     X-ray scattering properties for the elements. Refer help(periodictable.xsf)
     from command prompt for details.
     """
-    _nff_path = core.get_data_path('xsf')
+    _nff_path = get_data_path('xsf')
     sftable_units = ["eV","",""]
     scattering_factors_units = ["",""]
     sld_units = ["10^-6 inv A^2","10^-6 invA^2"]
@@ -355,8 +353,8 @@ def xray_sld(compound, density=None,
     :Raises:
         *AssertionError* :  *density* or *wavelength*/*energy* is missing.
     """
-    import formulas
-    compound = formulas.Formula(compound)
+    from . import formulas
+    compound = formulas.formula(compound)
     if density is None:
         if natural_density is not None: 
             density = natural_density/compound.natural_mass_ratio()

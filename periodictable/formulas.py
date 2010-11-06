@@ -11,7 +11,7 @@ from math import pi, sqrt
 from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd)
 
-from .core import Element, Isotope, default_table
+from .core import default_table, isatom, isisotope, change_table
 
 PACKING_FACTORS = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
                        fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
@@ -45,6 +45,9 @@ def mix_by_weight(*args, **kw):
             
         *name* : string
             Name of the mixture
+            
+        *table* : PeriodicTable
+            Private table to use when parsing string formulas.
         
     :Returns:
     
@@ -55,6 +58,7 @@ def mix_by_weight(*args, **kw):
     space because they are in the mixture.  If component densities are
     not available, then the resulting density will not be computed.
     """
+    table = default_table(kw.pop('table',None))
     density = kw.pop('density',None)
     natural_density = kw.pop('natural_density',None)
     name = kw.pop('name',None)
@@ -62,7 +66,8 @@ def mix_by_weight(*args, **kw):
     
     if len(args)%2 != 0:
         raise ValueError("Need a quantity for each formula")
-    pairs = [(Formula(args[i]),args[i+1]) for i in range(0, len(args), 2)]
+    pairs = [(formula(args[i],table=table),args[i+1]) 
+             for i in range(0, len(args), 2)]
 
     # Drop pairs with zero quantity
     pairs = [(q,f) for q,f in pairs if q > 0]
@@ -120,6 +125,9 @@ def mix_by_volume(*args, **kw):
         *name* : string
             Name of the mixture
         
+        *table* : PeriodicTable
+            Private table to use when parsing string formulas.
+        
     :Returns:
     
         *formula* : Formula
@@ -129,6 +137,7 @@ def mix_by_volume(*args, **kw):
     space because they are in the mixture.  If component densities are
     not available, then the resulting density will not be computed.
     """
+    table = default_table(kw.pop('table',None))
     density = kw.pop('density',None)
     natural_density = kw.pop('natural_density',None)
     name = kw.pop('name',None)
@@ -136,7 +145,8 @@ def mix_by_volume(*args, **kw):
     
     if len(args)%2 != 0:
         raise ValueError("Need a quantity for each formula")
-    pairs = [(Formula(args[i]),args[i+1]) for i in range(0, len(args), 2)]
+    pairs = [(formula(args[i],table=table),args[i+1]) 
+             for i in range(0, len(args), 2)]
     
     if not all(f.density for f,_ in pairs):
         raise ValueError("Need a density for each formula")
@@ -169,30 +179,30 @@ def mix_by_volume(*args, **kw):
         
     return result
 
-class Formula(object):
+def formula(value=None, density=None, natural_density=None, 
+            name=None, table=None):
     r"""
-    Simple chemical formula representation.
-    This is designed for calculating molar mass and scattering
-    length density, not for representing bonds or atom positions.
-    We preserve the structure of the formula so that it can
-    be used as a basis for a rich text representation such as
-    `matplotlib TeX markup <http://matplotlib.sourceforge.net/users/mathtext.html>`_.
+    Construct a chemical formula representation from a string, a
+    dictionary of atoms and
 
     :Parameters:
     
         *formula* : see below
             Chemical formula.
 
-        *density* : float | g/cm**3
-            Material density.
-        
-        *natural_density*: float | g/cm**3
+        *density* : float | |g/cm^3|
+            Material density.  Not needed for single element formulas.
+
+        *natural_density*: float | |g/cm^3|
             Material density assuming naturally occurring isotopes and no
             change in cell volume.
 
         *name* : string
             Common name for the molecule.
-    
+            
+        *table* : PeriodicTable
+            Private table to use when parsing string formulas.
+        
     :Exceptions:
         *ValueError* : invalid formula initializer
 
@@ -217,55 +227,63 @@ class Formula(object):
 
     * nothing:
         m = Formula()
+
+    After creating a formula, a rough estimate of the density can be
+    computed using formula.density = self.mass/self.volume(packing_factor).  
+    The volume calculation uses the covalent radii of the components and 
+    the known packing factor or crystal structure name.
+
+    Formulas are designed for calculating quantities such as molar mass and 
+    scattering length density, not for representing bonds or atom positions.
+    The representations are simple, but preserve some of the structure for
+    display purposes.
     """
-    def __init__(self, value=None, density=None, natural_density=None, 
-                 name=None):
-        self.density,self.name = None,None
-        if value == None or value == '':
-            self.structure = []
-        elif isinstance(value,Formula):
-            self.__dict__ = copy(value.__dict__)
-        elif _isatom(value):
-            self.structure = ((1,value),)
-        elif isinstance(value,dict):
-            self.structure = _convert_to_hill_notation(value)
-        elif _is_string_like(value):
-            try:
-                self._parse_string(value)
-            except ValueError,msg:
-                raise ValueError,msg
+    if value == None or value == '':
+        structure = tuple()
+    elif isinstance(value,Formula):
+        structure = value.structure
+        if not density and not natural_density: density = value.density
+        if not name: name = value.name
+    elif isatom(value):
+        structure = ((1,value),)
+    elif isinstance(value,dict):
+        structure = _convert_to_hill_notation(value)
+    elif _is_string_like(value):
+        try:
+            structure = _immutable(parse_formula(value, table=table))
+        except ValueError,exception:
+            raise ValueError(str(exception))
             #print "parsed",value,"as",self
+    else:
+        try:
+            structure = _immutable(value)
+        except:
+            raise ValueError("not a valid chemical formula: "+str(value))
+    return Formula(structure=structure, name=name, density=density,
+                   natural_density=natural_density)
+
+class Formula(object):
+    """
+    Simple chemical formula representation.
+
+    """
+    def __init__(self, structure=tuple(), density=None, natural_density=None, 
+                 name=None):
+        self.structure = structure
+        self.name = name
+
+        # If natural_density or density are specified, use them.
+        # If only one element in the formula, use its density.
+        # Otherwise, leave density unspecified, and let the user
+        # assign it separately if they need it.
+        if natural_density: 
+            self.natural_density = natural_density            
+        elif density: 
+            self.density = density
+        elif len(self.atoms) == 1:
+            self.density = self.atoms.keys()[0].density
         else:
-            try:
-                self._parse_structure(value)
-            except:
-                raise ValueError("not a valid chemical formula: "+str(value))
-
-        if natural_density: self.natural_density = natural_density            
-        if density: self.density = density
-        if name: self.name = name
-
-        if self.density is None:
-            # Density defaults to element density if only one element.
-            # Users can estimate the density as:
-            #    self.density = self.mass/self.volume()
-            # if they feel so inclined, but it is too misleading to
-            # make that assumption by default.
-            if len(self.atoms) == 1:
-                self.density = self.atoms.keys()[0].density
-
-    def _parse_structure(self,input):
-        """
-        Set the formula to the given structure, checking that it is valid.
-        """
-        _check_atoms(input)
-        self.structure = _immutable(input)
-
-    def _parse_string(self,input):
-        """
-        Parse the formula string.
-        """
-        self.structure = _immutable(parser.parseString(input))
+            self.density = None
 
     def _atoms(self):
         """
@@ -287,7 +305,7 @@ class Formula(object):
         first followed by hydrogen then the remaining elements in alphabetical
         order.
         """
-        return Formula(self.atoms)
+        return formula(self.atoms)
     hill = property(_hill, doc=_hill.__doc__)
 
     def natural_mass_ratio(self):
@@ -440,6 +458,13 @@ class Formula(object):
         return xray_sld_from_atoms(self.atoms,density=self.density,
                                    wavelength=wavelength,energy=energy)
 
+    def change_table(self, table):
+        """
+        Replace the table used for the components of the formula.
+        """
+        self.structure = _change_table(self.structure, table)
+        return self
+
     def __eq__(self,other):
         """
         Return True if two formulas represent the same structure. Note
@@ -476,7 +501,7 @@ class Formula(object):
             other += 0
         except TypeError:
             raise TypeError("n*formula expects numeric n")
-        ret = Formula(self)
+        ret = copy(self)
         if other != 1 and self.structure:
             if len(self.structure) == 1:
                 q,f = self.structure[0]
@@ -491,24 +516,7 @@ class Formula(object):
     def __repr__(self):
         return "formula('%s')"%(str(self))
 
-    def __getstate__(self):
-        """
-        Pickle formula structure using a string representation since
-        elements can't be pickled.
-        """
-        output = copy(self.__dict__)
-        output['structure'] = _str_atoms(self.structure)
-        return output
-
-    def __setstate__(self,input):
-        """
-        Unpickle formula structure from a string representation since
-        elements can't be pickled.
-        """
-        self.__dict__ = input
-        self._parse_string(input['structure'])
-
-def formula_grammar(table=None):
+def formula_grammar(table):
     """
     Construct a parser for molecular formulas. 
 
@@ -516,6 +524,7 @@ def formula_grammar(table=None):
         *table* = None : PeriodicTable
              If table is specified, then elements and their associated fields
              will be chosen from that periodic table rather than the default.
+
     :Returns: 
         *parser* : pyparsing.ParserElement.
             The ``parser.parseString()`` method returns a list of 
@@ -523,8 +532,6 @@ def formula_grammar(table=None):
             an *element* or a list of pairs (*count,fragment*).    
                 
     """
-    table = default_table(table)
-
     # Recursive
     formula = Forward()
 
@@ -551,11 +558,7 @@ def formula_grammar(table=None):
     def convert_element(string,location,tokens):
         #print "convert_element received",tokens
         symbol,isotope,count = tokens[0:3]
-        if isotope != 0:
-            try:
-                symbol = symbol[isotope]
-            except KeyError:
-                raise ValueError("%d is not an isotope of %s"%(isotope,symbol))
+        if isotope != 0: symbol = symbol[isotope]
         return (count,symbol)
     element = element.setParseAction(convert_element)
 
@@ -584,7 +587,19 @@ def formula_grammar(table=None):
     formula << group + ZeroOrMore(Optional(separator)+group)
     grammar = Optional(formula) + StringEnd()
 
+    grammar.setName('Chemical Formula')
     return grammar
+
+_PARSER_CACHE = {}
+def parse_formula(str, table = None):
+    """
+    Parse a chemical formula, returning a structure with elements from the 
+    given periodic table.
+    """
+    table = default_table(table)
+    if table not in _PARSER_CACHE:
+        _PARSER_CACHE[table] = formula_grammar(table)
+    return _PARSER_CACHE[table].parseString(str)
 
 def _count_atoms(seq):
     """
@@ -601,29 +616,32 @@ def _count_atoms(seq):
             total[el] += elcount*count
     return total
 
-def _check_atoms(seq):
+def _immutable(seq):
     """
     Traverse formula structure, checking that the counts are numeric and
-    units are elements or isotopes.  Raises an error if this is not the
-    case.
+    units are atoms.  Returns an immutable copy of the structure, with all 
+    lists replaced by tuples.
     """
-    for count,fragment in seq:
-        count += 0 # Fails if not numeric
-        if not _isatom(fragment):
-            _check_atoms(fragment) # Fails if not sequence of pairs
+    if isatom(seq):
+        return seq
+    else:
+        return tuple((count+0,_immutable(fragment)) for count,fragment in seq)
 
-def _immutable(seq):
+def _change_table(seq, table):
     """Converts lists to tuples so that structure is immutable."""
-    if _isatom(seq): return seq
-    return tuple( (count,_immutable(fragment)) for count,fragment in seq )
+    if isatom(seq):
+        return change_table(seq, table)
+    else:
+        return tuple((count,_change_table(fragment, table))
+                     for count,fragment in seq)
 
 def _hill_compare(a,b):
     """
     Compare elements in standard order.
     """
     if a.symbol == b.symbol:
-        a = a.isotope if isinstance(a, Isotope) else 0
-        b = b.isotope if isinstance(b, Isotope) else 0
+        a = a.isotope if isisotope(a) else 0
+        b = b.isotope if isisotope(b) else 0
         return cmp(a,b)
     elif a.symbol in ("C", "H"):
         if b.symbol in ("C", "H"):
@@ -647,9 +665,9 @@ def _str_atoms(seq):
     #print "str",seq
     ret = ""
     for count,fragment in seq:
-        if _isatom(fragment):
+        if isatom(fragment):
             # Isotopes are Sym[iso] except for D and T
-            if _isisotope(fragment) and 'symbol' not in fragment.__dict__:
+            if isisotope(fragment) and 'symbol' not in fragment.__dict__:
                 ret += "%s[%d]"%(fragment.symbol,fragment.isotope)
             else:
                 ret += fragment.symbol
@@ -665,19 +683,8 @@ def _str_atoms(seq):
 
     return ret
 
-def _isatom(val):
-    """Return true if value is an element or isotope"""
-    return isinstance(val,(Element,Isotope))
-
-def _isisotope(val):
-    """Return true if value is an isotope"""
-    return isinstance(val,Isotope)
-
 def _is_string_like(val):
     """Returns True if val acts like a string"""
     try: val+''
     except: return False
     return True
-
-parser = formula_grammar()
-parser.setName('Chemical Formula')

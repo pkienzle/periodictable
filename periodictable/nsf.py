@@ -840,8 +840,8 @@ def neutron_scattering(compound, density=None,
         \,+\, \Sigma_{\rm inc}\, 1/{\rm cm} 
         \,+\, \Sigma_{\rm abs}\, 1/{\rm cm})
     """
-    import formulas
-    compound = formulas.Formula(compound)
+    from . import formulas
+    compound = formulas.formula(compound)
     if density is None:
         if natural_density is not None: 
             density = natural_density/compound.natural_mass_ratio()

@@ -34,8 +34,14 @@ Helper functions:
 * :func:`define_elements`
     Define external variables for each element in namespace.    
 
+* :func:`isatom`, :func:`iselement`, :func:`isisotope`, :func:`ision`
+    Tests for different types of structure components.
+
 * :func:`default_table`
     Returns the common periodic table.
+
+* :func:`change_table`
+    Return the same item from a different table.
 
 .. seealso::
 
@@ -49,6 +55,8 @@ __all__ = ['delayed_load', 'define_elements', 'get_data_path', 'default_table',
            'Ion', 'Isotope', 'Element', 'PeriodicTable']
 
 import copy
+
+PUBLIC_TABLE_NAME = "public"
 
 def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
     """
@@ -190,9 +198,9 @@ class PeriodicTable(object):
            *nuclear* and *X-ray* scattering cross sections. 
            See section :ref:`Adding properties <extending>` for details.
     """
-    def __init__(self, table="default"):
+    def __init__(self, table):
         if table in PRIVATE_TABLES:
-            raise ValueError("Table '%s' is already defined"%table)
+            raise ValueError("Periodic table '%s' is already defined"%name)
         PRIVATE_TABLES[table] = self
         self.properties = []
         self._element = {}
@@ -470,7 +478,7 @@ class Element(object):
     Individual isotopes can be referenced as element[*isotope_number*].
     Individual ionization states can be referenced by element.ion[*charge*].
     """
-    table = "default"
+    table = PUBLIC_TABLE_NAME
     charge = 0
     def __init__(self,name,symbol,Z,ions,table):
         self.name = name
@@ -503,7 +511,10 @@ class Element(object):
         return self._isotopes[number]
     
     def __getitem__(self,number):
-        return self._isotopes[number]
+        try:
+            return self._isotopes[number]
+        except KeyError:
+            raise KeyError("%d is not an isotope of %s"%(number,self.symbol))            
 
     def __iter__(self):
         """
@@ -522,12 +533,43 @@ class Element(object):
     def __reduce__(self):
         return _make_element,(self.table,self.number,)
 
+def isatom(val):
+    """Return true if value is an element, isotope or ion"""
+    return isinstance(val,(Element,Isotope,Ion))
+
+def isisotope(val):
+    """Return true if value is an isotope or isotope ion."""
+    if ision(val): val = val.element
+    return isinstance(val,Isotope)
+
+def ision(val):
+    """Return true if value is a specific ion of an element or isotope"""
+    return isinstance(val,Ion)
+
+def iselement(val):
+    """Return true if value is an element or ion in natural abundance"""
+    if ision(val): val = val.element
+    return isinstance(val,Element)
+
+def change_table(atom, table):
+    """Search for the same element, isotope or ion from a different table"""
+    if ision(atom):
+        if isisotope(atom):
+            return table[atom.number][atom.isotope].ion[atom.charge]
+        else:
+            return table[atom.number].ion[atom.charge]
+    else:
+        if isisotope(atom):
+            return table[atom.number][atom.isotope]
+        else:
+            return table[atom.number]
+
 PRIVATE_TABLES = {}
-def _get_table(table):
+def _get_table(name):
     try:
-        return PRIVATE_TABLES[table]
+        return PRIVATE_TABLES[name]
     except KeyError:
-        raise ValueError("Periodic table %s is not initialized"%table)
+        raise ValueError("Periodic table '%s' is not initialized"%name)
         
 def _make_element(table,Z):
     return _get_table(table)[Z]
@@ -668,10 +710,7 @@ def default_table(table=None):
             table = core.default_table(table)
             ...
     """
-    if table == None:
-        import periodictable
-        table = periodictable.elements
-    return table
+    return table if table is not None else PUBLIC_TABLE
 
 def define_elements(table, namespace):
     """
@@ -754,4 +793,6 @@ def get_data_path(data):
 
     raise RuntimeError('Could not find the periodic table data files')
 
-
+# Make a common copy of the table for everyone to use --- equivalent to
+# a singleton without incurring any complexity.
+PUBLIC_TABLE = PeriodicTable(PUBLIC_TABLE_NAME)

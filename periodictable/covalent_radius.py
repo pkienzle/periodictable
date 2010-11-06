@@ -83,9 +83,7 @@ def init(table, reload=False):
 # Table of radii from Cordero.  Note that in cases where there are
 # multiple spin states (C,Mn,Fe,Co) only the first spin state is used.
 #
-#Z  Symbol radius(A) uncertainty number of measurements
-
-
+#Z,  Symbol, radius(A), uncertainty (0.01A), number of measurements
 Cordero = """\
 1    H    0.31    5    129
 2    He    0.28

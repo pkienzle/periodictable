@@ -428,9 +428,9 @@ class Formula(object):
 
         """
         if self.density is None: return None,None,None
-        from nsf import neutron_sld_from_atoms
-        return neutron_sld_from_atoms(self.atoms,density=self.density,
-                                      wavelength=wavelength)
+        from nsf import neutron_sld
+        return neutron_sld(self.atoms,density=self.density,
+                           wavelength=wavelength)
 
     def xray_sld(self, energy=None, wavelength=None):
         """
@@ -454,9 +454,9 @@ class Formula(object):
 
         """
         if self.density is None: return None,None
-        from xsf import xray_sld_from_atoms
-        return xray_sld_from_atoms(self.atoms,density=self.density,
-                                   wavelength=wavelength,energy=energy)
+        from xsf import xray_sld
+        return xray_sld(self.atoms,density=self.density,
+                        wavelength=wavelength,energy=energy)
 
     def change_table(self, table):
         """

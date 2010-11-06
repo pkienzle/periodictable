@@ -372,12 +372,13 @@ def xray_sld(compound, density=None,
         #print element,f1,f2,wavelength
         sum_f1 += f1*quantity
         sum_f2 += f2*quantity
+    
     if mass == 0: # because the formula is empty
-        rho,irho = 0,0
-    else:
-        N = (density/mass*avogadro_number*1e-8)
-        rho = N*sum_f1*electron_radius
-        irho = N*sum_f2*electron_radius
+        return 0,0
+
+    N = (density/mass*avogadro_number*1e-8)
+    rho = N*sum_f1*electron_radius
+    irho = N*sum_f2*electron_radius
     return rho,irho
 
 def xray_sld_from_atoms(*args, **kw):

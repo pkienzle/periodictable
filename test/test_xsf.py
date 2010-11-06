@@ -72,7 +72,7 @@ def test():
     D2O_density = (2*D.mass + O.mass)/(2*H.mass + O.mass)
     rho,mu = xray_sld('D2O',natural_density=1,wavelength=1.54)
     rho2,mu2 = xray_sld('D2O',density=D2O_density,wavelength=1.54)
-    assert abs(rho-rho2)<1e-15 and abs(mu-mu2)<1e-15
+    assert abs(rho-rho2)<1e-14 and abs(mu-mu2)<1e-14
 
 
     # Check f0 calculation for scalar, vector, array and empty

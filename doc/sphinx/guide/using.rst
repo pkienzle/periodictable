@@ -22,8 +22,8 @@ Access particular elements as symbols:
     >>> from periodictable import H,B,Cu,Ni
     >>> print "B absorption", B.neutron.absorption
     B absorption 767.0
-    >>> print "Ni f1/f2 for Cu K-alpha X-rays", Ni.xray.scattering_factors(Cu.K_alpha)
-    Ni f1/f2 for Cu K-alpha X-rays (27.13235204490778, 8.4032444506816351)
+    >>> print "Ni f1/f2 for Cu K-alpha X-rays", Ni.xray.scattering_factors(wavelength=Cu.K_alpha)
+    Ni f1/f2 for Cu K-alpha X-rays (25.022929905648375, 0.52493074546535157)
 
 Access isotopes using mass number subscripts:
 

@@ -10,14 +10,14 @@ def test():
     assert Cu.K_beta1 == 1.3922
 
     # Check scalar scattering factor lookup
-    f1,f2 = Ni.xray.scattering_factors(xray_energy(Cu.K_alpha))
+    f1,f2 = Ni.xray.scattering_factors(energy=xray_energy(Cu.K_alpha))
     assert abs(f1-25.0229)<0.0001
     assert abs(f2-0.5249)<0.0001
 
     # Check array scattering factor lookup
-    f1,f2 = Ni.xray.scattering_factors(xray_energy(Cu.K_alpha))
-    m1,m2 = Ni.xray.scattering_factors(xray_energy(Mo.K_alpha))
-    B1,B2 = Ni.xray.scattering_factors(xray_energy([Cu.K_alpha,Mo.K_alpha]))
+    f1,f2 = Ni.xray.scattering_factors(wavelength=Cu.K_alpha)
+    m1,m2 = Ni.xray.scattering_factors(wavelength=Mo.K_alpha)
+    B1,B2 = Ni.xray.scattering_factors(wavelength=[Cu.K_alpha,Mo.K_alpha])
     assert (B1==[f1,m1]).all() and (B2==[f2,m2]).all()
 
     # Check that we can lookup sld by wavelength and energy
@@ -28,13 +28,20 @@ def test():
     assert abs(Si_mu-0.4572) < 0.0001
 
     # Check that wavelength is the default
-    Fe_rho_default,Fe_mu_default = Fe.xray.sld(Cu.K_alpha)
+    Fe_rho_default,Fe_mu_default = Fe.xray.sld(wavelength=Cu.K_alpha)
     assert Fe_rho == Fe_rho_default and Fe_mu == Fe_mu_default
 
     # Check array form of sld lookup
     f1,f2 = Si.xray.sld(wavelength=Cu.K_alpha)
     m1,m2 = Si.xray.sld(wavelength=Mo.K_alpha)
     B1,B2 = Si.xray.sld(wavelength=[Cu.K_alpha,Mo.K_alpha])
+    assert (B1==[f1,m1]).all() and (B2==[f2,m2]).all()
+    
+    # Check energy conversion is consistent
+    f1,f2 = Si.xray.sld(energy=xray_energy(Cu.K_alpha))
+    m1,m2 = Si.xray.sld(energy=xray_energy(Mo.K_alpha))
+    assert (B1==[f1,m1]).all() and (B2==[f2,m2]).all()
+    B1,B2 = Si.xray.sld(energy=xray_energy([Cu.K_alpha,Mo.K_alpha]))
     assert (B1==[f1,m1]).all() and (B2==[f2,m2]).all()
 
     #print Cu.xray.sftable
@@ -57,12 +64,12 @@ def test():
     assert abs(rho - rhoSi) < 1e-14
     assert abs(mu - muSi) < 1e-14
 
-    # Check that neutron_sld works as expected
+    # Check that xray_sld works as expected
     atoms = formula('SiO2').atoms
-    rho,mu = xray_sld(atoms,2.2,energy=xray_energy(Cu.K_alpha))
+    rho,mu = xray_sld(atoms,density=2.2,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-18.87)<0.1
     atoms = formula('B4C').atoms
-    rho,mu = xray_sld(atoms,2.52,energy=xray_energy(Cu.K_alpha))
+    rho,mu = xray_sld(atoms,density=2.52,energy=xray_energy(Cu.K_alpha))
     assert abs(rho-20.17)<0.1
 
     rho,mu = xray_sld('', density=0, wavelength=Cu.K_alpha)

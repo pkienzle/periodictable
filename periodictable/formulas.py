@@ -12,6 +12,7 @@ from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd)
 
 from .core import default_table, isatom, isisotope, change_table
+from .util import require_keywords
 
 PACKING_FACTORS = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
                        fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
@@ -410,7 +411,8 @@ class Formula(object):
         return V/packing_factor
 
     # TODO: move neutron/xray sld to extension
-    def neutron_sld(self, wavelength=1):
+    @require_keywords
+    def neutron_sld(self, wavelength=None, energy=None):
         """
         Neutron scattering information for the molecule.
 
@@ -428,8 +430,9 @@ class Formula(object):
         if self.density is None: return None,None,None
         from nsf import neutron_sld
         return neutron_sld(self.atoms,density=self.density,
-                           wavelength=wavelength)
+                           wavelength=wavelength, energy=energy)
 
+    @require_keywords
     def xray_sld(self, energy=None, wavelength=None):
         """
         X-ray scattering length density for the molecule.

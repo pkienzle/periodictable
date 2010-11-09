@@ -121,6 +121,7 @@ from numpy import sqrt, pi, asarray, inf
 from .core import Element, Isotope, default_table
 from .constants import (avogadro_number, plancks_constant, electron_volt,
                         neutron_mass, atomic_mass_constant)
+from .util import require_keywords
 
 __all__ = ['init', 'Neutron',
            'neutron_energy', 'neutron_wavelength', 
@@ -187,7 +188,7 @@ def _CHECK_sld_potential(sld):
     Convert neutron scattering length density to energy potential.
 
     :Parameters:
-        *sld* : float or vector | 10^-6 / A
+        *sld* : float or vector | |1e-6/A|
         
             Scattering length density.
 
@@ -312,6 +313,7 @@ class Neutron(object):
     def has_sld(self):
         """Returns *True* if sld is defined for this element/isotope."""
         return None not in [self.b_c, self._number_density]
+    @require_keywords
     def sld(self, wavelength=ABSORPTION_WAVELENGTH, energy=None):
         """
         Returns scattering length density for the element at natural 
@@ -348,6 +350,7 @@ class Neutron(object):
         sld_inc = sqrt ( 100/(4*pi) * sigma_i )*10*N
         return sld_re,sld_im,sld_inc
 
+    @require_keywords
     def scattering(self,wavelength=ABSORPTION_WAVELENGTH, energy=None):
         """
         Returns neutron scattering information for the element at natural 
@@ -553,6 +556,7 @@ def energy_dependent_table(table=None):
 
 
 # Note: docs and function prototype are reproduced in __init__
+@require_keywords
 def neutron_scattering(compound, density=None,
                        wavelength=ABSORPTION_WAVELENGTH, energy=None,
                        natural_density=None):

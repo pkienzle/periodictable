@@ -162,6 +162,7 @@ from numpy import nan
 from .core import Element, Ion, default_table, get_data_path
 from .constants import (avogadro_number, plancks_constant, speed_of_light,
                         electron_radius)
+from .util import require_keywords
 
 def xray_wavelength(energy):
     """
@@ -226,7 +227,8 @@ class Xray(object):
         return self._table
     sftable = property(_gettable,doc="X-ray scattering factor table (E,f1,f2)")
 
-    def scattering_factors(self, energy):
+    @require_keywords
+    def scattering_factors(self, energy=None, wavelength=None):
         """
         X-ray scattering factors f',f''.
 
@@ -247,6 +249,11 @@ class Xray(object):
         xsf = self.sftable
         if xsf is None:
             return None,None
+
+        if wavelength is not None:
+            energy = xray_energy(wavelength)
+        if energy is None:
+            raise TypeError('X-ray scattering factors need wavelength or energy')
 
         scalar = numpy.isscalar(energy)
         if scalar:
@@ -285,6 +292,7 @@ class Xray(object):
                                 charge=self.element.charge)
         return f
 
+    @require_keywords
     def sld(self, wavelength=None, energy=None):
         """
         X ray scattering length density.
@@ -319,11 +327,7 @@ class Xray(object):
         Data comes from the Henke Xray scattering factors database at the
         Lawrence Berkeley Laboratory Center for X-ray Optics.
         """
-        if wavelength is not None:
-            energy = xray_energy(wavelength)
-        if energy is None:
-            raise TypeError('X-ray SLD needs wavelength or energy')
-        f1,f2 = self.scattering_factors(energy)
+        f1,f2 = self.scattering_factors(wavelength=wavelength, energy=energy)
         if f1 is None or self.element.number_density is None:
             return None,None
         rho = f1*electron_radius*self.element.number_density*1e-8
@@ -331,6 +335,7 @@ class Xray(object):
         return rho,irho
 
 # Note: docs and function prototype are reproduced in __init__
+@require_keywords
 def xray_sld(compound, density=None, 
              wavelength=None, energy=None, natural_density=None):
     """
@@ -368,7 +373,7 @@ def xray_sld(compound, density=None,
     mass,sum_f1,sum_f2 = 0,0,0
     for element,quantity in compound.atoms.iteritems():
         mass += element.mass*quantity
-        f1,f2 = element.xray.scattering_factors(energy)
+        f1,f2 = element.xray.scattering_factors(energy=energy)
         #print element,f1,f2,wavelength
         sum_f1 += f1*quantity
         sum_f2 += f2*quantity

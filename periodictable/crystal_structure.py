@@ -39,6 +39,7 @@ Example:
 This data is from Ashcroft and Mermin.
 '''
 
+
 crystal_structures = [\
     None, #X
     {'symmetry': 'diatom', 'd': 0.74}, #H

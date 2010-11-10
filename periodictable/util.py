@@ -1,8 +1,39 @@
 """
 Helper functions
 """
-import inspect
-import functools
+
+def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
+    """
+    Compute cell volume from lattice parameters.
+
+    :Parameters:
+        *a*, *b*, *c* : float | |A|
+            Lattice spacings.  If *b* or *c* are missing they default to *a*.
+        *alpha*, *beta*, *gamma* : float | |degrees|
+            Lattice angles.  If any are missing they default to 90\ |degrees|
+
+    :Returns:
+        *V* : float |A^3|
+            Cell volume
+
+    :Raises:
+        *TypeError* : missing or invalid parameters
+
+    Algorithm:
+    
+    .. math::
+    
+        V = a b c \sqrt{1 - \cos^2 \alpha - \cos^2 \beta - cos^2 \gamma
+                          + 2 \cos \alpha \cos beta \cos gamma}
+    """
+    from math import cos, radians, sqrt
+    if a is None: raise TypeError('missing lattice parameters')
+    if b is None: b = a
+    if c is None: c = a
+    calpha, cbeta, cgamma = [cos(radians(v)) if v is not None else 0
+                             for v in alpha, beta, gamma]
+    V = a*b*c*sqrt(1 - calpha**2 - cbeta**2 - cgamma**2 + 2*calpha*cbeta*cgamma)
+    return V
 
 def require_keywords(function):
     """
@@ -20,13 +51,16 @@ def require_keywords(function):
         >>> fn(1,2,c=6)
         >>> fn(b=1,a=2,c=6)
     
-    :Note: The call signature is not preserved.
+    .. Note:: The call signature is not preserved.
     
     We can't preserve the function signature for the call since the only 
     way we can count the number of non-keyword arguments is to 
     use the *args, **kw call style.  Python 3+ provides the '*' call 
     signature element which will force all keywords after '*' to be named.
     """
+    import inspect
+    import functools
+
     argspec = inspect.getargspec(function)
     named_args = argspec.args[:-len(argspec.defaults)]
     named_kwds = argspec.args[-len(argspec.defaults):]

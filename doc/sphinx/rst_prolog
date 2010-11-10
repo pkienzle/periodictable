@@ -1,7 +1,11 @@
 .. |Angstrom| unicode:: U+212B
-.. .. |Angstrom| replace:: :math:`\text{\r{A}}`
 .. |cm^2| replace:: cm\ :sup:`2`
+.. |1/cm| replace:: cm\ :sup:`-1`
 .. |1/A| replace:: |Angstrom|\ :sup:`-1`
 .. |1/A^2| replace:: |Angstrom|\ :sup:`-2`
+.. |A^3| replace:: |Angstrom|\ :sup:`3`
 .. |g/cm^3| replace:: g cm\ :sup:`-3`
 .. |1e-6/A^2| replace:: 10\ :sup:`-6`\ |Angstrom|\ :sup:`-2`
+.. |fm^2| replace:: fm\ :sup:`2`
+.. |degrees| replace:: degrees
+.. |A| replace:: |Angstrom|

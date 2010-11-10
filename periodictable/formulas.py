@@ -12,7 +12,8 @@ from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd)
 
 from .core import default_table, isatom, isisotope, change_table
-from .util import require_keywords
+from .constants import avogadro_number
+from .util import require_keywords, cell_volume
 
 PACKING_FACTORS = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
                        fcc=pi/sqrt(18), diamond=pi*sqrt(3)/16)
@@ -205,32 +206,16 @@ def formula(value=None, density=None, natural_density=None,
     :Exceptions:
         *ValueError* : invalid formula initializer
 
-    Formula initializers can have a variety of forms:
-
-    * string:
-        m = Formula("CaCO3+6H2O")
-
-        For full details see :ref:`Formula grammar <formula>`
-    
-    * structure:
-        m = Formula( [ (1,Ca), (2,C), (3,O), (6,[(2,H),(1,O)]) ] )
-
-    * formula math:
-        m = Formula("CaCO3") + 6*Formula("H2O")
-
-    * another formula (makes a copy):
-        m = Formula( Formula("CaCO3 + 6H2O"))
-
-    * an atom:
-        m = Formula(Ca)
-
-    * nothing:
-        m = Formula()
-
     After creating a formula, a rough estimate of the density can be
-    computed using formula.density = self.mass/self.volume(packing_factor).  
-    The volume calculation uses the covalent radii of the components and 
-    the known packing factor or crystal structure name.
+    computed using:
+    
+         formula.density = formula.molecular_mass/formula.volume(packing_factor=...)
+
+    The volume() calculation uses the covalent radii of the components and 
+    the known packing factor or crystal structure name.  If the lattice
+    constants for the crystal are known, then they can be used instead:
+    
+        formula.density = formula.molecular_mass/formula.volume(a,b,c,alpha,beta,gamma)
 
     Formulas are designed for calculating quantities such as molar mass and 
     scattering length density, not for representing bonds or atom positions.
@@ -266,7 +251,7 @@ class Formula(object):
     Simple chemical formula representation.
 
     """
-    def __init__(self, structure=tuple(), density=None, natural_density=None, 
+    def __init__(self, structure=tuple(), density=None, natural_density=None,
                  name=None):
         self.structure = structure
         self.name = name
@@ -346,8 +331,9 @@ class Formula(object):
         """
         atomic mass units u (C[12] = 12 u)
 
-        Atomic mass of the molecule.
-        
+        Molar mass of the molecule.  Scale by Avogadro's number to get the
+        molecular mass when calculating density.
+
         Referencing this attribute computes the mass of the chemical formula.
         """
         mass = 0
@@ -356,10 +342,21 @@ class Formula(object):
         return mass
     mass = property(_mass,doc=_mass.__doc__)
 
+    @property
+    def molecular_mass(self):
+        return self.mass/avogadro_number
 
-    def volume(self, packing_factor='hcp'):
+    def _pf(self):
+        """
+        packing factor  | unitless
+        
+        packing factor estimated from density.
+        """
+        return self.density
+        
+    def volume(self, packing_factor='hcp', *args, **kw):
         r"""
-        Estimate molecular volume. 
+        Estimate unit cell volume. 
 
         The crystal volume can be estimated from the element covalent radius 
         and the atomic packing factor using::
@@ -367,6 +364,10 @@ class Formula(object):
             packing_factor = N_atoms V_atom / V_crystal
 
         Packing factors for a number of crystal lattice structures are defined.
+        
+        Approximate density can be set using:
+        
+            formula.density = formula.mass/formula.volume()
 
         .. table:: Crystal lattice names and packing factors
 
@@ -385,16 +386,23 @@ class Formula(object):
             *packing_factor*  = 'hcp' : float or string
                 Atomic packing factor.  If *packing_factor* is the name of
                 a crystal lattice, use the *lattice* packing factor.
-        
-         
+            *a*, *b*, *c* : float | |A|
+                Lattice spacings. *b* and *c* default to *a*.
+            *alpha*, *beta*, *gamma* : float | |degrees|
+                Lattice angles.  These default to 90\ |degrees|
+
         :Returns:
-            *volume* : float | A^3
+            *volume* : float | |cm^3|
                 Molecular volume. 
 
         :Raises:
-
-             *ValueError* : *lattice* is not defined
+            *KeyError* : unknown lattice type
+            *TypeError* : missing or bad lattice parameters
         """
+        # Let cell_volume sort out its own parameters.
+        if args or kw:
+            return cell_volume(*args, **kw)*1e-24
+
         # Compute atomic volume
         V = 0
         for el,count in self.atoms.items():
@@ -408,7 +416,7 @@ class Formula(object):
             pass
         else:
             packing_factor = PACKING_FACTORS[packing_factor.lower()]
-        return V/packing_factor
+        return V/packing_factor*1e-24
 
     # TODO: move neutron/xray sld to extension
     @require_keywords
@@ -517,6 +525,7 @@ class Formula(object):
     def __repr__(self):
         return "formula('%s')"%(str(self))
 
+
 def formula_grammar(table):
     """
     Construct a parser for molecular formulas. 
@@ -584,8 +593,8 @@ def formula_grammar(table):
     explicit_group = explicit_group.setParseAction(convert_explicit)
 
     group = implicit_group | explicit_group
-    separator = Literal('+').suppress()
-    formula << group + ZeroOrMore(Optional(separator)+group)
+    separator = Optional(Literal('+').suppress()) + Optional(White().suppress())
+    formula << group + ZeroOrMore(Optional(White().suppress())+separator+group)
     grammar = Optional(formula) + StringEnd()
 
     grammar.setName('Chemical Formula')

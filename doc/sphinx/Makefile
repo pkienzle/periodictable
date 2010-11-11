@@ -29,7 +29,11 @@ help:
 clean:
 	-rm -rf _build/* build/* plots/*.pyc plots/*.png
 
-html: build
+_build/html:
+	mkdir -p _build/html/_static
+	cp -r MathJax _build/html/_static/MathJax
+
+html: build _build/html
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."

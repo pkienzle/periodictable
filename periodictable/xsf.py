@@ -15,7 +15,7 @@ The following attributes are added to each element:
        interpolated from sftable.
 
    :func:`Xray.f0`
-       Returns f0 for the given vector Q, with q_i in [0,24\pi] |1/A|.
+       Returns f0 for the given vector Q, with q_i in [0,24\pi] |1/Ang|.
 
    :func:`Xray.sld`
        Returns scattering length density (*real*, *imaginary*) for the
@@ -49,7 +49,7 @@ The following functions are available for X-ray scatting information processing:
      :func:`emission_table`
          Prints a table of emission lines.
 
-K_alpha, K_beta1 (Angstrom):
+K_alpha, K_beta1 (|Ang|):
     X-ray emission lines for various elements, including Ag, Pd, Rh, Mo,
     Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti. K_alpha is the average of
     K_alpha1 and K_alpha2 lines.
@@ -191,7 +191,7 @@ def xray_energy(wavelength):
     Convert X-ray wavelength to energy.
 
     :Parameters:
-        *wavelength* : float or vector | A
+        *wavelength* : float or vector | |Ang|
 
     :Returns:
         *energy* : float or vector | keV
@@ -207,7 +207,7 @@ class Xray(object):
     _nff_path = get_data_path('xsf')
     sftable_units = ["eV","",""]
     scattering_factors_units = ["",""]
-    sld_units = ["10^-6 inv A^2","10^-6 invA^2"]
+    sld_units = ["1e-6/Ang^2","1e-6/Ang^2"]
     _table = None
     def __init__(self, element):
         self.element = element
@@ -269,7 +269,7 @@ class Xray(object):
         Isotropic X-ray scattering factors f0 for the input Q.
 
         :Parameters: 
-            *Q* : float or vector in [0, 24*pi] | |1/A|
+            *Q* : float or vector in [0, 24*pi] | |1/Ang|
                 X-ray scattering properties for the elements.
                
         :Returns:
@@ -299,7 +299,7 @@ class Xray(object):
 
         :Parameters: 
 
-            *wavelength* : float or vector | A
+            *wavelength* : float or vector | |Ang|
                 Wavelength of the X-ray.
 
             *energy* : float or vector | keV
@@ -309,7 +309,7 @@ class Xray(object):
                 Only one of *wavelength* and *energy* is needed.
                
         :Returns:
-            *sld* : (float, float) | |1/A^2|
+            *sld* : (float, float) | |1/Ang^2|
                 (*real*, *imaginary*) X-ray scattering length density.
 
         :Raises:
@@ -346,13 +346,13 @@ def xray_sld(compound, density=None,
             Chemical formula initializer.
         *density* : float | |g/cm^3|
             Density of the compound. 
-        *wavelength* : float | A
+        *wavelength* : float | |Ang|
             Wavelength of the X-ray.
         *energy* : float | keV
             Energy of the X-ray, if *wavelength* is not specified.
 
     :Returns:
-        *sld* : (float, float) | |1e-6/A^2|
+        *sld* : (float, float) | |1e-6/Ang^2|
             (*real*, *imaginary*) scattering length density. 
 
     :Raises:
@@ -475,7 +475,7 @@ def sld_table(wavelength, table=None):
     Prints the xray SLD table for the given wavelength.
 
     :Parameters: 
-        *wavelength* : float | A
+        *wavelength* : float | |Ang|
             X-ray wavelength.
         *table* : PeriodicTable
             The default periodictable unless a specific table has been requested.
@@ -490,7 +490,7 @@ def sld_table(wavelength, table=None):
     #        print el.Z,el.symbol,"%.1f"%f1,"%.4f"%(f1-el.Z)
 
     # NBCU spreadsheet format
-    print "X-ray scattering length density for",wavelength,"A"
+    print "X-ray scattering length density for",wavelength,"Ang"
     print "%3s %6s %6s"%('El','rho','irho')
     for el in table:
         rho,irho = el.xray.sld(table.Cu.K_alpha)

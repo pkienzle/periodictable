@@ -316,7 +316,7 @@ class Formula(object):
         return total_natural_mass/total_isotope_mass
     def _get_natural_density(self):
         """
-        g/cm^3
+        |g/cm^3|
         
         Density of the formula with specific isotopes of each element 
         replaced by the naturally occurring abundance of the element
@@ -331,10 +331,8 @@ class Formula(object):
         """
         atomic mass units u (C[12] = 12 u)
 
-        Molar mass of the molecule.  Scale by Avogadro's number to get the
-        molecular mass when calculating density.
-
-        Referencing this attribute computes the mass of the chemical formula.
+        Molar mass of the molecule.  Use molecular_mass to get the mass in 
+        grams.
         """
         mass = 0
         for el,count in self.atoms.iteritems():
@@ -344,6 +342,11 @@ class Formula(object):
 
     @property
     def molecular_mass(self):
+        """
+        g
+        
+        Mass of the molecule in grams.
+        """
         return self.mass/avogadro_number
 
     def _pf(self):
@@ -386,17 +389,20 @@ class Formula(object):
             *packing_factor*  = 'hcp' : float or string
                 Atomic packing factor.  If *packing_factor* is the name of
                 a crystal lattice, use the *lattice* packing factor.
-            *a*, *b*, *c* : float | |A|
+            *a*, *b*, *c* : float | |Ang|
                 Lattice spacings. *b* and *c* default to *a*.
-            *alpha*, *beta*, *gamma* : float | |degrees|
-                Lattice angles.  These default to 90\ |degrees|
+            *alpha*, *beta*, *gamma* : float | |deg|
+                Lattice angles.  These default to 90\ |deg|
 
         :Returns:
+        
             *volume* : float | |cm^3|
                 Molecular volume. 
 
         :Raises:
+        
             *KeyError* : unknown lattice type
+            
             *TypeError* : missing or bad lattice parameters
         """
         # Let cell_volume sort out its own parameters.
@@ -425,11 +431,11 @@ class Formula(object):
         Neutron scattering information for the molecule.
 
         :Parameters:
-            *wavelength* : float | A
+            *wavelength* : float | |Ang|
                 Wavelength of the neutron beam.
         
         :Returns: 
-            *sld* : (float, float, float) | 10^-6 inv A^2
+            *sld* : (float, float, float) | |1e-6/Ang^2|
                 Neutron scattering length density is returned as the tuple
                 (*real*, *imaginary*, *incoherent*), or as (None, None, None) 
                 if the mass density is not known.
@@ -446,20 +452,19 @@ class Formula(object):
         X-ray scattering length density for the molecule.
 
         :Parameters:
-
             *energy* : float | keV
                 Energy of atom.
 
-            *wavelength* : float | A
+            *wavelength* : float | |Ang|
                 Wavelength of atom.
 
             .. Note: One of *wavelength* or *energy* is required.
 
         :Returns: 
-            *sld* : (float, float) | inv A^2
-	        X-ray scattering length density is returned as the tuple
-	        (*real*, *imaginary*), or as (None, None) if the mass 
-	        density is not known.
+            *sld* : (float, float) | |1e-6/Ang^2|
+    	        X-ray scattering length density is returned as the tuple
+	            (*real*, *imaginary*), or as (None, None) if the mass 
+	            density is not known.
 
         """
         if self.density is None: return None,None

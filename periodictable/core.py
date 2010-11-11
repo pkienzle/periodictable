@@ -51,8 +51,10 @@ Helper functions:
 
 """
 __docformat__ = 'restructuredtext en'
-__all__ = ['delayed_load', 'define_elements', 'get_data_path', 'default_table',
-           'Ion', 'Isotope', 'Element', 'PeriodicTable']
+__all__ = ['delayed_load', 'define_elements', 'get_data_path', 
+           'default_table', 'change_table',
+           'Ion', 'Isotope', 'Element', 'PeriodicTable',
+           'isatom', 'iselement', 'isisotope', 'ision']
 
 import copy
 
@@ -730,7 +732,7 @@ def define_elements(table, namespace):
     :Returns: [string, ...]
         A sequence listing the names defined.
 
-    .. Note:: This will only work for the *namespace* globals(), not locals()!
+    .. Note:: This will only work for *namespace* globals(), not locals()!
     """
 
     # Build the dictionary of element symbols

@@ -70,23 +70,23 @@ class MagneticFormFactor(object):
     M = property(_getM, doc="j0")
 
     def j0_Q(self, Q):
-        """Returns *j0* scattering potential at *Q* (inverse Angstroms)"""
+        """Returns *j0* scattering potential at *Q* |1/Ang|"""
         return formfactor_0(self.j0, Q)
 
     def j2_Q(self, Q):
-        """Returns *j2* scattering potential at *Q* (inverse Angstroms)"""
+        """Returns *j2* scattering potential at *Q* |1/Ang|"""
         return formfactor_n(self.j2, Q)
 
     def j4_Q(self, Q):
-        """Returns *j4* scattering potential at *Q* (inverse Angstroms)"""
+        """Returns *j4* scattering potential at *Q* |1/Ang|"""
         return formfactor_n(self.j4, Q)
 
     def j6_Q(self, Q):
-        """Returns j6 scattering potential at *Q* (inverse Angstroms)"""
+        """Returns j6 scattering potential at *Q* |1/Ang|"""
         return formfactor_n(self.j6, Q)
 
     def J_Q(self, Q):
-        """Returns J scattering potential at *Q* (inverse Angstroms)"""
+        """Returns J scattering potential at *Q* |1/Ang|"""
         return formfactor_0(self.J, Q)
 
     M_Q = j0_Q

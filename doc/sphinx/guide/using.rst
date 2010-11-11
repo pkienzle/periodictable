@@ -38,7 +38,7 @@ Access elements indirectly:
 
     >>> import periodictable
     >>> print "Cd density", periodictable.Cd.density, periodictable.Cd.density_units
-    Cd density 8.65 g/cm**3
+    Cd density 8.65 g/cm^3
 
 Import all elements:
 

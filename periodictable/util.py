@@ -9,8 +9,8 @@ def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
     :Parameters:
         *a*, *b*, *c* : float | |A|
             Lattice spacings.  If *b* or *c* are missing they default to *a*.
-        *alpha*, *beta*, *gamma* : float | |degrees|
-            Lattice angles.  If any are missing they default to 90\ |degrees|
+        *alpha*, *beta*, *gamma* : float | |deg|
+            Lattice angles.  If any are missing they default to 90\ |deg|
 
     :Returns:
         *V* : float |A^3|

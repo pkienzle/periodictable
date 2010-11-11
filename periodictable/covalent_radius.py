@@ -9,8 +9,13 @@ This module adds the following fields to the periodic table
 
 Use :func:`init` to initialize a private table.
 
-Data is taken from Cordero 2008 [#Cordero2008]_. The abstract
-of this paper reads as follows:
+Data is taken from Cordero et al., 2008 [#Cordero2008]_.  Bond specific values
+(single, double, or triple) are available from Pyykkö et al., 2009 [#Pyykko2009]_, 
+but they are generally smaller.  The CRC Handbook uses the average of Cordero
+and Pyykkö. Note that the combined Cordero/Pyykkö tables are included
+herein as *periodictable.covalent_radius.CorderoPyykko*, but are not yet parsed.
+
+The abstract of Cordero reads as follows:
 
     A new set of covalent atomic radii has been deduced from
     crystallographic data for most of the elements with atomic 
@@ -43,7 +48,6 @@ of this paper reads as follows:
 	#. Radii are measured from bonds to C, N or O.  The choice of which
 	   compound was used is element dependent.  Details are available in
 	   the references.
-
 
 .. [#Cordero2008] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés,
        Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez.

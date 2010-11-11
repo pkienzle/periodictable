@@ -21,7 +21,7 @@ A formula string is translated into a formula using
     >>> print formula("CaCO3")
     CaCO3
   
-* Formulas can contain multiple groups separated by ' ' or '+' or by using
+* Formulas can contain multiple groups separated by space or plus or by using
   parentheses.  Whole groups can have a repeat count.  The following are
   equivalent definitions of hydrated calcium carbonate:
   
@@ -56,6 +56,8 @@ A formula string is translated into a formula using
 
 The grammar used for parsing formula strings is the following:
 
+::
+
     number    :: [1-9][0-9]*
     fraction  :: (number | [0] | nothing) '.' [0-9]*
     count     :: number | fraction | nothing
@@ -71,7 +73,7 @@ Formulas can also be constructed from atoms or other formulas:
 
 * A simple formula can be created from a bare atom:
 
-    >>> from periodictable import Ca, C, O, H, Fe
+    >>> from periodictable import Ca, C, O, H
     >>> print formula(Ca)
     Ca
 
@@ -110,26 +112,29 @@ Density can also be estimated from the volume of the unit cell, either
 by using the covalent radii of the constituent atoms and assuming some
 packing factor, or by knowing the lattice parameters of the crystal
 which makes up the material.  Standard packing factors for hcp, fcc,
-bcc, cubic and diamond on uniform spheres can be used.  Be sure to
-use the molecular mass (formula.molecular_mass in g) rather than 
-the molar mass (formula.mass in u) in your calculations.
+bcc, cubic and diamond on uniform spheres can be used if the components
+are of about the same size.  The formula should specify the number of
+atoms in the unit cell, which is 1 for cubic, 2 for bcc and 4 for fcc.  
+Be sure to use the molecular mass (M.molecular_mass in g) rather 
+than the molar mass (M.mass in u = g/mol) in your calculations.
 
-Because the packing fraction method relies on an accurate covalent radius
-estimate, it is not very accurate:
+Because the packing fraction method relies on the covalent radius
+estimate it is not very accurate:
 
-    >>> fFe = formula("2Fe")  # bcc lattice has 2 atoms per unit cell
-    >>> fFe.density = fFe.molecular_mass/fFe.volume('bcc')
-    >>> print "%.3g"%fFe.density
-    6.55
+    >>> from periodictable import elements, formula
+    >>> Fe = formula("2Fe")  # bcc lattice has 2 atoms per unit cell
+    >>> Fe.density = Fe.molecular_mass/Fe.volume('bcc')
     >>> print "%.3g"%Fe.density
+    6.55
+    >>> print "%.3g"%elements.Fe.density
     7.87
 
 Using lattice parameters the results are much better:
 
-    >>> fFe.density = fFe.molecular_mass/fFe.volume(a=2.8664)
-    >>> print "%.3g"%fFe.density
-    7.88
+    >>> Fe.density = Fe.molecular_mass/Fe.volume(a=2.8664)
     >>> print "%.3g"%Fe.density
+    7.88
+    >>> print "%.3g"%elements.Fe.density
     7.87
 
 Mixtures

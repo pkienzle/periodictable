@@ -1,11 +1,14 @@
-.. |Angstrom| unicode:: U+212B
+.. |Ang| unicode:: U+212B
+.. |cdot| unicode:: U+00B7
+.. |deg| unicode:: U+00B0
 .. |cm^2| replace:: cm\ :sup:`2`
+.. |cm^3| replace:: cm\ :sup:`3`
 .. |1/cm| replace:: cm\ :sup:`-1`
-.. |1/A| replace:: |Angstrom|\ :sup:`-1`
-.. |1/A^2| replace:: |Angstrom|\ :sup:`-2`
-.. |A^3| replace:: |Angstrom|\ :sup:`3`
-.. |g/cm^3| replace:: g cm\ :sup:`-3`
-.. |1e-6/A^2| replace:: 10\ :sup:`-6`\ |Angstrom|\ :sup:`-2`
+.. |Ang^2| replace:: |Ang|\ :sup:`2`
+.. |Ang^3| replace:: |Ang|\ :sup:`3`
+.. |1/Ang| replace:: |Ang|\ :sup:`-1`
+.. |1/Ang^2| replace:: |Ang|\ :sup:`-2`
+.. |1e-6/Ang^2| replace:: 10\ :sup:`-6`\ |Ang|\ :sup:`-2`
+.. |g/cm^3| replace:: g\ |cdot|\ cm\ :sup:`-3`
 .. |fm^2| replace:: fm\ :sup:`2`
-.. |degrees| replace:: degrees
-.. |A| replace:: |Angstrom|
+.. |Js| replace:: J\ |cdot|\ s

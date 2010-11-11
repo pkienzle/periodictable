@@ -4,7 +4,7 @@
 The following properties are added:
 
 *    density
-*    density_units (g/cm^3)
+*    density_units (|g/cm^3|)
         Densities for solids and liquids are given as specific
         gravities at 20 C unless other wise indicated by
         *density_caveat*. Densities for gaseous elements
@@ -58,7 +58,7 @@ def density(iso_el):
             Name of the element or isotope.
         
     :Returns:
-        *density* : float | g/cm^3
+        *density* : float | |g/cm^3|
 
     Reference:
         *ILL Neutron Data Booklet, original values from CRC Handbook of Chemistry and Physics,
@@ -82,16 +82,16 @@ def interatomic_distance(element):
             Name of the element whose interatomic distance needs to be calculated.
                
     :Returns:
-        *distance* : float | A
+        *distance* : float | |Ang|
 
 	
-    Interatomic distance is computed using::
+    Interatomic distance is computed using:
 
-	d = atomic_weight/(density*0.602214179))^(1/3)
+    	d = atomic_weight/(density*0.602214179))^(1/3)
 
-    with units::
+    with units:
 
-        ((g/mol)/((g/cm^3)(atoms/mol))(10^8A/cm^3)^{1/3} = A
+        ((g/mol)/((g/cm^3)(atoms/mol))(10^8 |Ang|/cm^3)^{1/3} = |Ang|
 
     """
     
@@ -123,7 +123,7 @@ def init(table, reload=False):
     table.properties.append('density')
     Isotope.density = property(density, "density using inter-atomic spacing from naturally occurring form")
     Element.density = property(density, "density using inter-atomic spacing from naturally occurring form")
-    Element.density_units = "g/cm**3"
+    Element.density_units = "g/cm^3"
 
     Element.interatomic_distance \
         = property(interatomic_distance,

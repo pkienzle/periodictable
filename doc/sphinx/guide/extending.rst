@@ -8,7 +8,7 @@ The periodic table is extensible.  Third party packages can
 add attributes to the table, and they will appear in all of
 the elements.  
 
-In order to add a new property to to the table, you need to define
+In order to add a new property to the table, you need to define
 a python package which contains the required information, and can
 attach the information to the periodic table so that it is
 available on demand.  This is done with the function ``init(table)`` in

@@ -249,7 +249,7 @@ class PeriodicTable(object):
         :Raises:
             ValueError if the element symbol is not defined.
 
-        :Example: Print the element corresponding to 'Fe'.
+        For example, print the element corresponding to 'Fe':
 
         .. doctest::
 
@@ -276,7 +276,7 @@ class PeriodicTable(object):
         :Raises:
             *ValueError* if element does not exist.
 
-        :Example: Print the element corresponding to 'iron'.
+        For example, print the element corresponding to 'iron':
 
         .. doctest::
 
@@ -305,7 +305,7 @@ class PeriodicTable(object):
         :Raises:
             *ValueError* if element or isotope is not defined.
 
-        :Example: Print the element corresponding to '58-Ni'.
+        For example, print the element corresponding to '58-Ni'.
 
         .. doctest::
 
@@ -343,7 +343,7 @@ class PeriodicTable(object):
                 if isotope in attr.isotopes:
                     return attr[isotope]
             elif isinstance(attr,Isotope):
-                # D,T must not have an associated isotope; D[4] is meaningless.
+                # D,T must not have an associated isotope; 4-D is meaningless.
                 if isotope == 0:
                     return attr
 
@@ -363,8 +363,7 @@ class PeriodicTable(object):
         
         :Returns: None
 
-        :Example:
-            Print a table of mass and density.
+        For example, print a table of mass and density.
 
         .. doctest::
 
@@ -393,11 +392,11 @@ class PeriodicTable(object):
             if format is None:
                 print " ".join(str(p) for p in L)
             else:
-                try:
+                #try:
                     print format%L
-                except:
-                    print "format",format,"args",L
-                    raise
+                #except:
+                #    print "format",format,"args",L
+                #    raise
 
 
 

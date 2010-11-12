@@ -24,7 +24,6 @@ def mix_by_weight(*args, **kw):
     Generate a mixture which apportions each formula by weight.
     
     :Parameters:
-
         *formula1* : Formula OR string
             Material
 
@@ -102,7 +101,6 @@ def mix_by_volume(*args, **kw):
     Generate a mixture which apportions each formula by volume.
     
     :Parameters:
-
         *formula1* : Formula OR string
             Material
 
@@ -186,14 +184,13 @@ def formula(value=None, density=None, natural_density=None,
     dictionary of atoms and
 
     :Parameters:
-    
         *formula* : see below
             Chemical formula.
 
         *density* : float | |g/cm^3|
             Material density.  Not needed for single element formulas.
 
-        *natural_density*: float | |g/cm^3|
+        *natural_density* : float | |g/cm^3|
             Material density assuming naturally occurring isotopes and no
             change in cell volume.
 
@@ -368,23 +365,18 @@ class Formula(object):
 
         Packing factors for a number of crystal lattice structures are defined.
         
-        Approximate density can be set using:
-        
-            formula.density = formula.mass/formula.volume()
-
         .. table:: Crystal lattice names and packing factors
 
-                  
-            ========   =======================   =============    ==============
-            Code       Description               Formula          Packing factor
-            ========   =======================   =============    ==============
-            cubic      simple cubic              pi/6             0.52360
-            bcc        body-centered cubic       pi*sqrt(3/8)     0.68017
-            hcp        hexagonal close-packed    pi/sqrt(18)      0.74048
-            fcc        face-centered cubic       pi/sqrt(18)      0.74048
-            diamond    diamond cubic             pi*sqrt(3/16)    0.34009
-            ========   =======================   =============    ==============
-         
+         ======== ======================= ====================== ==============
+         Code     Description             Formula                Packing factor
+         ======== ======================= ====================== ==============
+         cubic    simple cubic            $\pi/6$                0.52360
+         bcc      body-centered cubic     $\pi\sqrt{3/8}$        0.68017
+         hcp      hexagonal close-packed  $\pi/\sqrt{18}$        0.74048
+         fcc      face-centered cubic     $\pi/\sqrt{18}$        0.74048
+         diamond  diamond cubic           $\pi\sqrt{3/16}$       0.34009
+         ======== ======================= ====================== ==============
+
         :Parameters:
             *packing_factor*  = 'hcp' : float or string
                 Atomic packing factor.  If *packing_factor* is the name of
@@ -404,6 +396,11 @@ class Formula(object):
             *KeyError* : unknown lattice type
             
             *TypeError* : missing or bad lattice parameters
+
+        Using the cell volume, mass density can be set with:
+        
+            formula.density = formula.molecular_mass/formula.volume()
+
         """
         # Let cell_volume sort out its own parameters.
         if args or kw:
@@ -434,7 +431,8 @@ class Formula(object):
             *wavelength* : float | |Ang|
                 Wavelength of the neutron beam.
         
-        :Returns: 
+        :Returns:
+
             *sld* : (float, float, float) | |1e-6/Ang^2|
                 Neutron scattering length density is returned as the tuple
                 (*real*, *imaginary*, *incoherent*), or as (None, None, None) 
@@ -460,7 +458,8 @@ class Formula(object):
 
             .. Note: One of *wavelength* or *energy* is required.
 
-        :Returns: 
+        :Returns:
+
             *sld* : (float, float) | |1e-6/Ang^2|
     	        X-ray scattering length density is returned as the tuple
 	            (*real*, *imaginary*), or as (None, None) if the mass 
@@ -536,6 +535,7 @@ def formula_grammar(table):
     Construct a parser for molecular formulas. 
 
     :Parameters:
+
         *table* = None : PeriodicTable
              If table is specified, then elements and their associated fields
              will be chosen from that periodic table rather than the default.

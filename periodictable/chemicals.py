@@ -23,7 +23,7 @@ Chemical
 
         * value: median property value
         * variance: range of values for the property (1-sigma)
-        * units: SI units for property (string, eg :math:`g/cm^3`)
+        * units: SI units for property (string, eg |g/cm^3|)
         * notes: caveats on value to present to user (e.g., temperature or pressure for the measurement)
         * reference: source of data
         * value_as('units'): value in particular units

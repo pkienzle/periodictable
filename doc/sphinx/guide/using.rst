@@ -64,7 +64,7 @@ Process all the elements:
 
 .. doctest::
 
-    >>> # importing periodic table as "import periodictable"
+    >>> import periodictable
     >>> for el in periodictable.elements: # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     ...     print el.symbol,el.name
     n neutron
@@ -77,7 +77,7 @@ Another example for processing all elements:
 
 .. doctest::
 
-    >>> # importing periodic table as "from periodictable import *"
+    >>> from periodictable import elements
     >>> for el in elements: # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     ...     print el.symbol,el.number
     n 0
@@ -97,15 +97,6 @@ Process all the :class:`isotopes <periodictable.core.Isotope>` for an element:
     4-H 4.02783
     5-H 5.03954
     6-H 6.04494
-
-Retrieve ion specific properties such as :class:`magentic form factor <periodictable.magnetic_ff.MagneticFormFactor>`:
-
-.. doctest::
-
-    >>> import periodictable
-    >>> ion = periodictable.Fe.ion[2]
-    >>> print ion.magnetic_ff[ion.charge].M_Q([0,0.1,0.2])
-    [ 1.          0.99935255  0.99741366]
 
 You can create a unique handle to an individual ion.  In addition to storing
 the ion charge, this can be used to reference the underlying properties of
@@ -128,6 +119,11 @@ for the ion index:
     >>> import pylab
     >>> import periodictable
     >>> Fe_2 = periodictable.Fe.ion[2]
+    >>> print Fe_2.magnetic_ff[Fe_2.charge].M_Q([0,0.1,0.2])
+    [ 1.          0.99935255  0.99741366]
+
+The following is a plot of the magnetic form factor vs. Q:
+
     >>> Q = pylab.linspace(0,16,200)
     >>> M = Fe_2.magnetic_ff[Fe_2.charge].j0_Q(Q)
     >>> pylab.xlabel(r'Magnetic Form Factor for Fe') # doctest: +SKIP
@@ -143,6 +139,7 @@ Missing properties generally evaluate to *None*:
 
     >>> print "Radon density",periodictable.Rn.density
     Radon density None
+
 
 Specific defined properties related to elements can be accessed in a table format as shown in following example :
 

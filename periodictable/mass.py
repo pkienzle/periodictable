@@ -4,18 +4,15 @@
 
 Adds average mass for the elements:
 
-*    mass
-*    mass_units ('u')
-         The atomic mass averaged over natural abundances.
+*    mass, mass_units (u)
+         The molar mass averaged over natural isotope abundance.
 
 Adds mass and abundance information for isotopes:
 
-*    mass
-*    mass_units ('u')
-         The individual isotope mass.
+*    mass, mass_units (u)
+         The molar mass of the individual isotope.
 
-*    abundance
-*    abundance_units ('%')
+*    abundance, abundance_units (%)
          Natural abundance for the isotope.
     
 Atomic Weights and Isotopic Composition [#Coursey]_.

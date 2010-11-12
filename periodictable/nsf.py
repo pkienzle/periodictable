@@ -131,6 +131,7 @@ __all__ = ['init', 'Neutron',
            'incoherent_comparison_table', 'total_comparison_table',
            'energy_dependent_table', 'sld_table',
            'neutron_sld_from_atoms',
+           #'sld_potential',
            ]
 
 ABSORPTION_WAVELENGTH = 1.798
@@ -152,7 +153,7 @@ def neutron_wavelength(energy):
     :Returns:
         *wavelength* : float or vector | |Ang|
 
-    :Algorithm:
+    Energy is converted to wavelength using
 
     .. math::
     
@@ -161,8 +162,9 @@ def neutron_wavelength(energy):
 
     where
     
-    | h = planck's constant in |Js|   
-    | m = neutron mass in kg
+        $h$ = planck's constant in |Js|
+
+        $m$ = neutron mass in kg
 
     """
     return sqrt(ENERGY_FACTOR / asarray(energy))
@@ -177,16 +179,17 @@ def neutron_energy(wavelength):
     :Returns:
         *energy* : float or vector | meV
 
-    :Algorithm:
-
+    Wavelength is converted to energy using
+    
     .. math::
     
         E = 1/2 m v^2 = h^2 / (2 m \lambda^2)
 
-    where
+    where:
     
-    | h = planck's constant in |Js|   
-    | m = neutron mass in kg
+        $h$ = planck's constant in |Js|
+
+        $m$ = neutron mass in kg
     """
     return ENERGY_FACTOR / asarray(wavelength)**2
 
@@ -196,27 +199,30 @@ def _CHECK_sld_potential(sld):
     Convert neutron scattering length density to energy potential.
 
     :Parameters:
-        *sld* : float or vector | |1e-6/Ang|
+        *sld* : float or vector | |1e-6/Ang^2|
         
             Scattering length density.
 
     :Returns:
-        *energy* : float or vector | 10^-6 eV
+        *energy* : float or vector | $10^{-6}$ eV
         
             Scattering potential.
 
-    :Algorithm:[#Smith2006]_
+    Computes:[#Smith2006]_
     
-    Computes:
+    .. math::
     
-        V = 2 pi hbar^2 Nb / m
+        V = 2 \pi \hbar^2 N_b / m_n
 
     where:
     
-    | hbar = h / (2 pi)
-    | h = planck's constant in |Js|
-    | Nb = sum{ n_i b_i } / V = SLD   
-    | m = neutron mass in kg
+        $\hbar = h / (2 \pi)$
+        
+        $h$ = planck's constant in |Js|
+        
+        $N_b = \sum{ n_i b_i } / V$
+        
+        $m_n$ = neutron mass in kg
     """
     return (ENERGY_FACTOR/pi) * asarray(sld)
 
@@ -234,10 +240,10 @@ class Neutron(object):
         Bounds coherent scattering length.
     * b_c_i (fm)
         Imaginary part of bound coherent scattering length.  This is
-        related to absorption cross section by 2*pi/k where k = 2*pi/lambda
-        with a factor of 100 for converting between barns and fm.  b_c_i
-        is not available for all isotopes for which absorption cross sections
-        have been measured.
+        related to absorption cross section by $2 \pi/k$ where 
+        $k = 2 \pi/\lambda$ with a factor of 100 for converting 
+        between barns and fm.  b_c_i is not available for all isotopes 
+        for which absorption cross sections have been measured.
     * bp,bm (fm)
         Spin-dependent scattering for I+1/2 and I-1/2 (not always available).
         Incoherent scattering arises from the spin-dependent scattering b+
@@ -252,7 +258,7 @@ class Neutron(object):
 
     * coherent (barn)
         Coherent scattering cross section. In theory coherent scattering
-        is related to bound coherent scattering by 4*pi*b_c^2/100.
+        is related to bound coherent scattering by $4 \pi b_c^2/100$.
         In practice, these values are different, with the following 
         table showing the largest relative difference:
        
@@ -343,8 +349,6 @@ class Neutron(object):
            Values may not be correct when the element or isotope has 
            *is_energy_dependent=True*
 
-        :Algorithm:
-
         See :func:`neutron_scattering` for details.
         """
 
@@ -385,8 +389,6 @@ class Neutron(object):
            Values may not be correct when the element or isotope has 
            *is_energy_dependent=True*
            
-        :Algorithm:
-
         See :func:`neutron_scattering` for details.
         """
 
@@ -624,31 +626,30 @@ def neutron_scattering(compound, density=None,
 
         :func:`total_comparison_table`
 
-    :Algorithm:
+    To compute the neutron cross sections we first need to average 
+    quantities for the unit cell of the molecule.
 
-    We first need to average quantities for the unit cell of the molecule.
-
-    Molecular weight *m* (g/mol) is the sum of the weights of each component:
+    Molar mass *m* (g/mol) is the sum of the masses of each component:
     
     .. math::
     
         m = \sum{n_i m_i}\ {\rm for\ each\ atom}\ i=1,2,\ldots
 
-    Cell volume *V* (|Ang^3|/molecule) is molecular weight *m* over density 
-    *rho*, with a correction based on Avogadro's number :math:`N_A` (atoms/mol) 
-    and the length conversion 10\ :sup:`8` |Ang|/cm:
+    Cell volume $V$ (|Ang^3|/molecule) is molar mass $m$ over density 
+    $rho$, with a correction based on Avogadro's number $N_A$ (atoms/mol) 
+    and the length conversion $10^8$ |Ang|/cm:
     
     .. math::
     
         V = m/\rho \cdot 1/N_A \cdot (10^8)^3
 
-    Number density *N* is the number of scatterers per unit volume:
+    Number density $N$ is the number of scatterers per unit volume:
 
     .. math::
 
         N = \left.\sum{n_i} \right/ V
 
-    Coherent scattering cross section *sigma_c* of the molecule is computed 
+    Coherent scattering cross section $\sigma_c$ of the molecule is computed 
     from the average scattering length of its constituent atoms, weighted by 
     their frequency.
 
@@ -657,14 +658,14 @@ def neutron_scattering(compound, density=None,
         b_c = \left.\sum n_i \rm{Im}(b_c) \right/ \sum n_i
 
     This is converted to a scattering cross section and scaled 
-    by 1 barn = 100 fm^2:
+    by 1 barn = 100 |fm^2|:
     
     .. math::
 
         \sigma_c = 4 \pi b_c^2 / 100
 
-    Similarly, the absorption cross section :math:`\sigma_a` and the total 
-    cross section :math:`\sigma_s` can be computed from the corresponding 
+    Similarly, the absorption cross section $\sigma_a$ and the total 
+    cross section $\sigma_s$ can be computed from the corresponding 
     cross sections of the constituent elements, already expressed in barns:
 
     .. math::
@@ -689,7 +690,7 @@ def neutron_scattering(compound, density=None,
         \sigma_a = \sigma_a \lambda / \lambda_o = \sigma_a \lambda / 1.798
 
     For the scattering equations, the primary quantity of interest is the
-    scattering potential :math:`b = b' + i b''`.  For most 
+    scattering potential $b = b' + i b''$.  For most 
     elements, the scattering potential at cold neutron and thermal neutron 
     energies is simply related to the neutron energy, with no change in 
     the real portion and a linear scaling of the imaginary portion with 
@@ -716,7 +717,7 @@ def neutron_scattering(compound, density=None,
     The incoherent potential binc can be treated primarily as an
     absorption potential in large scale structure calculations, with the
     complex potential b approximated by 
-    :math:`b' + i (b'' + b_{\rm inc})`.
+    $b' + i (b'' + b_{\rm inc})$.
 
     The scattering potential is usually expressed as a scattering length 
     density for calculation purposes.  This is just the number density of
@@ -742,7 +743,7 @@ def neutron_scattering(compound, density=None,
 
         d = 1/(\Sigma_{\rm coh} + \Sigma_{\rm inc} + \Sigma_{\rm abs})
 
-    Including unit conversion with :math:`\mu=10^{-6}` the full equations are:
+    Including unit conversion with $\mu=10^{-6}$ the full equations are:
 
     .. math::
     
@@ -1347,7 +1348,7 @@ def compare(fn1, fn2, table=None, tol=1e-3):
 
 def absorption_comparison_table(table=None, tol=None):
     """
-    Prints a table of 10*b_c_i and -0.01*absorption/(2\ |cdot| 1.798) for 
+    Prints a table of 10 b_c_i and -0.01 absorption/(2\ |cdot|\ 1.798) for 
     each isotope where b_c_i exists.  This is used to checking the integrity 
     of the data and formula.
 
@@ -1373,8 +1374,8 @@ def absorption_comparison_table(table=None, tol=None):
 
 def coherent_comparison_table(table=None, tol=None):
     """
-    Prints a table of 4*pi*b_c^2/100 and coherent for each isotope. This is
-    useful for checking the integrity of the data and formula.
+    Prints a table of $4 \pi b_c^2/100$ and coherent for each isotope. 
+    This is useful for checking the integrity of the data and formula.
 
     The table only prints where b_c exists.
 

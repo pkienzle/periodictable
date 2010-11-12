@@ -19,8 +19,8 @@ def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
     :Raises:
         *TypeError* : missing or invalid parameters
 
-    Algorithm:
-    
+    The following formula works for all lattice types:
+
     .. math::
     
         V = a b c \sqrt{1 - \cos^2 \alpha - \cos^2 \beta - cos^2 \gamma
@@ -39,8 +39,8 @@ def require_keywords(function):
     """
     Decorator which forces all keyword arguments to the function to be 
     explicitly named.
-    
-    :Example:
+
+    For example:
 
         >>> @require_keywords
         ... def fn(a,b,c=3): pass
@@ -50,6 +50,14 @@ def require_keywords(function):
         TypeError: name=value required for c
         >>> fn(1,2,c=6)
         >>> fn(b=1,a=2,c=6)
+    
+    Variable arguments are not currently supported:
+    
+        >>> @require_keywords
+        ... def fn(a,b,c=6,*args,**kw): pass
+        Traceback (most recent call last):
+        ...
+        NotImplementedError: only named arguments for now
     
     .. Note:: The call signature is not preserved.
     
@@ -61,14 +69,13 @@ def require_keywords(function):
     import inspect
     import functools
 
-    argspec = inspect.getargspec(function)
-    named_args = argspec.args[:-len(argspec.defaults)]
-    named_kwds = argspec.args[-len(argspec.defaults):]
-    vararg = argspec.varargs
-    varkwd = argspec.keywords
+    args, vararg, varkwd, defaults = inspect.getargspec(function)
+    if defaults is None: defaults = []
+    named_args = args[:-len(defaults)]
+    named_kwds = args[-len(defaults):]
     # Keep it simple for now
     if vararg or varkwd:
-        raise NotImplementError("only named arguments for now")
+        raise NotImplementedError("only named arguments for now")
     @functools.wraps(function)
     def _require_kwds(*args, **kw):
         if len(args) > len(named_args):

@@ -22,7 +22,7 @@ import glob
 sys.path.insert(0, os.path.abspath('.')) # needed for extension tests
 #buildpath = glob.glob('../../build/lib*')[0]
 #sys.path.insert(0, os.path.abspath(buildpath))
-#sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('_extensions'))
 
 
@@ -39,6 +39,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
               'matplotlib.sphinxext.only_directives',
               'matplotlib.sphinxext.plot_directive',
               'inheritance_diagram',
+              'dollarmath',
              ]
 jsmath_path = 'MathJax/MathJax.js'
 
@@ -82,7 +83,8 @@ release = '0.9'
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
-exclude_trees = ['_build']
+exclude_trees = ['_*','build','MathJax','plots',
+                 'shelltable','discoverer']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

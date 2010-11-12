@@ -15,7 +15,7 @@ The following attributes are added to each element:
        interpolated from sftable.
 
    :func:`Xray.f0`
-       Returns f0 for the given vector Q, with q_i in [0,24\pi] |1/Ang|.
+       Returns f0 for the given vector Q, with Q[i] in $[0,24\pi]$ |1/Ang|.
 
    :func:`Xray.sld`
        Returns scattering length density (*real*, *imaginary*) for the
@@ -70,31 +70,37 @@ The data for the tables is stored in the ``periodictable/xsf``.
 directory.  The following information is from ``periodictable/xsf/read.me``, 
 with minor formatting changes.
 These ``[*.nff]`` files were used to generate the tables published in 
-reference [#Henke1993]_. The files contain three columns of data::
+reference [#Henke1993]_. The files contain three columns of data:
 
-    Energy(eV), f_1, f_2,
+    Energy(eV), *f_1*, *f_2*,
 
 where *f_1* and *f_2* are the atomic (forward) scattering factors.
 There are 500+ points on a uniform logarithmic mesh with points
 added 0.1 eV above and below "sharp" absorption edges. The
 tabulated values of *f_1* contain a relativistic, energy 
-independent, correction given by::
+independent, correction given by:
 
-    Z* = Z - (Z/82.5)^(2.37)
+.. math::
+
+    Z^* = Z - (Z/82.5)^{2.37}
 
 .. Note::
     Below 29 eV *f_1* is set equal to -9999.
 
-The atomic photoabsorption cross section, mu_a, may be readily obtained
-from the values of *f_2* using the relation::
+The atomic photoabsorption cross section, $\mu_a$, may be readily 
+obtained from the values of $f_2$ using the relation:
 
-    mu_a = 2*r_0*lambda*f_2
+.. math::
 
-where *r_0* is the classical electron radius, and lambda is the wavelength.
-The index of refraction for a material with *N* atoms per unit volume
-is calculated by::
+    \mu_a = 2 r_e \lambda f_2
 
-    n = 1 - N*r_0*(lambda)^2*(f_1+if_2)/(2*pi).
+where $r_e$ is the classical electron radius, and $\lambda$ is 
+the wavelength. The index of refraction for a material with *N* atoms per 
+unit volume is calculated by:
+
+.. math::
+
+    n = 1 - N r_e \lambda^2 (f_1 + i f_2)/(2 \pi).
 
 These (semi-empirical) atomic scattering factors are based upon
 photoabsorption measurements of elements in their elemental state.
@@ -113,8 +119,11 @@ experimental measurements are needed.
 
 Please send any comments about the tables to EMGullikson@lbl.gov.
 
-.. table:: Note that the following elements have been updated since the 
-           publication of Ref. [#Henke1993]_ in July 1993.
+
+Note that the following elements have been updated since the 
+publication of Ref. [#Henke1993]_ in July 1993.
+
+.. table:: 
 
            ========  ==========   ==============   
            Element   Updated      Energy Range       
@@ -172,17 +181,19 @@ def xray_wavelength(energy):
         *energy* : float or vector | keV
 
     :Returns:
+        *wavelength* : float | |Ang|
 
-    :Algorithm:
+    Energy can be converted to wavelength using
 
-        Use the formula:
+    .. math::
 
-            lambda = h c / E
+        \lambda = h c / E
 
-        where:
+    where:
 
-            h = planck's constant in eV s
-            c = speed of light in m/s
+        $h$ = planck's constant in eV\ |cdot|\ s
+     
+        $c$ = speed of light in m/s
     """
     return plancks_constant*speed_of_light/numpy.asarray(energy)*1e7
 
@@ -196,6 +207,17 @@ def xray_energy(wavelength):
     :Returns:
         *energy* : float or vector | keV
 
+    Wavelength can be converted to energy using
+
+    .. math::
+
+        E = h c / \lambda
+
+    where:
+
+        $h$ = planck's constant in eV\ |cdot|\ s
+        
+        $c$ = speed of light in m/s
     """
     return plancks_constant*speed_of_light/numpy.asarray(wavelength)*1e7
 
@@ -240,11 +262,9 @@ class Xray(object):
             *scattering_factors* : (float, float)
                 Values outside the range return NaN.
 
-        :Algorithm:
-
-            Linear interpolation within the Henke Xray scattering factors 
-            database at the Lawrence Berkeley Laboratory Center for X-ray 
-            Optics.
+        Values are found from linear interpolation within the Henke Xray 
+        scattering factors database at the Lawrence Berkeley Laboratory 
+        Center for X-ray Optics.
         """
         xsf = self.sftable
         if xsf is None:
@@ -266,10 +286,10 @@ class Xray(object):
 
     def f0(self, Q):
         r"""
-        Isotropic X-ray scattering factors f0 for the input Q.
+        Isotropic X-ray scattering factors *f0* for the input Q.
 
         :Parameters: 
-            *Q* : float or vector in [0, 24*pi] | |1/Ang|
+            *Q* : float or vector in $[0, 24\pi]$ | |1/Ang|
                 X-ray scattering properties for the elements.
                
         :Returns:
@@ -277,10 +297,11 @@ class Xray(object):
                 Values outside the valid range return NaN.
       
 
-        .. Note:: f0 is often given as a function of sin(theta)/lambda
-                  whereas we are using  Q = 4*pi*sin(theta)/lambda, or
-                  in terms of energy Q = 4*pi*sin(theta)*E/(h c).
+        .. Note:: 
         
+            *f0* is often given as a function of $\sin(\theta)/\lambda$
+            whereas we are using  $Q = 4 \pi \sin(\theta)/\lambda$, or
+            in terms of energy $Q = 4 \pi \sin(\theta) E/(h c)$.
 
         Reference:
              D. Wassmaier, A. Kerfel, Acta Crystallogr. A51 (1995) 416.
@@ -294,11 +315,10 @@ class Xray(object):
 
     @require_keywords
     def sld(self, wavelength=None, energy=None):
-        """
+        r"""
         X ray scattering length density.
 
         :Parameters: 
-
             *wavelength* : float or vector | |Ang|
                 Wavelength of the X-ray.
 
@@ -315,14 +335,17 @@ class Xray(object):
         :Raises:
             *TypeError* : neither *wavelength* nor *energy* was specified.
 
-        :Algorithm:
-            The element SLD is r_eN(f1+1jf2), where *r_e* is the electron
-            radius and *N* is number density = density/mass * Avogadro's Number.
+        The scattering length density is $r_e N (f_1 + i f_2)$.
+        where $r_e$ is the electron radius and $N$ is the
+        number density.  The number density is $N = \rho_m/m N_A$,
+        with mass density $\rho_m$ molar mass $m$ and
+        Avogadro's number $N_A$.
 
-            The constants are available directly::
+        The constants are available directly:
      
-                *r_e* = periodictable.xsf.electron_radius
-                *N_A* = periodictable.constants.avogadro_number
+            $r_e$ = periodictable.xsf.electron_radius
+            
+            $N_A$ = periodictable.constants.avogadro_number
 
         Data comes from the Henke Xray scattering factors database at the
         Lawrence Berkeley Laboratory Center for X-ray Optics.

@@ -1,4 +1,4 @@
-from periodictable import H, O, Fe, helium, elements
+from periodictable import H, O, Fe, helium, elements, data_files
 
 def test():
     # Check that we can access element properties
@@ -15,7 +15,11 @@ def test():
     assert str(H[2])=='D'
     assert str(H[3])=='T'
     assert str(O[18])=='18-O'
-
+    try:
+        Fe[12]
+    except KeyError,msg:
+        assert msg.args[0] == '12 is not an isotope of Fe'
+        
     # Check that "for el in elements" works and for iso in el works
     els = tuple(el for el in elements)
     assert els[0].number == 0
@@ -29,6 +33,7 @@ def test():
     assert elements.name('iron') == Fe
     assert elements.isotope('Fe') == Fe
     assert elements.isotope('56-Fe') == Fe[56]
+    assert elements.isotope('D') == H[2]
     try:
         elements.symbol('Qu')
     except ValueError,msg:
@@ -41,14 +46,22 @@ def test():
         elements.isotope('Qu')
     except ValueError,msg:
         assert str(msg) == "unknown element Qu"
+    try:
+        elements.isotope('4-D')
+    except ValueError,msg:
+        assert str(msg) == "unknown element 4-D"
 
     # Check that ions work
     assert Fe.ion[2].charge==2
     assert Fe.ions == (2,3)
+    assert str(Fe.ion[2]) == "Fe^{2+}"
+    assert str(O.ion[-2]) == "O^{2-}"
     try:
         Fe.ion[1]
         raise Exception("accepts invalid ions")
     except ValueError,msg:
         assert str(msg) == "1 is not a valid charge for Fe"
+
+    assert data_files()[0][0] == "periodictable-data/xsf"
 
 if __name__ == "__main__": test()

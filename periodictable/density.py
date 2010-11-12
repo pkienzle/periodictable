@@ -3,20 +3,17 @@
 
 The following properties are added:
 
-*    density
-*    density_units (|g/cm^3|)
+*    density, density_units (|g/cm^3|)
         Densities for solids and liquids are given as specific
-        gravities at 20 C unless other wise indicated by
+        gravities at 20\ |deg| C unless other wise indicated by
         *density_caveat*. Densities for gaseous elements
         are given for the liquids at their boiling points.
         Missing data are represented by *None*.
 *   density_caveat
         Comments on the density, if not taken in standard conditions.
-*   interatomic_distance
-*   interatomic_distance_units (angstrom)
+*   interatomic_distance, interatomic_distance_units (|Ang|)
         Interatomic distance estimated from element density.
-*   number_density
-*   number_density_units (unitless)
+*   number_density, number_density_units (unitless)
         Number density estimated from mass and density.
 
 Density for the isotope is computed assuming that the atomic spacing
@@ -72,26 +69,33 @@ def density(iso_el):
         return iso_el._density
 
 def interatomic_distance(element):
-    """
+    r"""
     Estimated interatomic distance from atomic weight and density. The
     distance between isotopes is assumed to match that between atoms in
     the natural abundance.
 
     :Parameters: 
         *element* : Element
-            Name of the element whose interatomic distance needs to be calculated.
+            The element whose interatomic distance is to be calculated.
                
     :Returns:
         *distance* : float | |Ang|
+            Estimated interatomic distance.
 
-	
     Interatomic distance is computed using:
 
-    	d = atomic_weight/(density*0.602214179))^(1/3)
+    .. math::
+    
+    	d = (m/(\rho_m N_A 10^{-24}))^{1/3}
 
     with units:
 
-        ((g/mol)/((g/cm^3)(atoms/mol))(10^8 |Ang|/cm^3)^{1/3} = |Ang|
+    .. math::
+    
+        (\rm (g\cdot mol^{-1}) 
+        / ( (g\cdot cm^{-3})
+            (atoms\cdot mol^{-1})
+            (10^{-8} cm\cdot \AA^{-1})^3))^{1/3} = \AA
 
     """
     

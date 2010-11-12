@@ -120,6 +120,8 @@ def test():
 
     # Pickle test
     assert loads(dumps(fm)) == fm
+    ion = Fe[56].ion[2]
+    assert id(loads(dumps(ion))) == id(ion)
 
     # zero quantities tests in mixtures
     f = mix_by_weight(H2O,0,D2O,2)

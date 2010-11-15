@@ -77,9 +77,6 @@ associated with the periodictable package.
    measured for the scattering length of an element or isotope may be
    inconsistent with the values measured for the corresponding cross section.
 
-References
-==========
-
 .. [#Rauch2003] Rauch, H. and Waschkowski, W. (2003)
     Neutron Scattering Lengths in ILL
     Neutron Data Booklet (second edition), A.-J. Dianoux, G. Lander, Eds.
@@ -157,14 +154,14 @@ def neutron_wavelength(energy):
 
     .. math::
 
-        E = 1/2 m v^2 = h^2 / (2 m \lambda^2)
-        \Rightarrow \lambda = \sqrt{h^2 / (2 m E)}
+        E = 1/2 m_n v^2 = h^2 / (2 m_n \lambda^2)
+        \Rightarrow \lambda = \sqrt{h^2 / (2 m_n E)}
 
     where
 
         $h$ = planck's constant in |Js|
 
-        $m$ = neutron mass in kg
+        $m_n$ = neutron mass in kg
 
     """
     return sqrt(ENERGY_FACTOR / asarray(energy))
@@ -183,13 +180,13 @@ def neutron_energy(wavelength):
 
     .. math::
 
-        E = 1/2 m v^2 = h^2 / (2 m \lambda^2)
+        E = 1/2 m_n v^2 = h^2 / (2 m_n \lambda^2)
 
     where:
 
         $h$ = planck's constant in |Js|
 
-        $m$ = neutron mass in kg
+        $m_n$ = neutron mass in kg
     """
     return ENERGY_FACTOR / asarray(wavelength)**2
 
@@ -238,20 +235,22 @@ class Neutron(object):
 
     * b_c (fm)
         Bounds coherent scattering length.
+
     * b_c_i (fm)
         Imaginary part of bound coherent scattering length.  This is
         related to absorption cross section by $2 \pi/k$ where
         $k = 2 \pi/\lambda$ with a factor of 100 for converting
         between barns and fm.  b_c_i is not available for all isotopes
         for which absorption cross sections have been measured.
+
     * bp,bm (fm)
         Spin-dependent scattering for I+1/2 and I-1/2 (not always available).
         Incoherent scattering arises from the spin-dependent scattering b+
-        and b-. The Neutron Data Booklet [#Rauch2003]_ gives formulas for
+        and b-. The Neutron Data Booklet\ [#Rauch2003]_ gives formulas for
         calculating coherent and incoherent scattering from b+ and b- alone.
 
     * bp_i,bm_i (fm)
-        Imaginary portion. See the Neutron Data Booklet [#Rauch2003]_ for details.
+        Imaginary portion of bp and bm.
 
     * is_energy_dependent (boolean)
         Do not use this data if scattering is energy dependent.

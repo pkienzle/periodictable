@@ -14,7 +14,7 @@ Adds mass and abundance information for isotopes:
 
 *    abundance, abundance_units (%)
          Natural abundance for the isotope.
-    
+
 Atomic Weights and Isotopic Composition [#Coursey]_.
 
 The atomic weights are available for elements 1 through 112, 114, & 116 and
@@ -65,10 +65,10 @@ def getval(str):
 def mass(isotope):
     """
     Atomic weight.
-   
-    :Parameters: 
+
+    :Parameters:
         *isotope* : Isotope
-               
+
     :Returns:
         *mass* : float | u
             Atomic weight of the element.
@@ -83,14 +83,14 @@ def abundance(isotope):
     """
     Natural abundance.
 
-    :Parameters: 
+    :Parameters:
         *isotope* : Isotope
-               
+
     :Returns:
         *abundance* : float | %
 
     Reference:
-        *Coursey. J. S., Schwab. D. J, and Dragoset. R. A., NIST Atomic 
+        *Coursey. J. S., Schwab. D. J, and Dragoset. R. A., NIST Atomic
         Weights and Isotopic Composition Database.*
     """
     return isotope._abundance

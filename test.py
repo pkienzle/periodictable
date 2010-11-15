@@ -32,7 +32,7 @@ if not nose.run(argv=nose_args): sys.exit()
 # Run isolated tests in their own environment.  In this case we will have
 # to set the PYTHONPATH environment variable before running since it is
 # happening in a separate process.
-if 'PYTHONPATH' in os.environ:    
+if 'PYTHONPATH' in os.environ:
     PYTHONPATH = path + ":" + os.environ['PYTHONPATH']
 else:
     PYTHONPATH = path
@@ -40,5 +40,3 @@ os.putenv('PYTHONPATH', PYTHONPATH)
 for p in ("nsfd2o", ):
     ret = os.system(" ".join( (sys.executable, "test/test_%s.py"%p) ))
     if ret != 0: sys.exit()
-
-

@@ -25,7 +25,7 @@ the following table:
     SC           a
     Monoclinic
     ============ ===========
-    
+
 Example:
 
 .. doctest::

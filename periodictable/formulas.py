@@ -22,7 +22,7 @@ PACKING_FACTORS = dict(cubic=pi/6, bcc=pi*sqrt(3)/8, hcp=pi/sqrt(18),
 def mix_by_weight(*args, **kw):
     """
     Generate a mixture which apportions each formula by weight.
-    
+
     :Parameters:
         *formula1* : Formula OR string
             Material
@@ -37,23 +37,23 @@ def mix_by_weight(*args, **kw):
             Relative quantity of that material
 
         ...
-        
+
         *density* : float
             Density of the mixture, if known
 
         *natural_density* : float
             Density of the mixture with natural abundances, if known.
-            
+
         *name* : string
             Name of the mixture
-            
+
         *table* : PeriodicTable
             Private table to use when parsing string formulas.
-        
+
     :Returns:
-    
+
         *formula* : Formula
-        
+
     If density is not given, then it will be computed from the density
     of the components, assuming the components take up no more nor less
     space because they are in the mixture.  If component densities are
@@ -64,10 +64,10 @@ def mix_by_weight(*args, **kw):
     natural_density = kw.pop('natural_density',None)
     name = kw.pop('name',None)
     if kw: raise TypeError("Unexpected keyword "+kw.keys()[0])
-    
+
     if len(args)%2 != 0:
         raise ValueError("Need a quantity for each formula")
-    pairs = [(formula(args[i],table=table),args[i+1]) 
+    pairs = [(formula(args[i],table=table),args[i+1])
              for i in range(0, len(args), 2)]
 
     # Drop pairs with zero quantity
@@ -77,7 +77,7 @@ def mix_by_weight(*args, **kw):
     if len(pairs) > 0:
         # cell mass = mass
         # target mass = q
-        # cell mass * n = target mass 
+        # cell mass * n = target mass
         #   => n = target mass / cell mass
         #        = q / mass
         # scale this so that n = 1 for the smallest quantity
@@ -92,14 +92,14 @@ def mix_by_weight(*args, **kw):
     if scale and not result.density and all(f.density for f,_ in pairs):
         volume = sum(q/f.density for f,q in pairs)/scale
         result.density = result.mass/volume
-    
-    if name: result.name = name    
+
+    if name: result.name = name
     return result
 
 def mix_by_volume(*args, **kw):
     """
     Generate a mixture which apportions each formula by volume.
-    
+
     :Parameters:
         *formula1* : Formula OR string
             Material
@@ -114,21 +114,21 @@ def mix_by_volume(*args, **kw):
             Relative quantity of that material
 
         ...
-        
+
         *density* : float
             Density of the mixture, if known
 
         *natural_density* : float
             Density of the mixture with natural abundances, if known.
-            
+
         *name* : string
             Name of the mixture
-        
+
         *table* : PeriodicTable
             Private table to use when parsing string formulas.
-        
+
     :Returns:
-    
+
         *formula* : Formula
 
     If density is not given, then it will be computed from the density
@@ -141,12 +141,12 @@ def mix_by_volume(*args, **kw):
     natural_density = kw.pop('natural_density',None)
     name = kw.pop('name',None)
     if kw: raise TypeError("Unexpected keyword "+kw.keys()[0])
-    
+
     if len(args)%2 != 0:
         raise ValueError("Need a quantity for each formula")
-    pairs = [(formula(args[i],table=table),args[i+1]) 
+    pairs = [(formula(args[i],table=table),args[i+1])
              for i in range(0, len(args), 2)]
-    
+
     if not all(f.density for f,_ in pairs):
         raise ValueError("Need a density for each formula")
 
@@ -157,7 +157,7 @@ def mix_by_volume(*args, **kw):
     if len(pairs) > 0:
         # cell volume = mass/density
         # target volume = q
-        # cell volume * n = target volume 
+        # cell volume * n = target volume
         #   => n = target volume / cell volume
         #        = q / (mass/density)
         #        = q * density / mass
@@ -173,11 +173,11 @@ def mix_by_volume(*args, **kw):
     if scale and not result.density:
         volume = sum(q for _,q in pairs)/scale
         result.density = result.mass/volume
-        
-    if name: result.name = name    
+
+    if name: result.name = name
     return result
 
-def formula(value=None, density=None, natural_density=None, 
+def formula(value=None, density=None, natural_density=None,
             name=None, table=None):
     r"""
     Construct a chemical formula representation from a string, a
@@ -196,25 +196,25 @@ def formula(value=None, density=None, natural_density=None,
 
         *name* : string
             Common name for the molecule.
-            
+
         *table* : PeriodicTable
             Private table to use when parsing string formulas.
-        
+
     :Exceptions:
         *ValueError* : invalid formula initializer
 
     After creating a formula, a rough estimate of the density can be
     computed using:
-    
+
          formula.density = formula.molecular_mass/formula.volume(packing_factor=...)
 
-    The volume() calculation uses the covalent radii of the components and 
+    The volume() calculation uses the covalent radii of the components and
     the known packing factor or crystal structure name.  If the lattice
     constants for the crystal are known, then they can be used instead:
-    
+
         formula.density = formula.molecular_mass/formula.volume(a,b,c,alpha,beta,gamma)
 
-    Formulas are designed for calculating quantities such as molar mass and 
+    Formulas are designed for calculating quantities such as molar mass and
     scattering length density, not for representing bonds or atom positions.
     The representations are simple, but preserve some of the structure for
     display purposes.
@@ -257,9 +257,9 @@ class Formula(object):
         # If only one element in the formula, use its density.
         # Otherwise, leave density unspecified, and let the user
         # assign it separately if they need it.
-        if natural_density: 
-            self.natural_density = natural_density            
-        elif density: 
+        if natural_density:
+            self.natural_density = natural_density
+        elif density:
             self.density = density
         elif len(self.atoms) == 1:
             self.density = self.atoms.keys()[0].density
@@ -268,10 +268,10 @@ class Formula(object):
 
     def _atoms(self):
         """
-        { *atom*: *count*, ... } 
+        { *atom*: *count*, ... }
 
-        Composition of the molecule.  Referencing this attribute computes 
-        the *count* as the total number of each element or isotope in the 
+        Composition of the molecule.  Referencing this attribute computes
+        the *count* as the total number of each element or isotope in the
         chemical formula, summed across all subgroups.
         """
         return _count_atoms(self.structure)
@@ -281,7 +281,7 @@ class Formula(object):
     def _hill(self):
         """
         Formula
-        
+
         Convert the formula to a formula in Hill notation.  Carbon appears
         first followed by hydrogen then the remaining elements in alphabetical
         order.
@@ -292,17 +292,17 @@ class Formula(object):
     def natural_mass_ratio(self):
         """
         Natural mass to isotope mass ratio.
-        
+
         :Returns:
-            *ratio* : float            
-        
-        The ratio is computed from the sum of the masses of the individual 
+            *ratio* : float
+
+        The ratio is computed from the sum of the masses of the individual
         elements using natural abundance divided by the sum of the masses
         of the isotopes used in the formula.  If the cell volume is
         preserved with isotope substitution, then the ratio of the masses
         will be the ratio of the densities.
         """
-        total_natural_mass = total_isotope_mass = 0        
+        total_natural_mass = total_isotope_mass = 0
         for el,count in self.atoms.items():
             try:
                 natural_mass = el.element.mass
@@ -314,8 +314,8 @@ class Formula(object):
     def _get_natural_density(self):
         """
         |g/cm^3|
-        
-        Density of the formula with specific isotopes of each element 
+
+        Density of the formula with specific isotopes of each element
         replaced by the naturally occurring abundance of the element
         without changing the cell volume.
         """
@@ -328,7 +328,7 @@ class Formula(object):
         """
         atomic mass units u (C[12] = 12 u)
 
-        Molar mass of the molecule.  Use molecular_mass to get the mass in 
+        Molar mass of the molecule.  Use molecular_mass to get the mass in
         grams.
         """
         mass = 0
@@ -341,7 +341,7 @@ class Formula(object):
     def molecular_mass(self):
         """
         g
-        
+
         Mass of the molecule in grams.
         """
         return self.mass/avogadro_number
@@ -349,22 +349,22 @@ class Formula(object):
     def _pf(self):
         """
         packing factor  | unitless
-        
+
         packing factor estimated from density.
         """
         return self.density
-        
+
     def volume(self, packing_factor='hcp', *args, **kw):
         r"""
-        Estimate unit cell volume. 
+        Estimate unit cell volume.
 
-        The crystal volume can be estimated from the element covalent radius 
+        The crystal volume can be estimated from the element covalent radius
         and the atomic packing factor using::
-        
+
             packing_factor = N_atoms V_atom / V_crystal
 
         Packing factors for a number of crystal lattice structures are defined.
-        
+
         .. table:: Crystal lattice names and packing factors
 
          ======== ======================= ====================== ==============
@@ -387,18 +387,18 @@ class Formula(object):
                 Lattice angles.  These default to 90\ |deg|
 
         :Returns:
-        
+
             *volume* : float | |cm^3|
-                Molecular volume. 
+                Molecular volume.
 
         :Raises:
-        
+
             *KeyError* : unknown lattice type
-            
+
             *TypeError* : missing or bad lattice parameters
 
         Using the cell volume, mass density can be set with:
-        
+
             formula.density = formula.molecular_mass/formula.volume()
 
         """
@@ -430,12 +430,12 @@ class Formula(object):
         :Parameters:
             *wavelength* : float | |Ang|
                 Wavelength of the neutron beam.
-        
+
         :Returns:
 
             *sld* : (float, float, float) | |1e-6/Ang^2|
                 Neutron scattering length density is returned as the tuple
-                (*real*, *imaginary*, *incoherent*), or as (None, None, None) 
+                (*real*, *imaginary*, *incoherent*), or as (None, None, None)
                 if the mass density is not known.
 
         """
@@ -461,9 +461,9 @@ class Formula(object):
         :Returns:
 
             *sld* : (float, float) | |1e-6/Ang^2|
-    	        X-ray scattering length density is returned as the tuple
-	            (*real*, *imaginary*), or as (None, None) if the mass 
-	            density is not known.
+                X-ray scattering length density is returned as the tuple
+                    (*real*, *imaginary*), or as (None, None) if the mass
+                    density is not known.
 
         """
         if self.density is None: return None,None
@@ -497,7 +497,7 @@ class Formula(object):
         ret = Formula()
         ret.structure = tuple(list(self.structure) + list(other.structure))
         return ret
-    
+
     def __iadd__(self, other):
         """
         Extend a formula with another.
@@ -532,7 +532,7 @@ class Formula(object):
 
 def formula_grammar(table):
     """
-    Construct a parser for molecular formulas. 
+    Construct a parser for molecular formulas.
 
     :Parameters:
 
@@ -540,12 +540,12 @@ def formula_grammar(table):
              If table is specified, then elements and their associated fields
              will be chosen from that periodic table rather than the default.
 
-    :Returns: 
+    :Returns:
         *parser* : pyparsing.ParserElement.
-            The ``parser.parseString()`` method returns a list of 
-            pairs (*count,fragment*), where fragment is an *isotope*, 
-            an *element* or a list of pairs (*count,fragment*).    
-                
+            The ``parser.parseString()`` method returns a list of
+            pairs (*count,fragment*), where fragment is an *isotope*,
+            an *element* or a list of pairs (*count,fragment*).
+
     """
     # Recursive
     formula = Forward()
@@ -608,7 +608,7 @@ def formula_grammar(table):
 _PARSER_CACHE = {}
 def parse_formula(str, table = None):
     """
-    Parse a chemical formula, returning a structure with elements from the 
+    Parse a chemical formula, returning a structure with elements from the
     given periodic table.
     """
     table = default_table(table)
@@ -634,7 +634,7 @@ def _count_atoms(seq):
 def _immutable(seq):
     """
     Traverse formula structure, checking that the counts are numeric and
-    units are atoms.  Returns an immutable copy of the structure, with all 
+    units are atoms.  Returns an immutable copy of the structure, with all
     lists replaced by tuples.
     """
     if isatom(seq):

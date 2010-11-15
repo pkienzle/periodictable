@@ -18,7 +18,7 @@ def init(table, reload=False):
     # Load the data
     for name,person in data.iteritems():
         el = table.name(name)
-        el.discoverer = person 
+        el.discoverer = person
 
 data = dict(
  arsenic="Jabir ibn Hayyan",
@@ -30,4 +30,3 @@ data = dict(
  nickel="A.F. Cronstedt",
  magnesium="J. Black",
 )
-

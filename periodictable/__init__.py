@@ -42,7 +42,7 @@ density.init(elements)
 def data_files():
     """
     Return the data files associated with all periodic table attributes.
-    
+
     The format is a list of (directory, [files...]) pairs which can be
     used directly in setup(...,data_files=...) for setup.py.
 
@@ -55,7 +55,7 @@ def data_files():
             files += glob.glob(os.path.join(path,p))
             return files
 
-    data_files = [('periodictable-data/xsf', 
+    data_files = [('periodictable-data/xsf',
                    _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat']))]
     return data_files
 
@@ -68,7 +68,7 @@ def _load_covalent_radius():
     """
     from . import covalent_radius
     covalent_radius.init(elements)
-core.delayed_load(['covalent_radius', 
+core.delayed_load(['covalent_radius',
                    'covalent_radius_units',
                    'covalent_radius_uncertainty'],
                   _load_covalent_radius)
@@ -101,7 +101,7 @@ core.delayed_load(['neutron'],_load_neutron, isotope=True)
 def _load_xray():
     """
     X-ray scattering properties for the elements.
-     
+
     Reference:
         *Center for X-Ray optics. Henke. L., Gullikson. E. M., and Davis. J. C.*
     """
@@ -116,7 +116,7 @@ def _load_emission_lines():
     Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti. *K_alpha* is the average of
     K_alpha1 and K_alpha2 lines.
     """
- 
+
     from . import xsf
     xsf.init_spectral_lines(elements)
 core.delayed_load(['K_alpha','K_beta1','K_alpha_units','K_beta1_units'],
@@ -187,7 +187,7 @@ def formula(*args, **kw):
 def mix_by_weight(*args, **kw):
     """
     Generate a mixture which apportions each formula by weight.
-    
+
     :Parameters:
 
         *formula1* : Formula OR string
@@ -203,20 +203,20 @@ def mix_by_weight(*args, **kw):
             Relative quantity of that material
 
         ...
-        
+
         *density* : float
             Density of the mixture, if known
 
         *natural_density* : float
             Density of the mixture with natural abundances, if known.
-            
+
         *name* : string
             Name of the mixture
-        
+
     :Returns:
-    
+
         *formula* : Formula
-        
+
     If density is not given, then it will be computed from the density
     of the components, assuming equal volume.
     """
@@ -226,7 +226,7 @@ def mix_by_weight(*args, **kw):
 def mix_by_volume(*args, **kw):
     """
     Generate a mixture which apportions each formula by volume.
-    
+
     :Parameters:
 
         *formula1* : Formula OR string
@@ -242,23 +242,23 @@ def mix_by_volume(*args, **kw):
             Relative quantity of that material
 
         ...
-        
+
         *density* : float
             Density of the mixture, if known
 
         *natural_density* : float
             Density of the mixture with natural abundances, if known.
-            
+
         *name* : string
             Name of the mixture
-        
+
     :Returns:
-    
+
         *formula* : Formula
-        
-    Densities are required for each of the components.  If the density of 
+
+    Densities are required for each of the components.  If the density of
     the result is not given, it will be computed from the components
-    assuming the components take up no more nor less space because they 
+    assuming the components take up no more nor less space because they
     are in the mixture.
     """
     from . import formulas
@@ -270,8 +270,8 @@ def neutron_sld(*args, **kw):
     Compute neutron scattering length densities for molecules.
 
     Returns scattering length density (real, imaginary and incoherent).
-    
-    See :class:`periodictable.nsf.neutron_sld` for details.  
+
+    See :class:`periodictable.nsf.neutron_sld` for details.
     """
     from . import nsf
     return nsf.neutron_sld(*args, **kw)
@@ -283,8 +283,8 @@ def neutron_scattering(*args, **kw):
     Returns scattering length density (real, imaginary and incoherent),
     cross sections (coherent, absorption, incoherent) and penetration
     depth.
-    
-    See :func:`periodictable.nsf.neutron_scattering` for details.  
+
+    See :func:`periodictable.nsf.neutron_scattering` for details.
     """
     from . import nsf
     return nsf.neutron_scattering(*args, **kw)
@@ -292,11 +292,11 @@ def neutron_scattering(*args, **kw):
 def xray_sld(*args, **kw):
     """
     Compute neutron scattering length densities for molecules.
-    
+
     Either supply the wavelength (A) or the energy (keV) of the X-rays.
 
     Returns scattering length density (real, imaginary).
-    
+
     See :class:`periodictable.xsf.Xray` for details.
     """
     from . import xsf

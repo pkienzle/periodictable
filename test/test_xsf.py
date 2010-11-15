@@ -36,7 +36,7 @@ def test():
     m1,m2 = Si.xray.sld(wavelength=Mo.K_alpha)
     B1,B2 = Si.xray.sld(wavelength=[Cu.K_alpha,Mo.K_alpha])
     assert (B1==[f1,m1]).all() and (B2==[f2,m2]).all()
-    
+
     # Check energy conversion is consistent
     f1,f2 = Si.xray.sld(energy=xray_energy(Cu.K_alpha))
     m1,m2 = Si.xray.sld(energy=xray_energy(Mo.K_alpha))
@@ -108,7 +108,7 @@ def test():
     assert abs(Ni_2p_f0-10.09535) < 0.00001
     Ni58_2p_f0 = Ni[58].ion[2].xray.f0(Q=Q1)
     assert Ni_2p_f0 == Ni58_2p_f0
-    
+
     # The following test is implementation specific, and is not guaranteed
     # to succeed if the extension interface changes.
     assert '_xray' not in Ni[58].__dict__

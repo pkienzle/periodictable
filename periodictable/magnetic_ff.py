@@ -35,7 +35,7 @@ class MagneticFormFactor(object):
     Magnetic form factor for the ion.
 
     The available form factors are::
-    
+
         M = <j0> form factor coefficients
         J = <j0> + C2 <j2> form factor coeffients
         jn = <jn> form factor coefficients for n = 0, 2, 4, 6
@@ -54,7 +54,7 @@ class MagneticFormFactor(object):
     The form factor calculation is performed by the <ff>_Q method for <ff>
     in *M*, *J*, *j0*, *j2*, *j4*, *j6*.  For example, here is the calculation for
     the *M* form factor for Fe^2+ computed at 0, 0.1 and 0.2:
-    
+
     .. doctest::
 
         >>> import periodictable
@@ -63,8 +63,8 @@ class MagneticFormFactor(object):
         [ 1.          0.99935255  0.99741366]
 
     """
-    
-    
+
+
     def _getM(self): return self.j0
 
     M = property(_getM, doc="j0")
@@ -90,8 +90,8 @@ class MagneticFormFactor(object):
         return formfactor_0(self.J, Q)
 
     M_Q = j0_Q
-    
-   
+
+
 def init(table, reload=False):
     if 'magnetic_ff' in table.properties and not reload: return
     table.properties.append('magnetic_ff')

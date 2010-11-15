@@ -82,7 +82,7 @@ def test():
     assert abs(sld[1] - 0) < 0.01
     assert abs(xs[2] - 0.00292) < 0.00001
     assert abs(xs[1] - 0.00569) < 0.00001
-    assert abs(1/sum(xs) - 4.329) < 0.001 
+    assert abs(1/sum(xs) - 4.329) < 0.001
 
     # Cu/Mo K-alpha = 1.89e-5 + 2.45e-7i / 1.87e-5 + 5.16e-8i
 
@@ -90,19 +90,19 @@ def test():
     bp,bpp,binc = neutron_sld(M,wavelength=4.75)
     assert abs(bp-7.649)<0.001
     #assert abs(absorp-2.226)<0.001
-    # Alan's numbers: 
+    # Alan's numbers:
     # SLD=7.56e-6 - 2.34e-7i /A^2
     # inc,abs XS = 0.193, 220.0 / cm
     # 1/e = 0.004483 cm
     # Cu/Mo K-alpha = 2.02e-5 + 1.93e-8i / 2.01e-5 + 4.64e-9i
-    
+
     Si = elements.Si
 
     # Make sure molecular calculation corresponds to direct calculation
     sld = neutron_sld('Si',density=Si.density,wavelength=4.75)
     sld2 = Si.neutron.sld(wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
-    
+
     sld,xs,depth = neutron_scattering('Si',density=Si.density,wavelength=4.75)
     sld2,xs2,depth2 = Si.neutron.scattering(wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
@@ -128,7 +128,7 @@ def test():
     assert all(v == 0 for v in sld)
     assert all(v == 0 for v in xs)
     assert numpy.isinf(depth)
-    
+
     sld,xs,depth = periodictable.neutron_scattering('H2O',density=1,wavelength=4.75)
     sld2,xs2,depth2 = neutron_scattering('H2O',density=1,wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
@@ -155,7 +155,7 @@ def _summarize(M):
     for el in M.atoms.keys():
         print el,"density",el.density
         print el,"sld",el.neutron.sld(wavelength=4.75)
-        print el,"xs","%.15g %.15g %.15g"%el.neutron.xs(wavelength=4.75) 
+        print el,"xs","%.15g %.15g %.15g"%el.neutron.xs(wavelength=4.75)
         print el,"1/e",1./sum(el.neutron.xs(wavelength=4.75))
 
 

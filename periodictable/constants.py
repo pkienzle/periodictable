@@ -9,6 +9,6 @@ electron_radius = 2.8179402894e-15 #(58) m
 # From NIST Reference on Constants, Units, and Uncertainty
 #   http://physics.nist.gov/cuu/index.html
 # neutron mass = 1.008 664 915 97(43) u
-# atomic mass constant m_u = 1.660 538 782(83) x 10-27 kg 
+# atomic mass constant m_u = 1.660 538 782(83) x 10-27 kg
 neutron_mass = 1.00866491597 # u
 atomic_mass_constant = 1.660538782e-27 #(83) kg / u

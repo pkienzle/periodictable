@@ -9,7 +9,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
-# 
+#
 #  * Redistributions of source code must retain the above copyright
 #    notice, this list of conditions and the following disclaimer.
 #
@@ -116,7 +116,7 @@ class CromerMannFormula(object):
     '''
 
     # obtained from tables/f0_WaasKirf.dat and the associated reference
-    # D. Waasmaier, A. Kirfel, Acta Cryst. (1995). A51, 416-413                     
+    # D. Waasmaier, A. Kirfel, Acta Cryst. (1995). A51, 416-413
     # http://dx.doi.org/10.1107/S0108767394013292
     stollimit = 6
 

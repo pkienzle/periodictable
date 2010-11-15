@@ -18,7 +18,7 @@ Chemical
 
         * density - usual density
         * boiling_point - boiling temperature
-        
+
     Numeric properties are rich structures with a number of fields
 
         * value: median property value
@@ -39,9 +39,9 @@ lookup(chemical, properties=['formula','density'])
 
 wikipedia(chemical)
     Look up a chemical in wikipedia. Returns a list of
-    chemicals which match. Wikipedia provides information on 
-    6000+ chemicals. Though it is not necessarily complete or 
-    accurate, it is freely available. This package will include a 
+    chemicals which match. Wikipedia provides information on
+    6000+ chemicals. Though it is not necessarily complete or
+    accurate, it is freely available. This package will include a
     copy of the chemical information from the latest wikipedia database
     at the time of release.
 

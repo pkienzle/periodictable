@@ -62,7 +62,7 @@ modules=[
     ('nsf', 'Neutron scattering potentials'),
     ('xsf', 'X-ray scattering potentials'),
     ('magnetic_ff', 'Magnetic Form Factor'),
-    
+
 ]
 package='periodictable'
 package_name='Reference'

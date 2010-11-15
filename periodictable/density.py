@@ -30,7 +30,7 @@ is the same as that for the element in the natural abundance.
 The following plot shows density for all elements:
 
 .. plot:: plots/density_plot.py
-   
+
 From the X-ray data book: http://xdb.lbl.gov/Section5/Sec_5-2.html
 
 Data were taken mostly from [#Lide1999]_. These values are reproduced in [#ILL]_.
@@ -44,16 +44,16 @@ from .core import Element, Isotope
 from .constants import avogadro_number
 
 def density(iso_el):
-   
+
     """
     Element density for natural abundance. For isotopes, return
     the equivalent density assuming identical inter-atomic spacing as the
     naturally occuring material.
-   
+
     :Parameters:
         *iso_el* : isotope or element
             Name of the element or isotope.
-        
+
     :Returns:
         *density* : float | |g/cm^3|
 
@@ -74,10 +74,10 @@ def interatomic_distance(element):
     distance between isotopes is assumed to match that between atoms in
     the natural abundance.
 
-    :Parameters: 
+    :Parameters:
         *element* : Element
             The element whose interatomic distance is to be calculated.
-               
+
     :Returns:
         *distance* : float | |Ang|
             Estimated interatomic distance.
@@ -85,20 +85,20 @@ def interatomic_distance(element):
     Interatomic distance is computed using:
 
     .. math::
-    
-    	d = (m/(\rho_m N_A 10^{-24}))^{1/3}
+
+        d = (m/(\rho_m N_A 10^{-24}))^{1/3}
 
     with units:
 
     .. math::
-    
-        (\rm (g\cdot mol^{-1}) 
+
+        (\rm (g\cdot mol^{-1})
         / ( (g\cdot cm^{-3})
             (atoms\cdot mol^{-1})
             (10^{-8} cm\cdot \AA^{-1})^3))^{1/3} = \AA
 
     """
-    
+
     if hasattr(element,'isotope'): element = element.element
     if element.density is None or element.mass is None: return None
     return (element.mass/(element.density*avagadro_number*1e24))**(1./3.)
@@ -108,10 +108,10 @@ def number_density(element):
     Estimate the number density from atomic weight and density. The density
     for isotopes is assumed to match that of between atoms in natural abundance.
 
-    :Parameters: 
+    :Parameters:
         *element* : element
             Name of the element whose number density needs to be calculated.
-               
+
     :Returns:
             *Nb* : float | unitless
                 Number density of a element.

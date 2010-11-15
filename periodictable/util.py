@@ -22,7 +22,7 @@ def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
     The following formula works for all lattice types:
 
     .. math::
-    
+
         V = a b c \sqrt{1 - \cos^2 \alpha - \cos^2 \beta - cos^2 \gamma
                           + 2 \cos \alpha \cos beta \cos gamma}
     """
@@ -37,7 +37,7 @@ def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
 
 def require_keywords(function):
     """
-    Decorator which forces all keyword arguments to the function to be 
+    Decorator which forces all keyword arguments to the function to be
     explicitly named.
 
     For example:
@@ -50,20 +50,20 @@ def require_keywords(function):
         TypeError: name=value required for c
         >>> fn(1,2,c=6)
         >>> fn(b=1,a=2,c=6)
-    
+
     Variable arguments are not currently supported:
-    
+
         >>> @require_keywords
         ... def fn(a,b,c=6,*args,**kw): pass
         Traceback (most recent call last):
         ...
         NotImplementedError: only named arguments for now
-    
+
     .. Note:: The call signature is not preserved.
-    
-    We can't preserve the function signature for the call since the only 
-    way we can count the number of non-keyword arguments is to 
-    use the *args, **kw call style.  Python 3+ provides the '*' call 
+
+    We can't preserve the function signature for the call since the only
+    way we can count the number of non-keyword arguments is to
+    use the *args, **kw call style.  Python 3+ provides the '*' call
     signature element which will force all keywords after '*' to be named.
     """
     import inspect

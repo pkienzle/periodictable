@@ -19,7 +19,7 @@ def test():
         Fe[12]
     except KeyError,msg:
         assert msg.args[0] == '12 is not an isotope of Fe'
-        
+
     # Check that "for el in elements" works and for iso in el works
     els = tuple(el for el in elements)
     assert els[0].number == 0

@@ -90,7 +90,7 @@ def test():
     # be skewed toward the lighter H when mixing by mass.
     assert abs(fv.atoms[H]/fv.atoms[D] - 1.5) < 1e-14
     assert abs(fm.atoms[H]/fm.atoms[D] - 1.5*D2O.density/H2O.density) < 1e-14
-    # Mass densities should average according to H2O:D2O ratio when 
+    # Mass densities should average according to H2O:D2O ratio when
     # mixing by volume but be skewed toward toward the more plentiful
     # H2O when mixing by mass
     H2O_fraction = 0.6
@@ -110,7 +110,7 @@ def test():
     # be skewed toward the lighter H when mixing by mass.
     assert abs(fv.atoms[H]/fv.atoms[D] - 1.5) < 1e-14
     assert abs(fm.atoms[H]/fm.atoms[D] - 1.5*D2O.density/H2O.density) < 1e-14
-    # Mass densities should average according to H2O:D2O ratio when 
+    # Mass densities should average according to H2O:D2O ratio when
     # mixing by volume but be skewed toward toward the more plentiful
     # H2O when mixing by mass
     H2O_fraction = 0.6

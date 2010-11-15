@@ -9,14 +9,14 @@ __all__ = ['table_plot']
 def table_plot(data, form="line", label=None, title=None):
     """
     Plot periodic table data using element symbol vs. value.
-    
+
     :Parameters:
         *data* : { Element: float }
             Data values to plot
-            
+
         *form* = "line" : "line|grid"
             Table layout to use
-    
+
     :Returns: None
     """
     import pylab

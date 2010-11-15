@@ -7,6 +7,5 @@ def _load():
     """
     from . import core
     core.init(periodictable.core.default_table())
-periodictable.core.delayed_load(['shells'], _load, 
+periodictable.core.delayed_load(['shells'], _load,
                               isotope=True, element=False)
-

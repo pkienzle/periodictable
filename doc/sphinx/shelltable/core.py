@@ -25,4 +25,3 @@ data = dict(
           58: "58-Fe shell info",
          },
     )
-

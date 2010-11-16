@@ -493,30 +493,45 @@ def plot_xsf(el):
     pylab.legend(['f1','f2'])
     pylab.show()
 
-def sld_table(wavelength, table=None):
+def sld_table(wavelength=None, table=None):
     """
     Prints the xray SLD table for the given wavelength.
 
     :Parameters:
-        *wavelength* : float | |Ang|
+        *wavelength* = Cu K-alpha : float | |Ang|
             X-ray wavelength.
         *table* : PeriodicTable
             The default periodictable unless a specific table has been requested.
 
     :Returns: None
+    
+    Example
+    
+        >>> sld_table() # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        X-ray scattering length density for 1.5418 Ang
+         El    rho   irho
+          H   1.19   0.00
+         He   1.03   0.00
+         Li   3.92   0.00
+         Be  13.93   0.01
+          B  18.40   0.01
+          C  17.86   0.03
+          N   6.88   0.02
+          O   9.74   0.04
+          F  12.16   0.07
+         Ne  10.26   0.09
+         Na   7.98   0.09
+         Mg  14.78   0.22
+          ...
     """
     table = default_table(table)
-    ## Cu K-alpha Zeff and dZ table
-    #for el in table:
-    #    f1,f2 = el.xsf(table.Cu.K_alpha)
-    #    if f1 is not None:
-    #        print el.Z,el.symbol,"%.1f"%f1,"%.4f"%(f1-el.Z)
+    if wavelength == None: wavelength = table.Cu.K_alpha
 
     # NBCU spreadsheet format
     print "X-ray scattering length density for",wavelength,"Ang"
     print "%3s %6s %6s"%('El','rho','irho')
     for el in table:
-        rho,irho = el.xray.sld(table.Cu.K_alpha)
+        rho,irho = el.xray.sld(wavelength=table.Cu.K_alpha)
         if rho is not None:
             print "%3s %6.2f %6.2f"%(el.symbol,rho,irho)
 
@@ -529,6 +544,23 @@ def emission_table(table=None):
             The default periodictable unless a specific table has been requested.
 
     :Returns: None
+    
+    Example
+    
+        >>> emission_table()
+         El  Kalpha  Kbeta1
+         Ti  2.7496  2.5138
+         Cr  2.2909  2.0848
+         Mn  2.1031  1.9102
+         Fe  1.9373  1.7565
+         Co  1.7905  1.6208
+         Ni  1.6591  1.5001
+         Cu  1.5418  1.3922
+         Zn  1.4364  1.2952
+         Mo  0.7107  0.6323
+         Rh  0.6147  0.5456
+         Pd  0.5869  0.5205
+         Ag  0.5608  0.4970
     """
     table = default_table(table)
     print "%3s %7s %7s"%('El','Kalpha','Kbeta1')

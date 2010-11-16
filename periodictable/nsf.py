@@ -34,31 +34,38 @@ Details
 There are a number of functions available in periodictable.nsf
 
     :func:`neutron_energy`
-        Return energy given wavelength.
+        Return neutron energy given wavelength.
 
     :func:`neutron_wavelength`
-        Return wavelength given energy.
+        Return wavelength given neutron energy.
+    
+    :func:`neutron_wavelength_from_velocity`
+        Return wavelength given neutron velocity.
 
     :func:`neutron_scattering`
-        Computes SLD, cross sections and penetration depth for a compound.
+        Computes scattering length density, cross sections and 
+        penetration depth for a compound.
 
     :func:`neutron_sld`
-        Computes SLD for a compound.
+        Computes scattering length density for a compound.
 
     :func:`energy_dependent_table`
-        Lists energy dependent isotopes.
+        Lists isotopes with energy dependence.
 
     :func:`sld_table`
-        Lists all elements in natural abundance.
+        Lists scattering length densitys for all elements in natural abundance.
 
     :func:`absorption_comparison_table`
-        Compares element.neutron.b_c_i and element.neutron.absorption.
+        Compares the imaginary bound coherent scattering length to the
+        absorption cross section.
 
     :func:`coherent_comparison_table`
-        Compares element.neutron.b_c and element.neutron.coherent.
+        Compares the bound coherent scattering length to the 
+        coherent scattering cross section.
 
     :func:`total_comparison_table`
-        Compares element.neutron.b_c and element.neutron.coherent.
+        Compares the total scattering cross section to the sum of the
+        coherent and incoherent scattering cross sections.
 
 For private tables use :func:`init` to set the data.
 
@@ -121,7 +128,8 @@ from .constants import (avogadro_number, plancks_constant, electron_volt,
 from .util import require_keywords
 
 __all__ = ['init', 'Neutron',
-           'neutron_energy', 'neutron_wavelength',
+           'neutron_energy', 'neutron_wavelength', 
+           'neutron_wavelength_from_velocity',
            'neutron_scattering', 'neutron_sld',
            'sld_plot',
            'absorption_comparison_table', 'coherent_comparison_table',
@@ -133,13 +141,22 @@ __all__ = ['init', 'Neutron',
 
 ABSORPTION_WAVELENGTH = 1.798
 
-# Formula:
-#   h^2/(2 m_n kg) * (10^20 m/A) * (1000 meV/eV) / (electron_volt J/eV)
+
+# Velocity (m/s) <=> wavelength (A)
+#   lambda = h / p = h (eV) (J/eV) / ( m_n (kg) v (m/s) ) (10^10 A/m)
+#
+# Since plancks constant is in eV
+#   lambda = (1e10 * h*electron_volt/(neutron_mass/N_A)) / velocity
+
+# Energy (eV) <=> wavelength (A)
+#   h^2/(2 m_n kg lambda A) (10^20 A/m) (1000 meV/eV) / (electron_volt J/eV)
 # Since plancks constant is in eV
 #   (h J)^2/electron_volt = ((h eV)(electron_volt J/eV))^2/electron_volt
 #                         = (h eV)^2 * electron_volt
 ENERGY_FACTOR = (plancks_constant**2*electron_volt
                  / (2 * neutron_mass * atomic_mass_constant)) * 1e23
+VELOCITY_FACTOR = (plancks_constant*electron_volt
+                   / (neutron_mass * atomic_mass_constant)) * 1e10
 def neutron_wavelength(energy):
     """
     Convert neutron energy to wavelength.
@@ -166,6 +183,30 @@ def neutron_wavelength(energy):
     """
     return sqrt(ENERGY_FACTOR / asarray(energy))
 
+def neutron_wavelength_from_velocity(velocity):
+    """
+    Convert neutron velocity to wavelength.
+    
+    :Parameters:
+        *velocity* : float or vector | m/s
+        
+    :Returns:
+        *wavelength* : float or vector | |Ang|
+
+    Velocity is converted to wavelength using
+    
+    .. math::
+    
+        \lambda = h/p = h/(m_n v)
+    
+    where
+
+        $h$ = planck's constant in |Js|
+
+        $m_n$ = neutron mass in kg
+    """
+    return VELOCITY_FACTOR / velocity
+
 def neutron_energy(wavelength):
     """
     Convert neutron wavelength to energy.
@@ -189,7 +230,6 @@ def neutron_energy(wavelength):
         $m_n$ = neutron mass in kg
     """
     return ENERGY_FACTOR / asarray(wavelength)**2
-
 
 def _CHECK_sld_potential(sld):
     """
@@ -237,11 +277,11 @@ class Neutron(object):
         Bounds coherent scattering length.
 
     * b_c_i (fm)
-        Imaginary part of bound coherent scattering length.  This is
-        related to absorption cross section by $2 \pi/k$ where
-        $k = 2 \pi/\lambda$ with a factor of 100 for converting
-        between barns and fm.  b_c_i is not available for all isotopes
-        for which absorption cross sections have been measured.
+        Imaginary bound coherent scattering length.  This is
+        related to absorption cross section by $\sigma_a = 4 \pi b_i/k$ where
+        $k = 2 \pi/\lambda$ and an additional factor of 1000 for converting
+        between |Ang|\ |cdot|\ fm and barns.  b_c_i is not available 
+        for all isotopes for which absorption cross sections have been measured.
 
     * bp,bm (fm)
         Spin-dependent scattering for I+1/2 and I-1/2 (not always available).
@@ -281,15 +321,14 @@ class Neutron(object):
 
     For elements, the scattering cross-sections are based on the natural
     abundance of the individual isotopes. Individual isotopes may have
-    additional information as follows:
+    the following additional fields
 
-        ======================== ============================================
-        Property                 Description
-        ======================== ============================================
-        *abundance(%)*           Abundance used in elemental measurements.
-        *nuclear_spin(string)*   Spin on the nucleus: '0', '1/2', '3/2', etc.
-        ======================== ============================================
-
+    * abundance (%)
+        Isotope abundance used to compute the properties of the element in
+        natural abundance.
+        
+    * nuclear_spin (string)
+        Spin on the nucleus: '0', '1/2', '3/2', etc.
 
     Each field above has a corresponding ``*_units`` attribute with the name
     of the units. For scattering calculations, the scattering length density
@@ -327,7 +366,7 @@ class Neutron(object):
         """Returns *True* if sld is defined for this element/isotope."""
         return None not in [self.b_c, self._number_density]
     @require_keywords
-    def sld(self, wavelength=ABSORPTION_WAVELENGTH, energy=None):
+    def sld(self, wavelength=ABSORPTION_WAVELENGTH):
         """
         Returns scattering length density for the element at natural
         abundance and density.
@@ -366,7 +405,7 @@ class Neutron(object):
         return sld_re,sld_im,sld_inc
 
     @require_keywords
-    def scattering(self,wavelength=ABSORPTION_WAVELENGTH, energy=None):
+    def scattering(self,wavelength=ABSORPTION_WAVELENGTH):
         """
         Returns neutron scattering information for the element at natural
         abundance and density.
@@ -502,81 +541,6 @@ def init(table, reload=False):
     # put it in even though it has not been independently measured
     if table.Xe.neutron.total is None:
         table.Xe.neutron.total = table.Xe.neutron.coherent + table.Xe.neutron.incoherent
-
-def fix_number(str):
-    """
-    Converts strings of the form e.g., 35.24(2)* into numbers without
-    uncertainty. Also accepts a limited range, e.g., <1e-6, which is
-    converted as 1e-6.  Missing values are set to 0.
-    """
-    if str == '': return None
-    idx = str.find('(')
-    if idx >= 0: str = str[0:idx]
-    if str[0] == '<': str = str[1:]
-    return float(str)
-
-def sld_table(wavelength=1, table=None, isotopes=True):
-    """
-    Scattering length density table for wavelength 4.75 |Ang|.
-
-    :Parameters:
-
-        *table* : PeriodicTable
-            If *table* is not specified, use the common periodic table.
-
-        *isotopes* = True : boolean
-            Whether to consider isotopes or not.
-
-    :Returns: None
-    """
-    table = default_table(table)
-    # Table for comparison with scattering length density calculators
-    # b_c for Sc, Te, Xe, Sm, Eu, Gd, W, Au, Hg are different from Neutron News
-    # The Rauch data have cited references to back up the numbers
-    # (see doc directory), though it is not clear what criteria are
-    # used to select amongst the available measurements.
-    print " Neutron scattering length density table"
-    print "%-7s %7s %7s %7s %7s %7s"%('atom','mass','density',
-                                         'sld','imag','incoh')
-    for el in table:
-        if el.neutron.has_sld():
-            coh,jcoh,inc = el.neutron.sld(wavelength)
-            print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f %s"\
-                %(el,el.mass,el.density,coh,jcoh,inc,
-                  '*' if el.neutron.is_energy_dependent else '')
-            if isotopes:
-                isos = [iso for iso in el if iso.neutron != None and iso.neutron.has_sld()]
-            else:
-                isos = []
-            for iso in isos:
-                coh,jcoh,inc = iso.neutron.sld(wavelength)
-                print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f %s"\
-                    %(iso,iso.mass,iso.density,coh,jcoh,inc,
-                      '*' if iso.neutron.is_energy_dependent else '')
-    print "* Energy dependent cross sections"
-
-def energy_dependent_table(table=None):
-    """
-    Prints a table of energy dependent isotopes.
-
-    :Parameters:
-        *table* : PeriodicTable
-            If *table* is not specified, use the common periodic table.
-
-    :Returns: None
-    """
-    table = default_table(table)
-    # List of energy dependent elements and isotopes
-    print "Elements and isotopes with energy dependent absorption:"
-    for el in table:
-        if not hasattr(el,'neutron'): continue
-        dep = []
-        if el.neutron.is_energy_dependent:
-            dep += [str(el)]
-        dep += [str(el)+'-'+str(iso.isotope)
-                for iso in el
-                if iso.neutron != None and iso.neutron.is_energy_dependent]
-        if len(dep) > 0: print "   "," ".join(dep)
 
 
 # Note: docs and function prototype are reproduced in __init__
@@ -804,7 +768,8 @@ def neutron_scattering(compound, density=None,
         else:
             density = compound.density # defaults to molecule density
     assert density is not None, "scattering calculations need density"
-    if energy is not None: wavelength = neutron_wavelength(energy)
+    if energy is not None: 
+        wavelength = neutron_wavelength(energy)
     assert wavelength is not None, "scattering calculation needs energy or wavelength"
 
     # Sum over the quantities
@@ -1341,8 +1306,113 @@ nsftableI="""\
 # were not used in nsftable table.
 # 63-Eu-151,-2.46,,
 # 64-Gd-157,-47,-75,
-def _diff(iso,a,b,tol=None):
-    if tol is None: tol = 0.01
+
+
+
+def fix_number(str):
+    """
+    Converts strings of the form e.g., 35.24(2)* into numbers without
+    uncertainty. Also accepts a limited range, e.g., <1e-6, which is
+    converted as 1e-6.  Missing values are set to 0.
+    """
+    if str == '': return None
+    idx = str.find('(')
+    if idx >= 0: str = str[0:idx]
+    if str[0] == '<': str = str[1:]
+    return float(str)
+
+def sld_table(wavelength=1, table=None, isotopes=True):
+    """
+    Scattering length density table for wavelength 4.75 |Ang|.
+
+    :Parameters:
+
+        *table* : PeriodicTable
+            If *table* is not specified, use the common periodic table.
+
+        *isotopes* = True : boolean
+            Whether to consider isotopes or not.
+
+    :Returns: None
+    
+    Example
+
+        >>> sld_table(wavelength=4.75)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+         Neutron scattering length density table
+        atom       mass density     sld    imag   incoh
+        H         1.008   0.071  -1.582   0.000  10.691
+        1-H       1.008   0.071  -1.583   0.000  10.691
+        D         2.014   0.141   2.823   0.000   1.705
+        T         3.016   0.212   2.027   0.000   0.453
+        He        4.003   0.122   0.598   0.000   0.035
+        3-He      3.016   0.092   1.054   0.272   0.706 *
+        4-He      4.003   0.122   0.598   0.000   0.035
+           ...
+        248-Cm  248.072  13.569   2.536   0.000   0.207
+        * Energy dependent cross sections
+    """
+    table = default_table(table)
+    # Table for comparison with scattering length density calculators
+    # b_c for Sc, Te, Xe, Sm, Eu, Gd, W, Au, Hg are different from Neutron News
+    # The Rauch data have cited references to back up the numbers
+    # (see doc directory), though it is not clear what criteria are
+    # used to select amongst the available measurements.
+    print " Neutron scattering length density table"
+    print "%-7s %7s %7s %7s %7s %7s"%('atom','mass','density',
+                                         'sld','imag','incoh')
+    for el in table:
+        if el.neutron.has_sld():
+            coh,jcoh,inc = el.neutron.sld(wavelength=wavelength)
+            print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f%s"\
+                %(el,el.mass,el.density,coh,jcoh,inc,
+                  ' *' if el.neutron.is_energy_dependent else '')
+            if isotopes:
+                isos = [iso for iso in el if iso.neutron != None and iso.neutron.has_sld()]
+            else:
+                isos = []
+            for iso in isos:
+                coh,jcoh,inc = iso.neutron.sld(wavelength=wavelength)
+                print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f%s"\
+                    %(iso,iso.mass,iso.density,coh,jcoh,inc,
+                      ' *' if iso.neutron.is_energy_dependent else '')
+    print "* Energy dependent cross sections"
+
+def energy_dependent_table(table=None):
+    """
+    Prints a table of energy dependent isotopes.
+
+    :Parameters:
+        *table* : PeriodicTable
+            If *table* is not specified, use the common periodic table.
+
+    :Returns: None
+    
+    Example
+    
+        >>> energy_dependent_table()
+        Elements and isotopes with energy dependent absorption:
+            He-3
+            Cd Cd-113
+            Sm Sm-149
+            Eu Eu-151
+            Gd Gd-155 Gd-157
+            Yb-168
+            Hg-196 Hg-199
+    """
+    table = default_table(table)
+    # List of energy dependent elements and isotopes
+    print "Elements and isotopes with energy dependent absorption:"
+    for el in table:
+        if not hasattr(el,'neutron'): continue
+        dep = []
+        if el.neutron.is_energy_dependent:
+            dep += [str(el)]
+        dep += [str(el)+'-'+str(iso.isotope)
+                for iso in el
+                if iso.neutron != None and iso.neutron.is_energy_dependent]
+        if len(dep) > 0: print "   "," ".join(dep)
+
+def _diff(iso,a,b,tol=0.01):
     if None in (a,b):
         if a is not None or b is not None:
             if a is None and b > tol:
@@ -1352,7 +1422,7 @@ def _diff(iso,a,b,tol=None):
     elif abs(a - b) > tol:
         print "%10s %8.2f %8.2f %5.1f%%"%(iso, a, b, 100*(a-b)/b if b!=0 else inf)
 
-def compare(fn1, fn2, table=None, tol=1e-3):
+def compare(fn1, fn2, table=None, tol=0.01):
     table = default_table(table)
     for el in table:
         try: res1 = fn1(el)
@@ -1369,27 +1439,45 @@ def compare(fn1, fn2, table=None, tol=1e-3):
 
 def absorption_comparison_table(table=None, tol=None):
     """
-    Prints a table of 10 b_c_i and -0.01 absorption/(2\ |cdot|\ 1.798) for
-    each isotope where b_c_i exists.  This is used to checking the integrity
+    Prints a table comparing absorption to the imaginary bound coherent
+    scattering length b_c_i.  This is used to checking the integrity
     of the data and formula.
+    
+    The relationship between absorption and b_c_i is:
+    
+    .. math::
 
-    The factor of 10 on b_c_i transforms from fm/|Ang^3| to |1e-6/Ang^2|. The
-    factor of 1.798 |Ang| on absorption is the neutron wavelength at which
-    the absorption is tallied and the factor of 0.01 transforms from
-    barn/|Ang^3|\ |cdot|\ |1/Ang| to |1e-6/Ang^2|.
+        \sigma_a = -2 \lambda b_i \cdot 1000
+
+    The wavelength $\lambda = 1.798 \AA$ is the neutron wavelength at which
+    the absorption is tallied. The factor of 1000 transforms from 
+    |Ang|\ |cdot|\ fm to barn.
 
     :Parameters:
         *table* : PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 1e-3: float | |1e-6/Ang^2|
+        *tol* = 0.01 : float | barn
             Show differences greater than this amount.
 
     :Returns: None
+
+    Example
+    
+        >>> absorption_comparison_table (tol=0.5) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        Comparison of absorption and (-2000 lambda b_c_i)
+              3-He  5333.00  5322.08   0.2%
+                Li    70.50     ----
+              6-Li   940.00   934.96   0.5%
+                 B   767.00   755.16   1.6%
+              10-B  3835.00     ----
+                 N     1.90     ----
+           ...
+
     """
 
-    print "Comparison of b_c_i and absorption"
-    compare(lambda el: el.neutron.absorption/2/ABSORPTION_WAVELENGTH/100,
-            lambda el: -10*el.neutron.b_c_i,
+    print "Comparison of absorption and (-2000 lambda b_c_i)"
+    compare(lambda el: el.neutron.absorption,
+            lambda el: -2000*el.neutron.b_c_i*ABSORPTION_WAVELENGTH,
             table=table, tol=tol)
     return
 
@@ -1403,11 +1491,27 @@ def coherent_comparison_table(table=None, tol=None):
     :Parameters:
         *table* : PeriodicTable
             The default periodictable unless a specific table has been requested.
+        *tol* = 0.01 : float | barn
+            Amount of difference to show
 
     :Returns: None
+    
+    Example
+    
+        >>> coherent_comparison_table (tol=0.5) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        Comparison of (4 pi b_c^2/100) and coherent
+                 n   172.03    43.01 300.0%
+               1-n   172.03    43.01 300.0%
+                Sc    18.40    19.00  -3.2%
+             45-Sc    18.40    19.00  -3.2%
+             65-Cu    13.08    14.10  -7.2%
+             70-Zn     5.98     4.50  33.0%
+             84-Sr     3.14     6.00 -47.6%
+           ...
+
     """
     import numpy
-    print "Comparison of b_c and coherent"
+    print "Comparison of (4 pi b_c^2/100) and coherent"
     compare(lambda el: 4*pi/100*el.neutron.b_c**2,
             lambda el: el.neutron.coherent,
             table=table, tol=tol)
@@ -1421,11 +1525,29 @@ def total_comparison_table(table=None, tol=None):
     :Parameters:
         *table* : PeriodicTable
             The default periodictable unless a specific table has been requested.
+        *tol* = 0.01 : float | barn
+            Amount of difference to show
 
     :Returns: None
+    
+    Example
+    
+        >>> total_comparison_table (tol=0.1)
+        Comparison of total cross section to (coherent + incoherent)
+                 n    43.01     ----
+               1-n    43.01     ----
+             84-Kr     6.60     ----
+            149-Sm   200.00   200.50  -0.2%
+                Eu     9.20     9.07   1.4%
+                Gd   180.00   180.30  -0.2%
+            155-Gd    66.00    65.80   0.3%
+            161-Dy    16.00    16.30  -1.8%
+            180-Ta     7.00     6.70   4.5%
+            187-Os    13.00    13.30  -2.3%
+
     """
 
-    print "Comparison of total cross section and individual cross sections"
+    print "Comparison of total cross section to (coherent + incoherent)"
     compare(lambda el: el.neutron.total,
             lambda el: el.neutron.coherent+el.neutron.incoherent,
             table=table, tol=tol)
@@ -1438,11 +1560,26 @@ def incoherent_comparison_table(table=None, tol=None):
     :Parameters:
         *table* : PeriodicTable
             The default periodictable unless a specific table has been requested.
+        *tol* = 0.01 : float | barn
+            Amount of difference to show
 
     :Returns: None
+    
+    Example
+    
+        >>> incoherent_comparison_table (tol=0.5) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        Comparison of incoherent and (total - 4 pi b_c^2/100)
+                Sc     4.50     5.10 -11.8%
+             45-Sc     4.50     5.10 -11.8%
+             65-Cu     0.40     1.42 -71.7%
+             70-Zn     0.00    -1.48 -100.0%
+             84-Sr     0.00     2.86 -100.0%
+            113-Cd     0.30     4.36 -93.1%
+           ...
+
     """
 
-    print "Comparison of incoherent and total - coherent from b_c"
+    print "Comparison of incoherent and (total - 4 pi b_c^2/100)"
     compare(lambda el: el.neutron.incoherent,
             lambda el: el.neutron.total - 4*pi/100*el.neutron.b_c**2,
             table=table, tol=tol)

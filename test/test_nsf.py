@@ -1,6 +1,6 @@
 import numpy
 import periodictable
-from periodictable import elements, formula
+from periodictable import elements, formula, nsf
 from math import sqrt, pi
 
 def test():
@@ -172,10 +172,19 @@ def test():
     D2O_density = (2*D.mass + O.mass)/(2*H.mass + O.mass)
     sld,xs,depth = neutron_scattering('D2O',natural_density=1,wavelength=4.75)
     sld2,xs2,depth2 = neutron_scattering('D2O',density=D2O_density,wavelength=4.75)
-    assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
-    assert all(abs(v-w)<1e-10 for v,w in zip(xs,xs2))
-    assert depth==depth2
+    assert all(abs(v-w)<1e-14 for v,w in zip(sld,sld2))
+    assert all(abs(v-w)<1e-14 for v,w in zip(xs,xs2))
+    assert abs(depth-depth2)<1e-14
 
+    assert abs(nsf.neutron_wavelength_from_velocity(2200) - 1.7981972618436388) < 1e-14
+    assert abs(nsf.neutron_wavelength(25) - 1.8) < 0.1
+    assert abs(nsf.neutron_energy(nsf.neutron_wavelength(25)) - 25) < 1e-14
+    sld,xs,depth = periodictable.neutron_scattering('H2O',density=1,wavelength=4.75)
+    sld2,xs2,depth2 = neutron_scattering('H2O',density=1,energy=nsf.neutron_energy(4.75))
+    assert all(abs(v-w)<1e-14 for v,w in zip(sld,sld2))
+    assert all(abs(v-w)<1e-14 for v,w in zip(xs,xs2))
+    assert abs(depth-depth2)<1e-14
+    
 
 def _summarize(M):
     from periodictable.nsf import neutron_sld, neutron_xs

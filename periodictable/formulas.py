@@ -181,7 +181,7 @@ def formula(value=None, density=None, natural_density=None,
             name=None, table=None):
     r"""
     Construct a chemical formula representation from a string, a
-    dictionary of atoms and
+    dictionary of atoms or another formula.
 
     :Parameters:
         *formula* : see below

@@ -1,6 +1,7 @@
 import numpy
 import periodictable
 from periodictable import elements, formula
+from math import sqrt, pi
 
 def test():
     H,He,D,O = elements.H,elements.He,elements.D,elements.O
@@ -87,27 +88,58 @@ def test():
     # Cu/Mo K-alpha = 1.89e-5 + 2.45e-7i / 1.87e-5 + 5.16e-8i
 
     M = formula('B4C', density=2.52)
-    bp,bpp,binc = neutron_sld(M,wavelength=4.75)
-    assert abs(bp-7.649)<0.001
-    #assert abs(absorp-2.226)<0.001
-    # Alan's numbers:
-    # SLD=7.56e-6 - 2.34e-7i /A^2
-    # inc,abs XS = 0.193, 220.0 / cm
-    # 1/e = 0.004483 cm
-    # Cu/Mo K-alpha = 2.02e-5 + 1.93e-8i / 2.01e-5 + 4.64e-9i
+    sld,xs,depth = neutron_scattering(M,wavelength=4.75)
+    # Compare to Alan Munter's numbers:
+    #   SLD=7.65e-6 - 2.34e-7i /A^2
+    #   inc,abs XS = 0.193, 222.4 / cm
+    #   1/e = 0.004483 cm
+    #   Cu/Mo K-alpha = 2.02e-5 + 1.93e-8i / 2.01e-5 + 4.64e-9i
+    # Using lambda=1.798 rather than 1.8
+    #   abs XS => 222.6
+    #   1/e => 0.004478
+    assert abs(sld[0]-7.649)<0.001
+    assert abs(sld[1]-0.234)<0.001
+    assert abs(xs[1]-222.6)<0.1
+    assert abs(xs[2]-0.193)<0.001
+    assert abs(depth-0.004478)<0.000001
+    # Check that sld_inc and coh_xs are consistent
+    #   cell_volume = (molar_mass/density) / N_A * 1e24
+    #   number_density = num_atoms/cell_volume
+    #   sigma_i = inc_xs/number_density
+    #   sld_inc = number_density * sqrt ( 100/(4*pi) * sigma_i ) * 10
+    #   sld_re = number_density * b_c * 10
+    #   sigma_c = 4*pi/100*b_c**2
+    #   coh_xs = sigma_c * number_density
+    Nb = 0.13732585020640778
+    sld_inc = Nb*sqrt(100/(4*pi)*xs[2]/Nb)*10
+    coh_xs = Nb*4*pi/100*(sld[0]/(10*Nb))**2
+    assert abs(sld[2] - sld_inc) < 1e-14
+    assert abs(xs[0] - coh_xs) < 1e-14
 
-    Si = elements.Si
+    Ni,Si = elements.Ni, elements.Si
 
     # Make sure molecular calculation corresponds to direct calculation
     sld = neutron_sld('Si',density=Si.density,wavelength=4.75)
     sld2 = Si.neutron.sld(wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
 
+    sld,_,_ = Si.neutron.scattering(wavelength=4.75)
+    sld2 = Si.neutron.sld(wavelength=4.75)
+    assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
+    
     sld,xs,depth = neutron_scattering('Si',density=Si.density,wavelength=4.75)
     sld2,xs2,depth2 = Si.neutron.scattering(wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
     assert all(abs(v-w)<1e-10 for v,w in zip(xs,xs2))
-    assert depth==depth2
+    assert abs(depth-depth2) < 1e-14
+
+    # incoherent cross sections for Ni[62] used to be negative
+    sld,xs,depth = neutron_scattering('Ni[62]',density=Ni[62].density,
+                                      wavelength=4.75)
+    assert sld[2] == 0 and xs[2] == 0
+    sld,xs,depth = Ni[62].neutron.scattering(wavelength=4.75)
+    assert sld[2] == 0 and xs[2] == 0
+    assert Ni[62].neutron.sld()[2] == 0
 
     """
     # Table of scattering length densities for various molecules

@@ -355,10 +355,14 @@ class Neutron(object):
         # same structure as the bulk element
         if not self.has_sld(): return None,None,None
         N = self._number_density*1e-24
-        sld_re = self.b_c*10*N
-        sld_im = self.absorption/(2*ABSORPTION_WAVELENGTH)*N*0.01
-        sigma_i = self.total - 4*pi/100*self.b_c**2
-        sld_inc = sqrt ( 100/(4*pi) * sigma_i )*10*N
+        
+        sigma_c = 0.01 * 4 * pi * self.b_c**2
+        sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
+        sigma_i = max(self.total - sigma_c, 0)
+        
+        sld_re = N*self.b_c*10
+        sld_im = N*0.01*sigma_a/(2*wavelength)
+        sld_inc = N*sqrt ( 100/(4*pi) * sigma_i )*10
         return sld_re,sld_im,sld_inc
 
     @require_keywords
@@ -395,11 +399,22 @@ class Neutron(object):
         # same structure as the bulk element
         if not self.has_sld(): return None,None,None
         N = self._number_density*1e-24
-        coh_xs = N * 0.01 * 4 * pi * self.b_c**2
-        abs_xs= N * self.absorption/ABSORPTION_WAVELENGTH*wavelength
-        inc_xs = N * self.total - coh_xs
+        
+        sigma_c = 0.01 * 4 * pi * self.b_c**2
+        sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
+        sigma_i = max(self.total - sigma_c, 0)
+        
+        sld_re = N*self.b_c*10
+        sld_im = N*0.01*sigma_a/(2*wavelength)
+        sld_inc = N*sqrt ( 100/(4*pi) * sigma_i )*10
+
+        coh_xs = N*sigma_c
+        abs_xs = N*sigma_a
+        inc_xs = N*sigma_i
+
         pen = 1/(coh_xs+abs_xs+inc_xs)
-        return self.sld(wavelength=wavelength), (coh_xs,abs_xs,inc_xs), pen
+        
+        return (sld_re, sld_im, sld_inc), (coh_xs,abs_xs,inc_xs), pen
 
 
 def init(table, reload=False):
@@ -664,7 +679,7 @@ def neutron_scattering(compound, density=None,
         \sigma_c = 4 \pi b_c^2 / 100
 
     Similarly, the absorption cross section $\sigma_a$ and the total
-    cross section $\sigma_s$ can be computed from the corresponding
+    scattering cross section $\sigma_s$ can be computed from the corresponding
     cross sections of the constituent elements, already expressed in barns:
 
     .. math::
@@ -672,12 +687,18 @@ def neutron_scattering(compound, density=None,
         \sigma_a &= \left.\sum n_i \sigma_{ai} \right/ \sum n_i \\
         \sigma_s &= \left.\sum n_i \sigma_{si} \right/ \sum n_i
 
-    The total cross section is just the coherent plus incoherent cross
-    sections:
+    The incoherent cross section is computed from the total scattering
+    cross section and the coherent scattering cross section:
 
     .. math::
 
         \sigma_i = \sigma_s - \sigma_c
+
+    Because the cross section tables are somewhat inconsistent, the total 
+    scattering cross section for the constituent elements $\sigma_{si}$ is 
+    forced to be at least as large as the computed coherent scattering
+    cross section $\sigma_{ci}$ for that element.  This guarantees that the
+    computed incoherent scattering cross section $\sigma_i$ is never negative.
 
     The absorption cross sections are tabulated at wavelength 1.798 |Ang|.
     In the thermal neutron energy range the absorption cross section
@@ -795,7 +816,8 @@ def neutron_scattering(compound, density=None,
         molar_mass += element.mass*quantity
         num_atoms += quantity
         sigma_a += quantity * element.neutron.absorption
-        sigma_total += quantity * element.neutron.total
+        total_i = max(element.neutron.total,4*pi/100*element.neutron.b_c**2)
+        sigma_total += quantity * total_i
         b_c += quantity * element.neutron.b_c
         is_energy_dependent |= element.neutron.is_energy_dependent
 
@@ -808,10 +830,10 @@ def neutron_scattering(compound, density=None,
     b_c /= num_atoms
     sigma_total /= num_atoms
     sigma_a /= num_atoms
+
+    # Compute sigmas
     sigma_c = 4*pi/100*b_c**2
     sigma_i = sigma_total - sigma_c
-
-    # Adjust for linear wavelength dependence
     sigma_a *= wavelength/ABSORPTION_WAVELENGTH
 
     # Compute number density

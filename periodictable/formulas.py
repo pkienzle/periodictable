@@ -421,7 +421,6 @@ class Formula(object):
             packing_factor = PACKING_FACTORS[packing_factor.lower()]
         return V/packing_factor*1e-24
 
-    # TODO: move neutron/xray sld to extension
     @require_keywords
     def neutron_sld(self, wavelength=None, energy=None):
         """
@@ -438,9 +437,11 @@ class Formula(object):
                 (*real*, *imaginary*, *incoherent*), or as (None, None, None)
                 if the mass density is not known.
 
+        .. deprecated:: 0.95
+            Use periodictable.neutron_sld(formula) instead.
         """
+        from .nsf import neutron_sld
         if self.density is None: return None,None,None
-        from nsf import neutron_sld
         return neutron_sld(self.atoms,density=self.density,
                            wavelength=wavelength, energy=energy)
 
@@ -465,9 +466,11 @@ class Formula(object):
                     (*real*, *imaginary*), or as (None, None) if the mass
                     density is not known.
 
+        .. deprecated:: 0.95
+            Use periodictable.xray_sld(formula) instead.
         """
+        from .xsf import xray_sld
         if self.density is None: return None,None
-        from xsf import xray_sld
         return xray_sld(self.atoms,density=self.density,
                         wavelength=wavelength,energy=energy)
 

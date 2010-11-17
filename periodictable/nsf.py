@@ -49,6 +49,10 @@ There are a number of functions available in periodictable.nsf
     :func:`neutron_sld`
         Computes scattering length density for a compound.
 
+    :func:`neutron_composite_sld`
+        Returns a scattering length density for a compound whose composition
+        is variable.
+
     :func:`energy_dependent_table`
         Lists isotopes with energy dependence.
 
@@ -121,6 +125,7 @@ associated with the periodictable package.
 
 """
 from __future__ import division
+import numpy
 from numpy import sqrt, pi, asarray, inf
 from .core import Element, Isotope, default_table
 from .constants import (avogadro_number, plancks_constant, electron_volt,
@@ -130,7 +135,7 @@ from .util import require_keywords
 __all__ = ['init', 'Neutron',
            'neutron_energy', 'neutron_wavelength', 
            'neutron_wavelength_from_velocity',
-           'neutron_scattering', 'neutron_sld',
+           'neutron_scattering', 'neutron_sld', 'neutron_composite_sld',
            'sld_plot',
            'absorption_comparison_table', 'coherent_comparison_table',
            'incoherent_comparison_table', 'total_comparison_table',
@@ -859,6 +864,72 @@ def neutron_sld_from_atoms(*args, **kw):
         :func:`neutron_sld` now accepts dictionaries of {atom: count} directly.
     """
     return neutron_scattering(*args, **kw)[0]
+
+
+
+def _sum_piece(wavelength, compound):
+    """
+    Helper for neutron_composite_sld which precomputes quantities of interest
+    for material fragments in a composite formula.
+    """
+    # Sum over the quantities
+    molar_mass = num_atoms = 0
+    sigma_a = sigma_total = b_c = 0
+    is_energy_dependent = False
+    for element,quantity in compound.atoms.iteritems():
+        #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
+        molar_mass += element.mass*quantity
+        num_atoms += quantity
+        sigma_a += quantity * element.neutron.absorption
+        total_i = max(element.neutron.total,4*pi/100*element.neutron.b_c**2)
+        sigma_total += quantity * total_i
+        b_c += quantity * element.neutron.b_c
+        is_energy_dependent |= element.neutron.is_energy_dependent
+
+    return num_atoms, molar_mass, b_c, sigma_total, sigma_a
+
+def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
+    """
+    Create a composite SLD calculator.
+    
+    :Parameters:
+        *materials* : [Formula]
+            List of materials
+        *wavelength* = 1.798: float OR [float] | |Ang|
+            Probe wavelength(s).
+    
+    :Returns:
+        *calculator* : f(w) -> (sld_re, sld_im, sld_inc)
+        
+    The composite calculator takes a vector of weights and returns the
+    scattering length density of the composite.  This is useful for operations
+    on large molecules, such as calculating a set of constrasts or fitting
+    a material composition.
+    
+    Table lookups and partial sums and constants are precomputed so that
+    the calculation consists of a few simple array operations regardless
+    of the size of the material fragments.
+    """
+    parts = [_sum_piece(wavelength, m) for m in materials]
+    V = [numpy.array(v) for v in zip(*parts)]
+
+    SLD_IM = 0.01/(2*ABSORPTION_WAVELENGTH)
+    SLD_RE = 10
+    SLD_INC = 10*sqrt(100/(4*pi))
+    SIGMA_C = 4*pi/100
+    NB = 1e-24*avogadro_number # assumes density is 1
+    def _compute(q, density=1):
+        atoms = numpy.sum(q*V[0])
+        number_density = density * NB * atoms / numpy.sum(q*V[1])
+        b_c = numpy.sum(q*V[2])/atoms
+        sigma_c = SIGMA_C * b_c**2
+        sigma_i = numpy.sum(q*V[3])/atoms - sigma_c
+        sigma_a = numpy.sum(q*V[4])/atoms # at tabulated wavelength
+        sld_re = number_density * b_c * SLD_RE
+        sld_im = number_density * sigma_a * SLD_IM
+        sld_inc = number_density * sqrt(sigma_i) * SLD_INC
+        return sld_re, sld_im, sld_inc
+    return _compute
 
 
 def sld_plot(table=None):

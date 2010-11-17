@@ -504,9 +504,9 @@ def sld_table(wavelength=None, table=None):
             The default periodictable unless a specific table has been requested.
 
     :Returns: None
-    
+
     Example
-    
+
         >>> sld_table() # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         X-ray scattering length density for 1.5418 Ang
          El    rho   irho
@@ -544,9 +544,9 @@ def emission_table(table=None):
             The default periodictable unless a specific table has been requested.
 
     :Returns: None
-    
+
     Example
-    
+
         >>> emission_table()
          El  Kalpha  Kbeta1
          Ti  2.7496  2.5138

@@ -38,12 +38,12 @@ There are a number of functions available in periodictable.nsf
 
     :func:`neutron_wavelength`
         Return wavelength given neutron energy.
-    
+
     :func:`neutron_wavelength_from_velocity`
         Return wavelength given neutron velocity.
 
     :func:`neutron_scattering`
-        Computes scattering length density, cross sections and 
+        Computes scattering length density, cross sections and
         penetration depth for a compound.
 
     :func:`neutron_sld`
@@ -64,7 +64,7 @@ There are a number of functions available in periodictable.nsf
         absorption cross section.
 
     :func:`coherent_comparison_table`
-        Compares the bound coherent scattering length to the 
+        Compares the bound coherent scattering length to the
         coherent scattering cross section.
 
     :func:`total_comparison_table`
@@ -133,7 +133,7 @@ from .constants import (avogadro_number, plancks_constant, electron_volt,
 from .util import require_keywords
 
 __all__ = ['init', 'Neutron',
-           'neutron_energy', 'neutron_wavelength', 
+           'neutron_energy', 'neutron_wavelength',
            'neutron_wavelength_from_velocity',
            'neutron_scattering', 'neutron_sld', 'neutron_composite_sld',
            'sld_plot',
@@ -191,19 +191,19 @@ def neutron_wavelength(energy):
 def neutron_wavelength_from_velocity(velocity):
     """
     Convert neutron velocity to wavelength.
-    
+
     :Parameters:
         *velocity* : float or vector | m/s
-        
+
     :Returns:
         *wavelength* : float or vector | |Ang|
 
     Velocity is converted to wavelength using
-    
+
     .. math::
-    
+
         \lambda = h/p = h/(m_n v)
-    
+
     where
 
         $h$ = planck's constant in |Js|
@@ -285,7 +285,7 @@ class Neutron(object):
         Imaginary bound coherent scattering length.  This is
         related to absorption cross section by $\sigma_a = 4 \pi b_i/k$ where
         $k = 2 \pi/\lambda$ and an additional factor of 1000 for converting
-        between |Ang|\ |cdot|\ fm and barns.  b_c_i is not available 
+        between |Ang|\ |cdot|\ fm and barns.  b_c_i is not available
         for all isotopes for which absorption cross sections have been measured.
 
     * bp,bm (fm)
@@ -331,7 +331,7 @@ class Neutron(object):
     * abundance (%)
         Isotope abundance used to compute the properties of the element in
         natural abundance.
-        
+
     * nuclear_spin (string)
         Spin on the nucleus: '0', '1/2', '3/2', etc.
 
@@ -399,11 +399,11 @@ class Neutron(object):
         # same structure as the bulk element
         if not self.has_sld(): return None,None,None
         N = self._number_density*1e-24
-        
+
         sigma_c = 0.01 * 4 * pi * self.b_c**2
         sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
         sigma_i = max(self.total - sigma_c, 0)
-        
+
         sld_re = N*self.b_c*10
         sld_im = N*0.01*sigma_a/(2*wavelength)
         sld_inc = N*sqrt ( 100/(4*pi) * sigma_i )*10
@@ -443,11 +443,11 @@ class Neutron(object):
         # same structure as the bulk element
         if not self.has_sld(): return None,None,None
         N = self._number_density*1e-24
-        
+
         sigma_c = 0.01 * 4 * pi * self.b_c**2
         sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
         sigma_i = max(self.total - sigma_c, 0)
-        
+
         sld_re = N*self.b_c*10
         sld_im = N*0.01*sigma_a/(2*wavelength)
         sld_inc = N*sqrt ( 100/(4*pi) * sigma_i )*10
@@ -457,7 +457,7 @@ class Neutron(object):
         inc_xs = N*sigma_i
 
         pen = 1/(coh_xs+abs_xs+inc_xs)
-        
+
         return (sld_re, sld_im, sld_inc), (coh_xs,abs_xs,inc_xs), pen
 
 
@@ -663,8 +663,8 @@ def neutron_scattering(compound, density=None,
 
         \sigma_i = \sigma_s - \sigma_c
 
-    Because the cross section tables are somewhat inconsistent, the total 
-    scattering cross section for the constituent elements $\sigma_{si}$ is 
+    Because the cross section tables are somewhat inconsistent, the total
+    scattering cross section for the constituent elements $\sigma_{si}$ is
     forced to be at least as large as the computed coherent scattering
     cross section $\sigma_{ci}$ for that element.  This guarantees that the
     computed incoherent scattering cross section $\sigma_i$ is never negative.
@@ -773,7 +773,7 @@ def neutron_scattering(compound, density=None,
         else:
             density = compound.density # defaults to molecule density
     assert density is not None, "scattering calculations need density"
-    if energy is not None: 
+    if energy is not None:
         wavelength = neutron_wavelength(energy)
     assert wavelength is not None, "scattering calculation needs energy or wavelength"
 
@@ -891,21 +891,21 @@ def _sum_piece(wavelength, compound):
 def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
     """
     Create a composite SLD calculator.
-    
+
     :Parameters:
         *materials* : [Formula]
             List of materials
         *wavelength* = 1.798: float OR [float] | |Ang|
             Probe wavelength(s).
-    
+
     :Returns:
         *calculator* : f(w) -> (sld_re, sld_im, sld_inc)
-        
+
     The composite calculator takes a vector of weights and returns the
     scattering length density of the composite.  This is useful for operations
     on large molecules, such as calculating a set of constrasts or fitting
     a material composition.
-    
+
     Table lookups and partial sums and constants are precomputed so that
     the calculation consists of a few simple array operations regardless
     of the size of the material fragments.
@@ -1405,7 +1405,7 @@ def sld_table(wavelength=1, table=None, isotopes=True):
             Whether to consider isotopes or not.
 
     :Returns: None
-    
+
     Example
 
         >>> sld_table(wavelength=4.75)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
@@ -1457,9 +1457,9 @@ def energy_dependent_table(table=None):
             If *table* is not specified, use the common periodic table.
 
     :Returns: None
-    
+
     Example
-    
+
         >>> energy_dependent_table()
         Elements and isotopes with energy dependent absorption:
             He-3
@@ -1513,15 +1513,15 @@ def absorption_comparison_table(table=None, tol=None):
     Prints a table comparing absorption to the imaginary bound coherent
     scattering length b_c_i.  This is used to checking the integrity
     of the data and formula.
-    
+
     The relationship between absorption and b_c_i is:
-    
+
     .. math::
 
         \sigma_a = -2 \lambda b_i \cdot 1000
 
     The wavelength $\lambda = 1.798 \AA$ is the neutron wavelength at which
-    the absorption is tallied. The factor of 1000 transforms from 
+    the absorption is tallied. The factor of 1000 transforms from
     |Ang|\ |cdot|\ fm to barn.
 
     :Parameters:
@@ -1533,7 +1533,7 @@ def absorption_comparison_table(table=None, tol=None):
     :Returns: None
 
     Example
-    
+
         >>> absorption_comparison_table (tol=0.5) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Comparison of absorption and (-2000 lambda b_c_i)
               3-He  5333.00  5322.08   0.2%
@@ -1566,9 +1566,9 @@ def coherent_comparison_table(table=None, tol=None):
             Amount of difference to show
 
     :Returns: None
-    
+
     Example
-    
+
         >>> coherent_comparison_table (tol=0.5) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Comparison of (4 pi b_c^2/100) and coherent
                  n   172.03    43.01 300.0%
@@ -1600,9 +1600,9 @@ def total_comparison_table(table=None, tol=None):
             Amount of difference to show
 
     :Returns: None
-    
+
     Example
-    
+
         >>> total_comparison_table (tol=0.1)
         Comparison of total cross section to (coherent + incoherent)
                  n    43.01     ----
@@ -1635,9 +1635,9 @@ def incoherent_comparison_table(table=None, tol=None):
             Amount of difference to show
 
     :Returns: None
-    
+
     Example
-    
+
         >>> incoherent_comparison_table (tol=0.5) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Comparison of incoherent and (total - 4 pi b_c^2/100)
                 Sc     4.50     5.10 -11.8%

@@ -66,7 +66,7 @@ def test():
     sld,_,_ = Si.neutron.scattering(wavelength=4.75)
     sld2 = Si.neutron.sld(wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
-    
+
     sld,xs,depth = neutron_scattering('Si',density=Si.density,wavelength=4.75)
     sld2,xs2,depth2 = Si.neutron.scattering(wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
@@ -123,14 +123,14 @@ def test():
     assert abs(nsf.neutron_wavelength_from_velocity(2200) - 1.7981972618436388) < 1e-14
     assert abs(nsf.neutron_wavelength(25) - 1.8) < 0.1
     assert abs(nsf.neutron_energy(nsf.neutron_wavelength(25)) - 25) < 1e-14
-    
+
     # Confirm scattering functions accept energy and wavelength
     sld,xs,depth = neutron_scattering('H2O',density=1,wavelength=4.75)
     sld2,xs2,depth2 = neutron_scattering('H2O',density=1,energy=nsf.neutron_energy(4.75))
     assert all(abs(v-w)<1e-14 for v,w in zip(sld,sld2))
     assert all(abs(v-w)<1e-14 for v,w in zip(xs,xs2))
     assert abs(depth-depth2)<1e-14
-    
+
 def test_formula():
     M = formula('B4C', density=2.52)
     sld,xs,depth = neutron_scattering(M,wavelength=4.75)
@@ -163,8 +163,8 @@ def test_formula():
 
 def test_composite():
     from periodictable.nsf import neutron_composite_sld
-    calc = neutron_composite_sld([formula(s) for s in 'HSO4','H2O','CCl4'], 
-                                 wavelength=4.75)    
+    calc = neutron_composite_sld([formula(s) for s in 'HSO4','H2O','CCl4'],
+                                 wavelength=4.75)
     sld = calc(numpy.array([3,1,2]),density=1.2)
     sld2 = neutron_sld('3HSO4+1H2O+2CCl4',density=1.2,wavelength=4.75)
     print sld
@@ -174,7 +174,7 @@ def test_composite():
 def time_composite():
     from periodictable.nsf import neutron_composite_sld
     import time
-    calc = neutron_composite_sld([formula(s) for s in 'HSO4','H2O','CCl4'], 
+    calc = neutron_composite_sld([formula(s) for s in 'HSO4','H2O','CCl4'],
                                  wavelength=4.75)
     q = numpy.array([3,1,2])
     N = 1000
@@ -190,7 +190,7 @@ def time_composite():
                           density=1.2,wavelength=4.75)
     toc = time.time()-tic
     print "direct %.1f us"%(toc/N*1e6)
-    
+
 
 def test_abundance():
     # Check abundance totals to 0% or 100%
@@ -243,7 +243,7 @@ def show_tables():
 
     print """\
 Specific elements with b_c values different from Neutron News 1992.
-This is not a complete list."""    
+This is not a complete list."""
     for sym in ['Sc','Te','Xe','Sm','Eu','Gd','W','Au','Hg']:
         el = getattr(elements,sym)
         print el.symbol,el.neutron.b_c,el.neutron.coherent,\

@@ -40,3 +40,4 @@ os.putenv('PYTHONPATH', PYTHONPATH)
 for p in ("nsfd2o", ):
     ret = os.system(" ".join( (sys.executable, "test/test_%s.py"%p) ))
     if ret != 0: sys.exit()
+

@@ -19,6 +19,7 @@ assert os.path.exists(os.path.join(path,'periodictable','nsf.py'))
 
 # Make sure that we have a private version of mplconfig
 mplconfig = os.path.join(os.getcwd(),'.mplconfig')
+os.environ['MPLCONFIGDIR'] = mplconfig
 os.putenv('MPLCONFIGDIR',mplconfig)
 if not os.path.exists(mplconfig): os.mkdir(mplconfig)
 

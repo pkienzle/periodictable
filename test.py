@@ -27,7 +27,7 @@ nose_args = [__file__,'-v','--with-doctest','--doctest-extension=.rst',
              '--cover-package=periodictable']
 nose_args += sys.argv[1:]  # allow coverage arguments
 nose_args += ['test','periodictable','doc/sphinx/guide']
-if not nose.run(argv=nose_args): sys.exit()
+if not nose.run(argv=nose_args): sys.exit(1)
 
 # Run isolated tests in their own environment.  In this case we will have
 # to set the PYTHONPATH environment variable before running since it is

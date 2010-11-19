@@ -2,7 +2,6 @@ import periodictable
 
 def test():
 
-    raise Exception("Break the build!")
     assert periodictable.Be[12].mass == 12.026921
     assert periodictable.Be.mass == 9.012182
     assert periodictable.Pb[206].abundance == 24.1

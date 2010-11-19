@@ -17,6 +17,11 @@ import nose
 path = os.getcwd()
 assert os.path.exists(os.path.join(path,'periodictable','nsf.py'))
 
+# Make sure that we have a private version of mplconfig
+mplconfig = os.path.join(os.getcwd(),'.mplconfig')
+os.putenv('MPLCONFIGDIR',mplconfig)
+if not os.path.exists(mplconfig): os.mkdir(mplconfig)
+
 # Run the source tests with periodictable on the path.  By manipulating
 # the path in this way, we can test without having to build and install.
 # We are adding doc/sphinx to the path because the periodic table extension

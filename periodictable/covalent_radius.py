@@ -1,6 +1,6 @@
+# -*- coding: latin-1 -*-
 # This program is in the public domain
 # Author: Paul Kienzle
-# -*- coding: latin-1 -*-
 """
 
 This module adds the following fields to the periodic table

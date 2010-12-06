@@ -1,3 +1,5 @@
+# This program is in the public domain
+# Author: Paul Kienzle
 """
 
 Adds magnetic_ff[charge].t for t in j0, j2, j4, j6, and J.

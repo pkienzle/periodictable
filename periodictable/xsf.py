@@ -1,4 +1,5 @@
 # This program is public domain
+# Author: Paul Kienzle
 r"""
 This module has one class and nine fuctions.
 

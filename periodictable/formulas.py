@@ -1,4 +1,5 @@
 # This program is public domain
+# Author: Paul Kienzle
 """
 Chemical formula parser.
 """

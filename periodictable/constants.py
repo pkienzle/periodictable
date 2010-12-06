@@ -1,4 +1,5 @@
 # This program is public domain
+# Author: Paul Kienzle
 
 avogadro_number = 6.02214179e23 #(30) mol-1
 plancks_constant = 4.13566733e-15 #(10) eV s

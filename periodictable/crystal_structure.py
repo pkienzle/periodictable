@@ -1,3 +1,4 @@
+# This program is in the public domain
 '''
 Crystal structure data.
 

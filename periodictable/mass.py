@@ -1,5 +1,6 @@
 # -*- coding: iso-8859-15 -*-
 # This program is public domain
+# Author: Paul Kienzle
 """
 
 Adds average mass for the elements:

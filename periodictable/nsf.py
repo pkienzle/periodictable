@@ -1,5 +1,5 @@
 # This program is public domain
-
+# Author: Paul Kienzle
 """
 
 Neutron scattering factors for the elements and isotopes.

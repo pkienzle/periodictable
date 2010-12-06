@@ -1,3 +1,5 @@
+# This program is in the public domain
+# Author: Paul Kienzle
 """
 Helper functions
 """

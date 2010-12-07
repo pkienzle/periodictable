@@ -15,7 +15,7 @@ dist = setup(
         author_email='pkienzle@gmail.com',
         url='http://www.reflectometry.org/danse/elements.html',
         description='Extensible periodic table of the elements',
-        long_description=open('README.txt').read(),
+        long_description=open('README.rst').read(),
         classifiers=[
             'Development Status :: 4 - Beta',
             'Environment :: Console',

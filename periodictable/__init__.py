@@ -28,6 +28,7 @@ whose conditions may differ from those of your experiment.
 __docformat__ = 'restructuredtext en'
 __all__ = ['elements', 'neutron_sld','xray_sld',
            'formula','mix_by_weight','mix_by_volume'] # and all elements
+__version__ = "1.3.0"
 
 from . import core
 from . import mass
@@ -54,7 +55,7 @@ def data_files():
         path = core.get_data_path(ext)
         for p in patterns:
             files += glob.glob(os.path.join(path,p))
-            return files
+        return files
 
     data_files = [('periodictable-data/xsf',
                    _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat']))]

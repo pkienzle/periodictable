@@ -1,0 +1,6 @@
+build
+dist
+periodictable.egg-info
+doc/sphinx/MathJax
+doc/sphinx/_build
+doc/sphinx/build

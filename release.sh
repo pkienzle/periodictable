@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./release.sh [git|test|doc|notes|web|pypi]
+# Usage: ./release.sh [sync|test|doc|notes|web|pypi]
 #
 # Build an official elements package release
 #
@@ -35,7 +35,7 @@
 # password:...
 
 case "$1" in
-git)    step=0;;
+sync)   step=0;;
 test)   step=1;;
 doc)    step=2;;
 notes)  step=3;;
@@ -46,15 +46,17 @@ esac
 
 
 function ready() {
-   echo -n "$* [y/n] "
-   read ans && test "$ans" != "y" && exit
+  stepname=$1; shift
+  echo -n "$* [y/n] "
+  read ans && test "$ans" != "y" \
+    && echo Restart with ./release.sh $stepname && exit
 }
 
 if [ $step -le 0 ]; then
   echo === Version control status ===
   git pull
   git status
-  ready Is the repository up to date?
+  ready sync Is the repository up to date?
 fi
 
 if [ $step -le 1 ]; then
@@ -77,7 +79,7 @@ if [ $step -le 1 ]; then
         firefox $url &
     fi
   fi
-  ready Are the tests okay?
+  ready test Are the tests okay?
 fi
 
 if [ $step -le 2 ]; then
@@ -85,7 +87,7 @@ if [ $step -le 2 ]; then
   (cd doc/sphinx && make clean html pdf)
   firefox doc/sphinx/_build/html/index.html >/dev/null 2>&1 & 
   evince doc/sphinx/_build/latex/PeriodicTable.pdf >/dev/null 2>&1 &
-  ready Does the documentation build cleanly, and pdf/html display correctly?
+  ready doc Does the documentation build correctly?
 fi
 
 if [ $step -le 3 ]; then
@@ -93,28 +95,27 @@ if [ $step -le 3 ]; then
   rst2html README.rst > /tmp/README.html
   firefox /tmp/README.html >/dev/null 2>&1 &
   git log --oneline
-  ready Are the release notes up to date?
 
   version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//')
-  echo === Version is $version ===
-  ready Is the version number correct?
+  echo *** Version is $version
+  ready notes Are the release notes up to date?
 fi
 
 if [ $step -le 4 ]; then
-  ready Push docs to the web?
+  ready web: Push docs to the web?
   ssh reflectometry.org rm -r web/danse/docs/elements
   find doc/sphinx/_build/html | xargs chmod ug+rw
   find doc/sphinx/_build/html -type d | xargs chmod g+x
   rm -r doc/sphinx/_build/html/_static/MathJax
   (cd doc/sphinx/_build && scp -r html reflectometry.org:web/danse/docs/elements)
   ssh reflectometry.org ln -s /var/www/reflectometry/MathJax web/danse/docs/elements/_static
-  ready Documentation upload successful?
+  ready web Documentation upload successful?
 fi
 
 if [ $step -le 5 ]; then
   ready Push package to pypi?
   python setup.py sdist upload
-  ready Package upload successful?
+  ready pypi Package upload successful?
 fi
 
 echo == All done! ==

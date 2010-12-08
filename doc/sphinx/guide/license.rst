@@ -23,8 +23,15 @@ whose conditions may differ from those of your experiment.
 Credits
 *******
 
-Periodictable was written by Paul Kienzle and is developed and
-maintained by the `DANSE <http://danse.us>`_ project.
+Periodictable was written by Paul Kienzle with contributions from the 
+`DANSE <http://danse.us>`_ project.
+
+The DANSE/Reflectometry team is supported by the University of Maryland 
+Department of Materials Science and Engineering, the NIST Center for 
+Neutron Research and the US National Science Foundation grant 
+DMR-0520547. Any opinions, findings and recommendations expressed in 
+this material are those of the author(s) and do not necessarily reflect 
+the view of the supporting institutions. 
 
 We are grateful for the existence of many fine open source packages such
 as `Pyparsing <http://pyparsing.wikispaces.com/>`_, 

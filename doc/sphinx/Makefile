@@ -31,7 +31,7 @@ clean:
 
 _build/html:
 	mkdir -p _build/html/_static
-	cp -r MathJax _build/html/_static/MathJax
+	-cp -r MathJax _build/html/_static/MathJax
 
 html: build _build/html
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html

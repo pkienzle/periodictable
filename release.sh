@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./release.sh
+# Usage: ./release.sh [git|test|doc|notes|web|pypi]
 #
 # Build an official elements package release
 #
@@ -34,22 +34,36 @@
 # username:...
 # password:...
 
+case "$1" in
+git)    step=0;;
+test)   step=1;;
+doc)    step=2;;
+notes)  step=3;;
+web)    step=4;;
+pypi)   step=5;;
+*)      step=0;;
+esac
+
+
 function ready() {
    echo -n "$* [y/n] "
    read ans && test "$ans" != "y" && exit
 }
 
-echo === Version control status ===
-git pull
-git status
-ready Is the repository up to date?
+if [ $step -le 0 ]; then
+  echo === Version control status ===
+  git pull
+  git status
+  ready Is the repository up to date?
+fi
 
-echo === Tests ===
-set -x
-python2.6 test.py -q --with-coverage
-python2.5 test.py -q
-set +x
-if true; then
+if [ $step -le 1 ]; then
+  echo === Tests ===
+  set -x
+  python2.6 test.py -q --with-coverage
+  python2.5 test.py -q
+  set +x
+  if true; then
     echo
     # Ask hudson build server if package is working on all platforms
     hudson_server="localhost:8080"
@@ -62,37 +76,45 @@ if true; then
         echo **** latest hudson build failed ... see $url
         firefox $url &
     fi
+  fi
+  ready Are the tests okay?
 fi
-ready Are the tests okay?
 
-echo === Documentation ===
-(cd doc/sphinx && make clean html pdf)
-firefox doc/sphinx/_build/html/index.html >/dev/null 2>&1 & 
-evince doc/sphinx/_build/latex/PeriodicTable.pdf >/dev/null 2>&1 &
-ready Does the documentation build cleanly, and pdf/html display correctly?
+if [ $step -le 2 ]; then
+  echo === Documentation ===
+  (cd doc/sphinx && make clean html pdf)
+  firefox doc/sphinx/_build/html/index.html >/dev/null 2>&1 & 
+  evince doc/sphinx/_build/latex/PeriodicTable.pdf >/dev/null 2>&1 &
+  ready Does the documentation build cleanly, and pdf/html display correctly?
+fi
 
-echo === Release notes ===
-rst2html README.rst > /tmp/README.html
-firefox /tmp/README.html >/dev/null 2>&1 &
-git log --oneline
-ready Are the release notes up to date?
+if [ $step -le 3 ]; then
+  echo === Release notes ===
+  rst2html README.rst > /tmp/README.html
+  firefox /tmp/README.html >/dev/null 2>&1 &
+  git log --oneline
+  ready Are the release notes up to date?
 
-version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//')
-echo === Version is $version ===
-ready Is the version number correct?
+  version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//')
+  echo === Version is $version ===
+  ready Is the version number correct?
+fi
 
-ready Push docs to the web?
-ssh reflectometry.org rm -r web/danse/docs/elements
-find doc/sphinx/_build/html | xargs chmod ug+rw
-find doc/sphinx/_build/html -type d | xargs chmod g+x
-rm -r doc/sphinx/_build/html/_static/MathJax
-(cd doc/sphinx/_build && scp -r html reflectometry.org:web/danse/docs/elements)
-ssh reflectometry.org ln -s /var/www/reflectometry/MathJax web/danse/docs/elements/_static
+if [ $step -le 4 ]; then
+  ready Push docs to the web?
+  ssh reflectometry.org rm -r web/danse/docs/elements
+  find doc/sphinx/_build/html | xargs chmod ug+rw
+  find doc/sphinx/_build/html -type d | xargs chmod g+x
+  rm -r doc/sphinx/_build/html/_static/MathJax
+  (cd doc/sphinx/_build && scp -r html reflectometry.org:web/danse/docs/elements)
+  ssh reflectometry.org ln -s /var/www/reflectometry/MathJax web/danse/docs/elements/_static
+  ready Documentation upload successful?
+fi
 
-ready Documentation upload successful?
-
-ready Push package to pypi?
-python setup.py sdist upload
-ready Package upload successful?
+if [ $step -le 5 ]; then
+  ready Push package to pypi?
+  python setup.py sdist upload
+  ready Package upload successful?
+fi
 
 echo == All done! ==

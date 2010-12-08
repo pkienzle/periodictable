@@ -18,12 +18,12 @@ and if you want to know in detail about Periodic Table, refer to the
    :maxdepth: 2
 
    intro.rst
-   installing.rst
    using.rst
    formula_grammar.rst
    bundle.rst
    extending.rst
    customizing.rst
    data_sources.rst
+   contributing.rst
    license.rst
    

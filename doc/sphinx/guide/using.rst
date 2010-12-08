@@ -4,8 +4,13 @@
 Basic usage
 ***********
 
-This section provides various examples on how to get started with Periodic table.
-These examples should work on all periodic table supported platforms.
+The periodic table is available on `PyPI <http://pypi.python.org/pypi>`_, 
+and can be obtained simply with::
+
+    easy_install periodictable
+    
+This will install pyparsing if it is not already available.  The numpy
+package must already be installed.
 
 Access particular elements by name:
 

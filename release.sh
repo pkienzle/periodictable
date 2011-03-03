@@ -94,8 +94,10 @@ if [ $step -le 3 ]; then
   echo === Release notes ===
   rst2html README.rst > /tmp/README.html
   firefox /tmp/README.html >/dev/null 2>&1 &
-  git log --oneline
-
+  git log --format="%Cred%ad%Creset %s %Cred%an%Creset" --date=short --reverse
+  # Check whether anyone checked stuff into the old repository since the
+  # move to git
+  svn log svn://danse.us/common/elements/trunk -r1189:HEAD | grep -v "^[-]*$"
   version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//')
   echo *** Version is $version
   ready notes Are the release notes up to date?

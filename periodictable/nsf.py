@@ -766,13 +766,9 @@ def neutron_scattering(compound, density=None,
             \,+\, \Sigma_{\rm abs}\, 1/{\rm cm})
     """
     from . import formulas
-    compound = formulas.formula(compound)
-    if density is None:
-        if natural_density is not None:
-            density = natural_density/compound.natural_mass_ratio()
-        else:
-            density = compound.density # defaults to molecule density
-    assert density is not None, "scattering calculations need density"
+    compound = formulas.formula(compound, density=density,
+                                natural_density=natural_density)
+    assert compound.density is not None, "scattering calculation needs density"
     if energy is not None:
         wavelength = neutron_wavelength(energy)
     assert wavelength is not None, "scattering calculation needs energy or wavelength"
@@ -793,7 +789,7 @@ def neutron_scattering(compound, density=None,
 
     # If nothing to sum, return values for a vacuum.  This might be because
     # the material has no atoms or it might be because the density is zero.
-    if molar_mass*density == 0:
+    if molar_mass*compound.density == 0:
         return (0,0,0), (0,0,0), inf
 
     # Turn sums into averages
@@ -807,7 +803,7 @@ def neutron_scattering(compound, density=None,
     sigma_a *= wavelength/ABSORPTION_WAVELENGTH
 
     # Compute number density
-    cell_volume = (molar_mass/density)/avogadro_number*1e24 # (10^8 A/cm)^3
+    cell_volume = (molar_mass/compound.density)/avogadro_number*1e24 # (10^8 A/cm)^3
     number_density = num_atoms / cell_volume
 
     # Compute SLD

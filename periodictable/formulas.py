@@ -178,14 +178,14 @@ def mix_by_volume(*args, **kw):
     if name: result.name = name
     return result
 
-def formula(value=None, density=None, natural_density=None,
+def formula(compound=None, density=None, natural_density=None,
             name=None, table=None):
     r"""
     Construct a chemical formula representation from a string, a
     dictionary of atoms or another formula.
 
     :Parameters:
-        *formula* : see below
+        *compound* : Formula initializer
             Chemical formula.
 
         *density* : float | |g/cm^3|
@@ -220,27 +220,27 @@ def formula(value=None, density=None, natural_density=None,
     The representations are simple, but preserve some of the structure for
     display purposes.
     """
-    if value == None or value == '':
+    if compound == None or compound == '':
         structure = tuple()
-    elif isinstance(value,Formula):
-        structure = value.structure
-        if not density and not natural_density: density = value.density
-        if not name: name = value.name
-    elif isatom(value):
-        structure = ((1,value),)
-    elif isinstance(value,dict):
-        structure = _convert_to_hill_notation(value)
-    elif _is_string_like(value):
+    elif isinstance(compound,Formula):
+        structure = compound.structure
+        if not density and not natural_density: density = compound.density
+        if not name: name = compound.name
+    elif isatom(compound):
+        structure = ((1,compound),)
+    elif isinstance(compound,dict):
+        structure = _convert_to_hill_notation(compound)
+    elif _is_string_like(compound):
         try:
-            structure = _immutable(parse_formula(value, table=table))
+            structure = _immutable(parse_formula(compound, table=table))
         except ValueError,exception:
             raise ValueError(str(exception))
-            #print "parsed",value,"as",self
+            #print "parsed",compound,"as",self
     else:
         try:
-            structure = _immutable(value)
+            structure = _immutable(compound)
         except:
-            raise ValueError("not a valid chemical formula: "+str(value))
+            raise ValueError("not a valid chemical formula: "+str(compound))
     return Formula(structure=structure, name=name, density=density,
                    natural_density=natural_density)
 
@@ -258,9 +258,9 @@ class Formula(object):
         # If only one element in the formula, use its density.
         # Otherwise, leave density unspecified, and let the user
         # assign it separately if they need it.
-        if natural_density:
+        if natural_density is not None:
             self.natural_density = natural_density
-        elif density:
+        elif density is not None:
             self.density = density
         elif len(self.atoms) == 1:
             self.density = self.atoms.keys()[0].density

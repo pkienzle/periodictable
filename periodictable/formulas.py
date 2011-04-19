@@ -425,6 +425,9 @@ class Formula(object):
     @require_keywords
     def neutron_sld(self, wavelength=None, energy=None):
         """
+        .. deprecated:: 0.95
+            Use periodictable.neutron(formula) instead.
+
         Neutron scattering information for the molecule.
 
         :Parameters:
@@ -437,9 +440,6 @@ class Formula(object):
                 Neutron scattering length density is returned as the tuple
                 (*real*, *imaginary*, *incoherent*), or as (None, None, None)
                 if the mass density is not known.
-
-        .. deprecated:: 0.95
-            Use periodictable.neutron_sld(formula) instead.
         """
         from .nsf import neutron_sld
         if self.density is None: return None,None,None
@@ -450,6 +450,9 @@ class Formula(object):
     def xray_sld(self, energy=None, wavelength=None):
         """
         X-ray scattering length density for the molecule.
+
+        .. deprecated:: 0.95
+            Use periodictable.xray(formula) instead.
 
         :Parameters:
             *energy* : float | keV
@@ -466,9 +469,6 @@ class Formula(object):
                 X-ray scattering length density is returned as the tuple
                     (*real*, *imaginary*), or as (None, None) if the mass
                     density is not known.
-
-        .. deprecated:: 0.95
-            Use periodictable.xray_sld(formula) instead.
         """
         from .xsf import xray_sld
         if self.density is None: return None,None

@@ -11,11 +11,11 @@ Masses, densities and natural abundances come from the
 NIST Physics Laboratory, but do not represent a critical
 evaluation by NIST scientists.
 
-Neutron scattering calculations use values collected by the 
+Neutron scattering calculations use values collected by the
 Atomic Institute of the Austrian Universities.  These values
-do corresponding to those from other packages, though there 
-are some differences depending to the tables used.  Bound 
-coherent neutron scattering for gold in particular is significantly 
+do corresponding to those from other packages, though there
+are some differences depending to the tables used.  Bound
+coherent neutron scattering for gold in particular is significantly
 different from older value: 7.63(6) as measured in 1974
 compared to 7.90(7) as measured in 1990.
 
@@ -28,6 +28,15 @@ give different results from other packages.
 
 Change history
 ==============
+
+New:
+
+* add index_of_refraction and mirror_reflectivity to xsf
+
+Modified:
+
+* renamed parameter value to compound in formula() factory
+* fixed interatomic distance calculation
 
 1.3  2010-12-05
 ---------------

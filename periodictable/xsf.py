@@ -179,7 +179,7 @@ from numpy import nan, pi, exp, sin, cos, sqrt, radians
 from .core import Element, Ion, default_table, get_data_path
 from .constants import (avogadro_number, plancks_constant, speed_of_light,
                         electron_radius)
-from .util import require_keywords
+from .util import require_keywords, cached_property
 
 def xray_wavelength(energy):
     """
@@ -324,6 +324,9 @@ class Xray(object):
     @require_keywords
     def sld(self, wavelength=None, energy=None):
         r"""
+        .. deprecated:: 1.3
+            given c = periodictable.xray(...).sld, use c.real,c.imag instead.
+
         X ray scattering length density.
 
         :Parameters:
@@ -343,10 +346,77 @@ class Xray(object):
         :Raises:
             *TypeError* : neither *wavelength* nor *energy* was specified.
 
+        """
+        f1,f2 = self.scattering_factors(wavelength=wavelength, energy=energy)
+        if f1 is None or self.element.number_density is None:
+            return None,None
+        rho = f1*electron_radius*self.element.number_density*1e-8
+        irho = f2*electron_radius*self.element.number_density*1e-8
+        return rho,irho
+
+class XrayScattering(object):
+    """
+    Compute xray scattering properties for molecules.
+
+    :Parameters:
+        *compound* : Formula initializer
+            Chemical formula.
+        *density* : float | |g/cm^3|
+            Mass density of the compound, or None for default.
+        *natural_density* : float | |g/cm^3|
+            Mass density of the compound at naturally occurring isotope abundance.
+        *wavelength* : float or vector | |Ang|
+            Wavelength of the X-ray.
+        *energy* : float or vector | keV
+            Energy of the X-ray, if *wavelength* is not specified.
+
+    :Raises:
+        *TypeError* :  *density* or *wavelength*/*energy* is missing.
+    """
+    @require_keywords
+    def __init__(self, compound, density=None,  natural_density=None,
+                 wavelength=None, energy=None):
+
+        from . import formulas
+        compound = formulas.formula(compound, density=density,
+                                    natural_density=natural_density)
+        if compound.density is None:
+            raise TypeError("scattering calculation needs density")
+
+        if wavelength is not None:
+            energy = xray_energy(wavelength)
+        elif energy is not None:
+            wavelength = xray_wavelength(energy)
+        else:
+            raise TypeError("scattering calculation needs energy or wavelength")
+        self.compound = compound
+        self.wavelength = wavelength
+        self.energy = energy
+
+    @cached_property
+    def scattering_factors(self):
+        """
+        *f1*, *f2* : float,float or [float],[float]
+            Composite scattering factor
+        """
+        sum_f1,sum_f2 = 0,0
+        for element,quantity in self.compound.atoms.iteritems():
+            f1,f2 = element.xray.scattering_factors(energy=self.energy)
+            #print element,f1,f2,wavelength
+            sum_f1 += f1*quantity
+            sum_f2 += f2*quantity
+        return sum_f1, sum_f2
+
+    @cached_property
+    def sld(self):
+        """
+        *rho* : complex or [complex] | |1e-6/Ang^2|
+            Complex scattering length density for the compound.
+
         The scattering length density is $r_e N (f_1 + i f_2)$.
         where $r_e$ is the electron radius and $N$ is the
         number density.  The number density is $N = \rho_m/m N_A$,
-        with mass density $\rho_m$ molar mass $m$ and
+        with mass density $\rho_m$, molar mass $m$ and
         Avogadro's number $N_A$.
 
         The constants are available directly:
@@ -358,143 +428,89 @@ class Xray(object):
         Data comes from the Henke Xray scattering factors database at the
         Lawrence Berkeley Laboratory Center for X-ray Optics.
         """
-        f1,f2 = self.scattering_factors(wavelength=wavelength, energy=energy)
-        if f1 is None or self.element.number_density is None:
-            return None,None
-        rho = f1*electron_radius*self.element.number_density*1e-8
-        irho = f2*electron_radius*self.element.number_density*1e-8
-        return rho,irho
+        f1,f2 = self.scattering_factors
+        mass = sum(n*el.mass for el, n in self.compound.atoms.iteritems())
+        if mass == 0:
+            return 0j
+
+        number_density = self.compound.density/mass*avogadro_number*1e-8
+        sld = number_density * electron_radius * (f1 + 1j*f2)
+        return sld
+
+    @cached_property
+    def index_of_refraction(self):
+        """
+        *n* : float or vector | unitless
+            index of refraction of the material at the given energy
+
+        Formula taken from http://xdb.lbl.gov (section 1.7) and checked
+        against http://henke.lbl.gov/optical_constants/getdb2.html
+        """
+        return 1 - self.wavelength**2/(2*pi)*self.sld*1e-6
+
+    @cached_property
+    def attenuation_length(self):
+        """
+        *attenuation_length* : float or [float] | |m|
+            energy dependent attenuation length for the compound
+
+        Transmisison is then exp(-thickness/attenuation_length)
+        """
+
+        n = self.index_of_refraction
+        attenuation_length = (self.wavelength*1e-10)/ (4*pi*numpy.imag(n))
+        return numpy.abs(attenuation_length)
+
+
+    def reflectivity(self, angle=None, roughness=0):
+        """
+        Calculates reflectivity of a thick mirror as function of
+        energy and angle
+
+        :Parameters:
+            *angle* : vector | |deg|
+                Incident beam angles.
+            *roughness* : float | |Ang|
+                High-spatial-frequency surface roughness.
+
+        :Returns:
+            *reflectivity* : matrix
+                matrix of reflectivity as function of (angle,energy)
+
+        Formula taken from http://xdb.lbl.gov (section 4.2) and checked
+        against http://henke.lbl.gov/optical_constants/mirror2.html
+        """
+        wavelength = self.wavelength
+        angle = radians(angle)
+
+        if (numpy.isscalar(self.wavelength)):
+            wavelength=numpy.array( [wavelength] )
+        if (numpy.isscalar(angle)):
+            angle =numpy.array( [self.angle] )
+
+        nv = self.index_of_refraction
+        ki = 2*pi/wavelength[None,:] * sin(angle[:,None])
+        kf = 2*pi/wavelength[None,:] * sqrt(nv[None,:]**2 - cos(angle[:,None])**2)
+        r = (ki-kf)/(ki+kf)*exp(-2*ki*kf*roughness**2)
+        return abs(r)**2
+
 
 # Note: docs and function prototype are reproduced in __init__
 @require_keywords
 def xray_sld(compound, density=None,  natural_density=None,
              wavelength=None, energy=None):
     """
-    Compute xray scattering length densities for molecules.
-
-    :Parameters:
-        *compound* : Formula initializer
-            Chemical formula.
-        *density* : float | |g/cm^3|
-            Mass density of the compound, or None for default.
-        *natural_density* : float | |g/cm^3|
-            Mass density of the compound at naturally occurring isotope abundance.
-        *wavelength* : float or vector | |Ang|
-            Wavelength of the X-ray.
-        *energy* : float or vector | keV
-            Energy of the X-ray, if *wavelength* is not specified.
-
-    :Returns:
-        *sld* : (float, float) | |1e-6/Ang^2|
-            (*real*, *imaginary*) scattering length density.
-
-    :Raises:
-        *AssertionError* :  *density* or *wavelength*/*energy* is missing.
+    .. deprecated:: 1.3
+        given c = periodictable.xray(...).sld, use c.real,c.imag instead.
     """
-    from . import formulas
-    compound = formulas.formula(compound, density=density,
-                                natural_density=natural_density)
-    assert compound.density is not None, "scattering calculation needs density"
-
-    if wavelength is not None: energy = xray_energy(wavelength)
-    assert energy is not None, "scattering calculation needs energy or wavelength"
-
-    mass,sum_f1,sum_f2 = 0,0,0
-    for element,quantity in compound.atoms.iteritems():
-        mass += element.mass*quantity
-        f1,f2 = element.xray.scattering_factors(energy=energy)
-        #print element,f1,f2,wavelength
-        sum_f1 += f1*quantity
-        sum_f2 += f2*quantity
-
-    if mass == 0: # because the formula is empty
-        return 0,0
-
-    N = (compound.density/mass*avogadro_number*1e-8)
-    rho = N*sum_f1*electron_radius
-    irho = N*sum_f2*electron_radius
-    return rho,irho
-
-
-@require_keywords
-def index_of_refraction(compound,density=None,natural_density=None,
-                        energy=None,wavelength=None):
-    """
-    Calculates the index of refraction for a given compound
-
-    :Parameters:
-        *compound* : Formula initializer
-            Chemical formula.
-        *density* : float | |g/cm^3|
-            Mass density of the compound, or None for default.
-        *natural_density* : float | |g/cm^3|
-            Mass density of the compound at naturally occurring isotope abundance.
-        *wavelength* : float or vector | |Ang|
-            Wavelength of the X-ray.
-        *energy* : float or vector | keV
-            Energy of the X-ray, if *wavelength* is not specified.
-
-    :Returns:
-        *n* : float or vector | unitless
-            index of refraction of the material at the given energy
-
-    :Notes:
-
-    Formula taken from http://xdb.lbl.gov (section 1.7) and checked
-    against http://henke.lbl.gov/optical_constants/getdb2.html
-    """
-    if energy is not None: wavelength = xray_wavelength(energy)
-    assert wavelength is not None, "scattering calculation needs energy or wavelength"
-    f1,f2 = xray_sld(compound,
-                     density=density, natural_density=natural_density,
-                     wavelength=wavelength)
-    return 1 - wavelength**2/(2*pi)*(f1 + f2*1j)*1e-6
-
-@require_keywords
-def mirror_reflectivity(compound, density=None, natural_density=None,
-                        energy=None, wavelength=None,
-                        angle=None, roughness=0):
-    """
-    Calculates reflectivity of a thick mirror as function of energy and angle
-
-    :Parameters:
-        *compound* : Formula initializer
-            Chemical formula.
-        *density* : float | |g/cm^3|
-            Mass density of the compound, or None for default.
-        *natural_density* : float | |g/cm^3|
-            Mass density of the compound at naturally occurring isotope abundance.
-        *roughness* : float | |Ang|
-            High-spatial-frequency surface roughness.
-        *wavelength* : float or vector | |Ang|
-            Wavelength of the X-ray.
-        *energy* : float or vector | keV
-            Energy of the X-ray, if *wavelength* is not specified.
-        *angle* : vector | |deg|
-            Incident beam angles.
-
-    :Returns:
-        *reflectivity* : matrix
-            matrix of reflectivity as function of (angle,energy)
-
-    :Notes:
-
-    Formula taken from http://xdb.lbl.gov (section 4.2) and checked
-    against http://henke.lbl.gov/optical_constants/mirror2.html
-    """
-    if energy is not None: wavelength = xray_wavelength(energy)
-    assert wavelength is not None, "scattering calculation needs energy or wavelength"
-    angle = radians(angle)
-    if (numpy.isscalar(wavelength)): wavelength=numpy.array( [wavelength] )
-    if (numpy.isscalar(angle))     : angle =numpy.array( [angle] )
-    nv = index_of_refraction(compound=compound,
-                             density=density, natural_density=natural_density,
-                             wavelength=wavelength)
-    ki = 2*pi/wavelength[None,:] * sin(angle[:,None])
-    kf = 2*pi/wavelength[None,:] * sqrt(nv[None,:]**2 - cos(angle[:,None])**2)
-    r = (ki-kf)/(ki+kf)*exp(-2*ki*kf*roughness**2)
-    return abs(r)**2
-
+    try:
+        C = XrayScattering(compound=compound,
+                       density=density, natural_density=natural_density,
+                       wavelength=wavelength, energy=energy)
+        rho = C.sld
+        return rho.real, rho.imag
+    except TypeError, exc:
+        raise AssertionError(str(exc))
 
 def xray_sld_from_atoms(*args, **kw):
     """

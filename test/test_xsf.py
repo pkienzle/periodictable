@@ -3,7 +3,7 @@ from numpy import pi, isnan
 from periodictable import formula
 from periodictable import Cu,Mo,Ni,Fe,Si,H,D,O
 from periodictable.xsf import xray_energy, xray_sld_from_atoms, xray_sld
-from periodictable.xsf import index_of_refraction, mirror_reflectivity
+from periodictable.xsf import XrayScattering
 
 def test_xsf():
 
@@ -150,8 +150,9 @@ def test_refl():
 
     e,R2 = numpy.loadtxt(data2).T
     e,R3 = numpy.loadtxt(data3).T
-    R = mirror_reflectivity(energy=e*1e-3,angle=[2,3],compound='SiO2',density=2.2,
-                            roughness=30)
+
+    c = XrayScattering(energy=e*1e-3,compound='SiO2',density=2.2)
+    R = c.reflectivity(angle=[2,3],roughness=30)
     assert numpy.max(abs((R-numpy.vstack([R2,R3]))/R)) < 1e-4
 
 

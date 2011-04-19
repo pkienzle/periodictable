@@ -28,7 +28,7 @@ whose conditions may differ from those of your experiment.
 __docformat__ = 'restructuredtext en'
 __all__ = ['elements', 'neutron_sld','xray_sld',
            'formula','mix_by_weight','mix_by_volume'] # and all elements
-__version__ = "1.3.0"
+__version__ = "1.4a"
 
 from . import core
 from . import mass
@@ -293,7 +293,11 @@ def neutron_scattering(*args, **kw):
 
 def xray_sld(*args, **kw):
     """
-    Compute neutron scattering length densities for molecules.
+    .. deprecated:: 1.3
+
+        Given c = periodictable.xray(...).sld, use c.real,c.imag instead.
+
+    Compute X-ray scattering length densities for molecules.
 
     Either supply the wavelength (A) or the energy (keV) of the X-rays.
 
@@ -303,6 +307,16 @@ def xray_sld(*args, **kw):
     """
     from . import xsf
     return xsf.xray_sld(*args, **kw)
+
+def xray(*args, **kw):
+    """
+    Compute X-ray scattering properties for compounds.
+
+    Either supply the wavelength (|Ang|) or the energy (keV) of the X-rays
+    and also density (|g/cm^3|) or natural_density (|g/cm^3|).
+    """
+    from .xsf import XrayScattering
+    return XrayScattering(*args, **kw)
 
 
 #del core, mass, density

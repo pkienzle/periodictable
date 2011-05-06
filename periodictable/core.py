@@ -782,14 +782,14 @@ def get_data_path(data):
         return path
 
     # Check for data path next to exe/zip file.
-    # If we are inside a py2exe zip file, we need to go up
-    # two levels to get to the directory containing the exe
-    # We will check if the exe and the xsf are in the same
-    # directory.
-    path= os.path.dirname(__file__)
-    path,_ = os.path.split(path)
-    path,_ = os.path.split(path)
-    path = os.path.join(path, 'periodictable-data', data)
+    exepath = os.path.dirname(sys.executable)
+    path = os.path.join(exepath, 'periodictable-data', data)
+    if os.path.isdir(path):
+        return path
+
+    # py2app puts the data in Contents/Resources, but the executable
+    # is in Contents/MacOS.
+    path = os.path.join(exepath, '..', 'Resources', 'periodictable-data', data)
     if os.path.isdir(path):
         return path
 

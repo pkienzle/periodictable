@@ -764,7 +764,7 @@ def get_data_path(data):
     :Returns: string
          Path to the data.
     """
-    import os
+    import os,sys
     def is_data_path(path):
         return os.path.isdir(path)
 

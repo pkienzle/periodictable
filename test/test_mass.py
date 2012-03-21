@@ -4,6 +4,8 @@ def test():
 
     assert periodictable.Be[12].mass == 12.026921
     assert periodictable.Be.mass == 9.012182
+    assert abs(periodictable.Be[12].ion[2].mass - (12.026921 - 2*periodictable.constants.electron_mass))<1e-12
+    assert abs(periodictable.Be.ion[2].mass - (9.012182 - 2*periodictable.constants.electron_mass))<1e-12
     assert periodictable.Pb[206].abundance == 24.1
     assert periodictable.Pb[209].abundance == 0
     assert periodictable.Pb.mass == 207.2

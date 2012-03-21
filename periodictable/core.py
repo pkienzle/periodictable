@@ -21,8 +21,10 @@ Core classes for the periodic table.
 Elements are accessed from a periodic table using ``table[number]``,
 ``table.name`` or ``table.symbol`` where *symbol* is the two letter symbol.
 Individual isotopes are accessed using ``element[isotope]``. Individual ions
-are references using ``element.ion[charge]``.  There are presently no
-properties specific to both ion and isotope.
+are references using ``element.ion[charge]``.  Note that
+``element[isotope].ion[charge].mass`` will depend on the particular charge
+since we subtract the charge times the rest mass of the electron from the
+overall mass.
 
 Helper functions:
 
@@ -58,6 +60,8 @@ __all__ = ['delayed_load', 'define_elements', 'get_data_path',
            'isatom', 'iselement', 'isisotope', 'ision']
 
 import copy
+
+from . import constants
 
 PUBLIC_TABLE_NAME = "public"
 
@@ -426,6 +430,9 @@ class Ion(object):
         self.charge = charge
     def __getattr__(self, attr):
         return getattr(self.element,attr)
+    @property
+    def mass(self):
+        return getattr(self.element,'mass') - constants.electron_mass*self.charge
     def __str__(self):
         el = str(self.element)
         if self.charge > 0:

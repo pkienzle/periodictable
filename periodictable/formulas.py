@@ -668,7 +668,10 @@ def _hill_compare(a,b):
         else:
             return -1
     else:
-        return cmp(a.symbol, b.symbol)
+        if b.symbol in ("C","H"):
+            return 1
+        else:
+            return cmp(a.symbol, b.symbol)
 
 def _convert_to_hill_notation(atoms):
     """

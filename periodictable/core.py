@@ -207,7 +207,7 @@ class PeriodicTable(object):
     """
     def __init__(self, table):
         if table in PRIVATE_TABLES:
-            raise ValueError("Periodic table '%s' is already defined"%name)
+            raise ValueError("Periodic table '%s' is already defined"%table)
         PRIVATE_TABLES[table] = self
         self.properties = []
         self._element = {}

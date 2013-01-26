@@ -354,6 +354,13 @@ class Formula(object):
         """
         return sum([m*a.charge for a,m in self.atoms.items()])
 
+    @property
+    def mass_fraction(self):
+        """
+        Fractional mass representation of each element/isotope/ion
+        """
+        return {a: m*a.mass/self.mass for a,m in self.atoms.items()}
+
     def _pf(self):
         """
         packing factor  | unitless

@@ -347,6 +347,13 @@ class Formula(object):
         """
         return self.mass/avogadro_number
 
+    @property
+    def charge(self):
+        """
+        Net charge of the molecule.
+        """
+        return sum([m*a.charge for a,m in self.atoms.items()])
+
     def _pf(self):
         """
         packing factor  | unitless

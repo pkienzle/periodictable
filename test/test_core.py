@@ -54,8 +54,8 @@ def test():
     # Check that ions work
     assert Fe.ion[2].charge==2
     assert Fe.ions == (2,3)
-    assert str(Fe.ion[2]) == "Fe^{2+}"
-    assert str(O.ion[-2]) == "O^{2-}"
+    assert str(Fe.ion[2]) == "Fe{2+}"
+    assert str(O.ion[-2]) == "O{2-}"
     try:
         Fe.ion[1]
         raise Exception("accepts invalid ions")

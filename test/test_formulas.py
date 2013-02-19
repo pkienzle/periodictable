@@ -2,7 +2,7 @@ from __future__ import division
 from copy import deepcopy
 from cPickle import loads, dumps
 
-from periodictable import Ca,C,O,H,Fe,Ni,Si,D
+from periodictable import Ca,C,O,H,Fe,Ni,Si,D,Na,Cl
 from periodictable import formula, mix_by_weight, mix_by_volume
 
 def test():
@@ -42,6 +42,17 @@ def test():
 
     # Check atom count
     assert formula("Fe2O4+3H2O").atoms == {Fe:2,O:7,H:6}
+
+    # Check charge
+    assert formula("P{5+}O{2-}4").charge == -3
+    try:
+        formula("P{18-}")
+        raise Exception("No exception raised for invalid charge") 
+    except ValueError: 
+        pass
+    assert formula("Na{+}Cl{-}").charge == 0
+    Na_frac = Na.ion[1].mass/(Na.ion[1].mass+Cl.ion[-1].mass)
+    assert abs(formula("Na{+}Cl{-}").mass_fraction[Na.ion[1]] - Na_frac) < 1e-14
 
     # Check the mass calculator
     assert formula('H2O').mass == 2*H.mass+O.mass

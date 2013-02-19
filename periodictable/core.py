@@ -434,13 +434,10 @@ class Ion(object):
     def mass(self):
         return getattr(self.element,'mass') - constants.electron_mass*self.charge
     def __str__(self):
-        el = str(self.element)
-        if self.charge > 0:
-            return el+'^{%d+}'%self.charge
-        elif self.charge < 0:
-            return el+'^{%d-}'%(-self.charge)
-        else:
-            return el
+        sign = '+' if self.charge > 0 else '-'
+        value = '%d'%abs(self.charge) if abs(self.charge)>1 else ''
+        charge_str = '{'+value+sign+'}' if self.charge != 0 else ''
+        return str(self.element)+charge_str
     def __repr__(self):
         return repr(self.element)+'.ion[%d]'%self.charge
     def __reduce__(self):

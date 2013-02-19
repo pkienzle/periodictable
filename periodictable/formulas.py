@@ -347,6 +347,22 @@ class Formula(object):
         """
         return self.mass/avogadro_number
 
+    @property
+    def charge(self):
+        """
+        Charge of the molecule
+        """
+        return sum([m*a.charge for a,m in self.atoms.items()])
+
+    @property
+    def mass_fraction(self):
+        """
+        Mass fraction representation of the elements in the molecule
+        """
+        total_mass = self.mass
+        return {a: m*a.mass/total_mass for a,m in self.atoms.items()}
+
+
     def _pf(self):
         """
         packing factor  | unitless
@@ -565,6 +581,16 @@ def formula_grammar(table):
                        default='0')
     isotope = isotope.setParseAction(lambda s,l,t: int(t[0]) if t[0] else 0)
 
+    # Translate ion
+    openion = Literal('{').suppress()
+    closeion = Literal('}').suppress()
+    ion = Optional(~White()
+                     +openion
+                     +Regex("([1-9][0-9]*)?[+-]")
+                     +closeion,
+                   default='0+')
+    ion = ion.setParseAction(lambda s,l,t: int(t[0][-1]+(t[0][:-1] if len(t[0])>1 else '1')))
+
     # Translate counts
     fract = Regex("(0|[1-9][0-9]*|)([.][0-9]*)")
     fract = fract.setParseAction(lambda s,l,t: float(t[0]) if t[0] else 1)
@@ -572,12 +598,13 @@ def formula_grammar(table):
     whole = whole.setParseAction(lambda s,l,t: int(t[0]) if t[0] else 1)
     count = Optional(~White()+(fract|whole),default=1)
 
-    # Convert symbol,isotope,count to (count,isotope)
-    element = symbol+isotope+count
+    # Convert symbol,isotope,ion,count to (count,isotope)
+    element = symbol+isotope+ion+count
     def convert_element(string,location,tokens):
         #print "convert_element received",tokens
-        symbol,isotope,count = tokens[0:3]
+        symbol,isotope,ion,count = tokens[0:4]
         if isotope != 0: symbol = symbol[isotope]
+        if ion != 0: symbol = symbol.ion[ion]
         return (count,symbol)
     element = element.setParseAction(convert_element)
 
@@ -688,11 +715,15 @@ def _str_atoms(seq):
     ret = ""
     for count,fragment in seq:
         if isatom(fragment):
-            # Isotopes are Sym[iso] except for D and T
+            # Normal isotope string from is #-Yy, but we want Yy[#]
             if isisotope(fragment) and 'symbol' not in fragment.__dict__:
                 ret += "%s[%d]"%(fragment.symbol,fragment.isotope)
             else:
                 ret += fragment.symbol
+            if fragment.charge != 0:
+                sign = '+' if fragment.charge > 0 else '-'
+                value = str(abs(fragment.charge)) if abs(fragment.charge)>1 else ''
+                ret += '{'+value+sign+'}'
             if count!=1:
                 ret += "%g"%count
         else:

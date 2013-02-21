@@ -36,6 +36,7 @@ New:
 
 * formulas now report charge and mass fraction
 * formula parser accepts ions as Yy{#+} or Yy[#]{#+} for isotopes
+* support neutron activation calculations
 
 Modified:
 

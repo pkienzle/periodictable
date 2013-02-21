@@ -54,18 +54,20 @@ function ready() {
 
 if [ $step -le 0 ]; then
   echo === Version control status ===
+  set -x
   git pull
   git status
+  set +x
   ready sync Is the repository up to date?
 fi
 
 if [ $step -le 1 ]; then
   echo === Tests ===
   set -x
-  python2.6 test.py -q --with-coverage
-  python2.5 test.py -q
+  python2.7 test.py -q --with-coverage
+  python2.6 test.py -q
   set +x
-  if true; then
+  if false; then
     echo
     # Ask hudson build server if package is working on all platforms
     hudson_server="localhost:8080"

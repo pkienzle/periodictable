@@ -29,7 +29,7 @@ dist = setup(
         packages = find_packages(),
         package_data = {
             'periodictable' :
-                ['xsf/*.nff', 'xsf/f0_WaasKirf.dat', 'xsf/read.me'],
+                ['activation.dat', 'xsf/*.nff', 'xsf/f0_WaasKirf.dat', 'xsf/read.me'],
         },
         #data_files = periodictable.data_files(),
         install_requires = ['pyparsing', 'numpy'],

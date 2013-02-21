@@ -363,6 +363,10 @@ def init(table, reload=False):
         kw=dict(zip(COLUMN_NAMES, columns))
         kw['Thalf_str'] = " ".join((kw['_Thalf'],kw['_Thalf_unit']))
 
+        # Strip columns whose names start with underscore
+        kw = dict((k,v) for k,v in kw.items() if not k.startswith('_'))
+
+        # Create an Activation record and add it to the isotope
         iso = table[kw['Z']][kw['A']]
         activation = getattr(iso,'neutron_activation',[])
         activation.append(Activation(**kw))

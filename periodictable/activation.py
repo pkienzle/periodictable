@@ -192,7 +192,7 @@ class ActivationEnvironment(object):
 
     *fast_ratio* : float
 
-        Thermal/fast ratio needed for fast reactions.
+        Thermal/fast ratio needed for fast reactions. Use 0 to suppress fast contribution.
     """
     def __init__(self, fluence, Cd_ratio, fast_ratio, location=""):
         self.fluence = fluence     # cell F13
@@ -262,7 +262,8 @@ def activity(isotope, mass, env, exposure, rest_times):
         # Column J: fast?
         #    ai.fast
         # Column K: effective reaction flux (n/cm^2/s)
-        flux = env.fluence/env.fast_ratio if ai.fast else env.fluence
+        # PAK: I don't know what to do if fast_ratio is 0, so I ignore it if it is less than 1
+        flux = env.fluence/env.fast_ratio if ai.fast and env.fast_ratio>1 else env.fluence
         # Column L: root part of activation calculation
         # Decay correction portion done in column M
         # The given mass is sample mass * sample fraction * isotope abundance

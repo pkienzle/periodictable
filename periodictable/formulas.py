@@ -360,7 +360,7 @@ class Formula(object):
         Mass fraction representation of the elements in the molecule
         """
         total_mass = self.mass
-        return {a: m*a.mass/total_mass for a,m in self.atoms.items()}
+        return dict((a,m*a.mass/total_mass) for a,m in self.atoms.items())
 
 
     def _pf(self):

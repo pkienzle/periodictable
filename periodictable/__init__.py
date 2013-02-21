@@ -58,7 +58,8 @@ def data_files():
         return files
 
     data_files = [('periodictable-data/xsf',
-                   _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat']))]
+                   _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat'])),
+                  ('periodictable-data', 'activation.dat')]
     return data_files
 
 # Export variables for each element name and symbol.
@@ -99,6 +100,19 @@ def _load_neutron():
     from . import nsf
     nsf.init(elements)
 core.delayed_load(['neutron'],_load_neutron, isotope=True)
+
+def _load_neutron_activation():
+    """
+    Neutron activation calculations for isotopes and formulas.
+
+    Reference:
+        *IAEA 273: Handbook on Nuclear Activation Data.*
+        *NBSIR 85-3151: Compendium of Benchmark Neutron Field.*
+    """
+    from . import activation
+    activation.init(elements)
+core.delayed_load(['neutron_activation'], _load_neutron_activation, 
+                  element=False, isotope=True)
 
 def _load_xray():
     """

@@ -1,0 +1,580 @@
+	Computational note:																					
+	  For some numerical combinations with very large half-lives the numerical																					
+	  precision is inadequate and you get negative results. This can be																					
+	  corrected by reformulation or approximations but has not been done.																					
+	"  Remember, the X in EXP(X) is limited to |X|<709"																					
+																						
+	**********************************************************************																					
+	WARNING: If you SORT this table take care to include all columns!!!																					
+	   Otherwise all is lost and you have no means to unscramble your action																					
+	"WARNING: A relative reference is used in the daughter nuclide entry. That is, the parent must be on the line directly above the daughter!"																					
+	"    DO NOT change the order of the parent daughter pairs, upon pain of erroneous results"																					
+	"    This caution applies to both ""b"" and ""2n"" mode production."																					
+	**********************************************************************																					
+																						
+	Notes:																					
+	Simplifications have been made as indicated in the comments column.																					
+	"Typically, for a decay chain where the daughter is also produced (isomers)"																					
+	  the s of the parent has been added to that of the daughter when the																					
+	  daughter t1/2 is much longer (true for most cases) and the parent																					
+	"  t1/2 is relatively short, e.g. less than 1 day, so that allthe daughter"																					
+	  will be made relatively promptly.																					
+	In cases where the above condition is not met an * is put next to the																					
+	  nuclide name to warn that the daughter production has not been accounted																					
+	  for. In most cases the daughter is in a simple decay equilibrium.																					
+	Where the decay product is a new nuclide a line has been added to the																					
+	  database to account for this. This production mode is indicated in																					
+	  the reaction column by 'b'. Where both m and g state contribute to daughter																					
+	"  production it is simplified to a single parent, that with the greater"																					
+	  cross-section or that with the longer half-life together with the sum of the cross-sections.																					
+	In a few cases where the parent nuclide t1/2 is very short all production																					
+	"  is assigned to the daughter and no entry is made for the parent, as"																					
+	  noted in the comments column.																					
+	No correction for neutron burn up has been made																					
+	Most cross-section data is from IAEA 273.																					
+	"Fast neutron data from NBSIR 85-3151, Compendium of Benchmark Neutron Fields"																					
+	"  is for reaction above the Cd cutooff, .4eV. Noted in comment column"																					
+	Fast neutron reaction data from IAEA 273 has been weighted by a unit fluence																					
+	"  fast maxwellian spectrum as described in NBSIR 85-3151, but no further"																					
+	  weighting for a 1/v or thermal component has been made. Only selected																					
+	  reactions have been included.																					
+																						
+																						
+	fast? : identifies fast neutron reactions so fast fluence reduction factor can be applied.																					
+	"isomer : identifies isomers, and is used to flag radioactive daughter info"																					
+	%IT : Info only. Not used in any spreadsheet calculation.																					
+	Resonance: the cross-section above the nominal Cd cutoff.																					
+	          Basically useful if you already know the answer.																					
+																						
+																						
+							Notation on nuclide name															
+							"m,m1,m2 indicate metastable states. Decay may be the ground state or another nuclide."															
+							+ indicates radioactive daughter production already included in daughter listing															
+							   several parent t1/2's required to acheive calculated daughter activity. All act. assigned at end of irradiation.															
+							   In most cases the added activity to the daughter is small.															
+							"* indicates radioactive daughter production NOT calculated, approx secular equilibrium"															
+							s indicates radioactive daughter of this nuclide in secular equilibrium after several daughter t1/2's															
+							t indicates transient equil via beta decay. Accumulation of that nuclide during irradiation is separately calculated.															
+							Reaction = b indicates production via decay from an activation produced parent															
+																			|..............|			
+	   Target Element					Isotopic					    Reaction			  Cross-section					b or 2n mode production			
+	Index		Symbol			  %	Resulting		t1/2	 isomer		^		 Thermal		Resonance		t1/2	t1/2 of	Cross-section (b) of 2n precursor		
+		 Z	^	  A		Abund	Nuclide	 t1/2	unit	 ^	 %IT	  fast		  (b)	g(T)	  (b)	t1/2	as text	 parent	& burnup X-sect of 2n parent		
+													?				in hr			thermal	resonance	  Comments
+H	1	1	H	2	H-2	0.015	H-3	12.346	y			act	n	0.000519		0.0006298	108150.96	12.346y				
+He	2	2	He	3	He-3	0.00013	H-3	12.346	y			"n,p"	n	5333		2401	108150.96	12.346y				
+Li	3	3	Li	7	Li-7	92.5	Li-8	0.844	s			act	n	0.0454		0.01756	0.000234444	0.844 s				
+Li	4	3	Li	6	Li-6	7.5	H-3	12.346	y			"n,a"	n	940		425.5	108150.96	12.346y				
+Be	5	4	Be	9	Be-9	100	Be-10	1600000	y			act	n	0.0076		0.004	14016000000	1.6 My				
+Be	6	4	Be	9	Be-9	100	He-6	0.805	s			"n,a"	y	0.0328			0.000223611	0.805 s				IAEA156
+B	7	5	B	11	B-11	80	B-12	0.0203	s			act	n	0.0055		0.0757	5.63889E-06	0.020 s				
+B	8	5	B	11	B-11	80	Li-8	0.844	s			"n,a"	y	0.00014			0.000234444	0.844 s				IAEA156
+C	9	6	C	12	C-12	98.9	C-11	20.3	m			"n,2n"	y	4.2E-10			0.338333333	20.30 m				IAEA156
+C	10	6	C	13	C-13	1.11	C-14	5736	y			act	n	0.00137		0.0017	50247360	5736 y				
+N	11	7	N	14	N-14	99.64	C-14	5736	y			"n,p"	n	0.00183			50247360	5736 y				
+N	12	7	N	15	N-15	0.36	N-16	7.14	s			act	n	0.000024		0.00011	0.001983333	7.14 s				
+O	13	8	O	16	O-16	99.75	N-16	7.14	s			"n,p"	y	0.000019			0.001983333	7.14 s				IAEA156
+O	14	8	O	16	O-16	99.75	O-15	122	s			"n,2n"	y	5.3E-10			0.033888889	122 s				IAEA156
+O	15	8	O	17	O-17	0.039	C-14	5736	y			"n,a"	n	0.235			50247360	5736 y				
+O	16	8	O	17	O-17	0.039	N-17	4.17	s			"n,p"	y	0.0000086			0.001158333	4.2 s				IAEA156
+O	17	8	O	18	O-18	0.205	O-19	27.1	s			act	n	0.00016		0.00087	0.007527778	27.1 s				
+F	18	9	F	19	F-19	100	F-20	11	s			act	n	0.0096		0.039	0.003055556	11.0 s				
+F	19	9	F	19	F-19	100	O-19	26.9	s			"n,p"	y	0.00135			0.007472222	26.9 s				IAEA156
+F	20	9	F	19	F-19	100	N-16	7.14	s			"n,a"	y	0.00785			0.001983333	7.1 s				IAEA156
+F	21	9	F	19	F-19	100	F-18	109.8	m			"n,2n"	y	0.0000073			1.83	110 m				
+Ne	22	10	Ne	22	Ne-22	9.23	Ne-23	38	s			act	n	0.0455		0.023	0.010555556	38.0 s				
+Na	23	11	Na	23	Na-23	100	Na-24m+	0.02	s	m+		act	n	0.4			5.55556E-06	0.020 s				
+Na	24	11	Na	23	Na-23	100	Na-24	15.03	h	g		act	n	0.53		0.32	15.03	15.0 h				s for .02s isomer added to ground state
+Na	25	11	Na	23	Na-23	100	Na-22	2.602	y			"n,2n"	y	0.0000022			22793.52	2.602 y				"IAEA156, fission averaged"
+Na	26	11	Na	23	Na-23	100	Ne-23	37.2	s			"n,p"	y	0.0015			0.010333333	37.2 s				IAEA156
+Na	27	11	Na	23	Na-23	100	F-20	11	s			"n,a"	y	0.000765			0.003055556	11.0 s				IAEA156
+Mg	28	12	Mg	25	Mg-25	10	Na-25	59.3	s			"n,p"	y	0.0032			0.016472222	59.3 s				IAEA156
+Mg	29	12	Mg	26	Mg-26	11.01	Mg-27	9.46	m			act	n	0.035		0.027	0.157666667	9.46 m		0.07		
+Mg	30	12	Mg	26	Mg-26	11.01	Mg-28	21	h			2n	n	0.035		0.027	21	21.0 h	0.157666667	0.07		
+Mg	31	12	Mg	24	Mg-24	78.99	Na-24	15.03	h			"n,p"	y	0.00153			15.03	15.03 h				"IAEA156, fission averaged, an adopted std."
+Al	32	13	Al	27	Al-27	100	Al-28	2.246	m			act	n	0.232		0.175	0.037433333	2.25 m				
+Al	33	13	Al	27	Al-27	100	Na-24	15.03	h			"n,a"	y	0.000725			15.03	15.03 h				"from NBSIR 85-3151, IAEA 156"
+Al	34	13	Al	27	Al-27	100	Mg-27	9.458	m			"n,p"	y	0.004			0.157633333	9.458 m				"IAEA156, fission averaged"
+Si	35	14	Si	28	Si-28	92.23	Al-28	2.25	m			"n,p"	y	0.0064			0.0375	2.250 m				"IAEA156, fission averaged"
+Si	36	14	Si	29	Si-29	4.67	Al-29	6.5	m			"n,p"	y	0.0033			0.108333333	6.5 m				"IAEA156, fission averaged"
+Si	37	14	Si	30	Si-30	3.1	Si-31	2.62	h			act	n	0.107		0.66	2.62	2.62 h		0.18		
+Si	38	14	Si	30	Si-30	3.1	Si-32	100	y			2n	n	0.107		0.66	876000	100 y	2.62	0.18		
+Si	39	14	Si	30	Si-30	3.1	Mg-27	9.458	m			"n,a"	y	0.000155			0.157633333	9.458 m				"IAEA156, fission averaged"
+P	40	15	P	31	P-31	100	P-32	14.3	d			act	n	0.172		0.085	343.2	14.3 d				
+P	41	15	P	31	P-31	100	P-33	25.3	d			2n	n	10		0	607.2	25.3 d	343.2	0.17	0.085	"dummy entry, a guess"
+P	42	15	P	31	P-31	100	Si-31	2.62	h			"n,p"	y	0.036			2.62	2.62 h		0.18		"IAEA156, fission averaged"
+P	43	15	P	31	P-31	100	Si-32	100	y			2n	n	0.036			876000	100 y	2.62	0.18		"produced via P(n,p) then Si-31 (n,g)"
+S	44	16	S	32	S-32	95.02	P-32	14.3	d			"n,p"	y	0.069			343.2	14.3 d				"IAEA156, fission averaged, an adopted std."
+S	45	16	S	33	S-33	0.75	P-33	25.3	d			"n,p"	n	0.002			607.2	25.3 d				"IAEA273, thermal only"
+S	46	16	S	33	S-33	0.75	P-33	25.3	d			"n,p"	y	0.076			607.2	25.3 d				"IAEA156, fission averaged"
+S	47	16	S	33	S-33	0.75	P-33	25.3	d			"n,p"	y	0.076			607.2	25.3 d				"IAEA156, fission averaged"
+S	48	16	S	34	S-34	4.2	S-35	87.2	d			act	n	0.24		0.534	2092.8	87.2 d				"IAEA273, note- no entry for A+1 nuclide"
+S	49	16	S	34	S-34	4.2	P-34	12.4	s			"n,p"	y	0.00043			0.003444444	12.40 s				"IAEA156, fission averaged"
+S	50	16	S	36	S-36	0.015	S-37	5.1	m			act	n	0.15		0.17	0.085	5.10 m				
+Cl	51	17	Cl	35	Cl-35	75.77	Cl-36	300000	y			act	n	43.6		18	2628000000	0.3 My				
+Cl	52	17	Cl	35	Cl-35	75.77	S-35	87.2	d			"n,p"	n	0.489			2092.8	87.2 d				"iaea273, thermal only"
+Cl	53	17	Cl	35	Cl-35	75.77	S-35	87.2	d			"n,p"	y	0.078			2092.8	87.2 d				"IAEA156, fission averaged"
+Cl	54	17	Cl	35	Cl-35	75.77	P-32	14.3	d			"n,a"	n	0.00008			343.2	14.3 d				"iaea273, thermal only"
+Cl	55	17	Cl	35	Cl-35	75.77	P-32	14.3	d			"n,a"	y	0.0088			343.2	14.3 d				"IAEA156, fission averaged"
+Cl	56	17	Cl	37	Cl-37	24.23	Cl-38m+	1	s	m+	100	act	n	0.047			0.000277778	1.00 s				
+Cl	57	17	Cl	37	Cl-37	24.23	Cl-38	37.18	m	g		act	n	0.423		0.3	0.619666667	37.2 m				s for 1s isomer added to ground state
+Cl	58	17	Cl	37	Cl-37	24.23	S-37	5.05	m			"n,p"	y	0.00038			0.084166667	5.1 m				"IAEA156, fission averaged"
+Ar	59	18	Ar	36	Ar-36	0.34	Ar-37	34.8	d			act	n	5.2		2.5	835.2	34.8 d		1970		
+Ar	60	18	Ar	38	Ar-38	0.07	Ar-39	269	y			act	n	0.8		0.4	2356440	269 y		600		
+Ar	61	18	Ar	40	Ar-40	99.59	Ar-41	1.83	h			act	n	0.66		0.42	1.83	1.83 h		0.5		
+Ar	62	18	Ar	40	Ar-40	99.59	Ar-42	33	y			2n	n	0.66		0.42	289080	33.00 y	1.83	0.5		
+K	63	19	K	39	K-39	93.3	Cl-36	300000	y			"n,a"	y	0.008			2628000000	0.3 My				"IAEA156, fission averaged"
+K	64	19	K	39	K-39	93.3	Cl-36	300000	y			"n,a"	n	0.0043			2628000000	0.3 My				"IAEA273, thermal only"
+K	65	19	K	39	K-39	93.3	K-40	1300000000	y			act	n	2.1		1.1	1.1388E+13	1.3 Gy		34.8	15	"IAEA273, thermal only"
+K	66	19	K	41	K-41	6.7	K-42	12.36	h			act	n	1.46		1.4	12.36	12.36 h				
+K	67	19	K	41	K-41	6.7	Ar-41	1.83	h			"n,p"	y	0.0021			1.83	1.83 h		0.5		"IAEA156, fission averaged"
+K	68	19	K	41	K-41	6.7	Ar-42	33	y			2n	n	0.0021			289080	33.00 y	1.83	0.5		produced from Ar-41
+K	69	19	K	41	K-41	6.7	Cl-38	37.18	m			"n,a"	y	0.00076			0.619666667	37.2 m				"IAEA156, fission averaged"
+Ca	70	20	Ca	40	Ca-40	96.94	Ca-41	130000	y			act	n	0.41		0.22	1138800000	0.13My		4		
+Ca	71	20	Ca	40	Ca-40	96.94	Ar-37	34.8	d			"n,a"	y	0.013			835.2	34.8 d		1970		"IAEA156, fission averaged"
+Ca	72	20	Ca	40	Ca-40	96.94	Ar-37	34.8	d			"n,a"	n	0.0025			835.2	34.8 d		1970		"IAEA273, thermal only"
+Ca	73	20	Ca	43	Ca-43	0.135	K-43	22.3	h			"n,p"	y	0.0003			22.3	22.30 h				"IAEA156, fission averaged"
+Ca	74	20	Ca	44	Ca-44	2.08	Ca-45	165	d			act	n	0.88		0.56	3960	165 d		15		
+Ca	75	20	Ca	44	Ca-44	2.08	Ar-41	1.83	h			"n,a"	y	0.0000611			1.83	1.83 h		0.5		"IAEA156, fission averaged"
+Ca	76	20	Ca	44	Ca-44	2.08	Ar-42	33	y			2n	n	0.0000611			289080	33.00 y	1.83	0.5		produced from Ar-41
+Ca	77	20	Ca	46	Ca-46	0.003	Ca-47*	4.54	d	*		act	n	0.74		0.32	108.96	4.54 d				
+Ca	78	20	Ca	48	Ca-48	0.19	Ca-49t	8.72	m	t		act	n	1.09		0.9	0.145333333	8.72 m				
+Ca	79	20	Ca	48	Ca-48	0.19	Sc-49	57.3	m			b	n	1.09		0.9	0.955	57.3 m	0.145333333			
+Ca	80	20	Ca	48	Ca-48	0.19	Ca-47*	4.54	d			"n,2n"	y	0.00036			108.96	4.54 d				"IAEA156, fission averaged"
+Sc	81	21	Sc	45	Sc-45	100	Sc-46m+	18.7	s	m+	100	act	n	9.8		5.4	0.005194444	18.7 s				
+Sc	82	21	Sc	45	Sc-45	100	Sc-46	84	d	g		act	n	27.2		11.5	2016	84.0 d		8		s for 19s isomer added to ground state
+Sc	83	21	Sc	45	Sc-45	100	Sc-47	3.34	d	g		2n	n	27.2		11.5	80.16	3.3 d	2016	8		
+Sc	84	21	Sc	45	Sc-45	100	Ca-45	165	d			"n,p"	y	0.015			3960	165.0 d				"IAEA156, fission averaged"
+Sc	85	21	Sc	45	Sc-45	100	K-42	12.36	h			"n,a"	y	0.000182			12.36	12.36 h				"IAEA156, fission averaged"
+Ti	86	22	Ti	46	Ti-46	8	Sc-46	84	d			"n,p"	y	0.0118			2016	84 d		8		from NBSIR 85-3151
+Ti	87	22	Ti	46	Ti-46	8	Sc-47	3.34	d			2n	n	0.0118			80.16	3 d	2016	8		produced via Sc-46
+Ti	88	22	Ti	46	Ti-46	8	Ti-45	3.078	h			"n,2n"	y	0.0000078			3.078	3.08 h				"IAEA156, fission averaged"
+Ti	89	22	Ti	47	Ti-47	7.3	Sc-47	3.422	d			"n,p"	y	0.018			82.128	3.422 d				from NBSIR 85-3151
+Ti	90	22	Ti	48	Ti-48	73.8	Sc-48	43.67	h			"n,p"	y	0.000397			43.67	43.67 h				from NBSIR 85-3151
+Ti	91	22	Ti	48	Ti-48	73.8	Ca-45	165	d			"n,a"	y	0.000013			3960	165.0 d				"IAEA156, fission averaged"
+Ti	92	22	Ti	50	Ti-50	5.3	Ti-51	5.8	m			act	n	0.179		0.12	0.096666667	5.80 m				
+Ti	93	22	Ti	50	Ti-50	5.3	Ca-47*	4.54	d			"n,a"	y	0.00000046			108.96	4.5 d				"IAEA156, fission averaged"
+V	94	23	V	51	V-51	99.75	V-52	3.75	m			act	n	4.93		2.6	0.0625	3.75 m				
+V	95	23	V	51	V-51	99.75	Ti-51	5.76	m			"n,p"	y	0.00087			0.096	5.76 m				"IAEA156, fission averaged"
+V	96	23	V	51	V-51	99.75	Sc-48	43.67	h			"n,a"	y	0.000022			43.67	43.67 h				"IAEA156, fission averaged"
+Cr	97	24	Cr	50	Cr-50	4.35	Cr-51	27.7	d			act	n	15.9		8.1	664.8	27.7 d				
+Cr	98	24	Cr	50	Cr-50	4.35	Cr-49	42.1	m			"n,2n"	y	0.000006			0.701666667	42.10 m				"IAEA156, fission averaged"
+Cr	99	24	Cr	52	Cr-52	83.79	V-52	3.75	m			"n,p"	y	0.00109			0.0625	3.75 m				"IAEA156, fission averaged"
+Cr	100	24	Cr	53	Cr-53	9.5	V-53	1.61	m			"n,p"	y	0.00044			0.026833333	1.61 m				"IAEA156, fission averaged"
+Cr	101	24	Cr	54	Cr-54	2.36	Cr-55	3.6	m			act	n	0.36		0.08	0.06	3.60 m				
+Mn	102	25	Mn	55	Mn-55	100	Mn-56	2.58	h			act	n	13.3		13.8	2.58	2.58 h				
+Mn	103	25	Mn	55	Mn-55	100	Mn-54	312.7	d			"n,2n"	y	0.000258			7504.8	312.7 d		38	17	"IAEA156, fission averaged"
+Mn	104	25	Mn	55	Mn-55	100	V-52	3.75	m			"n,a"	y	0.00011			0.0625	3.75 m				"IAEA156, fission averaged"
+Fe	105	26	Fe	54	Fe-54	5.8	Fe-55	2.7	y			act	n	2.25		1.2	23652	2.70 y				
+Fe	106	26	Fe	54	Fe-54	5.8	Mn-54	312.7	d			"n,p"	y	0.0817			7504.8	312.7 d		38	17	from NBSIR 85-3151
+Fe	107	26	Fe	54	Fe-54	5.8	Cr-51	27.7	d			"n,a"	y	0.0006			664.8	27.7 d				"IAEA156, fission averaged"
+Fe	108	26	Fe	54	Fe-54	5.8	Fe-53	8.51	m			"n,2n"	y	0.000005			0.141833333	8.51 m				"IAEA156, fission averaged"
+Fe	109	26	Fe	56	Fe-56	91.72	Mn-56	2.58	h			"n,p"	y	0.00107			2.58	2.58 h				"IAEA156, fission averaged"
+Fe	110	26	Fe	58	Fe-58	0.31	Fe-59	44.6	d			act	n	1.28		1.4	1070.4	44.6 d				
+Co	111	27	Co	59	Co-59	100	Co-60m+	10.5	m	m+	99.7	act	n	18.8		39.7	0.175	10.5 m		58	230	
+Co	112	27	Co	59	Co-59	100	Co-61	1.65	h			2n	n	18.8		39.7	1.65	1.7 h	0.175	58	230	Co-61 prod from Co-60m only
+Co	113	27	Co	59	Co-59	100	Co-60	5.272	y	g		act	n	37.45		71.1	46182.72	5.27 y		2	4.1	s for 10m isomer added to ground state
+Co	114	27	Co	59	Co-59	100	Co-61	1.65	h			2n	n	37.45		71.1	1.65	1.65 h	46182.72	2	4.1	Co-61 prod assuming all Co-60m has decayed to Co-60
+Co	115	27	Co	59	Co-59	100	Fe-59	44.6	d			"n,p"	y	0.00142			1070.4	44.6 d				"IAEA156, fission averaged"
+Co	116	27	Co	59	Co-59	100	Mn-56	2.58	h			"n,a"	y	0.000156			2.58	2.58 h				"IAEA156, fission averaged"
+Co	117	27	Co	59	Co-59	100	Co-58	70.8	d			"n,2n"	y	0.0004			1699.2	70.8 d		1880	6890	"IAEA156, fission averaged"
+Ni	118	28	Ni	58	Ni-58	67.76	Ni-57	36.1	h			"n,2n"	y	0.0000049			36.1	36.10 h				"IAEA156, fission averaged"
+Ni	119	28	Ni	58	Ni-58	67.76	Ni-59	75000	y			act	n	4.6		2.8	657000000	75000y		77.7	140	
+Ni	120	28	Ni	58	Ni-58	67.76	Fe-55	2.7	y			"n,a"	y	0.003			23652	2.70 y				"iaea156, fission averaged"
+Ni	121	28	Ni	58	Ni-58	67.76	Fe-55	2.7	y			"n,a"	n	0.00003			23652	2.70 y				"IAEA273, thermal only"
+Ni	122	28	Ni	58	Ni-58	67.76	Fe-55	2.7	y			"n,a"	y	0.003			23652	2.7 y				"IAEA273, fission maxwellian weighted, IAEA156"
+Ni	123	28	Ni	58	Ni-58	67.76	Co-58	70.8	d			"n,p"	y	0.111			1699.2	70.8 d		1880	6890	from NBSIR 85-3151
+Ni	124	28	Ni	58	Ni-58	67.76	Co-58m+	9.1	h			"n,p"	y	0.0354			9.1	9.10 h		140000	540000	"IAEA156, fission averaged"
+Ni	125	28	Ni	60	Ni-60	26.1	Co-60	5.272	y			"n,p"	y	0.0023			46182.72	5.272 y		2	4.1	"IAEA156, fission averaged"
+Ni	126	28	Ni	60	Ni-60	26.1	Co-60m+	10.48	m			"n,p"	y	0.0021			0.174666667	10.48 m		58	230	"IAEA156, fission averaged"
+Ni	127	28	Ni	60	Ni-60	26.1	Co-61	1.65	h			2n	n	0.0021			1.65	1.65 h	0.174666667	58	230	produced via Co-60
+Ni	128	28	Ni	61	Ni-61	1.13	Co-61	1.65	h			"n,p"	y	0.0014			1.65	1.65 h				"IAEA156, fission averaged"
+Ni	129	28	Ni	62	Ni-62	3.71	Ni-63	100	y			act	n	14.5		8.1	876000	100 y		24.4		
+Ni	130	28	Ni	62	Ni-62	3.71	Fe-59	44.6	d			"n,a"	y	0.00009			1070.4	44.6 d				"IAEA156, fission averaged"
+Ni	131	28	Ni	64	Ni-64	0.95	Ni-65	2.52	h			act	n	1.58		1.19	2.52	2.52 h		22.4		
+Cu	132	29	Cu	63	Cu-63	69.1	Cu-62	9.74	m			"n,2n"	y	0.000124			0.162333333	9.74 m				"IAEA156, fission averaged"
+Cu	133	29	Cu	63	Cu-63	69.1	Cu-64	12.7	h			act	n	4.5		4.94	12.7	12.7 h				
+Cu	134	29	Cu	63	Cu-63	69.1	Co-60	5.272	y			"n,a"	y	0.0006			46182.72	5.272 y		2	4.1	from NBSIR 85-3151
+Cu	135	29	Cu	63	Cu-63	69.1	Co-61	1.65	h			2n	n	0.0006			1.65	1.650 h	46182.72	2	4.1	produced via Co-60
+Cu	136	29	Cu	65	Cu-65	30.9	Cu-66	5.1	m			act	n	2.17		2.32	0.085	5.10 m		135		
+Cu	137	29	Cu	65	Cu-65	30.9	Cu-67	61.9	h			2n	n	2.17		2.32	61.9	61.90 h	0.085	135		
+Cu	138	29	Cu	65	Cu-65	30.9	Ni-65	2.52	h			"n,p"	y	0.00048			2.52	2.5 h		22.4		"IAEA156, fission averaged"
+Cu	139	29	Cu	65	Cu-65	30.9	Ni-66s	54.8	h			2n	n	0.00048			54.8	54.8 h	2.52	22.4		produced via Ni-65
+Zn	140	30	Zn	64	Zn-64	48.9	Zn-65	265	d			act	n	0.76		1.4	6360	265 d		250		
+Zn	141	30	Zn	64	Zn-64	48.9	Cu-64	12.7	h			"n,p"	y	0.031			12.7	12.7 h				"IAEA156, fission averaged"
+Zn	142	30	Zn	66	Zn-66	27.9	Zn-65	265	d			"n,2n"	y	0.005			6360	265 d		250		"IAEA156, fission averaged [cross-section is <5 mb. Hence this is a max. calc.]"
+Zn	143	30	Zn	66	Zn-66	27.9	Cu-66	5.1	m			"n,p"	y	0.00062			0.085	5.1 m		135		"IAEA156, fission averaged"
+Zn	144	30	Zn	66	Zn-66	27.9	Cu-67	61.9	h			2n	n	0.00062			61.9	61.9 h	0.085	135		produced via Cu-66
+Zn	145	30	Zn	67	Zn-67	4.1	Cu-67	61.9	h			"n,p"	y	0.00107			61.9	61.9 h				"IAEA156, fission averaged"
+Zn	146	30	Zn	68	Zn-68	18.6	Zn-69ms	13.9	h	m*	99	act	n	0.072		0.24	13.9	13.9 h				s not added to ground state
+Zn	147	30	Zn	68	Zn-68	18.6	Zn-69	56	m	g		act	n	1		3.36	0.933333333	56.0 m				
+Zn	148	30	Zn	68	Zn-68	18.6	Ni-65	2.52	h			"n,a"	y	0.000074			2.52	2.5 h		22.4		"IAEA156, fission averaged"
+Zn	149	30	Zn	68	Zn-68	18.6	Ni-66s	54.8	h			2n	n	0.000074			54.8	54.8 h	2.52	22.4		produced via Ni-65
+Zn	150	30	Zn	70	Zn-70	0.62	Zn-71m	3.9	h	m	0	act	n	0.0087			3.9	3.90 h				
+Zn	151	30	Zn	70	Zn-70	0.62	Zn-71	2.4	m	g		act	n	0.083			0.04	2.40 m				
+Ga	152	31	Ga	69	Ga-69	60	Ga-70	21.1	m			act	n	1.68		15.5	0.351666667	21.1 m				
+Ga	153	31	Ga	69	Ga-69	60	Zn-69ms	13.8	h			"n,p"	y	0.000496			13.8	13.8 h				"IAEA156, fission averaged"
+Ga	154	31	Ga	71	Ga-71	40	Ga-72m+	0.036	s	m+	100	act	n	0.15			0.00001	0.036 s				
+Ga	155	31	Ga	71	Ga-71	40	Ga-72	14.1	h	g		act	n	4.71		31.1	14.1	14.1 h		4.25	25.7	s for 36ms isomer added to ground state
+Ga	156	31	Ga	71	Ga-71	40	Ga-73	4.87	h			2n	n	4.71		31.1	4.87	4.9 h	14.1	4.25	25.7	
+Ge	157	32	Ge	70	Ge-70	20.7	Ge-69	39.1	h			"n,2n"	y	0.0018			39.1	39.1 h				"IAEA156, fission averaged"
+Ge	158	32	Ge	70	Ge-70	20.7	Ge-71m+	0.02	s	m+	100	act	n	0.28			5.55556E-06	0.020 s				
+Ge	159	32	Ge	70	Ge-70	20.7	Ge-71	11.2	d	g		act	n	3.43		1.5	268.8	11.2 d				s for 20ms isomer added to ground state
+Ge	160	32	Ge	72	Ge-72	27.5	Ge-73m	0.53	s	m	100	act	n	0.98		0.76	0.000147222	0.530 s				assigned m+g barns to m state. g is stable
+Ge	161	32	Ge	72	Ge-72	27.5	Ga-72	14.1	h			"n,p"	y	0.000022			14.1	14.1 h		4.25	25.7	"IAEA156, fission averaged"
+Ge	162	32	Ge	72	Ge-72	27.5	Ga-73	4.87	h			2n	n	0.000022			4.87	4.9 h	14.1	4.25	25.7	produced via Ga-72
+Ge	163	32	Ge	72	Ge-72	27.5	Zn-69ms	13.8	h			"n,a"	y	0.000025			13.8	13.8 h				"IAEA156, fission averaged"
+Ge	164	32	Ge	74	Ge-74	36.4	Ge-75m+	48	s	m+	99	act	n	0.17		0.41	0.013333333	48.0 s				
+Ge	165	32	Ge	74	Ge-74	36.4	Ge-75	83	m	g		act	n	0.51		1	1.383333333	83.0 m				s for 48s isomer added to ground state
+Ge	166	32	Ge	74	Ge-74	36.4	Zn-71ms	3.9	h			"n,a"	y	0.0000025			3.9	3.9 h				"IAEA156, fission averaged"
+Ge	167	32	Ge	76	Ge-76	7.7	Ge-77m+	54	s	m+	19.8	act	n	0.1		1.2	0.015	54.0 s		1.48	7.01	
+Ge	168	32	Ge	76	Ge-76	7.7	Ge-77	11.3	h	g		act	n	0.16		2	11.3	11.3 h		1.48	7.01	s for 54s isomer added to ground state
+Ge	169	32	Ge	76	Ge-76	7.7	Ge-78s	1.45	h			2n	n	0.1		1.2	1.45	1.5 h	11.3	1.48	7.01	
+As	170	33	As	75	As-75	100	As-74	17.78	d			"n,2n"	y	0.00033			426.72	17.8 d				"IAEA156, fission averaged"
+As	171	33	As	75	As-75	100	As-76	26.4	h			act	n	4.48		61	26.4	26.4 h		60.8	216.1	
+As	172	33	As	75	As-75	100	As-77	38.8	h			2n	n	4.48		61	38.8	38.8 h	26.4	60.8	216.1	
+As	173	33	As	75	As-75	100	Ge-75	83	m			"n,p"	y	0.00045			1.383333333	83.00 m				"IAEA156, fission averaged"
+Se	174	34	Se	74	Se-74	0.9	Se-75	120	d			act	n	51.8		514	2880	120 d				
+Se	175	34	Se	74	Se-74	0.9	As-74	17.78	d			"n,p"	y	0.0066			426.72	18 d				"IAEA156, fission averaged"
+Se	176	34	Se	76	Se-76	9	Se-77m	17.5	s	m	100	act	n	22		17	0.004861111	17.5 s				
+Se	177	34	Se	77	Se-77	7.6	Se-77m	17.5	s			"n,n'"	y	0.733			0.004861111	17.5 s				"IAEA156, fission averaged [max. cross-section]"
+Se	178	34	Se	78	Se-78	23.5	Se-77m	17.5	s			"n,2n"	y	0.001			0.004861111	17.5 s				"IAEA156, fission averaged [max. cross-section]"
+Se	179	34	Se	78	Se-78	23.5	Se-79m+	3.9	m	m+	100	act	n	0.38		3.7	0.065	3.90 m		3.28	36	
+Se	180	34	Se	78	Se-78	23.5	Se-79	65000	y	g		act	n	0.43		4.76	569400000	65000y		3.28	36	s for 4m isomer added to ground state
+Se	181	34	Se	80	Se-80	50	Se-79m	3.9	m			"n,2n"	y	0.01			0.065	3.9 m		3.28	36	"IAEA156, fission averaged [max. cross-section]"
+Se	182	34	Se	80	Se-80	50	Se-81m*	57.3	m	m*	99	act	n	0.08		0.42	0.955	57.3 m				
+Se	183	34	Se	80	Se-80	50	Se-81	18	m	g		act	n	0.53		1.28	0.3	18.0 m				
+Se	184	34	Se	82	Se-82	9.1	Se-83m+	69	s	m+	0	act	n	0.039			0.019166667	69.0 s				
+Se	185	34	Se	82	Se-82	9.1	Se-83t	22.4	m	t		act	n	0.044		0.08	0.373333333	22.4 m				s for 69s isomer added to ground state
+Se	186	34	Se	82	Se-82	9.1	Br-83	2.39	h			b	n	0.044		0.08	2.39	2.39 h	0.373333333			
+Br	187	35	Br	79	Br-79	50.69	Br-80m*	4.42	h	m*	100	act	n	2.4		35.7	4.42	4.42 h				
+Br	188	35	Br	79	Br-79	50.69	Br-80	18	m	g		act	n	8.6		95.7	0.3	18.0 m				
+Br	189	35	Br	79	Br-79	50.69	As-76	26.4	h			"n,a"	y	0.00002			26.4	26.40 h		60.8	216.1	"IAEA156, fission averaged"
+Br	190	35	Br	79	Br-79	50.69	As-77	38.8	h			2n	n	0.00002			38.8	38.80 h	26.4	60.8	216.1	produced via As-76
+Br	191	35	Br	81	Br-81	49.31	Br-82m+	6.1	m	m+	97.6	act	n	2.43		41.3	0.101666667	6.10 m		18.09	90.46	
+Br	192	35	Br	81	Br-81	49.31	Br-82	35.34	h	g		act	n	2.7		50.2	35.34	35.3 h		18.09	90.46	s for 6m isomer added to ground state
+Br	193	35	Br	81	Br-81	49.31	Br-83	2.39	h			2n	n	2.7		50.2	2.39	2.4 h	35.34	18.09	90.46	
+Br	194	35	Br	81	Br-81	49.31	Se-81m*	57.3	m			"n,p"	y	0.0000145			0.955	57.30 m				"IAEA156, fission averaged"
+Kr	195	36	Kr	78	Kr-78	0.35	Kr-79m+	50	s	m+	100	act	n	0.17			0.013888889	50.0 s				
+Kr	196	36	Kr	78	Kr-78	0.35	Kr-79	34.9	h	g		act	n	6.2		20	34.9	34.9 h				s for 50s isomer added to ground state
+Kr	197	36	Kr	80	Kr-80	2.25	Kr-81m+	13.3	s	m+	100	act	n	4.55			0.003694444	13.3 s				
+Kr	198	36	Kr	80	Kr-80	2.25	Kr-81	210000	y	g		act	n	11.5		56	1839600000	0.21My				s for 13s isomer added to ground state
+Kr	199	36	Kr	82	Kr-82	11.6	Kr-83m	1.83	h	m	100	act	n	14			1.83	1.83 h				
+Kr	200	36	Kr	84	Kr-84	57	Kr-85m+	4.48	h	m+	21.2	act	n	0.09		2.4	4.48	4.48 h				
+Kr	201	36	Kr	84	Kr-84	57	Kr-85	10.76	y	g		act	n	0.0589		1.3	94257.6	10.76 y		1.66	1.8	21% of s for 4.4h isomer added to ground state
+Kr	202	36	Kr	86	Kr-86	17.3	Kr-87	76.3	m			act	n	0.003		0.1	1.271666667	76.3 m		12600	270	IAEA273: max burnup cross-sections
+Kr	203	36	Kr	86	Kr-86	17.3	Kr-88	2.84	h			2n	n	0.003		0.1	2.84	2.8 h	1.271666667	12600	270	
+Rb	204	37	Rb	85	Rb-85	72.17	Rb-84	32.9	d			"n,2n"	y	0.0002			789.6	32.9 d		12		"IAEA156, fission averaged"
+Rb	205	37	Rb	85	Rb-85	72.17	Rb-86m+	1.02	m	m+	100	act	n	0.053		1.74	0.017	1.02 m		4.92	33	
+Rb	206	37	Rb	85	Rb-85	72.17	Rb-86	18.7	d	g		act	n	0.48		5.5	448.8	18.7 d		4.92	33	s for 1m isomer added to ground state
+Rb	207	37	Rb	87	Rb-87	27.83	Rb-88	17.8	m			act	n	0.12		2.2	0.296666667	17.8 m		1		
+Rb	208	37	Rb	87	Rb-87	27.83	Rb-89*	15.2	m			2n	n	0.12		2.2	0.253333333	15.2 m	0.296666667	1		decays to Sr-89 (not calculated)
+Sr	209	38	Sr	84	Sr-84	0.56	Sr-85m+	67.7	m	m+	87	act	n	0.6		4.59	1.128333333	67.7 m				
+Sr	210	38	Sr	84	Sr-84	0.56	Sr-85	64.9	d	g		act	n	0.87		10.6	1557.6	64.9 d				87% of s for 67m isomer added to ground state
+Sr	211	38	Sr	86	Sr-86	9.9	Sr-87m	2.81	h	m	99.7	act	n	0.84		4.79	2.81	2.81 h				
+Sr	212	38	Sr	87	Sr-87	7	Sr-87m	2.81	h			"n,n'"	y	0.112			2.81	2.81 h				"IAEA156, fission averaged [max. cross-section]"
+Sr	213	38	Sr	88	Sr-88	82.6	Sr-87m	2.81	h			"n,2n"	y	0.01			2.81	2.81 h				"IAEA156, fission averaged [max. cross-section]"
+Sr	214	38	Sr	88	Sr-88	82.6	Sr-89	50.5	d			act	n	0.0058		0.06	1212	50.5 d		0.42	0.56	"IAEA273 value (.058) is in error, should be .0058"
+Sr	215	38	Sr	88	Sr-88	82.6	Sr-90	29	y			2n	n	0.0058		0.06	254040	29.0 y	1212	0.42	0.56	
+Sr	216	38	Sr	88	Sr-88	82.6	Rb-88	15.2	m			"n,p"	y	0.00001			0.253333333	15.2 m		1		"IAEA156, fission averaged"
+Y	217	39	Y	89	Y-89	100	Y-88	106.61	d			"n,2n"	y	0.000156			2558.64	106.6 d				"IAEA156, fission averaged"
+Y	218	39	Y	89	Y-89	100	Y-89m	15.7	s			"n,n'"	y	0.128			0.004361111	15.7 s				"IAEA156, fission averaged"
+Y	219	39	Y	89	Y-89	100	Y-90m+	3.19	h	m+	99	act	n	0.001			3.19	3.19 h		6.5	3	
+Y	220	39	Y	89	Y-89	100	Y-90	64.1	h	g		act	n	1.28		0.85	64.1	64.1 h		6.5	3	s for 3h isomer added to ground state
+Y	221	39	Y	89	Y-89	100	Y-91	58.5	d			2n	n	1.28		0.85	1404	58.5 d	64.1	6.5	3	
+Y	222	39	Y	89	Y-89	100	Sr-89	50.5	d			"n,p"	y	0.00031			1212	50.5 d		0.42	0.56	"IAEA156, fission averaged"
+Y	223	39	Y	89	Y-89	100	Sr-90	29	y			2n	n	0.00031			254040	29.0 y	1212	0.42	0.56	produced via Sr-89
+Y	224	39	Y	89	Y-89	100	Rb-86	18.7	d			"n,a"	y	0.000002			448.8	18.7 d		4.92	33	"IAEA156, fission averaged"
+Zr	225	40	Zr	90	Zr-90	51.45	Zr-89	78.4	h			"n,2n"	y	0.000076			78.4	78.4 h				"IAEA156, fission averaged"
+Zr	226	40	Zr	90	Zr-90	51.45	Y-90	64.1	h			"n,p"	y	0.00018			64.1	64.1 h		6.5	3	"IAEA156, fission averaged"
+Zr	227	40	Zr	90	Zr-90	51.45	Y-91	58.5	d			2n	n	0.00018			1404	58.5 d	64.1	6.5	3	produced via Y-90
+Zr	228	40	Zr	92	Zr-92	17.1	Zr-93	1500000	y			act	n	0.22		0.63	13140000000	1.5 My		2.6	20	
+Zr	229	40	Zr	92	Zr-92	17.1	Sr-89	50.5	d			"n,a"	y	0.000014			1212	50.5 d		0.42	0.56	"IAEA156, fission averaged"
+Zr	230	40	Zr	92	Zr-92	17.1	Sr-90s	29	y			2n	n	0.000014			254040	29.0 y	1212	0.42	0.56	produced via Sr-89
+Zr	231	40	Zr	94	Zr-94	17.5	Zr-95s	64	d	s		act	n	0.0499		0.3	1536	64.0 d		0.49	6.5	
+Zr	232	40	Zr	96	Zr-96	2.8	Zr-97s	16.8	h	s		act	n	0.023		5.6	16.8	16.8 h		0.202	1.55	2n addition results in 2 nuclides with t1/2's of <30 sec
+Nb	233	41	Nb	93	Nb-93	100	Nb-92mt	10.13	d			"n,2n"	y	0.00048			243.12	10.1 d				"IAEA156, fission averaged"
+Nb	234	41	Nb	93	Nb-93	100	Nb-92	37000000	y			b	y	0.00048			3.2412E+11	37.00My	243.12			"IAEA156, fission averaged [as produced via isomer decay]"
+Nb	235	41	Nb	93	Nb-93	100	Nb-94m+	6.2	m	m+	99.5	act	n	1.15		8.2	0.103333333	6.20 m				assigned m+g barns to both states
+Nb	236	41	Nb	93	Nb-93	100	Nb-94	20000	y	g		act	n	1.15		8.2	175200000	20000y				assigned m+g barns to both states
+Nb	237	41	Nb	93	Nb-93	100	Nb-93m	14.6	y	m		"n,n'"	y	0.164			127896	14.6 y				NBSIR 85-3151
+Nb	238	41	Nb	93	Nb-93	100	Y-90	64.1	h			"n,a"	y	0.0000707			64.1	64.1 h		6.5	3	"IAEA156, fission averaged"
+Mo	239	42	Mo	92	Mo-92	14.8	Mo-93m+	6.9	h	m+	99.8	act	n	0.019		0.81	6.9	6.90 h				assigned m+g barns to both states
+Mo	240	42	Mo	92	Mo-92	14.8	Mo-93	3500	y	g		act	n	0.019		0.81	30660000	3500 y				assigned m+g barns to both states
+Mo	241	42	Mo	92	Mo-92	14.8	Nb-92mt	10.13	d			"n,p"	y	0.007			243.12	10.13 d				"IAEA156, fission averaged"
+Mo	242	42	Mo	92	Mo-92	14.8	Nb-92	37000000	y			b	y	0.007			3.2412E+11	37.00My	243.12			"IAEA156, fission averaged"
+Mo	243	42	Mo	92	Mo-92	14.8	Zr-89	78.4	h			"n,a"	y	0.00004			78.4	78.40 h				"IAEA156, fission averaged"
+Mo	244	42	Mo	95	Mo-95	15.92	Nb-95	34.98	d			"n,p"	y	0.00014			839.52	34.98 d		7	24	"IAEA156, fission averaged"
+Mo	245	42	Mo	95	Mo-95	15.92	Nb-96	23.4	h			2n	n	0.00014			23.4	23.40 h	839.52	7	24	produced via Nb-95
+Mo	246	42	Mo	96	Mo-96	23.4	Nb-96	23.4	h			"n,p"	y	0.00023			23.4	23.40 h				"IAEA156, fission averaged"
+Mo	247	42	Mo	98	Mo-98	24.4	Mo-99st	66	h	st		act	n	0.13		7.3	66	66.00 h		1.733	26	
+Mo	248	42	Mo	98	Mo-98	24.4	Tc-99	210000	y			b	n	0.13		7.3	1839600000	0.21 My	66	20	230	2n addition results in 16 sec product. Burnup not calculated.
+Mo	249	42	Mo	98	Mo-98	24.4	Zr-95	64	d			"n,a"	y	0.0000139			1536	64.00 d		0.49	6.5	"IAEA156, fission averaged"
+Mo	250	42	Mo	100	Mo-100	9.6	Mo-101s	14.6	m	s		act	n	0.199		4.2	0.243333333	14.6 m				"daughter is = t1/2, only quasi-equilibrium"
+Tc	251	43	Tc	98	Tc-98	100	Tc-99m+	6	h	m+	99	act	n	0.93			6	6.00 h		1.62	26.7	
+Tc	252	43	Tc	98	Tc-98	100	Tc-99	210000	y	g		act	n	2.6			1839600000	0.21My		20	230	s for 6h isomer added to ground state
+Ru	253	44	Ru	96	Ru-96	5.5	Ru-97t	2.9	d	t		act	n	0.29		5.8	69.6	2.90 d				
+Ru	254	44	Ru	96	Ru-96	5.5	Tc-97	2600000	y			b	n	0.29		5.8	22776000000	3 My	69.6			
+Ru	255	44	Ru	102	Ru-102	31.6	Ru-103	39.35	d			act	n	1.21		4.6	944.4	39.4 d		7.71	60	
+Ru	256	44	Ru	104	Ru-104	18.6	Ru-105t	4.44	h	t		act	n	0.32		5.2	4.44	4.44 h		0.39	6.4	Ru106 2n product not calculated
+Ru	257	44	Ru	104	Ru-104	18.6	Rh-105	35.4	h			b	n	0.32		5.2	35.4	35.4 h	4.44	5000		WARNING!: Large burnup cross-section (5000 b).  Burnup not calculated.
+Rh	258	45	Rh	103	Rh-103	100	Rh-103m	56.12	m			"n,n'"	y	0.533			0.935333333	56.12 m				"IAEA156, fission averaged"
+Rh	259	45	Rh	103	Rh-103	100	Rh-104m	4.4	m	m	99.8	act	n	10		83	0.073333333	4.40 m		800		
+Rh	260	45	Rh	103	Rh-103	100	Rh-105	35.4	h			2n	n	10		83	35.4	35.40 h	0.073333333	800		
+Rh	261	45	Rh	103	Rh-103	100	Rh-104	42	s	g		act	n	135		993	0.011666667	42.0 s		800		
+Rh	262	45	Rh	103	Rh-103	100	Rh-105	35.4	h			2n	n	10		83	35.4	35.40 h	0.011666667	800		
+Rh	263	45	Rh	103	Rh-103	100	Ru-103	39.35	d			"n,p"	y	0.000107			944.4	39.4 d		7.71	60	"IAEA156, fission averaged"
+Pd	264	46	Pd	102	Pd-102	1	Pd-103	17	d			act	n	3.4		10	408	17.0 d				
+Pd	265	46	Pd	106	Pd-106	27.3	Pd-107m+	21.3	s	m+	100	act	n	0.013			0.005916667	21.3 s		1.8	77	
+Pd	266	46	Pd	106	Pd-106	27.3	Pd-107	6500000	y	g		act	n	0.305		5.9	56940000000	6.5 My		1.8	77	s for 21s isomer added to ground state
+Pd	267	46	Pd	108	Pd-108	26.7	Pd-109m+	4.69	m	m+	100	act	n	0.183		2.26	0.078166667	4.69 m		5.24	60.6	
+Pd	268	46	Pd	108	Pd-108	26.7	Pd-109	13.46	h	g		act	n	8.483		227	13.46	13.5 h		5.24	60.6	s for 4m isomer added to ground state
+Pd	269	46	Pd	110	Pd-110	11.8	Pd-111m*	5.5	h	m*	71	act	n	0.037		0.6	5.5	5.50 h				
+Pd	270	46	Pd	110	Pd-110	11.8	Pd-111t	22	m	t		act	n	0.19		4.5	0.366666667	22.0 m				
+Pd	271	46	Pd	110	Pd-110	11.8	Ag-111	7.47	d			b	n	0.227		5.1	179.28	7.47 d	0.366666667	3	105	"m+g s, burnup not calculated"
+Ag	272	47	Ag	107	Ag-107	51.83	Ag-106ms	8.5	d			"n,2n"	y	0.00046			204	8.50 d				"IAEA156, fission averaged"
+Ag	273	47	Ag	107	Ag-107	51.83	Ag-108m*	127	y	m*	8.5	act	n	0.33		1.26	1112520	127 y				
+Ag	274	47	Ag	107	Ag-107	51.83	Ag-108	2.41	m	g		act	n	37.27		93.74	0.040166667	2.41 m				
+Ag	275	47	Ag	109	Ag-109	48.17	Ag-110m*	250.4	d	m*	1.5	act	n	4.7	1.0048	72.8	6009.6	250 d		82	41.3	
+Ag	276	47	Ag	109	Ag-109	48.17	Ag-110	24.6	s	g		act	n	86.3		1377.2	0.006833333	24.6 s		82	41.3	
+Ag	277	47	Ag	109	Ag-109	48.17	Ag-111	7.47	d			2n	n	86.3		1377.2	179.28	7.5 d	0.006833333	82	41.3	
+Ag	278	47	Ag	109	Ag-109	48.17	Pd-109	13.46	h			"n,p"	y	0.00006			13.46	13.46 h		5.24	60.6	"IAEA156, fission averaged"
+Cd	279	48	Cd	106	Cd-106	1.2	Cd-107	6.5	h			act	n	1		4	6.5	6.50 h				
+Cd	280	48	Cd	106	Cd-106	1.2	Ag-106	24	m			"n,p"	y	0.0033			0.4	24.00 m				"IAEA156, fission averaged"
+Cd	281	48	Cd	108	Cd-108	0.9	Cd-109	453	d			act	n	1.1		11	10872	453 d		700		
+Cd	282	48	Cd	110	Cd-110	12.4	Cd-111m	49	m	m	100	act	n	0.14		2.5	0.816666667	49.0 m				
+Cd	283	48	Cd	110	Cd-110	12.4	Ag-110	24.6	s			"n,p"	y	0.0033			0.006833333	24.6 s		82	41.3	"IAEA156, fission averaged"
+Cd	284	48	Cd	110	Cd-110	12.4	Ag-111	7.47	d			2n	n	0.0033			179.28	7.5 d	0.006833333	82	41.3	produced via Ag-110
+Cd	285	48	Cd	111	Cd-111	12.8	Cd-111m	49	m			"n,n'"	y	0.288			0.816666667	49.00 m				"IAEA156, fission averaged"
+Cd	286	48	Cd	112	Cd-112	24	Cd-111m	49	m			"n,2n"	y	0.00042			0.816666667	49.00 m				"IAEA156, fission averaged"
+Cd	287	48	Cd	112	Cd-112	24	Cd-113m	14.6	y	m	0.1	act	n	2.2		13.5	127896	14.6 y				assigned m+g barns to both states
+Cd	288	48	Cd	112	Cd-112	24	Cd-113	9E+15	y	g		act	n	2.2		13.5	7.884E+19	9000 Ty		20600	388	assigned m+g barns to both states
+Cd	289	48	Cd	114	Cd-114	28.8	Cd-115ms	44.8	d	ms	0	act	n	0.036		3.1	1075.2	44.8 d		31.2	195.9	
+Cd	290	48	Cd	114	Cd-114	28.8	Cd-115s	53.38	h	gs		act	n	0.3		19.9	53.38	53.38 h		5.43	79.9	
+Cd	291	48	Cd	116	Cd-116	7.6	Cd-117ms	3.31	h	ms	0	act	n	0.025		0.422	3.31	3.31 h				
+Cd	292	48	Cd	116	Cd-116	7.6	Cd-117s	2.42	h	gs		act	n	0.05		0.928	2.42	2.42 h				
+In	293	49	In	113	In-113	4.3	In-114m2+	0.042	s	m2+	100	act	n	3.1			1.16667E-05	0.042 s				
+In	294	49	In	113	In-113	4.3	In-114m1*	49.5	d	m1*		act	n	8.1		220	1188	49.5 d				"s for 42ms isomer added to m1 state, also m1 is in secular equil w/g state"
+In	295	49	In	113	In-113	4.3	In-114	71.9	s	g		act	n	3.9		90	0.019972222	71.9 s				
+In	296	49	In	115	In-115	95.7	In-116m2+	2.2	s	m2+	100	act	n	81			0.000611111	2.20 s				
+In	297	49	In	115	In-115	95.7	In-116m1	54	m	m1		act	n	162.3		2605	0.9	54.0 m				s for 2s isomer added to m1 state
+In	298	49	In	115	In-115	95.7	In-116	14	s	g		act	n	40		655	0.003888889	14.0 s				
+In	299	49	In	115	In-115	95.7	In-115m	4.36	h	m		"n,n'"	y	0.19			4.36	4.36 h				NBSIR  85-3151
+Sn	300	50	Sn	112	Sn-112	1	Sn-113m+	20	m	m+	91	act	n	0.3			0.333333333	20.0 m				
+Sn	301	50	Sn	112	Sn-112	1	Sn-113	115	d	g		act	n	0.98		34	2760	115 d				91% of s for 20m isomer added to ground state
+Sn	302	50	Sn	116	Sn-116	14.4	Sn-117m	14	d	m	100	act	n	0.006	 	0.49	336	14.0 d				
+Sn	303	50	Sn	118	Sn-118	24.1	Sn-119m	245	d	m	100	act	n	0.01		1.26	5880	245 d				
+Sn	304	50	Sn	120	Sn-120	32.8	Sn-121m	55	y	m	0	act	n	0.001			481800	55.0 y		5.77	26.29	
+Sn	305	50	Sn	120	Sn-120	32.8	Sn-121	27	h	g		act	n	0.14		1.25	27	27.0 h		5.77	26.29	
+Sn	306	50	Sn	122	Sn-122	4.7	Sn-123m	40.1	m	m	0	act	n	0.001			0.668333333	40.1 m		0.033	2.53	
+Sn	307	50	Sn	122	Sn-122	4.7	Sn-123	129.2	d	g		act	n	0.18		0.84	3100.8	129 d		0.033	2.53	
+Sn	308	50	Sn	124	Sn-124	5.8	Sn-125t	9.64	d	t		act	n	0.004		0.032	231.36	9.64 d		0.55	14.26	
+Sn	309	50	Sn	124	Sn-124	5.8	Sn-125m	9.5	m	m	0	act	n	0.13		8.5	0.158333333	9.50 m		0.55	14.26	
+Sn	310	50	Sn	124	Sn-124	5.8	Sb-125	2.76	y			b	n	0.134		8.532	24177.6	2.76 y	0.158333333			"both m&g go to Sb-125, use m t1/2 (major contributor)"
+Sn	311	50	Sn	124	Sn-124	5.8	Sn-126	100000	y		0	2n	n	0.13		8.5	876000000	100000 y	0.158333333	0.55	14.26	
+Sb	312	51	Sb	121	Sb-121	57.3	Sb-122m+	4.2	m	m+	100	act	n	0.06		13	0.07	4.20 m		21.5	159	
+Sb	313	51	Sb	121	Sb-121	57.3	Sb-122	2.7	d	g		act	n	5.9		202	64.8	2.70 d		21.5	159	s for 4m isomer added to ground state
+Sb	314	51	Sb	123	Sb-123	42.7	Sb-124m2*	20	m	m2*	100	act	n	0.019			0.333333333	20.0 m				
+Sb	315	51	Sb	123	Sb-123	42.7	Sb-124m1+	1.6	m	m1+	80	act	n	0.037			0.026666667	1.60 m				
+Sb	316	51	Sb	123	Sb-123	42.7	Sb-124	60.3	d	g		act	n	4.145		128	1447.2	60.3 d		17.4	22.83	80% of s for both isomer added to ground state
+Sb	317	51	Sb	123	Sb-123	42.7	Sb-125	2.76	y			2n	n	4.145		128	24177.6	2.8 y	1447.2	17.4	22.83	
+Te	318	52	Te	120	Te-120	0.09	Te-121m*	154	d	m*	90.2	act	n	0.34			3696	154 d				
+Te	319	52	Te	120	Te-120	0.09	Te-121	16.8	d	g		act	n	2			403.2	16.8 d				
+Te	320	52	Te	122	Te-122	2.4	Te-123m*	119.7	d	m*	100	act	n	1.1			2872.8	119.7 d		42.89	273.1	
+Te	321	52	Te	122	Te-122	2.4	Te-123	1.2E+13	y	g		act	n	2.3			1.0512E+17	12 Ty		418	5547	
+Te	322	52	Te	124	Te-124	4.6	Te-125m	58	d	m	100	act	n	0.04			1392	58.0 d		11.09	78.85	
+Te	323	52	Te	126	Te-126	18.7	Te-127m*	109	d	m*	97.6	act	n	0.135		1.04	2616	109 d		3380	1140	
+Te	324	52	Te	126	Te-126	18.7	Te-127	9.35	h	g		act	n	0.9	 	8.56	9.35	9.35 h		2.76	48.2	
+Te	325	52	Te	128	Te-128	31.8	Te-129ms	33.6	d	ms	63.4	act	n	0.015		0.0774	806.4	33.6 d		1.11	20.51	
+Te	326	52	Te	128	Te-128	31.8	Te-129t	69.6	m	t		act	n	0.1997		1.54	1.16	69.6 m		0.37	7.41	
+Te	327	52	Te	128	Te-128	31.8	I-129	16000000	y			b	n	0.1997		1.54	1.4016E+11	16 My	1.16	27	37	"use g s, m is a minor contributor.  Burnup not calculated"
+Te	328	52	Te	130	Te-130	34.5	Te-131m	30	h	m	18	act	n	0.02		0.0485	30	30.0 h		0.11	0.16	
+Te	329	52	Te	130	Te-130	34.5	Te-132	78.2	h			2n	n	0.27		0.446	78.2	78.2 h	30	0.04	0.05	
+Te	330	52	Te	130	Te-130	34.5	Te-131t	25	m	t		act	n	0.27		0.446	0.416666667	25.0 m		0.04	0.05	2n prod calculated for both isomer and ground state since the larger producer is time dependent
+Te	331	52	Te	130	Te-130	34.5	I-131	8.04	d			b	n	0.27		0.446	192.96	8.04 d	0.416666667	0.7	8.5	burnup not calculated.
+Te	332	52	Te	130	Te-130	34.5	Te-132	78.2	h			2n	n	0.27		0.446	78.2	78.2 h	0.416666667	0.04	0.05	
+I	333	53	I	127	I-127	100	I-126	13	d			"n,2n"	y	0.0009			312	13.00 d		5960	40600	"IAEA156, fission averaged"
+I	334	53	I	127	I-127	100	I-128	24.99	m			act	n	6.2		148	0.4165	25.0 m				
+I	335	53	I	127	I-127	100	Te-127m*	109	d			"n,p"	y	0.0000128			2616	109.00 d		3380	1140	"IAEA156, fission averaged"
+I	336	53	I	127	I-127	100	Te-127	9.5	h			"n,p"	y	0.0000088			9.5	9.5 h		2.76	48.2	"IAEA156, fission averaged"
+Xe	337	54	Xe	124	Xe-124	0.096	Xe-125m+	55	s	m+	100	act	n	28		600	0.015277778	55.0 s				
+Xe	338	54	Xe	124	Xe-124	0.096	Xe-125t	16.8	h	t		act	n	165		3145	16.8	16.8 h				s for 55s isomer added to ground state
+Xe	339	54	Xe	124	Xe-124	0.096	I-125	59.9	d			b	n	165		3145	1437.6	59.9 d	16.8	894	13730	burnup not calculated
+Xe	340	54	Xe	126	Xe-126	0.09	Xe-127m+	75	s	m+	100	act	n	0.45		8	0.020833333	75.0 s				
+Xe	341	54	Xe	126	Xe-126	0.09	Xe-127	36.41	d	g		act	n	3.5		50	873.84	36.4 d				s for 75s isomer added to ground state
+Xe	342	54	Xe	128	Xe-128	1.919	Xe-129m	8.9	d	m	100	act	n	0.48		20	213.6	8.90 d				
+Xe	343	54	Xe	130	Xe-130	4.08	Xe-131m	11.8	d	m	100	act	n	0.45		1.17	283.2	11.8 d				
+Xe	344	54	Xe	132	Xe-132	26.89	Xe-133m+	2.26	d	m+	100	act	n	0.05		0.9	54.24	2.26 d				
+Xe	345	54	Xe	132	Xe-132	26.89	Xe-133	5.72	d	g		act	n	0.45	 	4.6	137.28	5.72 d		190	356.3	s for 2d isomer added to ground state
+Xe	346	54	Xe	134	Xe-134	10.4	Xe-135m+	15.6	m	m+	99	act	n	0.003		0.1	0.26	15.6 m				
+Xe	347	54	Xe	134	Xe-134	10.4	Xe-135	9.14	h	g		act	n	0.265		0.3	9.14	9.14 h		2650000	7475	s for 15m isomer added to ground state
+Xe	348	54	Xe	136	Xe-136	8.87	Xe-137t	3.9	m	t		act	n	0.26		0.74	0.065	3.90 m				
+Xe	349	54	Xe	136	Xe-136	8.87	Cs-137s	30.17	y			b	n	0.26		0.74	264289.2	30.17y	0.065	0.11	0.43	burnup not calculated.
+Cs	350	55	Cs	133	Cs-133	100	Cs-134m+	2.89	h	m+	100	act	n	2.5		30	2.89	2.89 h				
+Cs	351	55	Cs	133	Cs-133	100	Cs-134	2.05	y	g		act	n	29		422	17958	2.05 y		140	54.2	s for 3h isomer added to ground state
+Cs	352	55	Cs	133	Cs-133	100	Cs-135	3000000	y			2n	n	29		422	26280000000	3 My	17958	140	54.2	
+Cs	353	55	Cs	133	Cs-133	100	I-130	12.36	h			"n,a"	y	0.0000033			12.36	12.36 h		18	178	"IAEA156, fission averaged"
+Cs	354	55	Cs	133	Cs-133	100	I-131	8.04	d			2n	n	0.0000033			192.96	8.04 d	12.36	18	178	produced via I-130
+Ba	355	56	Ba	130	Ba-130	0.101	Ba-131m+	14.5	m	m+	100	act	n	2.5			0.241666667	14.5 m				
+Ba	356	56	Ba	130	Ba-130	0.101	Ba-131s	11.6	d	gs		act	n	11.3		235	278.4	11.6 d				s for 15m isomer added to ground state
+Ba	357	56	Ba	132	Ba-132	0.097	Ba-133m+	39	h	m+	99	act	n	0.5		3.3	39	39.0 h				
+Ba	358	56	Ba	132	Ba-132	0.097	Ba-133	10.5	y	g		act	n	7			91980	10.5 y				s for 39h isomer added to ground state
+Ba	359	56	Ba	132	Ba-132	0.097	Cs-132	6.47	d			"n,p"	y	0.012			155.28	6.5 d				"IAEA156, fission averaged"
+Ba	360	56	Ba	134	Ba-134	2.42	Ba-135m	29	h	m	100	act	n	0.158		24	29	29.0 h				
+Ba	361	56	Ba	135	Ba-135	6.59	Ba-136m	0.32	s	m	100	act	n	0.0139		0.465	8.88889E-05	0.320 s				
+Ba	362	56	Ba	136	Ba-136	7.81	Ba-137m	2.6	m	m	100	act	n	0.01		0.75	0.043333333	2.60 m				
+Ba	363	56	Ba	136	Ba-136	7.81	Cs-136	13.1	d			"n,p"	y	0.0000035			314.4	13.1 d		1.3	44	"IAEA156, fission averaged"
+Ba	364	56	Ba	136	Ba-136	7.81	Cs-137	30.17	y			2n	n	0.0000035			264289.2	30.2 y	314.4	1.3	44	produced via Cs-136
+Ba	365	56	Ba	137	Ba-137	11.23	Ba-137m	2.552	m			"n,n'"	y	0.225			0.042533333	2.6 m				"IAEA156, fission averaged"
+Ba	366	56	Ba	138	Ba-138	71.66	Ba-137m	2.552	m			"n,2n"	y	0.0024			0.042533333	2.6 m				"IAEA156, fission averaged"
+Ba	367	56	Ba	138	Ba-138	71.66	Ba-139	83.3	m			act	n	0.36		0.32	1.388333333	83.3 m		6.2		
+Ba	368	56	Ba	138	Ba-138	71.66	Ba-140	12.76	d			2n	n	0.36		0.32	306.24	12.8 d	1.388333333	6.2		
+Ba	369	56	Ba	138	Ba-138	71.66	Xe-135	9.14	h			"n,a"	y	0.0000019			9.14	9.1 h		2650000	7475	"IAEA156, fission averaged"
+La	370	57	La	139	La-139	99.911	La-140	40.22	h			act	n	8.93		12.2	40.22	40.2 h		2.7	69	
+La	371	57	La	139	La-139	99.911	La-141*	3.93	h			2n	n	8.93		12.2	3.93	3.9 h	40.22	2.7	69	
+Ce	372	58	Ce	136	Ce-136	0.193	Ce-137m*	34.4	h	m*	99.2	act	n	0.95			34.4	34.4 h				
+Ce	373	58	Ce	136	Ce-136	0.193	Ce-137t	9	h	t		act	n	6.3		58	9	9.00 h				m+g resonance s used for Ce-137 resonance
+Ce	374	58	Ce	136	Ce-136	0.193	La-137	60000	y			b	n	7.25		58	525600000	60000y	9			
+Ce	375	58	Ce	138	Ce-138	0.25	Ce-139m+	55	s	m+	100	act	n	0.015			0.015277778	55.0 s				
+Ce	376	58	Ce	138	Ce-138	0.25	Ce-139	137.2	d	g		act	n	1.115			3292.8	137 d		500		s for 55s isomer added to ground state
+Ce	377	58	Ce	140	Ce-140	88.48	Ce-141	32.5	d			act	n	0.57		0.48	780	32.5 d		29	23.7	
+Ce	378	58	Ce	140	Ce-140	88.48	La-140	40.22	h			"n,p"	y	0.0043			40.22	40.22 h		2.7	69	"IAEA156, fission averaged"
+Ce	379	58	Ce	140	Ce-140	88.48	La-141*	3.93	h			2n	n	0.0043			3.93	3.93 h	40.22	2.7	69	produced via La-140
+Ce	380	58	Ce	142	Ce-142	11.07	Ce-143t	33	h	t		act	n	0.95		1.14	33	33.0 h		6	40	
+Ce	381	58	Ce	142	Ce-142	11.07	Pr-143	13.58	d			b	n	0.95		1.14	325.92	13.58d	33	90	185	
+Ce	382	58	Ce	142	Ce-142	11.07	Ce-144s	284.4	d			2n	n	0.95		1.14	6825.6	284.4 d	33	6	40	
+Pr	383	59	Pr	141	Pr-141	100	Pr-142m+	14.6	m	m+		act	n	3.9			0.243333333	14.6 m				
+Pr	384	59	Pr	141	Pr-141	100	Pr-142	19.2	h	g		act	n	11.5		17.8	19.2	19.2 h		20	144	s for 15m isomer added to ground state
+Pr	385	59	Pr	141	Pr-141	100	Pr-143	13.58	d			2n	n	11.5		17.8	325.92	13.6 d	19.2	20	144	
+Pr	386	59	Pr	141	Pr-141	100	Ce-141	32.5	d			"n,p"	y	0.00012			780	32.50d		29	23.7	"IAEA156, fission averaged"
+Nd	387	60	Nd	146	Nd-146	17.18	Nd-147t	11.06	d	t		act	n	1.4		2.7	265.44	11.06 d		440	540	
+Nd	388	60	Nd	146	Nd-146	17.18	Pm-147	2.6234	y			b	n	1.4		2.7	22980.984	2.62 y	265.44	181	2230	burnup not calculated
+Nd	389	60	Nd	148	Nd-148	5.72	Nd-149t	1.8	h	t		act	n	2.5		14	1.8	1.80 h				
+Nd	390	60	Nd	148	Nd-148	5.72	Pm-149	53.1	h			b	n	2.5		14	53.1	53.1 h	1.8	1400	825	burnup not calculated
+Nd	391	60	Nd	150	Nd-150	5.6	Nd-151t	12	m	t		act	n	1.2		14.5	0.2	12.0 m				"goes to Pm-151(24m), then Sm-151(90y)."
+Nd	392	60	Nd	150	Nd-150	5.6	Pm-151	28.4	h			b	n	1.2		14.5	28.4	28.4 h	0.2	173	1400	
+Nd	393	60	Nd	150	Nd-150	5.6	Sm-151	90	y			b	n	1.2		14.5	788400	90 y	0.2	15000	3100	calc ignores intermediate 24m Pm-151.  Burnup not calculated
+Sm	394	62	Sm	144	Sm-144	3.16	Sm-145t	340	d	t		act	n	0.7			8160	340 d				
+Sm	395	62	Sm	144	Sm-144	3.16	Pm-145	17.7	y			b	n	0.7			155052	17.7 y	8160			
+Sm	396	62	Sm	150	Sm-150	7.47	Sm-151	93	y			act	n	102		280	814680	93.0 y		15000	3100	
+Sm	397	62	Sm	152	Sm-152	26.63	Sm-153	46.8	h			act	n	206		2960	46.8	46.8 h		334.5	3700	
+Sm	398	62	Sm	154	Sm-154	22.53	Sm-155	23.5	m			act	n	5.5		29	0.391666667	23.5 m				
+Eu	399	63	Eu	151	Eu-151	47.77	Eu-152m2+	96	m	m2+	100	act	n	4.2			1.6	96.0 m				
+Eu	400	63	Eu	151	Eu-151	47.77	Eu-152m1	9.3	h	m1	0	act	n	3215	0.8936	1823	9.3	9.30 h				s for 96m isomer added to ground state
+Eu	401	63	Eu	151	Eu-151	47.77	Gd-152	1.1E+14	y			b	n	3215	0.8936	1823	9.636E+17	110 Ty	9.3	1100	3000	from Eu-152m1.  Burnup not calculated
+Eu	402	63	Eu	151	Eu-151	47.77	Eu-152t	12.7	y	t	0	act	n	5935	0.9022	3552	111252	12.7 y				
+Eu	403	63	Eu	151	Eu-151	47.77	Gd-152	1.1E+14	y			b	n	5935	0.9022	3552	9.636E+17	110 Ty	111252	1100	3000	from Eu-152.  Burnup not calculated.
+Eu	404	63	Eu	153	Eu-153	52.23	Eu-154	8.5	y			act	n	603	1.029	3414	74460	8.50 y		1500	1500	
+Eu	405	63	Eu	153	Eu-153	52.23	Eu-155	4.73	y			2n	n	603	1.029	3414	41434.8	4.73 y	74460	1500	1500	
+Gd	406	64	Gd	152	Gd-152	0.2	Gd-153	242	d			act	n	1100	 	3000	5808	242 d				
+Gd	407	64	Gd	158	Gd-158	24.9	Gd-159	18	h			act	n	2.5		80	18	18.0 h		16.3	186.7	
+Gd	408	64	Gd	160	Gd-160	21.9	Gd-161t	3.7	m	t		act	n	0.77		7	0.061666667	3.70 m				
+Gd	409	64	Gd	160	Gd-160	21.9	Tb-161	6.91	d			b	n	0.77		7	165.84	6.91 d	0.061666667	96.6	655.9	burnup not calculated
+Tb	410	65	Tb	159	Tb-159	100	Tb-160	72.1	d			act	n	23.2		400	1730.4	72.1 d		525	1135	
+Tb	411	65	Tb	159	Tb-159	100	Tb-161	6.91	d			2n	n	23.2		400	165.84	6.9 d	1730.4	525	1135	
+Dy	412	66	Dy	156	Dy-156	0.0524	Dy-157t	8.1	h	t		act	n	33		960	8.1	8.10 h				
+Dy	413	66	Dy	156	Dy-156	0.0524	Tb-157	150	y			b	n	33		960	1314000	150 y	8.1			
+Dy	414	66	Dy	158	Dy-158	0.0902	Dy-159	144	d			act	n	43		120	3456	144 d				
+Dy	415	66	Dy	164	Dy-164	28.18	Dy-165m	1.15	m	m	97.7	act	n	1700			0.019166667	1.15 m				
+Dy	416	66	Dy	164	Dy-164	28.18	Dy-165	2.35	h	g		act	n	1000			2.35	2.35 h		3900	22000	
+Dy	417	66	Dy	164	Dy-164	28.18	Dy-166	81.6	h			2n	n	1000			81.6	81.60 h	2.35	3900	22000	
+Ho	418	67	Ho	165	Ho-165	100	Ho-166m	1200	y	m	0	act	n	3.5		55	10512000	1200 y				
+Ho	419	67	Ho	165	Ho-165	100	Ho-166	27.2	h	g		act	n	61.2		660	27.2	27.2 h				
+Er	420	68	Er	162	Er-162	0.136	Er-163t	75.1	m	t		act	n	19		480	1.251666667	75.1 m				
+Er	421	68	Er	162	Er-162	0.136	Ho-163	10	y			b	n	19		480	87600	10 y	1.251666667			
+Er	422	68	Er	164	Er-164	1.56	Er-165	10.34	h			act	n	13		120	10.34	10.34 h				
+Er	423	68	Er	166	Er-166	33.41	Er-167m	2.35	s	m	100	act	n	15			0.000652778	2.35 s				
+Er	424	68	Er	168	Er-168	27.07	Er-169	9.6	d			act	n	1.95		35	230.4	9.60 d				
+Er	425	68	Er	170	Er-170	14.88	Er-171t	7.52	h	t		act	n	5.7		24	7.52	7.52 h		280		
+Er	426	68	Er	170	Er-170	14.88	Tm-171	1.92	y			b	n	5.7		24	16819.2	1.92 y	7.52	4.5	118	burnup not calculated.
+Er	427	68	Er	170	Er-170	14.88	Er-172*	49.3	h			2n	n	5.7		24	49.3	49.30 h	7.52	280		
+Tm	428	69	Tm	169	Tm-169	100	Tm-170	130	d	g		act	n	103		1710	3120	130 d		92	460	"assigned m+g s, m is 4us"
+Tm	429	69	Tm	169	Tm-169	100	Tm-171	63.6	h			2n	n	103		1710	63.6	64 h	3120	92	460	
+Yb	430	70	Yb	168	Yb-168	0.14	Yb-169m+	46	s	m+	100	act	n	3470		30500	0.012777778	46.0 s				assigned m+g barns to both states
+Yb	431	70	Yb	168	Yb-168	0.14	Yb-169	31.8	d	g		act	n	3470		30500	763.2	31.8 d				assigned m+g barns to both states
+Yb	432	70	Yb	174	Yb-174	31.84	Yb-175m+	0.067	s	m+	100	act	n	46			1.86111E-05	0.067 s				
+Yb	433	70	Yb	174	Yb-174	31.84	Yb-175	4.2	d	g		act	n	65		34.5	100.8	4.20 d				s for 67ms isomer added to ground state
+Yb	434	70	Yb	176	Yb-176	12.73	Yb-177m+	6.5	s	m+	100	act	n	2.4		8.1	0.001805556	6.50 s				assigned m+g barns to both states
+Yb	435	70	Yb	176	Yb-176	12.73	Yb-177t	1.9	h	t		act	n	2.4		8.1	1.9	1.90 h				assigned m+g barns to both states
+Yb	436	70	Yb	176	Yb-176	12.73	Lu-177	6.74	d			b	n	2.4		8.1	161.76	6.74 d	1.9			
+Lu	437	71	Lu	175	Lu-175	97.4	Lu-176m	3.69	h	m	0	act	n	15.1		523	3.69	3.69 h				
+Lu	438	71	Lu	175	Lu-175	97.4	Lu-176	33000000000	y	g	 	act	n	7		202	2.8908E+14	0.033Ty		2100	1017	
+Lu	439	71	Lu	175	Lu-175	97.4	Lu-177	6.74	d		 	2n	n	7		202	161.76	6.74 d	2.8908E+14	2100	1017	
+Lu	440	71	Lu	176	Lu-176	2.6	Lu-177m*	115	d	m2*		act	n	2.1			2760	115 d				note:Lu-176 is radioactive
+Lu	441	71	Lu	176	Lu-176	2.6	Lu-177	6.74	d	g		act	n	2100	1.6914	1017	161.76	6.74 d				added all of .16ms m1 state to 6.7d g state
+Hf	442	72	Hf	174	Hf-174	0.163	Hf-175	70	d			act	n	390		288	1680	70.0 d				
+Hf	443	72	Hf	177	Hf-177	18.56	Hf-178m	4.3	s	m	100	act	n	1.1			0.001194444	4.30 s				
+Hf	444	72	Hf	178	Hf-178	27.1	Hf-179m2	25.1	d	m2	100	act	n	10			602.4	25.1 d				"nominal 10 b assigned, with error tolerance of m+g total"
+Hf	445	72	Hf	178	Hf-178	27.1	Hf-179m1	18.6	s	m1	100	act	n	53			0.005166667	18.6 s				
+Hf	446	72	Hf	179	Hf-179	13.75	Hf-180m	5.5	h	m	100	act	n	0.34		4.75	5.5	5.50 h				
+Hf	447	72	Hf	180	Hf-180	35.22	Hf-181	42.5	d			act	n	12.6		33.6	1020	42.5 d		40		
+Hf	448	72	Hf	180	Hf-180	35.22	Hf-182s	9000000	y			2n	n	12.6		33.6	78840000000	9.00My	1020	40		
+Ta	449	73	Ta	181	Ta-181	99.9877	Ta-182m+	16.5	m	m+	100	act	n	0.012		0.415	0.275	16.5 m				
+Ta	450	73	Ta	181	Ta-181	99.9877	Ta-182	115.1	d	g		act	n	21.5		717	2762.4	115.1 d		8530	977	s for 17m isomer added to ground state
+Ta	451	73	Ta	181	Ta-181	99.9877	Ta-183	5.1	d			2n	n	21.5		717	122.4	5.1 d	2762.4	8530	977	
+Ta	452	73	Ta	181	Ta-181	99.9877	Lu-178	28.5	m			"n,a"	y	0.00000016			0.475	28.5 m				"IAEA156, fission averaged"
+W	453	74	W	180	W-180	0.135	W-181	121	d			act	n	3.5		200	2904	121 d				
+W	454	74	W	182	W-182	26.3	Ta-182	115.1	d			"n,p"	y	0.000004			2762.4	115 d		8530	977	"IAEA156, fission averaged"
+W	455	74	W	182	W-182	26.3	Ta-183	5.1	d			2n	n	0.000004			122.4	5 d	2762.4	8530	977	produced via Ta-182
+W	456	74	W	183	W-183	14.3	Ta-183	5.1	d			"n,p"	y	0.000003			122.4	5 d				"IAEA156, fission averaged"
+W	457	74	W	184	W-184	30.6	W-185m+	1.62	m	m+	100	act	n	0.002			0.027	1.62 m				
+W	458	74	W	184	W-184	30.6	W-185	75	d	g		act	n	1.8		13.4	1800	75.0 d				s for 2m isomer added to ground state
+W	459	74	W	184	W-184	30.6	Hf-181	42.5	d			"n,a"	y	0.0000002			1020	42.5 d		40		"IAEA156, fission averaged"
+W	460	74	W	184	W-184	30.6	Hf-182s	9000000	y			2n	n	0.0000002			78840000000	9.00My	1020	40		produced via Hf-181
+W	461	74	W	186	W-186	28.4	W-185	75	d			"n,2n"	y	0.01			1800	75.0 d				"IAEA156, fission averaged"
+W	462	74	W	186	W-186	28.4	W-187	23.9	h			act	n	37		490	23.9	23.9 h		64	2670	
+W	463	74	W	186	W-186	28.4	W-188	69.4	d			2n	n	37		490	69.4	69.4 d	23.9	64	2670	
+Re	464	75	Re	185	Re-185	37.07	Re-184ms	165	d			"n,2n"	y	0.00062			3960	165.0 d				"IAEA156, fission averaged"
+Re	465	75	Re	185	Re-185	37.07	Re-184	38	d			"n,2n"	y	0.0046			912	38.0 d				"IAEA156, fission averaged"
+Re	466	75	Re	185	Re-185	37.07	Re-186	88.9	h			act	n	112		1718	88.9	88.9 h				
+Re	467	75	Re	187	Re-187	62.93	Re-186	88.9	h			"n,2n"	y	0.01			88.9	88.9 h				"IAEA156, fission averaged"
+Re	468	75	Re	187	Re-187	62.93	Re-188m+	18.7	m	m+	100	act	n	73		8.8	0.311666667	18.7 m				
+Re	469	75	Re	187	Re-187	62.93	Re-188	16.7	h	g		act	n	75		305	16.7	16.7 h				s for 19m isomer added to ground state
+Os	470	76	Os	184	Os-184	0.018	Os-185	93.6	d			act	n	3005		1354	2246.4	94 d				
+Os	471	76	Os	188	Os-188	13.3	Os-189m	5.7	h	m	100	act	n	4.3		135	5.7	5.70 h				assigned m+g barns to m state. g is stable
+Os	472	76	Os	189	Os-189	16.1	Os-190m	10	m	m	100	act	n	0.26		0.013	0.166666667	10.00 m				
+Os	473	76	Os	190	Os-190	26.4	Os-191m+	15	h	m+	100	act	n	13.2		26.5	15	15.0 h				
+Os	474	76	Os	190	Os-190	26.4	Os-191	15	d	g		act	n	17.1		58.2	360	15.0 d				s for 15h isomer added to ground state
+Os	475	76	Os	192	Os-192	41	Os-193	31.5	h			act	n	1.97		5.4	31.5	31.5 h		1540		
+Os	476	76	Os	192	Os-192	41	Os-194s	6	y			2n	n	1.97		5.4	52560	6.0 y	31.5	1540		
+Ir	477	77	Ir	191	Ir-191	38.5	Ir-192m2*	241	y	m2*	100	act	n	0.32			2111160	241 y				
+Ir	478	77	Ir	191	Ir-191	38.5	Ir-192m1+	1.4	m	m1+	99	act	n	300	  	1060	0.023333333	1.40 m				
+Ir	479	77	Ir	191	Ir-191	38.5	Ir-192	74.2	d	g		act	n	924		4595	1780.8	74.2 d		1420	3242	"s for 1.4m isomer added to ground state, not m2 isomer"
+Ir	480	77	Ir	191	Ir-191	38.5	Ir-193m	10.6	d	m		2n	n	924		4595	254.4	10.6 d	1780.8	1420	3242	Brookhaven database
+Ir	481	77	Ir	193	Ir-193	61.5	Ir-194m	171	d	m	0	act	n	5.8			4104	171 d				
+Ir	482	77	Ir	193	Ir-193	61.5	Ir-194	19	h	g		act	n	110			19	19.0 h				
+Pt	483	78	Pt	190	Pt-190	0.0127	Pt-191	3	d			act	n	150			72	3.00 d				
+Pt	484	78	Pt	192	Pt-192	0.78	Pt-193m	4.4	d	m	100	act	n	2.2			105.6	4.40 d				
+Pt	485	78	Pt	192	Pt-192	0.78	Pt-193	50	y	g		act	n	14		83	438000	50.0 y				assign <value for m+g to g state
+Pt	486	78	Pt	194	Pt-194	32.9	Pt-195m	4.1	d	m	100	act	n	0.09			98.4	4.10 d				
+Pt	487	78	Pt	196	Pt-196	25.2	Pt-197m+	1.5	h	m+	96.7	act	n	0.05			1.5	1.50 h				
+Pt	488	78	Pt	196	Pt-196	25.2	Pt-197	18	h	g		act	n	0.74		8.3	18	18.0 h				assigned m+g to g. m value very small
+Pt	489	78	Pt	198	Pt-198	7.19	Pt-199m+	14	s	m+	100	act	n	0.027			0.003888889	14.0 s				
+Pt	490	78	Pt	198	Pt-198	7.19	Pt-199t	31	m	t		act	n	3.7		55.6	0.516666667	31.0 m		1.5		"s for 14s isomer added to ground state, not m2 isomer"
+Pt	491	78	Pt	198	Pt-198	7.19	Au-199	3.14	d			b	n	3.7		55.6	75.36	3.14 d	0.516666667			
+Pt	492	78	Pt	198	Pt-198	7.19	Pt-200s	12.6	h			2n	n	3.7		55.6	12.6	12.6 h	0.516666667	1.5		
+Au	493	79	Au	197	Au-197	100	Au-196	6.18	d			"n,2n"	y	0.003			148.32	6.18 d				"IAEA156, fission averaged"
+Au	494	79	Au	197	Au-197	100	Au-197m	7.8	s			"n,n'"	y	0.38			0.002166667	7.8 s				"IAEA156, fission averaged"
+Au	495	79	Au	197	Au-197	100	Au-198	2.7	d			act	n	98.8	1.0038	1551	64.8	2.70 d		26736	41420	
+Au	496	79	Au	198	Au-198	100	Au-199	3.15	d			2n	n	98.8			75.6	3.15 d	64.8	26736	41420	*** produced from a radioactive parent
+Hg	497	80	Hg	196	Hg-196	0.146	Hg-197m*	24	h	m*	93.5	act	n	120		58.9	24	24.0 h				
+Hg	498	80	Hg	196	Hg-196	0.146	Hg-197	65	h	g		act	n	3080		413	65	65.0 h				
+Hg	499	80	Hg	198	Hg-198	10.02	Hg-199m	43	m	m	100	act	n	0.018		1.8	0.716666667	43.0 m				
+Hg	500	80	Hg	202	Hg-202	29.8	Hg-203	46.9	d			act	n	4.9		4.43	1125.6	46.9 d				
+Hg	501	80	Hg	204	Hg-204	6.85	Hg-205	5.5	m	 		act	n	0.43		0.8	0.091666667	5.50 m				
+Tl	502	81	Tl	203	Tl-203	29.5	Tl-202	12.23	d			"n,2n"	y	0.003			293.52	12.2 d				"IAEA156, fission averaged"
+Tl	503	81	Tl	203	Tl-203	29.5	Tl-204	3.78	y			act	n	11		40	33112.8	3.78 y		21.6	86	
+Tl	504	81	Tl	203	Tl-203	29.5	Hg-203	46.9	d			"n,p"	y	0.000009			1125.6	46.9 d				"IAEA156, fission averaged"
+Tl	505	81	Tl	205	Tl-205	70.5	Tl-206	4.19	m			act	n	0.1		0.7	0.069833333	4.19 m				
+Pb	506	82	Pb	204	Pb-204	1.4	Pb-203	51.88	h			"n,2n"	y	0.00245			51.88	51.88 h				"IAEA156, fission averaged"
+Pb	507	82	Pb	204	Pb-204	1.4	Pb-204m	66.9	m			"n,n'"	y	0.38			1.115	66.90 m				"IAEA156, fission averaged"
+Pb	508	82	Pb	204	Pb-204	1.4	Pb-205	14000000	y			act	n	0.661		1.7	1.2264E+11	14.0 My				
+Pb	509	82	Pb	208	Pb-208	52.3	Pb-209	3.3	h			act	n	0.487			3.3	3.30 h				
+Bi	510	83	Bi	209	Bi-209	100	Bi-210ms	3500000	y	ms	0	act	n	0.019			30660000000	3.5 My				
+Bi	511	83	Bi	209	Bi-209	100	Bi-210t	5.01	d	t		act	n	0.014			120.24	5.01 d		0.054	0.2	
+Bi	512	83	Bi	209	Bi-209	100	Po-210	138.38	d			b	n	0.014			3321.12	138.4 d	120.24			
+Bi	513	83	Bi	209	Bi-209	100	Bi-211	2.14	m			2n	n	0.014			0.035666667	2.14 m	120.24	0.054	0.2	alpha emitter with a decay series
+xx	514		xx		error		error															
+																						
+																	^^^ Take care. The formulas in this column are NOT					
+																	all the same.  Each is different depending on the halflife unit					

@@ -14,7 +14,7 @@ The following properties are added:
         Comments on the density, if not taken in standard conditions.
 *   interatomic_distance, interatomic_distance_units (|Ang|)
         Interatomic distance estimated from element density.
-*   number_density, number_density_units (unitless)
+*   number_density, number_density_units (|1/cm^3|)
         Number density estimated from mass and density.
 
 Density for the isotope is computed assuming that the atomic spacing
@@ -102,10 +102,10 @@ def interatomic_distance(element):
 
     if hasattr(element,'isotope'): element = element.element
     if element.density is None or element.mass is None: return None
-    return (element.mass/(element.density*avagadro_number*1e24))**(1./3.)
+    return (element.mass/(element.density*avogadro_number*1e-24))**(1./3.)
 
 def number_density(element):
-    """
+    r"""
     Estimate the number density from atomic weight and density. The density
     for isotopes is assumed to match that of between atoms in natural abundance.
 
@@ -114,8 +114,21 @@ def number_density(element):
             Name of the element whose number density needs to be calculated.
 
     :Returns:
-            *Nb* : float | unitless
-                Number density of a element.
+        *Nb* : float | |1/cm^3|
+            Number density of a element.
+
+    Number density is computed using:
+
+    .. math::
+
+        d = N_A \frac{\rho}{m} 
+
+    with units:
+
+    .. math::
+
+        \rm (atoms\cdot mol^{-1})  (g\cdot cm^{-3}) / (g\cdot mol^{-1}) 
+            = atoms\cdot cm^{-3}
 
     """
 
@@ -137,7 +150,7 @@ def init(table, reload=False):
     Element.number_density \
         = property(number_density,
                    "number density estimated from mass and density")
-    Element.number_density_units = ""
+    Element.number_density_units = "1/cm^3"
 
     for k,v in element_densities.iteritems():
         el = getattr(table,k)

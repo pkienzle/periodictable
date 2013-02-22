@@ -90,19 +90,21 @@ Check that it works:
 
 Ion specific data is more complicated, particularly because of the
 interaction with isotopes.  For example, ``Ni[58].ion[3]`` should have
-the same mass as ``Ni[58]`` (the mass of the electron is negligible), but
-a different mass from ``Ni.ion[3]``.  However,  the f_0 scattering
-factors for X-rays are dependent on the ionization state, so 
-``Ni[58].ion[3].xray.f0(Q)`` and ``Ni.ion[3].xray.f0(Q)`` are the same 
-but different from ``Ni.xray.f0(Q)``.
+the same neutron scattering factors as ``Ni[58]`` (the neutron is
+only sensitive to the nucleus), but different scattering factors 
+from ``Ni.ion[3]``.  X-rays are sensitive to the electronic structure
+of the atom and not the nucleus, so ``Ni[58].ion[3].xray.f0(Q)`` 
+and ``Ni.ion[3].xray.f0(Q)`` are the same but different 
+from ``Ni.xray.f0(Q)``.
 
 Current support for ion dependent properties is awkward.  The X-ray
 table :mod:`periodictable.xsf` creates a specialized structure
 for each ion as it is requested.  The magnetic form factor table
 :mod:`periodictable.magnetic_ff` does not try to support ``ion.magnetic_ff``
-directly, but instead the user must request ``ion.magnetic_ff[ion.charge]``.  
-Properties dependent on both isotope and ion can probably be implemented, 
-but there are no examples yet.
+directly, but instead the user must request ``ion.magnetic_ff[ion.charge]``.
+Support for ion mass, which is isotope mass adjusted for the number of 
+electrons is built into the Ion class.  There are not yet any examples of
+extension tables that depend on both isotope and ion.
 
 Be sure to use the ``ion=True`` keyword for ``delayed_load`` when the
 table extension contains ion specific information.

@@ -4,11 +4,11 @@
 Basic usage
 ***********
 
-The periodic table is available on `PyPI <http://pypi.python.org/pypi>`_, 
+The periodic table is available on `PyPI <http://pypi.python.org/pypi>`_,
 and can be obtained simply with::
 
     easy_install periodictable
-    
+
 This will install pyparsing if it is not already available.  The numpy
 package must already be installed.
 
@@ -113,8 +113,8 @@ the element or isotope:
     >>> Ni_2 = periodictable.Ni.ion[2]
     >>> print "charge for Ni2+",Ni_2.charge
     charge for Ni2+ 2
-    >>> print "mass for Ni[58] and for natural abundance", Ni58_2.mass, Ni_2.mass
-    mass for Ni[58] and for natural abundance 57.9353479 58.6934
+    >>> print "mass for Ni[58] and for natural abundance: %.4f %.4f"%(Ni58_2.mass, Ni_2.mass)
+    mass for Ni[58] and for natural abundance: 57.9343 58.6923
 
 The ion specific properties can be accessed from the ion using ion.charge
 for the ion index:

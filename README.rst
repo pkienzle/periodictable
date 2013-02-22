@@ -29,6 +29,19 @@ give different results from other packages.
 Change history
 ==============
 
+1.3.1 2013-02-19
+----------------
+
+New:
+
+* formulas now report charge and mass fraction
+* formula parser accepts ions as Yy{#+} or Yy[#]{#+} for isotopes
+* support neutron activation calculations
+
+Modified:
+
+* ions now display as Yy{#+} rather than Yy^{#+}
+
 1.3  2010-12-05
 ---------------
 

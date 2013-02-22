@@ -54,18 +54,20 @@ function ready() {
 
 if [ $step -le 0 ]; then
   echo === Version control status ===
+  set -x
   git pull
   git status
+  set +x
   ready sync Is the repository up to date?
 fi
 
 if [ $step -le 1 ]; then
   echo === Tests ===
   set -x
-  python2.6 test.py -q --with-coverage
-  python2.5 test.py -q
+  python2.7 test.py -q --with-coverage
+  python2.6 test.py -q
   set +x
-  if true; then
+  if false; then
     echo
     # Ask hudson build server if package is working on all platforms
     hudson_server="localhost:8080"
@@ -94,8 +96,10 @@ if [ $step -le 3 ]; then
   echo === Release notes ===
   rst2html README.rst > /tmp/README.html
   firefox /tmp/README.html >/dev/null 2>&1 &
-  git log --oneline
-
+  git log --format="%Cred%ad%Creset %s %Cred%an%Creset" --date=short --reverse
+  # Check whether anyone checked stuff into the old repository since the
+  # move to git
+  svn log svn://danse.us/common/elements/trunk -r1189:HEAD | grep -v "^[-]*$"
   version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//')
   echo *** Version is $version
   ready notes Are the release notes up to date?

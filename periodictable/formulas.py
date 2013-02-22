@@ -178,14 +178,14 @@ def mix_by_volume(*args, **kw):
     if name: result.name = name
     return result
 
-def formula(value=None, density=None, natural_density=None,
+def formula(compound=None, density=None, natural_density=None,
             name=None, table=None):
     r"""
     Construct a chemical formula representation from a string, a
     dictionary of atoms or another formula.
 
     :Parameters:
-        *formula* : see below
+        *compound* : Formula initializer
             Chemical formula.
 
         *density* : float | |g/cm^3|
@@ -220,27 +220,27 @@ def formula(value=None, density=None, natural_density=None,
     The representations are simple, but preserve some of the structure for
     display purposes.
     """
-    if value == None or value == '':
+    if compound == None or compound == '':
         structure = tuple()
-    elif isinstance(value,Formula):
-        structure = value.structure
-        if not density and not natural_density: density = value.density
-        if not name: name = value.name
-    elif isatom(value):
-        structure = ((1,value),)
-    elif isinstance(value,dict):
-        structure = _convert_to_hill_notation(value)
-    elif _is_string_like(value):
+    elif isinstance(compound,Formula):
+        structure = compound.structure
+        if not density and not natural_density: density = compound.density
+        if not name: name = compound.name
+    elif isatom(compound):
+        structure = ((1,compound),)
+    elif isinstance(compound,dict):
+        structure = _convert_to_hill_notation(compound)
+    elif _is_string_like(compound):
         try:
-            structure = _immutable(parse_formula(value, table=table))
+            structure = _immutable(parse_formula(compound, table=table))
         except ValueError,exception:
             raise ValueError(str(exception))
-            #print "parsed",value,"as",self
+            #print "parsed",compound,"as",self
     else:
         try:
-            structure = _immutable(value)
+            structure = _immutable(compound)
         except:
-            raise ValueError("not a valid chemical formula: "+str(value))
+            raise ValueError("not a valid chemical formula: "+str(compound))
     return Formula(structure=structure, name=name, density=density,
                    natural_density=natural_density)
 
@@ -258,9 +258,9 @@ class Formula(object):
         # If only one element in the formula, use its density.
         # Otherwise, leave density unspecified, and let the user
         # assign it separately if they need it.
-        if natural_density:
+        if natural_density is not None:
             self.natural_density = natural_density
-        elif density:
+        elif density is not None:
             self.density = density
         elif len(self.atoms) == 1:
             self.density = self.atoms.keys()[0].density
@@ -346,6 +346,22 @@ class Formula(object):
         Mass of the molecule in grams.
         """
         return self.mass/avogadro_number
+
+    @property
+    def charge(self):
+        """
+        Charge of the molecule
+        """
+        return sum([m*a.charge for a,m in self.atoms.items()])
+
+    @property
+    def mass_fraction(self):
+        """
+        Mass fraction representation of the elements in the molecule
+        """
+        total_mass = self.mass
+        return dict((a,m*a.mass/total_mass) for a,m in self.atoms.items())
+
 
     def _pf(self):
         """
@@ -565,6 +581,16 @@ def formula_grammar(table):
                        default='0')
     isotope = isotope.setParseAction(lambda s,l,t: int(t[0]) if t[0] else 0)
 
+    # Translate ion
+    openion = Literal('{').suppress()
+    closeion = Literal('}').suppress()
+    ion = Optional(~White()
+                     +openion
+                     +Regex("([1-9][0-9]*)?[+-]")
+                     +closeion,
+                   default='0+')
+    ion = ion.setParseAction(lambda s,l,t: int(t[0][-1]+(t[0][:-1] if len(t[0])>1 else '1')))
+
     # Translate counts
     fract = Regex("(0|[1-9][0-9]*|)([.][0-9]*)")
     fract = fract.setParseAction(lambda s,l,t: float(t[0]) if t[0] else 1)
@@ -572,12 +598,13 @@ def formula_grammar(table):
     whole = whole.setParseAction(lambda s,l,t: int(t[0]) if t[0] else 1)
     count = Optional(~White()+(fract|whole),default=1)
 
-    # Convert symbol,isotope,count to (count,isotope)
-    element = symbol+isotope+count
+    # Convert symbol,isotope,ion,count to (count,isotope)
+    element = symbol+isotope+ion+count
     def convert_element(string,location,tokens):
         #print "convert_element received",tokens
-        symbol,isotope,count = tokens[0:3]
+        symbol,isotope,ion,count = tokens[0:4]
         if isotope != 0: symbol = symbol[isotope]
+        if ion != 0: symbol = symbol.ion[ion]
         return (count,symbol)
     element = element.setParseAction(convert_element)
 
@@ -668,7 +695,10 @@ def _hill_compare(a,b):
         else:
             return -1
     else:
-        return cmp(a.symbol, b.symbol)
+        if b.symbol in ("C","H"):
+            return 1
+        else:
+            return cmp(a.symbol, b.symbol)
 
 def _convert_to_hill_notation(atoms):
     """
@@ -685,11 +715,15 @@ def _str_atoms(seq):
     ret = ""
     for count,fragment in seq:
         if isatom(fragment):
-            # Isotopes are Sym[iso] except for D and T
+            # Normal isotope string from is #-Yy, but we want Yy[#]
             if isisotope(fragment) and 'symbol' not in fragment.__dict__:
                 ret += "%s[%d]"%(fragment.symbol,fragment.isotope)
             else:
                 ret += fragment.symbol
+            if fragment.charge != 0:
+                sign = '+' if fragment.charge > 0 else '-'
+                value = str(abs(fragment.charge)) if abs(fragment.charge)>1 else ''
+                ret += '{'+value+sign+'}'
             if count!=1:
                 ret += "%g"%count
         else:

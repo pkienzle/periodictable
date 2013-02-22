@@ -141,7 +141,7 @@ __all__ = ['init', 'Neutron',
            'incoherent_comparison_table', 'total_comparison_table',
            'energy_dependent_table', 'sld_table',
            'neutron_sld_from_atoms',
-           #'sld_potential',
+           #'scattering_potential',
            ]
 
 ABSORPTION_WAVELENGTH = 1.798
@@ -236,7 +236,7 @@ def neutron_energy(wavelength):
     """
     return ENERGY_FACTOR / asarray(wavelength)**2
 
-def _CHECK_sld_potential(sld):
+def _CHECK_scattering_potential(sld):
     """
     Convert neutron scattering length density to energy potential.
 
@@ -679,15 +679,15 @@ def neutron_scattering(compound, density=None,
         \sigma_a = \sigma_a \lambda / \lambda_o = \sigma_a \lambda / 1.798
 
     For the scattering equations, the primary quantity of interest is the
-    scattering potential $b = b' + i b''$.  For most
-    elements, the scattering potential at cold neutron and thermal neutron
-    energies is simply related to the neutron energy, with no change in
-    the real portion and a linear scaling of the imaginary portion with
-    energy. The value of b is dominated by the bound coherent potential,
-    with a small contribution from the incoherent scattering cross sections.
+    complex scattering length $b = b' + i b''$.  For most elements, the
+    scattering length at cold neutron and thermal neutron energies is simply
+    related to the neutron energy, with no change in the real portion and a
+    linear scaling of the imaginary portion with energy. The value of b is
+    dominated by the bound coherent scattering length, with a small
+    contribution from the incoherent scattering length.
 
-    The potentials are related to the scattering cross sections as follows:
-    [#Sears1999]_
+    The scattering lengths are related to the scattering cross sections
+    as follows:[#Sears1999]_
 
     .. math::
 
@@ -703,14 +703,14 @@ def neutron_scattering(compound, density=None,
         b''         &= \sigma_a / (2 \lambda)\\
         b_{\rm inc} &= \sqrt{ \sigma_i / (4 \pi) }
 
-    The incoherent potential binc can be treated primarily as an
-    absorption potential in large scale structure calculations, with the
-    complex potential b approximated by
+    The incoherent scattering length $b_{\rm inc}$ can be treated primarily
+    as an absorption length in large scale structure calculations, with the
+    complex scattering length b approximated by
     $b' + i (b'' + b_{\rm inc})$.
 
     The scattering potential is usually expressed as a scattering length
     density for calculation purposes.  This is just the number density of
-    the scatterers times their scattering potential:
+    the scatterers times their scattering lengths:
 
     .. math::
 
@@ -718,7 +718,7 @@ def neutron_scattering(compound, density=None,
         \rho_{\rm im}  &= N \sigma_a / (2 \lambda) \\
         \rho_{\rm inc} &= N \sqrt{\sigma_i/4 \pi}
 
-    Scattering cross section:
+    Similarly, scattering cross section includes number density:
 
     .. math::
 
@@ -726,7 +726,7 @@ def neutron_scattering(compound, density=None,
         \Sigma_{\rm inc} &= N \sigma_i \\
         \Sigma_{\rm abs} &= N \sigma_a
 
-    1/e penetration depth *d*:
+    as does 1/e penetration depth *d*:
 
     .. math::
 
@@ -766,13 +766,9 @@ def neutron_scattering(compound, density=None,
             \,+\, \Sigma_{\rm abs}\, 1/{\rm cm})
     """
     from . import formulas
-    compound = formulas.formula(compound)
-    if density is None:
-        if natural_density is not None:
-            density = natural_density/compound.natural_mass_ratio()
-        else:
-            density = compound.density # defaults to molecule density
-    assert density is not None, "scattering calculations need density"
+    compound = formulas.formula(compound, density=density,
+                                natural_density=natural_density)
+    assert compound.density is not None, "scattering calculation needs density"
     if energy is not None:
         wavelength = neutron_wavelength(energy)
     assert wavelength is not None, "scattering calculation needs energy or wavelength"
@@ -793,7 +789,7 @@ def neutron_scattering(compound, density=None,
 
     # If nothing to sum, return values for a vacuum.  This might be because
     # the material has no atoms or it might be because the density is zero.
-    if molar_mass*density == 0:
+    if molar_mass*compound.density == 0:
         return (0,0,0), (0,0,0), inf
 
     # Turn sums into averages
@@ -807,7 +803,7 @@ def neutron_scattering(compound, density=None,
     sigma_a *= wavelength/ABSORPTION_WAVELENGTH
 
     # Compute number density
-    cell_volume = (molar_mass/density)/avogadro_number*1e24 # (10^8 A/cm)^3
+    cell_volume = (molar_mass/compound.density)/avogadro_number*1e24 # (10^8 A/cm)^3
     number_density = num_atoms / cell_volume
 
     # Compute SLD

@@ -42,6 +42,27 @@ A formula string is translated into a formula using
     >>> print formula("CaCO[18]3+6H2O")
     CaCO[18]3(H2O)6
 
+* Ions are represented by charge, such as O{2-} = O\ :sup:`2-`:
+
+    >>> print formula("P{5+}O{2-}4")
+    P{5+}O{2-}4
+
+  If charge is +/- 1 then the number is optional:
+
+    >>> print formula("Na{+}Cl{1-}")
+    Na{+}Cl{-}
+
+  When specifying both charge and isotope, isotope comes first:
+
+    >>> print formula("Fe[56]{2+}")
+    Fe[56]{2+}
+
+  Even though the charge is on the individual atoms, the entire formula
+  has a charge:
+
+    >>> print formula("P{5+}O{2-}4").charge
+    -3
+
 * Counts can be integer or decimal:
 
     >>> print formula("CaCO3+(3HO1.5)2")
@@ -63,6 +84,7 @@ The grammar used for parsing formula strings is the following:
     count     :: number | fraction | nothing
     symbol    :: [A-Z][a-z]*
     isotope   :: '[' number ']' | nothing
+    ion       :: '{' number? [+-] '}' | nothing
     element   :: symbol isotope count
     separator :: '+' | nothing
     group     :: count element+ | '(' formula ')' count

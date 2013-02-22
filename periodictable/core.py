@@ -21,8 +21,10 @@ Core classes for the periodic table.
 Elements are accessed from a periodic table using ``table[number]``,
 ``table.name`` or ``table.symbol`` where *symbol* is the two letter symbol.
 Individual isotopes are accessed using ``element[isotope]``. Individual ions
-are references using ``element.ion[charge]``.  There are presently no
-properties specific to both ion and isotope.
+are references using ``element.ion[charge]``.  Note that
+``element[isotope].ion[charge].mass`` will depend on the particular charge
+since we subtract the charge times the rest mass of the electron from the
+overall mass.
 
 Helper functions:
 
@@ -58,6 +60,8 @@ __all__ = ['delayed_load', 'define_elements', 'get_data_path',
            'isatom', 'iselement', 'isisotope', 'ision']
 
 import copy
+
+from . import constants
 
 PUBLIC_TABLE_NAME = "public"
 
@@ -203,7 +207,7 @@ class PeriodicTable(object):
     """
     def __init__(self, table):
         if table in PRIVATE_TABLES:
-            raise ValueError("Periodic table '%s' is already defined"%name)
+            raise ValueError("Periodic table '%s' is already defined"%table)
         PRIVATE_TABLES[table] = self
         self.properties = []
         self._element = {}
@@ -426,14 +430,14 @@ class Ion(object):
         self.charge = charge
     def __getattr__(self, attr):
         return getattr(self.element,attr)
+    @property
+    def mass(self):
+        return getattr(self.element,'mass') - constants.electron_mass*self.charge
     def __str__(self):
-        el = str(self.element)
-        if self.charge > 0:
-            return el+'^{%d+}'%self.charge
-        elif self.charge < 0:
-            return el+'^{%d-}'%(-self.charge)
-        else:
-            return el
+        sign = '+' if self.charge > 0 else '-'
+        value = '%d'%abs(self.charge) if abs(self.charge)>1 else ''
+        charge_str = '{'+value+sign+'}' if self.charge != 0 else ''
+        return str(self.element)+charge_str
     def __repr__(self):
         return repr(self.element)+'.ion[%d]'%self.charge
     def __reduce__(self):
@@ -764,7 +768,7 @@ def get_data_path(data):
     :Returns: string
          Path to the data.
     """
-    import os
+    import os,sys
 
     # Check for data path in the environment
     key = 'PERIODICTABLE_DATA'
@@ -780,14 +784,14 @@ def get_data_path(data):
         return path
 
     # Check for data path next to exe/zip file.
-    # If we are inside a py2exe zip file, we need to go up
-    # two levels to get to the directory containing the exe
-    # We will check if the exe and the xsf are in the same
-    # directory.
-    path= os.path.dirname(__file__)
-    path,_ = os.path.split(path)
-    path,_ = os.path.split(path)
-    path = os.path.join(path, 'periodictable-data', data)
+    exepath = os.path.dirname(sys.executable)
+    path = os.path.join(exepath, 'periodictable-data', data)
+    if os.path.isdir(path):
+        return path
+
+    # py2app puts the data in Contents/Resources, but the executable
+    # is in Contents/MacOS.
+    path = os.path.join(exepath, '..', 'Resources', 'periodictable-data', data)
     if os.path.isdir(path):
         return path
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-import fix_setuptools_chmod
+#import fix_setuptools_chmod
 import sys
 
 import periodictable

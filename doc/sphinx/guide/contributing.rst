@@ -34,7 +34,7 @@ can run both sets of tests::
 When all the tests run, generate a patch and send it to the 
 `DANSE <http://danse.us>`_ Project mailing list at danse-dev@cacr.caltech.edu::
 
-    git diff > periodictable.patch
+    git diff > patch
 
 Alternatively, create a project fork at github and we can pull your
 changes directly from your repository.

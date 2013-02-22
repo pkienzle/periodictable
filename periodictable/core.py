@@ -765,8 +765,6 @@ def get_data_path(data):
          Path to the data.
     """
     import os
-    def is_data_path(path):
-        return os.path.isdir(path)
 
     # Check for data path in the environment
     key = 'PERIODICTABLE_DATA'

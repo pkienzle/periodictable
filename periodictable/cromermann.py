@@ -35,7 +35,8 @@
 ##############################################################################
 
 
-"""Cromer-Mann formula for calculating x-ray scattering factors.
+"""
+Cromer-Mann formula for calculating x-ray scattering factors.
 """
 
 # module version
@@ -47,42 +48,50 @@ import numpy
 from periodictable import core
 
 
-def getCMformula(smbl):
-    '''Obtain Cromer-Mann formula and coefficients for a specified element.
+def getCMformula(symbol):
+    """
+    Obtain Cromer-Mann formula and coefficients for a specified element.
 
-    smbl     -- string symbol of an element
+    *symbol* : string
+        symbol of an element
 
     Return instance of CromerMannFormula.
-    '''
+    """
     if not _cmformulas:  _update_cmformulas()
-    return _cmformulas[smbl]
+    return _cmformulas[symbol]
 
 
 def fxrayatq(symbol, Q, charge=None):
-    '''Return x-ray scattering factors of an element at a given Q.
+    """
+    Return x-ray scattering factors of an element at a given Q.
 
-    symbol   -- string symbol of an element or ion, e.g., "Ca", "Ca2+"
-    Q        -- Q value in 1/A, float or iterable
-    charge   -- integer ion charge, overrides any valence suffixes such as
-                ("-", "+", "3+").
+    *symbol* : string
+         symbol of an element or ion, e.g., "Ca", "Ca2+"
+    *Q* : float or [float] | |1/Ang|
+         Q value
+    *charge* : int
+         ion charge, overrides any valence suffixes such as "-", "+", "3+".
 
     Return float or numpy array.
-    '''
+    """
     stol = numpy.array(Q) / (4 * numpy.pi)
     rv = fxrayatstol(symbol, stol, charge)
     return rv
 
 
 def fxrayatstol(symbol, stol, charge=None):
-    '''Calculate x-ray scattering factors at specified sin(theta)/lambda
+    """
+    Calculate x-ray scattering factors at specified sin(theta)/lambda
 
-    symbol   -- string symbol of an element or ion, e.g., "Ca", "Ca2+"
-    stol     -- sin(theta)/lambda in 1/A, float or iterable.
-    charge   -- integer ion charge, overrides any valence suffixes such as
-                ("-", "+", "3+").
+    *symbol* : string
+        symbol of an element or ion, e.g., "Ca", "Ca2+"
+    *stol* : float or [float] | |1/Ang|
+        sin(theta)/lambda
+    *charge* : int
+        ion charge, overrides any valence suffixes such as "-", "+", "3+".
 
     Return float or numpy.array.
-    '''
+    """
     # resolve lookup symbol smbl, by default symbol
     smbl = symbol
     # build standard element or ion symbol
@@ -99,21 +108,26 @@ def fxrayatstol(symbol, stol, charge=None):
 
 
 class CromerMannFormula(object):
-    '''Cromer-Mann formula for x-ray scattering factors.
+    """
+    Cromer-Mann formula for x-ray scattering factors.
     Coefficient storage and evaluation.
 
     Class data:
 
-    stollimit    -- maximum sin(theta)/lambda for which the formula works
-                    in inverse Angstroms
+    *stollimit* : float | |1/Ang|
+        maximum sin(theta)/lambda for which the formula works
 
     Attributes:
 
-    symbol  -- string symbol of an element
-    a       -- numpy array of a-coefficients
-    b       -- numpy array of b-coefficients
-    c       -- coefficient c
-    '''
+    *symbol* : string
+        symbol of an element
+    *a* : [float]
+        a-coefficients
+    *b* : [float]
+        b-coefficients
+    *c* : float
+        c-coefficient
+    """
 
     # obtained from tables/f0_WaasKirf.dat and the associated reference
     # D. Waasmaier, A. Kirfel, Acta Cryst. (1995). A51, 416-413
@@ -121,24 +135,27 @@ class CromerMannFormula(object):
     stollimit = 6
 
     def __init__(self, symbol, a, b, c):
-        '''Create a new instance of CromerMannFormula for specified element.
+        """
+        Create a new instance of CromerMannFormula for specified element.
 
         No return value
-        '''
+        """
         self.symbol = symbol
-        self.a = numpy.array(a, dtype=float)
-        self.b = numpy.array(b, dtype=float)
+        self.a = numpy.asarray(a, dtype=float)
+        self.b = numpy.asarray(b, dtype=float)
         self.c = float(c)
         return
 
 
     def atstol(self, stol):
-        '''Calculate x-ray scattering factors at specified sin(theta)/lambda
+        """
+        Calculate x-ray scattering factors at specified sin(theta)/lambda
 
-        stol -- sin(theta)/lambda in 1/A, float or iterable.
+        *stol* : float or [float] | |1/Ang|
+            sin(theta)/lambda
 
         Return float or numpy.array.
-        '''
+        """
         stolflat = numpy.array(stol).flatten()
         n = len(stolflat)
         stol2row = numpy.reshape(stolflat ** 2, (1, n))
@@ -156,8 +173,9 @@ class CromerMannFormula(object):
 
 
 def _update_cmformulas():
-    '''Update the static dictionary of CromerMannFormula instances.
-    '''
+    """
+    Update the static dictionary of CromerMannFormula instances.
+    """
     data_path = core.get_data_path('xsf')
     filename = os.path.join(data_path, 'f0_WaasKirf.dat')
     fp = open(filename)

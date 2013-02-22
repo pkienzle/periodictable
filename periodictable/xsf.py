@@ -75,88 +75,87 @@ X-ray f1 and f2 tables
 ======================
 The data for the tables is stored in the ``periodictable/xsf``.
 directory.  The following information is from ``periodictable/xsf/read.me``,
-with minor formatting changes.
-These ``[*.nff]`` files were used to generate the tables published in
-reference [#Henke1993]_. The files contain three columns of data:
+with minor formatting changes:
+
+  These ``[*.nff]`` files were used to generate the tables published in
+  reference [#Henke1993]_. The files contain three columns of data:
 
     Energy(eV), *f_1*, *f_2*,
 
-where *f_1* and *f_2* are the atomic (forward) scattering factors.
-There are 500+ points on a uniform logarithmic mesh with points
-added 0.1 eV above and below "sharp" absorption edges. The
-tabulated values of *f_1* contain a relativistic, energy
-independent, correction given by:
+  where *f_1* and *f_2* are the atomic (forward) scattering factors.
+  There are 500+ points on a uniform logarithmic mesh with points
+  added 0.1 eV above and below "sharp" absorption edges. The
+  tabulated values of *f_1* contain a relativistic, energy
+  independent, correction given by:
 
-.. math::
+  .. math::
 
     Z^* = Z - (Z/82.5)^{2.37}
 
-.. Note::
+  .. Note::
     Below 29 eV *f_1* is set equal to -9999.
 
-The atomic photoabsorption cross section, $\mu_a$, may be readily
-obtained from the values of $f_2$ using the relation:
+  The atomic photoabsorption cross section, $\mu_a$, may be readily
+  obtained from the values of $f_2$ using the relation:
 
-.. math::
+  .. math::
 
     \mu_a = 2 r_e \lambda f_2
 
-where $r_e$ is the classical electron radius, and $\lambda$ is
-the wavelength. The index of refraction for a material with *N* atoms per
-unit volume is calculated by:
+  where $r_e$ is the classical electron radius, and $\lambda$ is
+  the wavelength. The index of refraction for a material with *N* atoms per
+  unit volume is calculated by:
 
-.. math::
+  .. math::
 
     n = 1 - N r_e \lambda^2 (f_1 + i f_2)/(2 \pi).
 
-These (semi-empirical) atomic scattering factors are based upon
-photoabsorption measurements of elements in their elemental state.
-The basic assumption is that condensed matter may be modeled as a
-collection of non-interacting atoms.  This assumption is in general
-a good one for energies sufficiently far from absorption thresholds.
-In the threshold regions, the specific chemical state is important
-and direct experimental measurements must be made.
+  These (semi-empirical) atomic scattering factors are based upon
+  photoabsorption measurements of elements in their elemental state.
+  The basic assumption is that condensed matter may be modeled as a
+  collection of non-interacting atoms.  This assumption is in general
+  a good one for energies sufficiently far from absorption thresholds.
+  In the threshold regions, the specific chemical state is important
+  and direct experimental measurements must be made.
 
-These tables are based on a compilation of the available experimental
-measurements and theoretical calculations.  For many elements there is
-little or no published data and in such cases it was necessary to
-rely on theoretical calculations and interpolations across Z.
-In order to improve the accuracy in the future considerably more
-experimental measurements are needed.
+  These tables are based on a compilation of the available experimental
+  measurements and theoretical calculations.  For many elements there is
+  little or no published data and in such cases it was necessary to
+  rely on theoretical calculations and interpolations across Z.
+  In order to improve the accuracy in the future considerably more
+  experimental measurements are needed.
 
-Please send any comments about the tables to EMGullikson@lbl.gov.
+  Note that the following elements have been updated since the
+  publication of Ref. [#Henke1993]_ in July 1993. Check
+  `<http://henke.lbl.gov/optical_constants/update.html>`_ for more
+  recent updates.
+
+  .. table::
+
+           ========  ==========   =================
+           Element   Updated      Energy Range (eV)
+           ========  ==========   =================
+           Mg        Jan 2011     10-1300
+           Zr        Apr 2010     20-1000
+           La        Jun 2007     14-440
+           Gd        Jun 2007     12-450
+           Sc        Apr 2006     50-1300
+           Ti        Aug 2004     20-150
+           Ru        Aug 2004     40-1300
+           W         Aug 2004     35-250
+           Mo        Aug 2004     25-60
+           Be        Aug 2004     40-250
+           Mo        Nov 1997     10-930
+           Fe        Oct 1995     600-800
+           Si        Jun 1995     30-500
+           Au        Jul 1994     2000-6500
+           Mg,Al,Si  Jan 1994     30-200
+           Li        Nov 1994     2000-30000
+           ========  ==========   =================
 
 
-Note that the following elements have been updated since the
-publication of Ref. [#Henke1993]_ in July 1993.
-
-.. table::
-
-           ========  ==========   ==============
-           Element   Updated      Energy Range
-           ========  ==========   ==============
-           Mg        1/15/94      30-50 eV
-           Al        1/15/94      30-73 eV
-           Si        1/15/94      30-100 eV
-           Au        11/7/94      2000-6500 eV
-           Li        11/15/94     2000-30000 eV
-           Si        6/95         30-500 eV
-           Fe        10/95        600-800 eV
-           Mo        11/97        10-930 eV
-           Be        8/04         40-250 eV
-           Mo        8/04         25-60 eV
-           W         8/04         35-250 eV
-           Ru        8/04         40-1300 eV
-           Ti        8/04         20-150 eV
-           Sc        4/06         50-1300 eV
-           Gd        6/07         12-450 eV
-           La        6/07         14-440 eV
-           ========  ==========   ==============
-
-
-Data available at:
-  #. http://henke.lbl.gov/optical_constants/asf.html
-  #. http://henke.lbl.gov/optical_constants/update.html
+  Data available at:
+    #. http://henke.lbl.gov/optical_constants/asf.html
 
 .. [#Henke1993] B. L. Henke, E. M. Gullikson, and J. C. Davis.  "X-ray interactions:
        photoabsorption, scattering, transmission, and reflection at E=50-30000 eV,
@@ -499,7 +498,8 @@ def mirror_reflectivity(compound, density=None, natural_density=None,
 def xray_sld_from_atoms(*args, **kw):
     """
     .. deprecated:: 0.91
-        :func:`xray_sld` now accepts a dictionary of {atom: count} directly.
+
+        :func:`xray_sld` now accepts a dictionary of \{atom\: count\} directly.
     """
     return xray_sld(*args, **kw)
 

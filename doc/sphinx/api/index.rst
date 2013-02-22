@@ -16,9 +16,13 @@
    core.rst
    formulas.rst
    covalent_radius.rst
+   constants.rst
    crystal_structure.rst
    density.rst
+   magnetic_ff.rst
    mass.rst
    nsf.rst
    xsf.rst
-   magnetic_ff.rst
+   cromermann.rst
+   plot.rst
+   util.rst

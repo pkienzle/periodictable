@@ -335,7 +335,7 @@ class Neutron(object):
     * nuclear_spin (string)
         Spin on the nucleus: '0', '1/2', '3/2', etc.
 
-    Each field above has a corresponding ``*_units`` attribute with the name
+    Each field ``T`` above has a corresponding ``T_units`` attribute with the name
     of the units. For scattering calculations, the scattering length density
     is the value of interest. This is computed from the *number_density* of the
     individual elements, as derived from the element density and atomic mass.
@@ -857,7 +857,9 @@ def neutron_sld(*args, **kw):
 def neutron_sld_from_atoms(*args, **kw):
     """
     .. deprecated:: 0.91
-        :func:`neutron_sld` now accepts dictionaries of {atom: count} directly.
+
+        :func:`neutron_sld` now accepts dictionaries of \{atom\: count\} directly.
+
     """
     return neutron_scattering(*args, **kw)[0]
 

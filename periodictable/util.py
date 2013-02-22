@@ -5,17 +5,17 @@ Helper functions
 """
 
 def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
-    """
+    r"""
     Compute cell volume from lattice parameters.
 
     :Parameters:
-        *a*, *b*, *c* : float | |A|
+        *a*, *b*, *c* : float | |Ang|
             Lattice spacings.  If *b* or *c* are missing they default to *a*.
         *alpha*, *beta*, *gamma* : float | |deg|
             Lattice angles.  If any are missing they default to 90\ |deg|
 
     :Returns:
-        *V* : float |A^3|
+        *V* : float | |Ang^3|
             Cell volume
 
     :Raises:
@@ -25,8 +25,8 @@ def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
 
     .. math::
 
-        V = a b c \sqrt{1 - \cos^2 \alpha - \cos^2 \beta - cos^2 \gamma
-                          + 2 \cos \alpha \cos beta \cos gamma}
+        V = a b c \sqrt{1 - \cos^2 \alpha - \cos^2 \beta - \cos^2 \gamma
+                          + 2 \cos \alpha \cos \beta \cos \gamma}
     """
     from math import cos, radians, sqrt
     if a is None: raise TypeError('missing lattice parameters')
@@ -65,8 +65,8 @@ def require_keywords(function):
 
     We can't preserve the function signature for the call since the only
     way we can count the number of non-keyword arguments is to
-    use the *args, **kw call style.  Python 3+ provides the '*' call
-    signature element which will force all keywords after '*' to be named.
+    use the \*args, \*\*kw call style.  Python 3+ provides the '\*' call
+    signature element which will force all keywords after '\*' to be named.
     """
     import inspect
     import functools

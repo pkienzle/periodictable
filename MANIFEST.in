@@ -1,0 +1,7 @@
+include doc
+include periodictable/xsf/*
+include periodictable/activation.dat
+prune doc/sphinx/_build
+prune doc/sphinx/build
+prune doc/sphinx/MathJax
+exclude build dist *.pyc

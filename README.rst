@@ -2,8 +2,6 @@
 Extensible periodic table of the elements
 =========================================
 
-Release 1.3, Dec 7, 2010
-
 This package provides a periodic table of the elements with
 support for mass, density and xray/neutron scattering information.
 
@@ -29,7 +27,12 @@ give different results from other packages.
 Change history
 ==============
 
-1.3.1 2013-02-19
+1.3.3 2013-02-25
+----------------
+
+* add data sets missing from last release
+
+1.3.2 2013-02-22
 ----------------
 
 New:

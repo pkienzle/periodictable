@@ -60,8 +60,15 @@ def test():
     assert (formula("Fe2O[18]4+3H2O").mass
             == 2*Fe.mass+4*O[18].mass+3*O.mass+6*H.mass)
 
+    # Check natural density support
     assert (formula('D2O',natural_density=1).density
             == (2*D.mass + O.mass)/(2*H.mass + O.mass))
+    D2O = formula('D2O',natural_density=1)
+    D2Os = formula('D2O')
+    D2Os.natural_density = 1
+    assert abs(D2O.density - D2Os.density) < 1e-14
+    assert abs(D2O.natural_density - 1) < 1e-14
+    assert abs(D2Os.natural_density - 1) < 1e-14
 
     # Test isotopes; make sure this is last since it changes ikaite!
     assert ikaite!=formula("CaCO[18]3+6H2O")

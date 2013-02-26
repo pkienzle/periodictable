@@ -27,6 +27,13 @@ give different results from other packages.
 Change history
 ==============
 
+1.3.4 2013-02-26
+----------------
+
+Modified:
+
+* formula.natural_density was being computed incorrectly
+
 1.3.3 2013-02-25
 ----------------
 

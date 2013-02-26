@@ -320,7 +320,7 @@ class Formula(object):
         replaced by the naturally occurring abundance of the element
         without changing the cell volume.
         """
-        return self.density/self.natural_mass_ratio()
+        return self.density*self.natural_mass_ratio()
     def _set_natural_density(self, natural_density):
         self.density = natural_density / self.natural_mass_ratio()
     natural_density = property(_get_natural_density, _set_natural_density,

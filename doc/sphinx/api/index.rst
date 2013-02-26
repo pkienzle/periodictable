@@ -21,6 +21,7 @@
    density.rst
    magnetic_ff.rst
    mass.rst
+   activation.rst
    nsf.rst
    xsf.rst
    cromermann.rst

@@ -62,6 +62,7 @@ modules=[
     ('density', 'Density'),
     ('magnetic_ff', 'Magnetic Form Factor'),
     ('mass', 'Mass'),
+    ('activation', 'Neutron activation'),
     ('nsf', 'Neutron scattering potentials'),
     ('xsf', 'X-ray scattering potentials'),
     ('cromermann', 'X-ray scattering factor f0 calculations'),

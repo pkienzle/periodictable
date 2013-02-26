@@ -7,17 +7,22 @@ NCNR health physics activation calculation.
 
 Notation information:
 
-m, m1, m2:  indicate metastable states.  Decay may be to the ground state or to
-    another nuclide.
-+ indicates radioactive daughter production already included in daughter listing
-    several parent t1/2's required to acheive calculated daughter activity.  All
-    activity assigned at end of irradiation.  In most cases the added activity to the
-    daughter is small.
-* indicates radioactive daughter production NOT calculated, approx secular equilibrium
-s indicates radioactive daughter of this nuclide in secular equilibrium after several
-    daughter t1/2's
-t indicates transient equil via beta dcay.  Accumulation of that nuclide during irradiation
-    is separately calculated.
+ m, m1, m2: indicate metastable states.  Decay may be to the ground state or to
+ another nuclide.
+
+ \+: indicates radioactive daughter production already included in daughter listing
+ several parent t1/2's required to acheive calculated daughter activity.  All
+ activity assigned at end of irradiation.  In most cases the added activity to the
+ daughter is small.
+
+ \*: indicates radioactive daughter production NOT calculated, approximately
+ secular equilibrium
+
+ s: indicates radioactive daughter of this nuclide in secular equilibrium after several
+ daughter t1/2's
+
+ t: indicates transient equilibrium via beta decay.  Accumulation of that nuclide 
+ during irradiation is separately calculated.
 
 Reaction = b indicates production via decay from an activation produced parent
 

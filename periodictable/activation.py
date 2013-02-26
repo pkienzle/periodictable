@@ -1,3 +1,4 @@
+# -*- coding: iso-8859-15 -*-
 """
 Calculate expected neutron activation from time spent in beam line.
 
@@ -45,6 +46,29 @@ import os
 from .formulas import formula as build_formula
 from . import core
 
+def NIST2001_isotopic_abundance(iso):
+    """
+    Isotopic abundance in % from the periodic table package.
+
+    Bölke, et al.
+    Isotopic Compositions of the Elements, 2001.
+    J. Phys. Chem. Ref. Data, Vol. 34, No. 1, 2005
+    """
+    return iso.abundance
+                    
+def IAEA1987_isotopic_abundance(iso):
+    """
+    Isotopic abundance in % from the IAEA, as provided in the activation.dat table.
+
+    Note: this will return an abundance of 0 if there is no neutron activation for
+    the isotope even though for isotopes such as H[1], the natural abundance may in
+    fact be rather large.
+
+    IAEA 273: Handbook on Nuclear Activation Data, 1987.
+    """
+    try: return iso.neutron_activation[0].abundance
+    except AttributeError: return 0
+
 class Sample(object):
     """
     Sample properties.
@@ -68,7 +92,8 @@ class Sample(object):
         self.name = name if name else str(self.formula) # cell F20
         self.activity = {}
 
-    def calculate_activation(self, environment, exposure=1, rest_times=[0, 1, 24, 360]):
+    def calculate_activation(self, environment, exposure=1, rest_times=[0, 1, 24, 360],
+                             abundance=NIST2001_isotopic_abundance):
         """
         Calculate sample activation after exposure to a neutron flux.
 
@@ -77,6 +102,10 @@ class Sample(object):
         *exposure* is the exposure time in hours (default is 1 h).
 
         *rest_times* is the list of deactivation times in hours (default is [0, 1, 24, 360]).
+
+        *abundance* is a function that returns the relative abundance of an isotope.  By
+        default it uses :func:`NIST2001_isotopic_abundance`, and there is the alternative
+        :func:`IAEA273_isotopic_abundance`.
         """
         self.activity = {}
         self.environment = environment
@@ -88,16 +117,7 @@ class Sample(object):
                 self._accumulate(A)
             else:
                 for iso in el.isotopes:
-                    # Pull the abundance from activation.dat, which gets values from:
-                    #     IAEA 273:  Handbook on Nuclear Activation Data, 1987
-                    #try: abundance = el[iso].neutron_activation.abundance
-                    #except AttributeError: abundance = 0
-
-                    # Pull the abundance from the periodic table, which gets values from:
-                    #     Isotopic Compositions of the Elements, 2001
-                    abundance = el[iso].abundance
-
-                    iso_mass = self.mass*frac*abundance*0.01
+                    iso_mass = self.mass*frac*abundance(el[iso])*0.01
                     if iso_mass:
                         A = activity(el[iso], iso_mass, environment, exposure, rest_times)
                         self._accumulate(A)

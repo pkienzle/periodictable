@@ -27,19 +27,7 @@ give different results from other packages.
 Change history
 ==============
 
-1.3.4 2013-02-26
-----------------
-
-Modified:
-
-* formula.natural_density was being computed incorrectly
-
-1.3.3 2013-02-25
-----------------
-
-* add data sets missing from last release
-
-1.3.2 2013-02-22
+1.3.5 2013-02-26
 ----------------
 
 New:
@@ -51,6 +39,7 @@ New:
 Modified:
 
 * ions now display as Yy{#+} rather than Yy^{#+}
+* formula.natural_density was being computed incorrectly
 
 1.3  2010-12-05
 ---------------

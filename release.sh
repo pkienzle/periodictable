@@ -115,6 +115,8 @@ fi
 
 if [ $step -le 5 ]; then
   ready Push package to pypi?
+  git tag -a v$version -m "Release $version"
+  git push --tags
   python setup.py sdist upload
   ready pypi Package upload successful?
 fi

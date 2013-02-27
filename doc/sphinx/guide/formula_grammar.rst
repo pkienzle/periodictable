@@ -79,16 +79,16 @@ The grammar used for parsing formula strings is the following:
 
 ::
 
-    number    :: [1-9][0-9]*
-    fraction  :: (number | [0] | nothing) '.' [0-9]*
-    count     :: number | fraction | nothing
-    symbol    :: [A-Z][a-z]*
-    isotope   :: '[' number ']' | nothing
-    ion       :: '{' number? [+-] '}' | nothing
-    element   :: symbol isotope count
-    separator :: '+' | nothing
+    formula   :: group (separator group)* | nothing
     group     :: count element+ | '(' formula ')' count
-    grammar   :: group space separator space formula | group | nothing
+    element   :: symbol isotope? ion? count?
+    symbol    :: [A-Z][a-z]*
+    isotope   :: '[' number ']'
+    ion       :: '{' number? [+-] '}'
+    count     :: number | fraction
+    number    :: [1-9][0-9]*
+    fraction  :: ([1-9][0-9]* | 0)? '.' [0-9]*
+    separator :: space? '+'? space?
 
 
 Formulas can also be constructed from atoms or other formulas:

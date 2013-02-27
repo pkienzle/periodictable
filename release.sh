@@ -97,7 +97,7 @@ if [ $step -le 3 ]; then
   rst2html README.rst > /tmp/README.html
   firefox /tmp/README.html >/dev/null 2>&1 &
   git log --format="%Cred%ad%Creset %s %Cred%an%Creset" --date=short
-  version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//')
+  version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//;s/"//g')
   echo *** Version is $version
   ready notes Are the release notes shown in the browser up to date?
 fi

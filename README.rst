@@ -32,14 +32,20 @@ Change history
 
 New:
 
-* formulas now report charge and mass fraction
+* formulas now report charge and mass_fraction
 * formula parser accepts ions as Yy{#+} or Yy[#]{#+} for isotopes
 * support neutron activation calculations
+* support xray refraction index and mirror reflectivity
 
 Modified:
 
+* update X-ray scattering tables for Zr
+* adjust ion mass for number of electrons
 * ions now display as Yy{#+} rather than Yy^{#+}
-* formula.natural_density was being computed incorrectly
+* fix formula.natural_density 
+* fix formula.hill so C,H come first
+* fix element.interatomic_distance
+* formula(value=...) -> formula(compound=...)
 
 1.3  2010-12-05
 ---------------

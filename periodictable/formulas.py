@@ -715,7 +715,7 @@ def _str_atoms(seq):
     ret = ""
     for count,fragment in seq:
         if isatom(fragment):
-            # Normal isotope string from is #-Yy, but we want Yy[#]
+            # Normal isotope string form is #-Yy, but we want Yy[#]
             if isisotope(fragment) and 'symbol' not in fragment.__dict__:
                 ret += "%s[%d]"%(fragment.symbol,fragment.isotope)
             else:

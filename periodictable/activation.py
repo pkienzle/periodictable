@@ -38,8 +38,14 @@ Example::
                                           ----------------- activity (uCi) ------------------
     isotope  product  reaction T1/2 (hrs)      T@0 hrs      T@1 hrs     T@24 hrs    T@360 hrs
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
-    Co-59    Co-60m+       act     10.5 m          1.7          ---          ---          ---
+    Co-59    Co-60         act    5.272 y    0.0004959    0.0004959    0.0004957    0.0004932
+    Co-59    Co-60m+       act     10.5 m        1.664      0.03172          ---          ---
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
+                                    total        1.665      0.03223    0.0005083    0.0005049
+    -------- -------- -------- ---------- ------------ ------------ ------------ ------------
+
+    >>> print "%.3f"%sample.decay_time(0.001) # number of hours to reach 1 nCi
+    2.054
 
 The default rest times used above show the sample activity at the end of neutron 
 activation and after 1 hour, 1 day, and 15 days.
@@ -127,12 +133,32 @@ class Sample(object):
                         A = activity(el[iso], iso_mass, environment, exposure, rest_times)
                         self._accumulate(A)
 
+    def decay_time(self, target):
+        """
+        After determining the activation, compute the number of hours required to achieve
+        a total activation level after decay.
+        """
+        if not self.rest_times or not self.activity: return 0
+
+        # Find the small rest time (probably 0 hr)
+        i,To = min(enumerate(self.rest_times),key=lambda x: x[1])
+        # Find the activity at that time, and the decay rate
+        data = [(Ia[i],0.693/a.Thalf_hrs) for a,Ia in self.activity.items()]
+        # Build functions for total activity at time T - target and its derivative
+        # This will be zero when activity is at target
+        def f(t): return sum(Ia*exp(-La*(t-To)) for Ia,La in data) - target
+        def df(t): return sum(-La*Ia*exp(-La*(t-To)) for Ia,La in data)
+        # Find target time
+        t,ft = find_root(0,f,df)
+        # Return target time, or 0 if target time is negative
+        return max(t,0)
+
     def _accumulate(self, activity):
         for el, activity_el in activity.items():
             el_total = self.activity.get(el, [0]*len(self.rest_times))
             self.activity[el] = [T+v for T,v in zip(el_total,activity_el)]
 
-    def show_table(self, cutoff=1, format="%.1f"):
+    def show_table(self, cutoff=0.0001, format="%.4g"):
         """
         Tabulate the daughter products.
 
@@ -194,6 +220,21 @@ class Sample(object):
             print cformat%tuple(footer)
             print cformat%tuple(separator)
 
+def find_root(x,f,df,max=20,tol=1e-10):
+    """
+    Find zero of a function.  Returns when |f(x)| < tol or when max iterations
+    have been reached, so check that fx is small enough for your purposes.
+
+    Returns x, f(x).
+    """
+    fx = f(x)
+    for _ in range(max):
+        if abs(f(x)) < tol: return x,fx
+        x -= fx / df(x)
+        fx = f(x)
+    else:
+        return x,fx
+         
 
 def _sorted_activity(activity_pair):
     return sorted(activity_pair, cmp=lambda x,y: cmp((x[0].isotope,x[0].daughter),

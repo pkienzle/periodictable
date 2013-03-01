@@ -27,6 +27,21 @@ give different results from other packages.
 Change history
 ==============
 
+1.3.6 2013-03-01
+----------------
+
+New:
+
+* add activation decay time to neutron activation calculator
+
+Modified:
+
+* change neutron scattering calculations for incoherent cross section and
+  penetration depth.  Incoherent cross section is now the linear
+  combination of the incoherent cross sections of the individual atoms.
+  Penetration depth now includes absorption and incoherent scattering,
+  but not coherent scattering.
+
 1.3.5 2013-02-26
 ----------------
 

@@ -441,7 +441,7 @@ class Neutron(object):
 
         sigma_c = 0.01 * 4 * pi * self.b_c**2
         sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
-        sigma_i = max(self.total - sigma_c, 0)
+        sigma_i = self.incoherent
 
         sld_re = N*self.b_c*10
         sld_im = N*0.01*sigma_a/(2*wavelength)
@@ -451,7 +451,7 @@ class Neutron(object):
         abs_xs = N*sigma_a
         inc_xs = N*sigma_i
 
-        pen = 1/(coh_xs+abs_xs+inc_xs)
+        pen = 1/(abs_xs+inc_xs)
 
         return (sld_re, sld_im, sld_inc), (coh_xs,abs_xs,inc_xs), pen
 
@@ -760,6 +760,7 @@ def neutron_scattering(compound, density=None,
 
     # Sum over the quantities
     molar_mass = num_atoms = 0
+    #sigma_t =  0
     sigma_a = sigma_i = b_c = 0
     is_energy_dependent = False
     for element,quantity in compound.atoms.iteritems():
@@ -768,6 +769,7 @@ def neutron_scattering(compound, density=None,
         num_atoms += quantity
         sigma_a += quantity * element.neutron.absorption
         sigma_i += quantity * element.neutron.incoherent
+        #sigma_t += quantity * element.neutron.total
         b_c += quantity * element.neutron.b_c
         is_energy_dependent |= element.neutron.is_energy_dependent
 
@@ -780,10 +782,12 @@ def neutron_scattering(compound, density=None,
     b_c /= num_atoms
     sigma_i /= num_atoms
     sigma_a /= num_atoms
+    #sigma_t /= num_atoms
 
     # Compute sigmas
     sigma_c = 4*pi/100*b_c**2
     sigma_a *= wavelength/ABSORPTION_WAVELENGTH
+    #sigma_i_diffuse = sigma_t - (sigma_c + sigma_i)
 
     # Compute number density
     cell_volume = (molar_mass/compound.density)/avogadro_number*1e24 # (10^8 A/cm)^3

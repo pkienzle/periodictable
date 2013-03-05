@@ -27,7 +27,7 @@ give different results from other packages.
 Change history
 ==============
 
-1.3.6 2013-03-01
+1.3.6 2013-03-05
 ----------------
 
 New:
@@ -36,11 +36,11 @@ New:
 
 Modified:
 
-* change neutron scattering calculations for incoherent cross section and
-  penetration depth.  Incoherent cross section is now the linear
-  combination of the incoherent cross sections of the individual atoms.
-  Penetration depth now includes absorption and incoherent scattering,
-  but not coherent scattering.
+* Change neutron scattering calculations for incoherent cross section
+  to be the linear combination of the incoherent cross sections of the 
+  individual atoms rather than total cross section minus the coherent
+  cross section.  Penetration depth of the unscattered beam still uses
+  the total cross section plus the absorption cross section.
 
 1.3.5 2013-02-26
 ----------------

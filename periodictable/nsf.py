@@ -442,6 +442,7 @@ class Neutron(object):
         sigma_c = 0.01 * 4 * pi * self.b_c**2
         sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
         sigma_i = self.incoherent
+        sigma_s = self.total
 
         sld_re = N*self.b_c*10
         sld_im = N*0.01*sigma_a/(2*wavelength)
@@ -450,10 +451,11 @@ class Neutron(object):
         coh_xs = N*sigma_c
         abs_xs = N*sigma_a
         inc_xs = N*sigma_i
+        total_xs = N*sigma_s
 
-        pen = 1/(abs_xs+inc_xs)
+        penetration = 1/(abs_xs+total_xs)
 
-        return (sld_re, sld_im, sld_inc), (coh_xs,abs_xs,inc_xs), pen
+        return (sld_re, sld_im, sld_inc), (coh_xs,abs_xs,inc_xs), penetration
 
 
 def init(table, reload=False):
@@ -638,14 +640,16 @@ def neutron_scattering(compound, density=None,
 
         \sigma_c = 4 \pi b_c^2 / 100
 
-    Similarly, the absorption cross section $\sigma_a$ and the incoherent cross
-    section $\sigma_i$ can be computed from the corresponding cross sections of 
-    the constituent elements,\ [#Glinka2011]_ already expressed in barns:
+    Similarly, the absorption cross section $\sigma_a$, the incoherent cross
+    section $\sigma_i$, and the total cross sectin $\sigma_s$ can be computed 
+    from the corresponding cross sections of the constituent elements,\ [#Sears1999]_ 
+    already expressed in barns:
 
     .. math::
 
         \sigma_a &= \left.\sum n_j \sigma_{aj} \right/ \sum n_j \\
         \sigma_i &= \left.\sum n_j \sigma_{ij} \right/ \sum n_j \\
+        \sigma_s &= \left.\sum n_j \sigma_{sj} \right/ \sum n_j
 
     The absorption cross sections are tabulated at wavelength 1.798 |Ang|.
     In the thermal neutron energy range the absorption cross section
@@ -657,7 +661,7 @@ def neutron_scattering(compound, density=None,
         \sigma_a = \sigma_a \lambda / \lambda_o = \sigma_a \lambda / 1.798
 
     For the scattering equations, the primary quantity of interest is the
-    complex scattering length $b = b' + i b''$.  For most elements, the
+    complex scattering length $b = b' - i b''$.  For most elements, the
     scattering length at cold neutron and thermal neutron energies is simply
     related to the neutron energy, with no change in the real portion and a
     linear scaling of the imaginary portion with energy. The value of b is
@@ -670,8 +674,9 @@ def neutron_scattering(compound, density=None,
     .. math::
 
         \sigma_c &= 4 \pi |b_c|^2 \\
-        \sigma_a &= 4 \pi b''/k \ {\rm for} \ k=2\pi / \lambda \\
+        \sigma_a &= 4 \pi \left< b'' \right> /k \ {\rm for} \ k=2\pi / \lambda \\
         \sigma_i &= 4 \pi |b_i|^2
+        \sigma_s &= 4 \pi \left< |b|^2 \right>
 
     Transforming these we get:
 
@@ -684,7 +689,7 @@ def neutron_scattering(compound, density=None,
     The incoherent scattering length $b_{\rm inc}$ can be treated primarily
     as an absorption length in large scale structure calculations, with the
     complex scattering length b approximated by
-    $b' + i (b'' + b_{\rm inc})$.
+    $b' - i (b'' + b_{\rm inc})$.
 
     The scattering potential is usually expressed as a scattering length
     density for calculation purposes.  This is just the number density of
@@ -703,19 +708,29 @@ def neutron_scattering(compound, density=None,
         \Sigma_{\rm coh} &= N \sigma_c \\
         \Sigma_{\rm inc} &= N \sigma_i \\
         \Sigma_{\rm abs} &= N \sigma_a
+        \Sigma_{\rm s} &= N \sigma_s
 
-    as does 1/e penetration depth *d*:
+    
+    The 1/e penetration depth *t_u* represents the the depth into the sample at
+    which the unscattered intensity is reduced by a factor of $e$:
 
     .. math::
 
-        d = 1/(\Sigma_{\rm inc} + \Sigma_{\rm abs})
+        t_u = 1/(\Sigma_{\rm s} + \Sigma_{\rm abs})
 
     Note that the calculated penetration depth includes the effects of both 
     absorption and incoherent scattering (which spreads the beam in the 
     full $4\pi$ spherical surface, and so it looks like absorption with
-    respect to the beam), but not the coherent scattering or the diffuse
-    coherent scattering from the sample.  Transmission rate can be computed
-    from $e^{-d/t_u}$ for penetration depth $t_u$ and thickness $d$.
+    respect to the beam), as well as the coherent scattering from the sample.
+    If you instead want to calculate the effective shielding of the sample,
+    you should recalculate penetration depth without the coherent scattering.
+
+    Transmission rate can be computed from $e^{-d/t_u}$ for penetration i
+    depth $t_u$ and sample thickness $d$.
+
+    In general, the total scattering cross section $\Sigma_{\rm s}$ is not the
+    sum of the coherent and incoherent cross sections 
+    $\Sigma_{\rm coh}+\Sigma_{\rm inc}$.\ [Glinka2011]_
 
     Including unit conversion with $\mu=10^{-6}$ the full scattering equations 
     are:
@@ -747,7 +762,11 @@ def neutron_scattering(compound, density=None,
             \,(\sigma_a\,{\rm barn})
             \, (10^{-8}\, \AA^2/{\rm barn})
             \, (10^8\, \AA/{\rm cm}) \\
-        t_u\,({\rm cm}) &= 1/(\Sigma_{\rm inc}\, 1/{\rm cm}
+        \Sigma_{\rm s}\,(1/{\rm cm}) &= (N/\AA^3)
+            \,(\sigma_s\,{\rm barn})
+            \, (10^{-8}\, \AA^2/{\rm barn})
+            \, (10^8\, \AA/{\rm cm}) \\
+        t_u\,({\rm cm}) &= 1/(\Sigma_{\rm s}\, 1/{\rm cm}
             \,+\, \Sigma_{\rm abs}\, 1/{\rm cm})
     """
     from . import formulas
@@ -760,8 +779,7 @@ def neutron_scattering(compound, density=None,
 
     # Sum over the quantities
     molar_mass = num_atoms = 0
-    #sigma_t =  0
-    sigma_a = sigma_i = b_c = 0
+    sigma_s = sigma_a = sigma_i = b_c = 0
     is_energy_dependent = False
     for element,quantity in compound.atoms.iteritems():
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
@@ -769,7 +787,7 @@ def neutron_scattering(compound, density=None,
         num_atoms += quantity
         sigma_a += quantity * element.neutron.absorption
         sigma_i += quantity * element.neutron.incoherent
-        #sigma_t += quantity * element.neutron.total
+        sigma_s += quantity * element.neutron.total
         b_c += quantity * element.neutron.b_c
         is_energy_dependent |= element.neutron.is_energy_dependent
 
@@ -778,16 +796,13 @@ def neutron_scattering(compound, density=None,
     if molar_mass*compound.density == 0:
         return (0,0,0), (0,0,0), inf
 
-    # Turn sums into averages
+    # Turn sums into scattering factors
     b_c /= num_atoms
-    sigma_i /= num_atoms
-    sigma_a /= num_atoms
-    #sigma_t /= num_atoms
-
-    # Compute sigmas
     sigma_c = 4*pi/100*b_c**2
-    sigma_a *= wavelength/ABSORPTION_WAVELENGTH
-    #sigma_i_diffuse = sigma_t - (sigma_c + sigma_i)
+    sigma_i /= num_atoms
+    sigma_a *= wavelength/ABSORPTION_WAVELENGTH/num_atoms
+    sigma_s /= num_atoms
+    #sigma_c_diffuse = sigma_s - (sigma_c + sigma_i)
 
     # Compute number density
     cell_volume = (molar_mass/compound.density)/avogadro_number*1e24 # (10^8 A/cm)^3
@@ -802,11 +817,12 @@ def neutron_scattering(compound, density=None,
     coh_xs = sigma_c * number_density
     abs_xs = sigma_a * number_density
     inc_xs = sigma_i * number_density
+    total_xs = sigma_s * number_density
 
     # Compute 1/e length
-    penetration_depth = 1/(abs_xs + inc_xs)
+    penetration = 1/(abs_xs + total_xs)
 
-    return (sld_re,sld_im,sld_inc), (coh_xs,abs_xs,inc_xs), penetration_depth
+    return (sld_re,sld_im,sld_inc), (coh_xs,abs_xs,inc_xs), penetration
 
 
 def neutron_sld(*args, **kw):

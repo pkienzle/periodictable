@@ -675,7 +675,7 @@ def neutron_scattering(compound, density=None,
 
         \sigma_c &= 4 \pi |b_c|^2 \\
         \sigma_a &= 4 \pi \left< b'' \right> /k \ {\rm for} \ k=2\pi / \lambda \\
-        \sigma_i &= 4 \pi |b_i|^2
+        \sigma_i &= 4 \pi |b_i|^2 \\
         \sigma_s &= 4 \pi \left< |b|^2 \right>
 
     Transforming these we get:

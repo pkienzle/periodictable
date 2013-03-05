@@ -223,9 +223,9 @@ class Sample(object):
             print cformat%tuple(separator)
 
 def find_root(x,f,df,max=20,tol=1e-10):
-    """
-    Find zero of a function.  Returns when |f(x)| < tol or when max iterations
-    have been reached, so check that fx is small enough for your purposes.
+    r"""
+    Find zero of a function.  Returns when $|f(x)| < tol$ or when max iterations
+    have been reached, so check that $|f(x)|$ is small enough for your purposes.
 
     Returns x, f(x).
     """

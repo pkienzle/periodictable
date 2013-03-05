@@ -782,6 +782,7 @@ def neutron_scattering(compound, density=None,
     sigma_s = sigma_a = sigma_i = b_c = 0
     is_energy_dependent = False
     for element,quantity in compound.atoms.iteritems():
+        if not element.neutron.has_sld(): return None, None, None
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
         molar_mass += element.mass*quantity
         num_atoms += quantity

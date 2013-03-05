@@ -148,10 +148,12 @@ class Sample(object):
         # This will be zero when activity is at target
         def f(t): return sum(Ia*exp(-La*(t-To)) for Ia,La in data) - target
         def df(t): return sum(-La*Ia*exp(-La*(t-To)) for Ia,La in data)
-        # Find target time
-        t,ft = find_root(0,f,df)
         # Return target time, or 0 if target time is negative
-        return max(t,0)
+        if f(0) < target: 
+            return 0
+        else:
+            t,ft = find_root(0,f,df)
+            return t
 
     def _accumulate(self, activity):
         for el, activity_el in activity.items():

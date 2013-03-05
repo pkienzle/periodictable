@@ -641,15 +641,15 @@ def neutron_scattering(compound, density=None,
         \sigma_c = 4 \pi b_c^2 / 100
 
     Similarly, the absorption cross section $\sigma_a$, the incoherent cross
-    section $\sigma_i$, and the total cross sectin $\sigma_s$ can be computed 
+    section $\sigma_i$, and the total cross section $\sigma_s$ can be computed 
     from the corresponding cross sections of the constituent elements,\ [#Sears1999]_ 
     already expressed in barns:
 
     .. math::
 
-        \sigma_a &= \left.\sum n_j \sigma_{aj} \right/ \sum n_j \\
-        \sigma_i &= \left.\sum n_j \sigma_{ij} \right/ \sum n_j \\
-        \sigma_s &= \left.\sum n_j \sigma_{sj} \right/ \sum n_j
+        \sigma_a &= \sum n_j \sigma_{aj} / \sum n_j \\
+        \sigma_i &= \sum n_j \sigma_{ij} / \sum n_j \\
+        \sigma_s &= \sum n_j \sigma_{sj} / \sum n_j
 
     The absorption cross sections are tabulated at wavelength 1.798 |Ang|.
     In the thermal neutron energy range the absorption cross section
@@ -683,7 +683,7 @@ def neutron_scattering(compound, density=None,
     .. math::
 
         b'          &= b_c \\
-        b''         &= \sigma_a / (2 \lambda)\\
+        b''         &= \sigma_a / (2 \lambda) \\
         b_{\rm inc} &= \sqrt{ \sigma_i / (4 \pi) }
 
     The incoherent scattering length $b_{\rm inc}$ can be treated primarily
@@ -707,7 +707,7 @@ def neutron_scattering(compound, density=None,
 
         \Sigma_{\rm coh} &= N \sigma_c \\
         \Sigma_{\rm inc} &= N \sigma_i \\
-        \Sigma_{\rm abs} &= N \sigma_a
+        \Sigma_{\rm abs} &= N \sigma_a \\
         \Sigma_{\rm s} &= N \sigma_s
 
     

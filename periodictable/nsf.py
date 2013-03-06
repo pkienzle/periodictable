@@ -638,7 +638,7 @@ def neutron_scattering(compound, density=None,
 
     .. math::
 
-        \sigma_c = 4 \pi b_c^2 / 100
+        \sigma_c = \left. 4 \pi b_c^2 \right/ 100
 
     Similarly, the absorption cross section $\sigma_a$, the incoherent cross
     section $\sigma_i$, and the total cross section $\sigma_s$ can be computed 
@@ -647,9 +647,9 @@ def neutron_scattering(compound, density=None,
 
     .. math::
 
-        \sigma_a &= \sum n_j \sigma_{aj} / \sum n_j \\
-        \sigma_i &= \sum n_j \sigma_{ij} / \sum n_j \\
-        \sigma_s &= \sum n_j \sigma_{sj} / \sum n_j
+        \sigma_a &= \left. \sum n_j \sigma_{aj} \right/ \sum n_j \\
+        \sigma_i &= \left. \sum n_j \sigma_{ij} \right/ \sum n_j \\
+        \sigma_s &= \left. \sum n_j \sigma_{sj} \right/ \sum n_j
 
     The absorption cross sections are tabulated at wavelength 1.798 |Ang|.
     In the thermal neutron energy range the absorption cross section
@@ -674,7 +674,7 @@ def neutron_scattering(compound, density=None,
     .. math::
 
         \sigma_c &= 4 \pi |b_c|^2 \\
-        \sigma_a &= 4 \pi \left< b'' \right> /k \ {\rm for} \ k=2\pi / \lambda \\
+        \sigma_a &= \left. 4 \pi \left< b'' \right> \right/k \ {\rm for} \ k=2\pi / \lambda \\
         \sigma_i &= 4 \pi |b_i|^2 \\
         \sigma_s &= 4 \pi \left< |b|^2 \right>
 
@@ -683,7 +683,7 @@ def neutron_scattering(compound, density=None,
     .. math::
 
         b'          &= b_c \\
-        b''         &= \sigma_a / (2 \lambda) \\
+        b''         &= \left. \sigma_a \right/ (2 \lambda) \\
         b_{\rm inc} &= \sqrt{ \sigma_i / (4 \pi) }
 
     The incoherent scattering length $b_{\rm inc}$ can be treated primarily
@@ -698,7 +698,7 @@ def neutron_scattering(compound, density=None,
     .. math::
 
         \rho_{\rm re}  &= N b_c \\
-        \rho_{\rm im}  &= N \sigma_a / (2 \lambda) \\
+        \rho_{\rm im}  &= \left. N \sigma_a \right/ (2 \lambda) \\
         \rho_{\rm inc} &= N \sqrt{\sigma_i/4 \pi}
 
     Similarly, scattering cross section includes number density:
@@ -716,7 +716,7 @@ def neutron_scattering(compound, density=None,
 
     .. math::
 
-        t_u = 1/(\Sigma_{\rm s} + \Sigma_{\rm abs})
+        t_u = \left. 1 \right/ (\Sigma_{\rm s} + \Sigma_{\rm abs})
 
     Note that the calculated penetration depth includes the effects of both 
     absorption and incoherent scattering (which spreads the beam in the 

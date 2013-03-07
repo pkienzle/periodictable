@@ -10,9 +10,11 @@ def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
 
     :Parameters:
         *a*, *b*, *c* : float | |Ang|
-            Lattice spacings.  If *b* or *c* are missing they default to *a*.
+            Lattice spacings.  *a* is required.
+            *b* and *c* default to *a*.
         *alpha*, *beta*, *gamma* : float | |deg|
-            Lattice angles.  If any are missing they default to 90\ |deg|
+            Lattice angles.  *alpha* defaults to 90\ |deg|.  
+            *beta* and *gamma* default to *alpha*.
 
     :Returns:
         *V* : float | |Ang^3|
@@ -32,8 +34,9 @@ def cell_volume(a=None,b=None,c=None,alpha=None,beta=None,gamma=None):
     if a is None: raise TypeError('missing lattice parameters')
     if b is None: b = a
     if c is None: c = a
-    calpha, cbeta, cgamma = [cos(radians(v)) if v is not None else 0
-                             for v in alpha, beta, gamma]
+    calpha = cos(radians(alpha)) if alpha is not None else 0
+    cbeta = cos(radians(beta)) if beta is not None else calpha
+    cgamma = cos(radians(gamma)) if gamma is not None else calpha
     V = a*b*c*sqrt(1 - calpha**2 - cbeta**2 - cgamma**2 + 2*calpha*cbeta*cgamma)
     return V
 

@@ -94,6 +94,8 @@ def test():
     assert deepcopy(permalloy).__dict__ == permalloy.__dict__
 
     # Check that copy constructor works
+    #print permalloy.__dict__
+    #print formula(permalloy).__dict__
     assert formula(permalloy).__dict__ == permalloy.__dict__
     assert formula('Si',name='Silicon').__dict__ != formula('Si').__dict__
 

@@ -68,6 +68,54 @@ A formula string is translated into a formula using
     >>> print formula("CaCO3+(3HO1.5)2")
     CaCO3((HO1.5)3)2
 
+* Formula density can be specified using the special '@' tag:
+
+    >>> print formula("NaCl@2.16").density
+    2.16
+
+  These uses the natural density of the compound, so for example, D2O
+  could be specified using the density of H2O:
+
+    >>> print "%.3f"%formula("D2O@1").density
+    1.112
+
+  or the density could be set according from a known value for that
+  particular isotopic formulation:
+
+    >>> print "%.3f"%formula("D2O@1.113i").density
+    1.113
+
+  Density applies to the entire formula, so for example a D2O-H2O
+  2:1 mixture (not by mass or by volume) would be:
+
+    >>> print "%.3f"%formula("2D2O + H2O@1").density
+    1.074
+
+* Mass fractions use %wt, with the final portion adding to 100%:
+
+    >>> print formula("10%wt Fe // 15% Co // Ni")
+    FeCo1.4214Ni7.13602
+
+  You can use any of %w %wt %weight %m or %mass.  Only the first item needs 
+  to specify that it is a mass fraction, and the remainder can use a bare %.
+
+* Volume fractions use %vol, again with the final portion adding to 100%:
+
+    >>> print formula("10%vol Fe // Ni")
+    FeNi9.68121
+
+  You can use %v or %volume as well.  Only the first item needs to specify
+  that it is a volume fraction, and the remainder can use a bare %.
+
+  Volume fraction mixing is only possible if the densities are known for
+  the individual components, using the formula density tag.
+
+* Mixtures can nest.  The following is a 10% salt solution by weight mixed
+  20:80 by volume with D2O:
+
+    >>> print formula("20%vol (10%wt NaCl@2.16 // H2O@1) // D2O@1")
+    NaCl(H2O)29.1966(D2O)122.794
+
 * Empty formulas are supported, e.g., for air or vacuum:
     
     >>> print formula()

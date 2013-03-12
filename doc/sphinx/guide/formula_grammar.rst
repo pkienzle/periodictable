@@ -96,19 +96,20 @@ A formula string is translated into a formula using
     >>> print formula("10%wt Fe // 15% Co // Ni")
     FeCo1.4214Ni7.13602
 
-  You can use any of %w %wt %weight %m or %mass.  Only the first item needs 
-  to specify that it is a mass fraction, and the remainder can use a bare %.
+  Only the first item needs to specify that it is a mass fraction, 
+  and the remainder can use a bare %.
 
-* Volume fractions use %vol, again with the final portion adding to 100%:
+* Volume fractions use %vol, with the final portion adding to 100%:
 
     >>> print formula("10%vol Fe // Ni")
     FeNi9.68121
 
-  You can use %v or %volume as well.  Only the first item needs to specify
-  that it is a volume fraction, and the remainder can use a bare %.
+  Only the first item needs to specify that it is a volume fraction, and 
+  the remainder can use a bare %.
 
   Volume fraction mixing is only possible if the densities are known for
-  the individual components, using the formula density tag.
+  the individual components, which will require the formula density tag 
+  if the component is not an element.
 
 * Mixtures can nest.  The following is a 10% salt solution by weight mixed
   20:80 by volume with D2O:
@@ -127,12 +128,16 @@ The grammar used for parsing formula strings is the following:
 
 ::
 
-    formula   :: group (separator group)* | nothing
+    formula   :: compound | mixture | nothing
+    mixture   :: count '%wt|%vol' part ('//' count '%' part)* '//' part 
+    part      :: compound | '(' mixture ')'
+    compound  :: group (separator group)* density?
     group     :: count element+ | '(' formula ')' count
     element   :: symbol isotope? ion? count?
     symbol    :: [A-Z][a-z]*
     isotope   :: '[' number ']'
     ion       :: '{' number? [+-] '}'
+    density   :: '@' count
     count     :: number | fraction
     number    :: [1-9][0-9]*
     fraction  :: ([1-9][0-9]* | 0)? '.' [0-9]*

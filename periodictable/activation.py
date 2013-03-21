@@ -2,10 +2,7 @@
 """
 Calculate expected neutron activation from time spent in beam line.
 
-
-NCNR health physics activation calculation.
-
-Notation information:
+Notation information for activation product:
 
  m, m1, m2: indicate metastable states.  Decay may be to the ground state or to
  another nuclide.
@@ -28,6 +25,9 @@ Reaction = b indicates production via decay from an activation produced parent
 
 Accounts for burnup and 2n,g production.
 
+This is only a gross estimate.  Many effects are not taken into account, such as 
+self-shielding in the sample and secondary activation from the decay products.
+
 Example::
 
     >>> from periodictable import activation
@@ -38,21 +38,23 @@ Example::
                                           ----------------- activity (uCi) ------------------
     isotope  product  reaction T1/2 (hrs)      T@0 hrs      T@1 hrs     T@24 hrs    T@360 hrs
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
-    Co-59    Co-60         act    5.272 y    0.0004959    0.0004959    0.0004957    0.0004932
-    Co-59    Co-60m+       act     10.5 m        1.664      0.03172          ---          ---
+    Co-59    Co-60         act    5.272 y     0.000496     0.000496    0.0004958    0.0004933
+    Co-59    Co-60m+       act     10.5 m        1.664       0.0317          ---          ---
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
-                                    total        1.665      0.03223    0.0005083    0.0005049
+                                    total        1.665      0.03221    0.0005084     0.000505
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
 
     >>> print "%.3f"%sample.decay_time(0.001) # number of hours to reach 1 nCi
-    2.054
+    2.053
 
 The default rest times used above show the sample activity at the end of neutron 
 activation and after 1 hour, 1 day, and 15 days.
 """
 
-from math import exp
+from math import exp, log
 import os
+
+LN2 = log(2)
 
 from .formulas import formula as build_formula
 from . import core
@@ -143,7 +145,7 @@ class Sample(object):
         # Find the small rest time (probably 0 hr)
         i,To = min(enumerate(self.rest_times),key=lambda x: x[1])
         # Find the activity at that time, and the decay rate
-        data = [(Ia[i],0.693/a.Thalf_hrs) for a,Ia in self.activity.items()]
+        data = [(Ia[i],LN2/a.Thalf_hrs) for a,Ia in self.activity.items()]
         # Build functions for total activity at time T - target and its derivative
         # This will be zero when activity is at target
         def f(t): return sum(Ia*exp(-La*(t-To)) for Ia,La in data) - target
@@ -337,14 +339,14 @@ def activity(isotope, mass, env, exposure, rest_times):
         # The given mass is sample mass * sample fraction * isotope abundance
         root = flux * initialXS * 1e-24 * mass / isotope.isotope * 1.6278e19
         # Column M: 0.69/t1/2  (1/h) lambda of produced nuclide
-        lam = 0.693/ai.Thalf_hrs
+        lam = LN2/ai.Thalf_hrs
         #print ai.thermalXS,ai.resonance,env.epithermal_reduction_factor
         #print isotope, "D", mass, "F", ai.daughter, "G", ai.Thalf_str, "H",initialXS,"I",ai.reaction,"J",ai.fast,"K",flux,"L",root,"M",lam
 
         # Column Y: activity at the end of irradiation (uCi)
         if ai.reaction == 'b':
             # Column N: 0.69/t1/2 (1/h) lambda of parent nuclide
-            parent_lam = 0.693 / ai.Thalf_parent
+            parent_lam = LN2 / ai.Thalf_parent
             # Column O: Activation if "b" mode production
             # Note: problems resulting from precision limitiation not addredd in "b"
             # mode production
@@ -353,7 +355,7 @@ def activity(isotope, mass, env, exposure, rest_times):
             #print "N",parent_lam,"O",activity
         elif ai.reaction == '2n':
             # Column N: 0.69/t1/2 (1/h) lambda of parent nuclide
-            parent_lam = 0.693 / ai.Thalf_parent
+            parent_lam = LN2 / ai.Thalf_parent
             # Column P: effective cross-section 2n product and n,g burnup (b)
             # Note: This cross-section always uses the total thermal flux
             effectiveXS = ai.thermalXS_parent + env.epithermal_reduction_factor*ai.resonance_parent

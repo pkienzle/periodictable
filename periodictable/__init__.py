@@ -59,7 +59,7 @@ def data_files():
 
     data_files = [('periodictable-data/xsf',
                    _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat'])),
-                  ('periodictable-data', 'activation.dat')]
+                  ('periodictable-data', _finddata('.', ['activation.dat']))]
     return data_files
 
 # Export variables for each element name and symbol.

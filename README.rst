@@ -27,6 +27,17 @@ give different results from other packages.
 Change history
 ==============
 
+1.3.7 2013-04-04
+----------------
+
+New:
+
+* formula parser supports density spec and mix by weight/mix by volume
+
+Modified:
+
+* py2exe/py2app wrapping now includes missing activation.dat
+
 1.3.6 2013-03-05
 ----------------
 

@@ -27,7 +27,7 @@ give different results from other packages.
 Change history
 ==============
 
-1.3.7 2013-04-04
+1.3.8 2013-04-08
 ----------------
 
 New:
@@ -37,6 +37,7 @@ New:
 Modified:
 
 * py2exe/py2app wrapping now includes missing activation.dat
+* skipping bad 1.3.7 build which didn't include all changes
 
 1.3.6 2013-03-05
 ----------------

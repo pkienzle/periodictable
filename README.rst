@@ -27,6 +27,11 @@ give different results from other packages.
 Change history
 ==============
 
+1.3.9 2013-04-23
+----------------
+
+* Update requirements to pyparsing<2.0.0 (we don't support 3.0 yet)
+
 1.3.8 2013-04-08
 ----------------
 

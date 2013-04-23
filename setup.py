@@ -36,7 +36,7 @@ dist = setup(
                 ['activate.dat', 'xsf/*.nff', 'xsf/f0_WaasKirf.dat', 'xsf/read.me'],
         },
         #data_files = periodictable.data_files(),
-        install_requires = ['pyparsing', 'numpy'],
+        install_requires = ['pyparsing<2.0.0', 'numpy'],
 )
 
 # End of file

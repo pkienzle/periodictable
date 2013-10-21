@@ -385,7 +385,7 @@ class Neutron(object):
 
         :Returns:
             *sld* : (float, float, float) | |1e-6/Ang^2|
-                (*real*, *imaginary*, *incoherent*) scattering length density.
+                (*real*, -*imaginary*, *incoherent*) scattering length density.
 
         .. Note:
 
@@ -420,7 +420,7 @@ class Neutron(object):
 
         :Returns:
             *sld* : (float, float, float) | |1e-6/Ang^2|
-                (*real*, *imaginary*, *incoherent*) scattering length density
+                (*real*, -*imaginary*, *incoherent*) scattering length density
             *xs* : (float, float, float) | |1/cm|
                 (*coherent*, *absorption*, *incoherent*) cross sections.
             *penetration* : float | cm
@@ -567,7 +567,7 @@ def neutron_scattering(compound, density=None,
 
     :Returns:
         *sld* : (float, float, float) | |1e-6/Ang^2|
-            (*real*, *imaginary*, *incoherent*) scattering length density.
+            (*real*, -*imaginary*, *incoherent*) scattering length density.
         *xs* : (float, float, float) | |1/cm|
             (*coherent*, *absorption*, *incoherent*) cross sections.
         *penetration* : float | cm
@@ -651,25 +651,21 @@ def neutron_scattering(compound, density=None,
         \sigma_i &= \left. \sum n_j \sigma_{ij} \right/ \sum n_j \\
         \sigma_s &= \left. \sum n_j \sigma_{sj} \right/ \sum n_j
 
-    The absorption cross sections are tabulated at wavelength 1.798 |Ang|.
-    In the thermal neutron energy range the absorption cross section
-    is assumed to scale linearly with wavelength,\ [#Lynn1990]_ and can
-    be adjusted with a simple multiplication:
+    The neutron cross sections are tabulated at wavelength 1.798 |Ang|.
+    In the thermal neutron energy range most absorption cross sections
+    scale linearly with wavelength,\ [#Lynn1990]_ and can be adjusted 
+    with a simple multiplication:
 
     .. math::
 
         \sigma_a = \sigma_a \lambda / \lambda_o = \sigma_a \lambda / 1.798
 
-    For the scattering equations, the primary quantity of interest is the
-    complex scattering length $b = b' - i b''$.  For most elements, the
-    scattering length at cold neutron and thermal neutron energies is simply
-    related to the neutron energy, with no change in the real portion and a
-    linear scaling of the imaginary portion with energy. The value of b is
-    dominated by the bound coherent scattering length, with a small
-    contribution from the incoherent scattering length.
+    If *isotope.neutron.is_energy_dependent()* is true for any part of
+    the material, then this relation may not hold, and the returned values
+    are only valid for 1.798 |Ang|.
 
-    The scattering lengths are related to the scattering cross sections
-    as follows:[#Sears1999]_
+    From the scattering cross sections, the scattering length for a material
+    $b = b' = i b''$ can be computed using the following relations:[#Sears1999]_
 
     .. math::
 
@@ -678,28 +674,33 @@ def neutron_scattering(compound, density=None,
         \sigma_i &= 4 \pi |b_i|^2 \\
         \sigma_s &= 4 \pi \left< |b|^2 \right>
 
-    Transforming these we get:
+    Transforming we get:
 
     .. math::
 
-        b'          &= b_c \\
-        b''         &= \left. \sigma_a \right/ (2 \lambda) \\
-        b_{\rm inc} &= \sqrt{ \sigma_i / (4 \pi) }
+        b'' &= \left. \sigma_a \right/ (2 \lambda) \\
+        b_i &= \sqrt{ \sigma_i / (4 \pi) }
 
-    The incoherent scattering length $b_{\rm inc}$ can be treated primarily
+    The incoherent scattering length $b_i$ can be treated primarily
     as an absorption length in large scale structure calculations, with the
-    complex scattering length b approximated by
-    $b' - i (b'' + b_{\rm inc})$.
+    complex scattering length approximated by $b = b_c - i (b'' + b_i)$.
 
-    The scattering potential is usually expressed as a scattering length
-    density for calculation purposes.  This is just the number density of
-    the scatterers times their scattering lengths:
+    The scattering potential is often expressed as a scattering length 
+    density (SLD).  This is just the number density of the scatterers times 
+    their scattering lengths, with a correction for units.
 
     .. math::
 
-        \rho_{\rm re}  &= N b_c \\
-        \rho_{\rm im}  &= \left. N \sigma_a \right/ (2 \lambda) \\
-        \rho_{\rm inc} &= N \sqrt{\sigma_i/4 \pi}
+        \rho_{\rm re}  &= 10 N b_c \\
+        \rho_{\rm im}  &= -N b'' / 100 \\
+        \rho_{\rm inc} &= 10 N b_i
+
+    with the factors of 10 chosen to give SLD in units of $\AA^{-2}$.  The
+    resulting $\rho = \rho_{\rm re} + i \rho_{\rm im}$ can be used in the
+    scattering equations.  Treatment of the incoherent scattering $\rho_{\rm inc}$
+    will depend on the equation.  For example, it can be treated as an absorption 
+    in specular reflectivity calculations since the incoherently scattered neutrons 
+    are removed from the multilayer recurrence calculation.
 
     Similarly, scattering cross section includes number density:
 
@@ -844,7 +845,7 @@ def neutron_sld(*args, **kw):
 
     :Returns:
         *sld* : (float, float, float) | |1e-6/Ang^2|
-            (*real*, *imaginary*, *incoherent*) scattering length density.
+            (*real*, -*imaginary*, *incoherent*) scattering length density.
 
     :Raises:
         *AssertionError* : density is missing.
@@ -896,7 +897,7 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
             Probe wavelength(s).
 
     :Returns:
-        *calculator* : f(w) -> (sld_re, sld_im, sld_inc)
+        *calculator* : f(w, density=1) -> (*real*, -*imaginary*, *incoherent*)
 
     The composite calculator takes a vector of weights and returns the
     scattering length density of the composite.  This is useful for operations

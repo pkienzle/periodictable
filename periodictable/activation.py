@@ -317,6 +317,8 @@ def activity(isotope, mass, env, exposure, rest_times):
         return result
 
     for ai in isotope.neutron_activation:
+        # Ignore fast neutron interactions if not using fast ratio
+        if ai.fast and env.fast_ratio == 0: continue
         # Column D: elemental % mass content of sample
         #    mass fraction and abundance already included in mass calculation, so not needed
         # Column E: target nuclide and comment
@@ -332,8 +334,7 @@ def activity(isotope, mass, env, exposure, rest_times):
         # Column J: fast?
         #    ai.fast
         # Column K: effective reaction flux (n/cm^2/s)
-        # PAK: I don't know what to do if fast_ratio is 0, so I ignore it if it is less than 1
-        flux = env.fluence/env.fast_ratio if ai.fast and env.fast_ratio>1 else env.fluence
+        flux = env.fluence/env.fast_ratio if ai.fast else env.fluence
         # Column L: root part of activation calculation
         # Decay correction portion done in column M
         # The given mass is sample mass * sample fraction * isotope abundance

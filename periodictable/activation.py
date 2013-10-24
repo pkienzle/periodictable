@@ -181,7 +181,7 @@ class Sample(object):
         # Replace any activation below the cutoff with '---'
         rows = []
         total = [0]*len(self.rest_times)
-        for el,activity_el in _sorted_activity(self.activity.items()):
+        for el,activity_el in sorted_activity(self.activity.items()):
             total = [t+a for t,a in zip(total,activity_el)]
             if all(a < cutoff for a in activity_el): continue
             activity_str = [format%a if a >= cutoff else "---" for a in activity_el]
@@ -240,7 +240,7 @@ def find_root(x,f,df,max=20,tol=1e-10):
         return x,fx
          
 
-def _sorted_activity(activity_pair):
+def sorted_activity(activity_pair):
     return sorted(activity_pair, cmp=lambda x,y: cmp((x[0].isotope,x[0].daughter),
                                                      (y[0].isotope,y[0].daughter)))
 
@@ -421,7 +421,7 @@ def init(table, reload=False):
     path = os.path.join(core.get_data_path('.'),'activation.dat')
     lastA = 0
     for row in open(path,'r'):
-        columns = row.split('\t')
+        columns = row.split('\t') 
         if columns[0].strip() in ('','xx'): continue
         columns = [c[1:-1] if c.startswith('"') else c
                    for c in columns]
@@ -432,6 +432,8 @@ def init(table, reload=False):
             columns[c] = (columns[c] == 'y')
         for c in FLOAT_COLUMNS:
             columns[c] = float(columns[c]) if columns[c].strip() else 0.
+        # clean up comment column
+        columns[-1] = columns[-1].replace('"','').strip()
         kw=dict(zip(COLUMN_NAMES, columns))
         kw['Thalf_str'] = " ".join((kw['_Thalf'],kw['_Thalf_unit']))
 

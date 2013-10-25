@@ -27,8 +27,18 @@ give different results from other packages.
 Change history
 ==============
 
+1.3.10 2013-10-25
+-----------------
+
+Modified:
+
+* fix activation calculation to ignore fast neutrons in thermal environment
+* add emission spectra for remaining elements above neon
+
 1.3.9 2013-04-23
 ----------------
+
+Modified:
 
 * Update requirements to pyparsing<2.0.0 (we don't support python 3 yet)
 

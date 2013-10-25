@@ -420,10 +420,11 @@ class Formula(object):
 
             *TypeError* : missing or bad lattice parameters
 
-        Using the cell volume, mass density can be set with:
+        Using the cell volume, mass density can be set with::
 
-            formula.density = formula.molecular_mass/formula.volume()
+            formula.density = n*formula.molecular_mass/formula.volume()
 
+        where n is the number of molecules per unit cell.
         """
         # Let cell_volume sort out its own parameters.
         if args or kw:

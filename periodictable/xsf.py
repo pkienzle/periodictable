@@ -57,9 +57,8 @@ The following functions are available for X-ray scatting information processing:
          Prints a table of emission lines.
 
 K_alpha, K_beta1 (|Ang|):
-    X-ray emission lines for various elements, including Ag, Pd, Rh, Mo,
-    Zn, Cu, Ni, Co, Fe, Mn, Cr and Ti. K_alpha is the average of
-    K_alpha1 and K_alpha2 lines.
+    X-ray emission lines for elements beyond neon, with
+    $K_\alpha = (2 K_{\alpha 1} + K_{\alpha 2})/3$.
 
 X-ray scattering factors:
     Low-Energy X-ray Interaction Coefficients: Photoabsorption, scattering
@@ -70,6 +69,16 @@ X-ray scattering factors:
     For :ref:`custom tables <custom-table>`, use :func:`init` and
     :func:`init_spectral_lines` to set the data.
 
+
+Emission line tables
+====================
+
+Data for the $K_\alpha$ and $K_\beta$ lines comes from
+[#Deslattes2003], with the full tables available at
+`<http://www.nist.gov/pml/data/xraytrans/index.cfm>`_.
+Experimental Values are used, truncated to 4 digits
+of precision to correspond to the values for the subset
+of elements previously defined in the periodictable package.
 
 X-ray f1 and f2 tables
 ======================
@@ -160,6 +169,9 @@ with minor formatting changes:
 .. [#Henke1993] B. L. Henke, E. M. Gullikson, and J. C. Davis.  "X-ray interactions:
        photoabsorption, scattering, transmission, and reflection at E=50-30000 eV,
        Z=1-92", Atomic Data and Nuclear Data Tables 54 no.2, 181-342 (July 1993).
+
+.. [#Deslattes2003] R. D. Deslattes, E. G. Kessler, Jr., P. Indelicato, L. de Billy, 
+       E. Lindroth, and J. Anton.  Rev. Mod. Phys. 75, 35-99 (2003).
 
 """
 from __future__ import with_statement
@@ -504,36 +516,111 @@ def xray_sld_from_atoms(*args, **kw):
     return xray_sld(*args, **kw)
 
 
+spectral_lines_data = """\
+Ac  0.1380  0.1205
+Ag  0.5608  0.4970
+Al  8.3402  7.9601
+Am  0.1181  0.1030
+Ar  4.1929  3.8860
+As  1.1772  1.0573
+At  0.1537  0.1343
+Au  0.1818  0.1589
+Ba  0.3866  0.3408
+Bi  0.1624  0.1419
+Bk  0.1122  0.0979
+Br  1.0411  0.9328
+Ca  3.3595  3.0897
+Cd  0.5364  0.4751
+Ce  0.3586  0.3158
+Cf  0.1094  0.0954
+Cl  4.7287  4.4034
+Cm  0.1151  0.1004
+Co  1.7902  1.6208
+Cr  2.2910  2.0848
+Cs  0.4018  0.3543
+Cu  1.5418  1.3922
+Dy  0.2711  0.2378
+Er  0.2539  0.2226
+Es  0.1067  0.0930
+Eu  0.3000  0.2635
+Fe  1.9373  1.7566
+Fm  0.1040  0.0907
+Fr  0.1456  0.1271
+Ga  1.3414  1.2079
+Gd  0.2899  0.2546
+Ge  1.2553  1.1289
+Hf  0.2238  0.1960
+Hg  0.1767  0.1544
+Ho  0.2623  0.2301
+I   0.4348  0.3839
+In  0.5136  0.4545
+Ir  0.1926  0.1685
+K   3.7423  3.4539
+Kr  0.9816  0.8785
+La  0.3722  0.3279
+Lu  0.2308  0.2023
+Mg  9.8902  9.5211
+Mn  2.1031  1.9102
+Mo  0.7107  0.6323
+Na 11.9103 11.5752
+Nb  0.7476  0.6657
+Nd  0.3333  0.2933
+Ne 14.6102 14.4522
+Ni  1.6592  1.5001
+Np  0.1243  0.1085
+Os  0.1984  0.1736
+P   6.1581  5.7961
+Pa  0.1310  0.1143
+Pb  0.1670  0.1459
+Pd  0.5869  0.5205
+Pm  0.3217  0.2829
+Po  0.1580  0.1380
+Pr  0.3456  0.3042
+Pt  0.1871  0.1636
+Pu  0.1212  0.1057
+Ra  0.1417  0.1238
+Rb  0.9269  0.8286
+Re  0.2043  0.1788
+Rh  0.6147  0.5456
+Rn  0.1496  0.1306
+Ru  0.6445  0.5724
+S   5.3731  5.0316
+Sb  0.4718  0.4170
+Sc  3.0320  2.7796
+Se  1.1061  0.9921
+Si  7.1263  6.7531
+Sm  0.3105  0.2730
+Sn  0.4920  0.4352
+Sr  0.8766  0.7829
+Ta  0.2171  0.1900
+Tb  0.2802  0.2460
+Tc  0.6764  0.6013
+Te  0.4527  0.4000
+Th  0.1344  0.1174
+Ti  2.7497  2.5139
+Tl  0.1717  0.1501
+Tm  0.2459  0.2155
+U   0.1276  0.1114
+V   2.5048  2.2844
+W   0.2106  0.1843
+Xe  0.4178  0.3687
+Y   0.8302  0.7407
+Yb  0.2382  0.2088
+Zn  1.4364  1.2952
+Zr  0.7873  0.7018\
+"""
+
 def init_spectral_lines(table):
     """
     Sets the K_alpha and K_beta1 wavelengths for select elements
     """
     Element.K_alpha_units = "angstrom"
     Element.K_beta1_units = "angstrom"
-    table.Ag.K_alpha = 0.5608
-    table.Ag.K_beta1 = 0.4970
-    table.Pd.K_alpha = 0.5869
-    table.Pd.K_beta1 = 0.5205
-    table.Rh.K_alpha = 0.6147
-    table.Rh.K_beta1 = 0.5456
-    table.Mo.K_alpha = 0.7107
-    table.Mo.K_beta1 = 0.6323
-    table.Zn.K_alpha = 1.4364
-    table.Zn.K_beta1 = 1.2952
-    table.Cu.K_alpha = 1.5418
-    table.Cu.K_beta1 = 1.3922
-    table.Ni.K_alpha = 1.6591
-    table.Ni.K_beta1 = 1.5001
-    table.Co.K_alpha = 1.7905
-    table.Co.K_beta1 = 1.6208
-    table.Fe.K_alpha = 1.9373
-    table.Fe.K_beta1 = 1.7565
-    table.Mn.K_alpha = 2.1031
-    table.Mn.K_beta1 = 1.9102
-    table.Cr.K_alpha = 2.2909
-    table.Cr.K_beta1 = 2.0848
-    table.Ti.K_alpha = 2.7496
-    table.Ti.K_beta1 = 2.5138
+    for row in spectral_lines_data.split('\n'):
+        el,K_alpha,K_beta1 = row.split()
+        el = table.symbol(el) 
+        el.K_alpha = float(K_alpha)
+        el.K_beta1 = float(K_beta1)
 
 def init(table, reload=False):
 
@@ -634,20 +721,14 @@ def emission_table(table=None):
 
     Example
 
-        >>> emission_table()
+        >>> emission_table() # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
          El  Kalpha  Kbeta1
-         Ti  2.7496  2.5138
-         Cr  2.2909  2.0848
-         Mn  2.1031  1.9102
-         Fe  1.9373  1.7565
-         Co  1.7905  1.6208
-         Ni  1.6591  1.5001
-         Cu  1.5418  1.3922
-         Zn  1.4364  1.2952
-         Mo  0.7107  0.6323
-         Rh  0.6147  0.5456
-         Pd  0.5869  0.5205
-         Ag  0.5608  0.4970
+         Ne 14.6102 14.4522
+         Na 11.9103 11.5752
+         Mg  9.8902  9.5211
+         Al  8.3402  7.9601
+         Si  7.1263  6.7531
+         ...
     """
     table = default_table(table)
     print "%3s %7s %7s"%('El','Kalpha','Kbeta1')

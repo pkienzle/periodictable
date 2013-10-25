@@ -151,9 +151,12 @@ Specific defined properties related to elements can be accessed in a table forma
 .. doctest::
 
     >>> elements.list('symbol','K_alpha',format="%s K-alpha = %s") # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    Ti K-alpha = 2.7496
-    Cr K-alpha = 2.2909
-    Mn K-alpha = 2.1031
+    Ne K-alpha = 14.6102
+    Na K-alpha = 11.9103
+    Mg K-alpha = 9.8902
+    Al K-alpha = 8.3402
        ...
-    Ag K-alpha = 0.5608
+    Cf K-alpha = 0.1094
+    Es K-alpha = 0.1067
+    Fm K-alpha = 0.104
 

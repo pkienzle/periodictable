@@ -74,7 +74,7 @@ There are a number of functions available in periodictable.nsf
 For private tables use :func:`init` to set the data.
 
 The neutron scattering information table is reproduced from the Atomic
-Institute for Austrian Universities (2007 version):
+Institute for Austrian Universities (retrieve March 2008):
 
 http://www.ati.ac.at/~neutropt/scattering/table.html
 

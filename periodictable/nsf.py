@@ -94,8 +94,9 @@ associated with the periodictable package.
     Old City Publishing, Philidelphia, PA. pp 1.1-1 to 1.1-17.
 
 .. [#Rauch2000] Rauch, H. and Waschkowski, W. (2000)
-    Landolt-Boernstein, New Series I/16A.
-    H.Schopper Ed. Chap. 6. Springer: Berlin.
+    Neutron scattering lengths. Schopper, H. (ed.).
+    SpringerMaterials - The Landolt-Börnstein Database (http://www.springermaterials.com). 
+    doi: 10.1007/10499706_6
 
 .. [#Koester1991] Koester, L., Rauch, H., Seymann. E. (1991)
     Atomic Data Nuclear Data Tables 49, 65

@@ -50,12 +50,12 @@ Example::
 The default rest times used above show the sample activity at the end of neutron 
 activation and after 1 hour, 1 day, and 15 days.
 
-Activation cross sections are mostly from IAEA-156\ [#IAEA1974]. See activation.dat in the
+Activation cross sections are mostly from IAEA-273\ [#IAEA1987]. See activation.dat in the
 package directory for details on individual isotopes.
 
-..[#IAEA1974] IAEA. 1974. “Handbook on Nuclear Activation Cross-Sections”. sti/doc/10/0156. 
-International Atomic Energy Agency, Vienna, Austria.
-https://www-nds.iaea.org/publications/tecdocs/sti%252Fdoc%252F10%252F0156/
+..[#IAEA1987] IAEA (1987)
+Handbook on Nuclear Activation Data. TR 273 (International Atomic Energy Agency, Vienna, Austria, 1987). 
+https://www-nds.iaea.org/publications/tecdocs/sti%252Fdoc%252F10%252F0273/
 """
 
 from math import exp, log

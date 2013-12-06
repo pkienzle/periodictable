@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This program is public domain
 # Author: Paul Kienzle
 """

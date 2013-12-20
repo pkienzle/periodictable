@@ -1,6 +1,8 @@
 .project
 .pydevproject
 .settings
+.coverage
+.mplconfig
 build
 dist
 periodictable.egg-info

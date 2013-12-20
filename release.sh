@@ -66,6 +66,7 @@ if [ $step -le 1 ]; then
   set -x
   python2.7 test.py -q --with-coverage
   python2.6 test.py -q
+  python3.3 test.py -q
   set +x
   if false; then
     echo
@@ -107,9 +108,7 @@ if [ $step -le 4 ]; then
   ssh reflectometry.org rm -r web/danse/docs/elements
   find doc/sphinx/_build/html | xargs chmod ug+rw
   find doc/sphinx/_build/html -type d | xargs chmod g+x
-  rm -r doc/sphinx/_build/html/_static/MathJax
   (cd doc/sphinx/_build && scp -r html reflectometry.org:web/danse/docs/elements)
-  ssh reflectometry.org ln -s /var/www/reflectometry/MathJax web/danse/docs/elements/_static
   ready web Documentation upload successful?
 fi
 

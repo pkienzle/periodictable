@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-15 -*-
 # This program is public domain
 # Author: Paul Kienzle
-"""
+u"""
 
 Adds average mass for the elements:
 
@@ -42,7 +42,7 @@ http://physics.nist.gov/cuu/index.html
        Technology, Australia.
 .. [#Taylor] Taylor. P. D. P. : Institute for Reference Materials and Measurements,
        European Commission, Belgium.
-.. [#Audi] Audi. G. : Centre de SpectromÃ©trie NuclÃ©aire et de SpectromÃ©trie de Masse,
+.. [#Audi] Audi. G. : Centre de Spectrométrie Nucléaire et de Spectrométrie de Masse,
        Orsay Campus, France.
 .. [#Wapstra] Wapstra. A. H. : National Institute of Nuclear Physics and High-Energy Physics,
        Amsterdam, The Netherlands.

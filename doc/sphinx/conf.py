@@ -34,14 +34,13 @@ import periodictable
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
               'sphinx.ext.coverage',
               #'sphinx.ext.pngmath',
-              'sphinx.ext.jsmath',
+              'sphinx.ext.mathjax',
               #'only_directives',
               #'matplotlib.sphinxext.mathmpl',
               'matplotlib.sphinxext.only_directives',
               'matplotlib.sphinxext.plot_directive',
               'dollarmath',
              ]
-jsmath_path = 'MathJax/MathJax.js'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -83,8 +82,7 @@ release = version
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
-exclude_trees = ['_*','build','MathJax','plots',
-                 'shelltable','discoverer']
+exclude_trees = ['_*','build','plots','shelltable','discoverer']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

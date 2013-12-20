@@ -30,6 +30,12 @@
 PYTHON33=~/anaconda/envs/bumps3x/bin/python
 PYTHON27=~/anaconda/envs/bumps/bin/python
 PYTHON26=~/anaconda/envs/bumps26/bin/python
+#BROWSER=firefox # linux
+#PDFREADER=evince # linux
+#RST2HTML=rst2html # linux
+BROWSER=open # OSX
+PDFREADER=open # OSX
+RST2HTML=rst2html.py
 
 case "$1" in
 sync)   step=0;;
@@ -76,7 +82,7 @@ if [ $step -le 1 ]; then
         echo latest hudson build was successful
     else
         echo **** latest hudson build failed ... see $url
-        firefox $url &
+        $BROWSER $url &
     fi
   fi
   ready test Are the tests okay?
@@ -85,15 +91,15 @@ fi
 if [ $step -le 2 ]; then
   echo === Documentation ===
   (cd doc/sphinx && make clean html pdf)
-  firefox doc/sphinx/_build/html/index.html >/dev/null 2>&1 & 
-  evince doc/sphinx/_build/latex/PeriodicTable.pdf >/dev/null 2>&1 &
+  $BROWSER doc/sphinx/_build/html/index.html >/dev/null 2>&1 & 
+  $PDFREADER doc/sphinx/_build/latex/PeriodicTable.pdf >/dev/null 2>&1 &
   ready doc Does the documentation build correctly?
 fi
 
 if [ $step -le 3 ]; then
   echo === Release notes ===
-  rst2html README.rst > /tmp/README.html
-  firefox /tmp/README.html >/dev/null 2>&1 &
+  $RST2HTML README.rst > /tmp/README.html
+  $BROWSER /tmp/README.html >/dev/null 2>&1 &
   git log --format="%Cred%ad%Creset %s %Cred%an%Creset" --date=short
   version=$(grep __version__ periodictable/__init__.py | sed -e's/^.*= *//;s/"//g')
   echo *** Version is $version

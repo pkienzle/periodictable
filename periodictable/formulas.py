@@ -58,7 +58,9 @@ def mix_by_weight(*args, **kw):
     If density is not given, then it will be computed from the density
     of the components, assuming the components take up no more nor less
     space because they are in the mixture.  If component densities are
-    not available, then the resulting density will not be computed.
+    not available, then the resulting density will not be computed.  The
+    density calculation assumes the cell volume remains constant for the
+    original materials, which is not in general the case.
     """
     table = default_table(kw.pop('table',None))
     density = kw.pop('density',None)
@@ -136,7 +138,9 @@ def mix_by_volume(*args, **kw):
     If density is not given, then it will be computed from the density
     of the components, assuming the components take up no more nor less
     space because they are in the mixture.  If component densities are
-    not available, then a ValueError is raised.
+    not available, then a ValueError is raised. The  density calculation
+    assumes the cell volume remains constant for the original materials,
+    which is not in general the case.
     """
     table = default_table(kw.pop('table',None))
     density = kw.pop('density',None)

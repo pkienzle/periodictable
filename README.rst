@@ -27,6 +27,11 @@ give different results from other packages.
 Change history
 ==============
 
+1.4.0 2013-12-20
+----------------
+
+* support python 3.3
+
 1.3.10 2013-10-25
 -----------------
 

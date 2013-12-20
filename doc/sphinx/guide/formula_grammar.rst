@@ -109,7 +109,9 @@ A formula string is translated into a formula using
 
   Volume fraction mixing is only possible if the densities are known for
   the individual components, which will require the formula density tag 
-  if the component is not an element.
+  if the component is not an element.  A density estimate is given for
+  the mixture but in general it will not be correct, and should be set
+  explicitly for the resulting compound.
 
 * Mixtures can nest.  The following is a 10% salt solution by weight mixed
   20:80 by volume with D2O:
@@ -231,6 +233,10 @@ Note that this is different from a 2:1 mixture by weight:
     >>> mix = mix_by_weight(H2O,2,D2O,1)
     >>> print("%s %.4g"%(mix,mix.density))
     (H2O)2.2234D2O 1.035
+
+Except in the simplest of cases, the density of the mixture cannot be
+computed from the densities of the components, and the resulting density
+should be set explicitly.
 
 Derived values
 --------------

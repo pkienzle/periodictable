@@ -7,21 +7,9 @@
 # Releasing this package requires some setup in your local environment
 #    nosetests and coverage package
 #    sphinx and latex
-#    mathjax with \AA extension
-#    hudson server set up to build/test on windows/mac
 #    reflectometry.org server key for updating docs
 #    ~/.pypirc should be defined
 #
-# The patched MathJax (see below) needs to be symlinked into your
-# doc/sphinx directory.
-
-# The following is a minimal patch to MathJax to use the Angstrom symbol in TeX
-# == MathJax/unpacked/jax/input/TeX/jax.js ==
-#           // Ord symbols
-#           S:            '00A7',
-# +         AA:           '212B',
-#           aleph:        ['2135',{mathvariant: MML.VARIANT.NORMAL}],
-#           hbar:         '210F',
 
 # Adapt the following to your own username/password for pypi, and get yourself
 # added to the periodictable package.
@@ -33,6 +21,15 @@
 # [pypi]
 # username:...
 # password:...
+
+# Set the python processor to use for the build tests
+# Note: you may need to change this for your own environment
+#PYTHON33=python3.3
+#PYTHON27=python2.7
+#PYTHON26=python2.6
+PYTHON33=~/anaconda/envs/bumps3x/bin/python
+PYTHON27=~/anaconda/envs/bumps/bin/python
+PYTHON26=~/anaconda/envs/bumps26/bin/python
 
 case "$1" in
 sync)   step=0;;
@@ -64,9 +61,9 @@ fi
 if [ $step -le 1 ]; then
   echo === Tests ===
   set -x
-  python2.7 test.py -q --with-coverage
-  python2.6 test.py -q
-  python3.3 test.py -q
+  $PYTHON27 test.py -q --with-coverage
+  $PYTHON26 test.py -q
+  $PYTHON33 test.py -q
   set +x
   if false; then
     echo

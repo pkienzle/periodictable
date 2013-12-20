@@ -17,7 +17,7 @@ def test():
     assert str(O[18])=='18-O'
     try:
         Fe[12]
-    except KeyError,msg:
+    except KeyError as msg:
         assert msg.args[0] == '12 is not an isotope of Fe'
 
     # Check that "for el in elements" works and for iso in el works
@@ -36,19 +36,19 @@ def test():
     assert elements.isotope('D') == H[2]
     try:
         elements.symbol('Qu')
-    except ValueError,msg:
+    except ValueError as msg:
         assert str(msg) == "unknown element Qu"
     try:
         elements.name('Qu')
-    except ValueError,msg:
+    except ValueError as msg:
         assert str(msg) == "unknown element Qu"
     try:
         elements.isotope('Qu')
-    except ValueError,msg:
+    except ValueError as msg:
         assert str(msg) == "unknown element Qu"
     try:
         elements.isotope('4-D')
-    except ValueError,msg:
+    except ValueError as msg:
         assert str(msg) == "unknown element 4-D"
 
     # Check that ions work
@@ -59,7 +59,7 @@ def test():
     try:
         Fe.ion[1]
         raise Exception("accepts invalid ions")
-    except ValueError,msg:
+    except ValueError as msg:
         assert str(msg) == "1 is not a valid charge for Fe"
 
     assert data_files()[0][0] == "periodictable-data/xsf"

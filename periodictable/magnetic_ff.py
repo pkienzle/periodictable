@@ -10,6 +10,8 @@ documentation for CrysFML [#Brown]_ , but that does not seem to be the case in p
 .. [#Brown] Brown. P. J. (Section 4.4.5) International Tables for Crystallography
         Volume C, Wilson. A. J. C.(ed).
 """
+from __future__ import division
+
 import numpy
 from numpy import pi, exp
 
@@ -61,7 +63,7 @@ class MagneticFormFactor(object):
 
         >>> import periodictable
         >>> ion = periodictable.Fe.ion[2]
-        >>> print ion.magnetic_ff[ion.charge].M_Q([0,0.1,0.2])
+        >>> print(ion.magnetic_ff[ion.charge].M_Q([0,0.1,0.2]))
         [ 1.          0.99935255  0.99741366]
 
     """

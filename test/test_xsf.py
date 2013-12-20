@@ -117,9 +117,12 @@ def test_xsf():
     assert '_xray' not in Ni[58].__dict__
 
 def test_refl():
-    from StringIO import StringIO
+    # Note: io always works on unicode (python 2.x and 3.x), so tag the input
+    # as unicode.  The alternative is to import StringIO from six, but only
+    # if six is already required for some other reason.
+    from io import StringIO
     # http://henke.lbl.gov/optical_constants/mirror2.html
-    data2=StringIO("""\
+    data2=StringIO(u"""\
 #SiO2 Rho=2.2, Sig=3.nm, P=1., 2.deg
 # Photon Energy (eV), Reflectivity
    30.0000  0.900114
@@ -133,7 +136,7 @@ def test_refl():
    495.934  0.717134
    704.226  0.392855
    1000.00  5.563799E-02""")
-    data3=StringIO("""\
+    data3=StringIO(u"""\
 #SiO2 Rho=2.2, Sig=3.nm, P=1., 3.deg
 # Photon Energy (eV), Reflectivity
    30.0000  0.853800

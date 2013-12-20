@@ -64,7 +64,7 @@ def mix_by_weight(*args, **kw):
     density = kw.pop('density',None)
     natural_density = kw.pop('natural_density',None)
     name = kw.pop('name',None)
-    if kw: raise TypeError("Unexpected keyword "+kw.keys()[0])
+    if kw: raise TypeError("Unexpected arguments "+", ".join(kw.keys()))
 
     if len(args)%2 != 0:
         raise ValueError("Need a quantity for each formula")
@@ -79,6 +79,7 @@ def mix_by_weight(*args, **kw):
 def _mix_by_weight_pairs(pairs):
 
     # Drop pairs with zero quantity
+    # Note: must be first statement in order to accept iterators
     pairs = [(f,q) for f,q in pairs if q > 0]
 
     result = Formula()
@@ -141,7 +142,7 @@ def mix_by_volume(*args, **kw):
     density = kw.pop('density',None)
     natural_density = kw.pop('natural_density',None)
     name = kw.pop('name',None)
-    if kw: raise TypeError("Unexpected keyword "+kw.keys()[0])
+    if kw: raise TypeError("Unexpected arguments "+", ".join(kw.keys()))
 
     if len(args)%2 != 0:
         raise ValueError("Need a quantity for each formula")
@@ -155,11 +156,12 @@ def mix_by_volume(*args, **kw):
 
 def _mix_by_volume_pairs(pairs):
 
+    # Drop pairs with zero quantity
+    # Note: must be first statement in order to accept iterators
+    pairs = [(f,q) for f,q in pairs if q > 0]
+
     if not all(f.density for f,_ in pairs):
         raise ValueError("Need a density for each formula")
-
-    # Drop pairs with zero quantity
-    pairs = [(f,q) for f,q in pairs if q > 0]
 
     result = Formula()
     if len(pairs) > 0:
@@ -239,7 +241,7 @@ def formula(compound=None, density=None, natural_density=None,
             if density is not None: formula.density = density
             elif natural_density is not None: formula.natural_density = natural_density
             return formula
-        except ValueError,exception:
+        except ValueError as exception:
             raise ValueError(str(exception))
             #print "parsed",compound,"as",self
     else:
@@ -269,11 +271,12 @@ class Formula(object):
         elif density is not None:
             self.density = density
         elif len(self.atoms) == 1:
-            self.density = self.atoms.keys()[0].density
+            self.density = list(self.atoms.keys())[0].density
         else:
             self.density = None
 
-    def _atoms(self):
+    @property
+    def atoms(self):
         """
         { *atom*: *count*, ... }
 
@@ -282,10 +285,9 @@ class Formula(object):
         chemical formula, summed across all subgroups.
         """
         return _count_atoms(self.structure)
-    atoms = property(_atoms,doc=_atoms.__doc__)
 
-
-    def _hill(self):
+    @property
+    def hill(self):
         """
         Formula
 
@@ -294,7 +296,6 @@ class Formula(object):
         order.
         """
         return formula(self.atoms)
-    hill = property(_hill, doc=_hill.__doc__)
 
     def natural_mass_ratio(self):
         """
@@ -318,7 +319,9 @@ class Formula(object):
             total_natural_mass += count * natural_mass
             total_isotope_mass += count * el.mass
         return total_natural_mass/total_isotope_mass
-    def _get_natural_density(self):
+
+    @property
+    def natural_density(self):
         """
         |g/cm^3|
 
@@ -327,11 +330,13 @@ class Formula(object):
         without changing the cell volume.
         """
         return self.density*self.natural_mass_ratio()
-    def _set_natural_density(self, natural_density):
+
+    @natural_density.setter
+    def natural_density(self, natural_density):
         self.density = natural_density / self.natural_mass_ratio()
-    natural_density = property(_get_natural_density, _set_natural_density,
-                               doc=_get_natural_density.__doc__)
-    def _mass(self):
+
+    @property
+    def mass(self):
         """
         atomic mass units u (C[12] = 12 u)
 
@@ -339,10 +344,9 @@ class Formula(object):
         grams.
         """
         mass = 0
-        for el,count in self.atoms.iteritems():
+        for el,count in self.atoms.items():
             mass += el.mass*count
         return mass
-    mass = property(_mass,doc=_mass.__doc__)
 
     @property
     def molecular_mass(self):
@@ -714,7 +718,7 @@ def _count_atoms(seq):
             partial = _count_atoms(fragment)
         else:
             partial = {fragment: 1}
-        for el,elcount in partial.iteritems():
+        for el,elcount in partial.items():
             if el not in total: total[el] = 0
             total[el] += elcount*count
     return total
@@ -757,11 +761,17 @@ def _hill_compare(a,b):
         else:
             return cmp(a.symbol, b.symbol)
 
+def _hill_key(a):
+    return "".join((("0" if a.symbol in ("C","H") else "1"),
+                    a.symbol,
+                    "%4d"%(a.isotope if isisotope(a) else 0)))
+
 def _convert_to_hill_notation(atoms):
     """
     Return elements listed in standard order.
     """
-    return [(atoms[el], el) for el in sorted(atoms.keys(), cmp=_hill_compare)]
+    #return [(atoms[el], el) for el in sorted(atoms.keys(), cmp=_hill_compare)]
+    return [(atoms[el], el) for el in sorted(atoms.keys(), key=_hill_key)]
 
 
 def _str_atoms(seq):

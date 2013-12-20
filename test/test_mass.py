@@ -16,7 +16,7 @@ def test():
         abundance=0
         for iso in el:
             if iso.abundance == None:
-                print iso,"abundance=None"
+                print("%s abundance=None"%iso)
             else:
                 abundance += iso.abundance
         assert abs(abundance-100) < 1e-4 or abundance==0,\
@@ -31,7 +31,7 @@ def test():
         mass=0
         for iso in el:
             if iso.abundance == None:
-                print iso,"abundance=None"
+                print("%s abundance=None"%iso)
             else:
                 abundance += iso.abundance
                 mass += iso.mass*iso.abundance/100.

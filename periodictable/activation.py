@@ -44,7 +44,7 @@ Example::
                                     total        1.665      0.03221    0.0005084     0.000505
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
 
-    >>> print "%.3f"%sample.decay_time(0.001) # number of hours to reach 1 nCi
+    >>> print("%.3f"%sample.decay_time(0.001)) # number of hours to reach 1 nCi
     2.053
 
 The default rest times used above show the sample activity at the end of neutron 
@@ -70,7 +70,7 @@ def NIST2001_isotopic_abundance(iso):
     """
     Isotopic abundance in % from the periodic table package.
 
-    BÃ¶lke, et al.
+    Bölke, et al.
     Isotopic Compositions of the Elements, 2001.
     J. Phys. Chem. Ref. Data, Vol. 34, No. 1, 2005
     """
@@ -197,7 +197,7 @@ class Sample(object):
 
         # If no significant total activation then don't print the table
         if all(t < cutoff for t in total):
-            print "No significant activation"
+            print("No significant activation")
             return
 
         # Print the table header, with an overbar covering the various rest times
@@ -211,25 +211,25 @@ class Sample(object):
         if width<16: width = 16
         overbar = "-"*(width//2-8) + " activity (uCi) " + "-"*((width+1)//2-8)
         offset = sum(len(c)+1 for c in separator[:4]) - 1
-        print " "*offset,overbar
-        print cformat%tuple(header)
-        print cformat%tuple(separator)
+        print(" "*(offset+1)+overbar)
+        print(cformat%tuple(header))
+        print(cformat%tuple(separator))
 
         # Print the significant table rows, or indicate that there were no
         # significant rows if the total is significant but none of the
         # individual isotopes
         if rows:
-            for r in rows: print cformat%tuple(r)
+            for r in rows: print(cformat%tuple(r))
         else:
-            print "No significant isotope activation"
-        print cformat%tuple(separator)
+            print("No significant isotope activation")
+        print(cformat%tuple(separator))
 
         # If there is more than one row, or if there is enough marginally
         # significant activation that the total is greater then the one row
         # print the total in the footer
         if len(rows) != 1 or any(c!=t for c,t in zip(rows[0][4:],footer[4:])):
-            print cformat%tuple(footer)
-            print cformat%tuple(separator)
+            print(cformat%tuple(footer))
+            print(cformat%tuple(separator))
 
 def find_root(x,f,df,max=20,tol=1e-10):
     r"""
@@ -248,8 +248,7 @@ def find_root(x,f,df,max=20,tol=1e-10):
          
 
 def sorted_activity(activity_pair):
-    return sorted(activity_pair, cmp=lambda x,y: cmp((x[0].isotope,x[0].daughter),
-                                                     (y[0].isotope,y[0].daughter)))
+    return sorted(activity_pair, key=lambda x:(x[0].isotope,x[0].daughter))
 
 class ActivationEnvironment(object):
     """

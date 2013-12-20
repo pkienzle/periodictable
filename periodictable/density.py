@@ -23,9 +23,9 @@ is the same as that for the element in the natural abundance.
 .. doctest::
 
     >>> from periodictable import D, H
-    >>> print "H :",H.density,", D :",D.density
-    H : 0.0708 , D : 0.141475093639
-    >>> print (D.density/H.density) / (D.mass/H.mass)
+    >>> print("H: %.4f, D: %.4f"%(H.density,D.density))
+    H: 0.0708, D: 0.1415
+    >>> print((D.density/H.density) / (D.mass/H.mass))
     1.0
 
 The following plot shows density for all elements:
@@ -152,7 +152,7 @@ def init(table, reload=False):
                    "number density estimated from mass and density")
     Element.number_density_units = "1/cm^3"
 
-    for k,v in element_densities.iteritems():
+    for k,v in element_densities.items():
         el = getattr(table,k)
         if isinstance(v,tuple):
             el._density = v[0]

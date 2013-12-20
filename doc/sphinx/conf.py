@@ -39,7 +39,6 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
               #'matplotlib.sphinxext.mathmpl',
               'matplotlib.sphinxext.only_directives',
               'matplotlib.sphinxext.plot_directive',
-              'inheritance_diagram',
               'dollarmath',
              ]
 jsmath_path = 'MathJax/MathJax.js'
@@ -57,8 +56,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Periodic Table'
-copyright = u'2009, Paul Kienzle'
+project = 'Periodic Table'
+copyright = '2009, Paul Kienzle'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -209,8 +208,8 @@ htmlhelp_basename = 'PeriodicTabledoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PeriodicTable.tex', u'Periodic Table Documentation',
-   u'Paul Kienzle', 'manual'),
+  ('index', 'PeriodicTable.tex', 'Periodic Table Documentation',
+   'Paul Kienzle', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

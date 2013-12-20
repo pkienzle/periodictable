@@ -18,82 +18,82 @@ A formula string is translated into a formula using
   so "CO" is different from "Co".  Here is an example of calcium carbonate:
  
     >>> from periodictable import formula
-    >>> print formula("CaCO3")
+    >>> print(formula("CaCO3"))
     CaCO3
   
 * Formulas can contain multiple groups separated by space or plus or by using
   parentheses.  Whole groups can have a repeat count.  The following are
   equivalent definitions of hydrated calcium carbonate:
   
-    >>> print formula("CaCO3+6H2O")
+    >>> print(formula("CaCO3+6H2O"))
     CaCO3(H2O)6
-    >>> print formula("CaCO3 6H2O")
+    >>> print(formula("CaCO3 6H2O"))
     CaCO3(H2O)6
-    >>> print formula("CaCO3(H2O)6")
+    >>> print(formula("CaCO3(H2O)6"))
     CaCO3(H2O)6
 
 * Parentheses can nest, e.g., in polyethylene glycol:
 
-    >>> print formula("HO ((CH2)2O)6 H")
+    >>> print(formula("HO ((CH2)2O)6 H"))
     HO((CH2)2O)6H
 
 * Isotopes are represented by index, such as O[18] = :sup:`18`\ O:
 
-    >>> print formula("CaCO[18]3+6H2O")
+    >>> print(formula("CaCO[18]3+6H2O"))
     CaCO[18]3(H2O)6
 
 * Ions are represented by charge, such as O{2-} = O\ :sup:`2-`:
 
-    >>> print formula("P{5+}O{2-}4")
+    >>> print(formula("P{5+}O{2-}4"))
     P{5+}O{2-}4
 
   If charge is +/- 1 then the number is optional:
 
-    >>> print formula("Na{+}Cl{1-}")
+    >>> print(formula("Na{+}Cl{1-}"))
     Na{+}Cl{-}
 
   When specifying both charge and isotope, isotope comes first:
 
-    >>> print formula("Fe[56]{2+}")
+    >>> print(formula("Fe[56]{2+}"))
     Fe[56]{2+}
 
   Even though the charge is on the individual atoms, the entire formula
   has a charge:
 
-    >>> print formula("P{5+}O{2-}4").charge
+    >>> print(formula("P{5+}O{2-}4").charge)
     -3
 
 * Counts can be integer or decimal:
 
-    >>> print formula("CaCO3+(3HO1.5)2")
+    >>> print(formula("CaCO3+(3HO1.5)2"))
     CaCO3((HO1.5)3)2
 
 * Formula density can be specified using the special '@' tag:
 
-    >>> print formula("NaCl@2.16").density
+    >>> print(formula("NaCl@2.16").density)
     2.16
 
   These uses the natural density of the compound, so for example, D2O
   could be specified using the density of H2O:
 
-    >>> print "%.3f"%formula("D2O@1").density
+    >>> print("%.3f"%formula("D2O@1").density)
     1.112
 
   or the density could be set according from a known value for that
   particular isotopic formulation:
 
-    >>> print "%.3f"%formula("D2O@1.113i").density
+    >>> print("%.3f"%formula("D2O@1.113i").density)
     1.113
 
   Density applies to the entire formula, so for example a D2O-H2O
   2:1 mixture (not by mass or by volume) would be:
 
-    >>> print "%.3f"%formula("2D2O + H2O@1").density
+    >>> print("%.3f"%formula("2D2O + H2O@1").density)
     1.074
 
 * Mass fractions use %wt, with the final portion adding to 100%:
 
-    >>> print formula("10%wt Fe // 15% Co // Ni")
+    >>> print(formula("10%wt Fe // 15% Co // Ni"))
     FeCo1.4214Ni7.13602
 
   Only the first item needs to specify that it is a mass fraction, 
@@ -101,7 +101,7 @@ A formula string is translated into a formula using
 
 * Volume fractions use %vol, with the final portion adding to 100%:
 
-    >>> print formula("10%vol Fe // Ni")
+    >>> print(formula("10%vol Fe // Ni"))
     FeNi9.68121
 
   Only the first item needs to specify that it is a volume fraction, and 
@@ -114,12 +114,12 @@ A formula string is translated into a formula using
 * Mixtures can nest.  The following is a 10% salt solution by weight mixed
   20:80 by volume with D2O:
 
-    >>> print formula("20%vol (10%wt NaCl@2.16 // H2O@1) // D2O@1")
+    >>> print(formula("20%vol (10%wt NaCl@2.16 // H2O@1) // D2O@1"))
     NaCl(H2O)29.1966(D2O)122.794
 
 * Empty formulas are supported, e.g., for air or vacuum:
     
-    >>> print formula()
+    >>> print(formula())
     <BLANKLINE>
     >>> formula()
     formula('')
@@ -149,23 +149,23 @@ Formulas can also be constructed from atoms or other formulas:
 * A simple formula can be created from a bare atom:
 
     >>> from periodictable import Ca, C, O, H
-    >>> print formula(Ca)
+    >>> print(formula(Ca))
     Ca
 
 * More complex structures will require a sequences of counts and fragments.
   The fragment itself can be a structure:
 
-    >>> print formula( [ (1,Ca), (1,C), (3,O), (6,[(2,H),(1,O)]) ] )
+    >>> print(formula( [ (1,Ca), (1,C), (3,O), (6,[(2,H),(1,O)]) ] ))
     CaCO3(H2O)6
 
 * Structures can also be built with simple formula math:
     
-    >>> print formula("CaCO3") + 6*formula("H2O")
+    >>> print(formula("CaCO3") + 6*formula("H2O"))
     CaCO3(H2O)6
 
 * Formulas can be easily cloned:
     
-    >>> print formula( formula("CaCO3+6H2O"))
+    >>> print(formula( formula("CaCO3+6H2O")))
     CaCO3(H2O)6
 
 Density
@@ -180,7 +180,7 @@ to those isotopes used.
 This makes heavy water density easily specified as:
 
     >>> D2O = formula('D2O',natural_density=1)
-    >>> print D2O,"%.4g"%D2O.density
+    >>> print("%s %.4g"%(D2O,D2O.density))
     D2O 1.112
 
 Density can also be estimated from the volume of the unit cell, either
@@ -199,17 +199,17 @@ estimate it is not very accurate:
     >>> from periodictable import elements, formula
     >>> Fe = formula("2Fe")  # bcc lattice has 2 atoms per unit cell
     >>> Fe.density = Fe.molecular_mass/Fe.volume('bcc')
-    >>> print "%.3g"%Fe.density
+    >>> print("%.3g"%Fe.density)
     6.55
-    >>> print "%.3g"%elements.Fe.density
+    >>> print("%.3g"%elements.Fe.density)
     7.87
 
 Using lattice parameters the results are much better:
 
     >>> Fe.density = Fe.molecular_mass/Fe.volume(a=2.8664)
-    >>> print "%.3g"%Fe.density
+    >>> print("%.3g"%Fe.density)
     7.88
-    >>> print "%.3g"%elements.Fe.density
+    >>> print("%.3g"%elements.Fe.density)
     7.87
 
 Mixtures
@@ -223,13 +223,13 @@ following is a 2:1 mixture of water and heavy water:
     >>> H2O = formula('H2O',natural_density=1)
     >>> D2O = formula('D2O',natural_density=1)
     >>> mix = mix_by_volume(H2O,2,D2O,1)
-    >>> print mix,"%.4g"%mix.density
+    >>> print("%s %.4g"%(mix,mix.density))
     (H2O)2D2O 1.037
     
 Note that this is different from a 2:1 mixture by weight:
 
     >>> mix = mix_by_weight(H2O,2,D2O,1)
-    >>> print mix,"%.4g"%mix.density
+    >>> print("%s %.4g"%(mix,mix.density))
     (H2O)2.2234D2O 1.035
 
 Derived values
@@ -242,12 +242,12 @@ compute molar mass and neutron/xray scattering length density:
     >>> import periodictable
     >>> SiO2 = periodictable.formula('SiO2')
     >>> hydrated = SiO2 + periodictable.formula('3H2O')
-    >>> print hydrated,'mass',hydrated.mass
+    >>> print('%s mass %s'%(hydrated,hydrated.mass))
     SiO2(H2O)3 mass 114.13014
     >>> rho,mu,inc = periodictable.neutron_sld('SiO2+3H2O',density=1.5,wavelength=4.75)
-    >>> print hydrated,'neutron sld','%.3g'%rho
+    >>> print('%s neutron sld %.3g'%(hydrated,rho))
     SiO2(H2O)3 neutron sld 0.849
     >>> rho,mu = periodictable.xray_sld(hydrated,density=1.5,
     ... wavelength=periodictable.Cu.K_alpha)
-    >>> print hydrated,'X-ray sld','%.3g'%rho
+    >>> print('%s X-ray sld %.3g'%(hydrated,rho))
     SiO2(H2O)3 X-ray sld 13.5

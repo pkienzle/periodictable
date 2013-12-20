@@ -1,6 +1,6 @@
 from __future__ import division
 from copy import deepcopy
-from cPickle import loads, dumps
+from pickle import loads, dumps
 
 from periodictable import Ca,C,O,H,Fe,Ni,Si,D,Na,Cl
 from periodictable import formula, mix_by_weight, mix_by_volume

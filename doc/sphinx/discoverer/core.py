@@ -16,7 +16,7 @@ def init(table, reload=False):
     # Not numeric, so no discoverer_units
 
     # Load the data
-    for name,person in data.iteritems():
+    for name,person in data.items():
         el = table.name(name)
         el.discoverer = person
 

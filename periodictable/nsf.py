@@ -21,12 +21,12 @@ of a particular element:
     >>> import periodictable
     >>> for iso in periodictable.Ni:
     ...     if iso.neutron.has_sld():
-    ...         print iso,iso.neutron.sld()[0]
-    58-Ni 13.152605395
-    60-Ni 2.55745104902
-    61-Ni 6.94165284735
-    62-Ni -7.94636575947
-    64-Ni -0.337948888621
+    ...         print("%s %7.4f"%(iso,iso.neutron.sld()[0]))
+    58-Ni 13.1526
+    60-Ni  2.5575
+    61-Ni  6.9417
+    62-Ni -7.9464
+    64-Ni -0.3379
 
 
 Details
@@ -130,7 +130,7 @@ associated with the periodictable package.
     J. Appl. Cryst. 44, 618-624. 
     doi: 10.1107/S0021889811008223
 """
-from __future__ import division
+
 import numpy
 from numpy import sqrt, pi, asarray, inf
 from .core import Element, Isotope, default_table
@@ -784,7 +784,7 @@ def neutron_scattering(compound, density=None,
     molar_mass = num_atoms = 0
     sigma_s = sigma_a = sigma_i = b_c = 0
     is_energy_dependent = False
-    for element,quantity in compound.atoms.iteritems():
+    for element,quantity in compound.atoms.items():
         if not element.neutron.has_sld(): return None, None, None
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
         molar_mass += element.mass*quantity
@@ -877,7 +877,7 @@ def _sum_piece(wavelength, compound):
     molar_mass = num_atoms = 0
     sigma_a = sigma_i = b_c = 0
     is_energy_dependent = False
-    for element,quantity in compound.atoms.iteritems():
+    for element,quantity in compound.atoms.items():
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
         molar_mass += element.mass*quantity
         num_atoms += quantity
@@ -1428,25 +1428,25 @@ def sld_table(wavelength=1, table=None, isotopes=True):
     # The Rauch data have cited references to back up the numbers
     # (see doc directory), though it is not clear what criteria are
     # used to select amongst the available measurements.
-    print " Neutron scattering length density table"
-    print "%-7s %7s %7s %7s %7s %7s"%('atom','mass','density',
-                                         'sld','imag','incoh')
+    print(" Neutron scattering length density table")
+    print("%-7s %7s %7s %7s %7s %7s"
+        %('atom', 'mass', 'density', 'sld', 'imag', 'incoh'))
     for el in table:
         if el.neutron.has_sld():
             coh,jcoh,inc = el.neutron.sld(wavelength=wavelength)
-            print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f%s"\
+            print("%-7s %7.3f %7.3f %7.3f %7.3f %7.3f%s"
                 %(el,el.mass,el.density,coh,jcoh,inc,
-                  ' *' if el.neutron.is_energy_dependent else '')
+                  ' *' if el.neutron.is_energy_dependent else ''))
             if isotopes:
                 isos = [iso for iso in el if iso.neutron != None and iso.neutron.has_sld()]
             else:
                 isos = []
             for iso in isos:
                 coh,jcoh,inc = iso.neutron.sld(wavelength=wavelength)
-                print "%-7s %7.3f %7.3f %7.3f %7.3f %7.3f%s"\
+                print("%-7s %7.3f %7.3f %7.3f %7.3f %7.3f%s"
                     %(iso,iso.mass,iso.density,coh,jcoh,inc,
-                      ' *' if iso.neutron.is_energy_dependent else '')
-    print "* Energy dependent cross sections"
+                      ' *' if iso.neutron.is_energy_dependent else ''))
+    print("* Energy dependent cross sections")
 
 def energy_dependent_table(table=None):
     """
@@ -1472,7 +1472,7 @@ def energy_dependent_table(table=None):
     """
     table = default_table(table)
     # List of energy dependent elements and isotopes
-    print "Elements and isotopes with energy dependent absorption:"
+    print("Elements and isotopes with energy dependent absorption:")
     for el in table:
         if not hasattr(el,'neutron'): continue
         dep = []
@@ -1481,17 +1481,17 @@ def energy_dependent_table(table=None):
         dep += [str(el)+'-'+str(iso.isotope)
                 for iso in el
                 if iso.neutron != None and iso.neutron.is_energy_dependent]
-        if len(dep) > 0: print "   "," ".join(dep)
+        if len(dep) > 0: print("    "+" ".join(dep))
 
 def _diff(iso,a,b,tol=0.01):
     if None in (a,b):
         if a is not None or b is not None:
             if a is None and b > tol:
-                print "%10s %8s %8.2f"%(iso, "----", b)
+                print("%10s %8s %8.2f"%(iso, "----", b))
             elif b is None and a > tol:
-                print "%10s %8.2f %8s"%(iso, a, "----")
+                print("%10s %8.2f %8s"%(iso, a, "----"))
     elif abs(a - b) > tol:
-        print "%10s %8.2f %8.2f %5.1f%%"%(iso, a, b, 100*(a-b)/b if b!=0 else inf)
+        print("%10s %8.2f %8.2f %5.1f%%"%(iso, a, b, 100*(a-b)/b if b!=0 else inf))
 
 def compare(fn1, fn2, table=None, tol=0.01):
     table = default_table(table)
@@ -1546,7 +1546,7 @@ def absorption_comparison_table(table=None, tol=None):
 
     """
 
-    print "Comparison of absorption and (-2000 lambda b_c_i)"
+    print("Comparison of absorption and (-2000 lambda b_c_i)")
     compare(lambda el: el.neutron.absorption,
             lambda el: -2000*el.neutron.b_c_i*ABSORPTION_WAVELENGTH,
             table=table, tol=tol)
@@ -1582,7 +1582,7 @@ def coherent_comparison_table(table=None, tol=None):
 
     """
     import numpy
-    print "Comparison of (4 pi b_c^2/100) and coherent"
+    print("Comparison of (4 pi b_c^2/100) and coherent")
     compare(lambda el: 4*pi/100*el.neutron.b_c**2,
             lambda el: el.neutron.coherent,
             table=table, tol=tol)
@@ -1618,7 +1618,7 @@ def total_comparison_table(table=None, tol=None):
 
     """
 
-    print "Comparison of total cross section to (coherent + incoherent)"
+    print("Comparison of total cross section to (coherent + incoherent)")
     compare(lambda el: el.neutron.total,
             lambda el: el.neutron.coherent+el.neutron.incoherent,
             table=table, tol=tol)
@@ -1650,7 +1650,7 @@ def incoherent_comparison_table(table=None, tol=None):
 
     """
 
-    print "Comparison of incoherent and (total - 4 pi b_c^2/100)"
+    print("Comparison of incoherent and (total - 4 pi b_c^2/100)")
     compare(lambda el: el.neutron.incoherent,
             lambda el: el.neutron.total - 4*pi/100*el.neutron.b_c**2,
             table=table, tol=tol)

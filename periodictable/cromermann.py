@@ -187,11 +187,11 @@ def _update_cmformulas():
             continue
         if w[0] == "#L":
             assert smbl is not None
-            line1 = lineiter.next()
+            line1 = next(lineiter)
             w1 = line1.split()
             assert len(w1) == 11
-            a = map(float, w1[0:5])
-            b = map(float, w1[6:11])
+            a = list(map(float, w1[0:5]))
+            b = list(map(float, w1[6:11]))
             c = float(w1[5])
             cmf = CromerMannFormula(smbl, a, b, c)
             _cmformulas[cmf.symbol] = cmf

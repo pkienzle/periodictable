@@ -26,7 +26,7 @@ def chmod(path, mode):
     log.debug("changing mode of %s to %o", path, mode)
     try:
         _chmod(path, mode)
-    except os.error, e:
+    except os.error as e:
         log.debug("chmod failed: %s", e)
 
 
@@ -48,7 +48,7 @@ def fixed_unpack_and_compile(self, egg_path, destination):
     if not self.dry_run:
         for f in to_chmod:
 #           mode = ((os.stat(f)[stat.ST_MODE]) | 0555) & 07755
-            mode = ((os.stat(f)[stat.ST_MODE]) | 0444) & 07755
+            mode = ((os.stat(f)[stat.ST_MODE]) | 0o444) & 0o7755
             chmod(f, mode)
 
     to_compile = []; to_chmod = []

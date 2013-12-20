@@ -14,9 +14,9 @@ def init(table, reload=False):
     Isotope.shells = None
 
     # Load the data
-    for symbol,eldata in data.iteritems():
+    for symbol,eldata in data.items():
         el = table.symbol(symbol)
-        for iso,isodata in eldata.iteritems():
+        for iso,isodata in eldata.items():
             el[iso].shells = isodata
 
 # Define the data

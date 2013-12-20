@@ -159,15 +159,15 @@ class PeriodicTable(object):
     .. doctest::
 
         >>> from periodictable import *
-        >>> print elements[26]
+        >>> print(elements[26])
         Fe
-        >>> print elements.Fe
+        >>> print(elements.Fe)
         Fe
-        >>> print elements.symbol('Fe')
+        >>> print(elements.symbol('Fe'))
         Fe
-        >>> print elements.name('iron')
+        >>> print(elements.name('iron'))
         Fe
-        >>> print elements.isotope('Fe')
+        >>> print(elements.isotope('Fe'))
         Fe
 
 
@@ -175,11 +175,11 @@ class PeriodicTable(object):
 
     .. doctest::
 
-        >>> print elements[26][56]
+        >>> print(elements[26][56])
         56-Fe
-        >>> print elements.Fe[56]
+        >>> print(elements.Fe[56])
         56-Fe
-        >>> print elements.isotope('56-Fe')
+        >>> print(elements.isotope('56-Fe'))
         56-Fe
 
 
@@ -192,7 +192,7 @@ class PeriodicTable(object):
 
         >>> from periodictable import *
         >>> for el in elements:  # lists the element symbols
-        ...     print el.symbol,el.name  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        ...     print("%s %s"%(el.symbol,el.name))  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         n neutron
         H hydrogen
         He helium
@@ -211,7 +211,7 @@ class PeriodicTable(object):
         PRIVATE_TABLES[table] = self
         self.properties = []
         self._element = {}
-        for Z,(name,symbol,ions) in element_base.iteritems():
+        for Z,(name,symbol,ions) in element_base.items():
             element = Element(name=name.lower(),symbol=symbol,Z=Z,
                               ions=ions,table=table)
             self._element[element.number] = element
@@ -235,10 +235,8 @@ class PeriodicTable(object):
         """
         Process the elements in Z order
         """
-        Zlist = self._element.keys()
-        Zlist.sort()
-        for Z in Zlist:
-            yield self._element[Z]
+        for _,el in sorted(self._element.items()):
+            yield el
 
     def symbol(self, input):
         """
@@ -259,7 +257,7 @@ class PeriodicTable(object):
         .. doctest::
 
             >>> import periodictable
-            >>> print periodictable.elements.symbol('Fe')
+            >>> print(periodictable.elements.symbol('Fe'))
             Fe
         """
         if hasattr(self,input):
@@ -286,7 +284,7 @@ class PeriodicTable(object):
         .. doctest::
 
             >>> import periodictable
-            >>> print periodictable.elements.name('iron')
+            >>> print(periodictable.elements.name('iron'))
             Fe
         """
         for el in self:
@@ -315,7 +313,7 @@ class PeriodicTable(object):
         .. doctest::
 
             >>> import periodictable
-            >>> print periodictable.elements.isotope('58-Ni')
+            >>> print(periodictable.elements.isotope('58-Ni'))
             58-Ni
         """
         # Parse #-Sym or Sym
@@ -395,10 +393,10 @@ class PeriodicTable(object):
             if any(v==None for v in L): continue
 
             if format is None:
-                print " ".join(str(p) for p in L)
+                print(" ".join(str(p) for p in L))
             else:
                 #try:
-                print format%L
+                print(format%L)
                 #except:
                 #    print "format",format,"args",L
                 #    raise
@@ -496,13 +494,13 @@ class Element(object):
         # Remember the table name for pickle dump/load
         if table != self.table: self.table = table
 
-    # Isotope support
-    def _getisotopes(self):
-        L = self._isotopes.keys()
-        L.sort()
-        return L
-    isotopes = property(_getisotopes,doc="List of all isotopes")
-    def add_isotope(self,number):
+    @property
+    def isotopes(self):
+        """List of all isotopes"""
+        # Note: may want to return the iterator rather than the list...
+        return list(sorted(self._isotopes.keys()))
+
+    def add_isotope(self, number):
         """
         Add an isotope for the element.
 
@@ -513,21 +511,21 @@ class Element(object):
         :Returns: None
         """
         if number not in self._isotopes:
-            self._isotopes[number] = Isotope(self,number)
+            self._isotopes[number] = Isotope(self, number)
         return self._isotopes[number]
 
-    def __getitem__(self,number):
+    def __getitem__(self, number):
         try:
             return self._isotopes[number]
         except KeyError:
-            raise KeyError("%d is not an isotope of %s"%(number,self.symbol))
+            raise KeyError("%s is not an isotope of %s"%(number,self.symbol))
 
     def __iter__(self):
         """
-        Process the elements in Z order.
+        Process the isotopes in order
         """
-        for isotope in self.isotopes:
-            yield self._isotopes[isotope]
+        for _,iso in sorted(self._isotopes.items()):
+            yield iso
 
     # Note: using repr rather than str for the element symbol so
     # that lists of elements print nicely.  Since elements are
@@ -537,7 +535,7 @@ class Element(object):
         return self.symbol
 
     def __reduce__(self):
-        return _make_element,(self.table,self.number,)
+        return _make_element, (self.table, self.number)
 
 def isatom(val):
     """Return true if value is an element, isotope or ion"""
@@ -753,7 +751,7 @@ def define_elements(table, namespace):
         namespace[k] = v
 
     # return the keys
-    return names.keys()
+    return list(names.keys())
 
 
 def get_data_path(data):
@@ -772,7 +770,7 @@ def get_data_path(data):
 
     # Check for data path in the environment
     key = 'PERIODICTABLE_DATA'
-    if os.environ.has_key(key):
+    if key in os.environ:
         path = os.path.join(os.environ[key],data)
         if not os.path.isdir(path):
             raise RuntimeError('Path in environment %s not a directory'%key)

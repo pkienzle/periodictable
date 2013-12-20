@@ -25,6 +25,7 @@ dist = setup(
             'License :: Public Domain',
             'Operating System :: OS Independent',
             'Programming Language :: Python',
+            'Programming Language :: Python :: 3',
             'Topic :: Scientific/Engineering :: Chemistry',
             'Topic :: Scientific/Engineering :: Physics',
             ],
@@ -36,7 +37,7 @@ dist = setup(
                 ['activate.dat', 'xsf/*.nff', 'xsf/f0_WaasKirf.dat', 'xsf/read.me'],
         },
         #data_files = periodictable.data_files(),
-        install_requires = ['pyparsing<2.0.0', 'numpy'],
+        install_requires = ['pyparsing', 'numpy'],
 )
 
 # End of file

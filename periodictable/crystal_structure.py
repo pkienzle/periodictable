@@ -32,9 +32,9 @@ Example:
 .. doctest::
 
     >>> import periodictable as elements
-    >>> print elements.C.crystal_structure['symmetry']
+    >>> print(elements.C.crystal_structure['symmetry'])
     Diamond
-    >>> print elements.C.crystal_structure['a']
+    >>> print(elements.C.crystal_structure['a'])
     3.57
 
 This data is from Ashcroft and Mermin.

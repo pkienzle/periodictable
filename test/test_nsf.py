@@ -36,7 +36,7 @@ def test():
         if complete and b_c != 0 and abs((b_c-el.neutron.b_c)/b_c) > 0.05:
             err = abs((b_c-el.neutron.b_c)/b_c)
             ## Printing suppressed for the release version
-            #print "%2s %.3f % 7.3f % 7.3f"%(el.symbol,err,b_c,el.neutron.b_c)
+            #print("%2s %.3f % 7.3f % 7.3f"%(el.symbol,err,b_c,el.neutron.b_c))
 
     # Check neutron_sld and neutron_xs against NIST calculator
     # Note that we are using different tables, so a general comparison with
@@ -163,33 +163,33 @@ def test_formula():
 
 def test_composite():
     from periodictable.nsf import neutron_composite_sld
-    calc = neutron_composite_sld([formula(s) for s in 'HSO4','H2O','CCl4'],
+    calc = neutron_composite_sld([formula(s) for s in ('HSO4','H2O','CCl4')],
                                  wavelength=4.75)
     sld = calc(numpy.array([3,1,2]),density=1.2)
     sld2 = neutron_sld('3HSO4+1H2O+2CCl4',density=1.2,wavelength=4.75)
-    #print sld
-    #print sld2
+    #print(sld)
+    #print(sld2)
     assert all(abs(v-w)<1e-14 for v,w in zip(sld,sld2))
 
 def time_composite():
     from periodictable.nsf import neutron_composite_sld
     import time
-    calc = neutron_composite_sld([formula(s) for s in 'HSO4','H2O','CCl4'],
+    calc = neutron_composite_sld([formula(s) for s in ('HSO4','H2O','CCl4')],
                                  wavelength=4.75)
     q = numpy.array([3,1,2])
     N = 1000
-    bits = [formula(s) for s in 'HSO4','H2O','CCl4']
+    bits = [formula(s) for s in ('HSO4','H2O','CCl4')]
     tic = time.time()
     for i in range(N):
         sld = calc(q,density=1.2)
     toc = time.time()-tic
-    print "composite %.1f us"%(toc/N*1e6)
+    print("composite %.1f us"%(toc/N*1e6))
     tic = time.time()
     for i in range(N):
         sld = neutron_sld(q[0]*bits[0]+q[1]*bits[1]+q[2]*bits[2],
                           density=1.2,wavelength=4.75)
     toc = time.time()-tic
-    print "direct %.1f us"%(toc/N*1e6)
+    print("direct %.1f us"%(toc/N*1e6))
 
 
 def test_abundance():
@@ -200,9 +200,9 @@ def test_abundance():
         for iso in el:
             if iso.neutron == None: continue
             if not hasattr(iso.neutron,'abundance'):
-                print "abundance missing for",iso
+                print("abundance missing for %s"%iso)
             if iso.neutron.abundance == None:
-                print iso,"abundance=None"
+                print("%s abundance=None"%iso)
             else:
                 abundance += iso.neutron.abundance
         # TODO: abundance tables are not very good
@@ -215,23 +215,23 @@ def _summarize(M):
     from periodictable.nsf import neutron_sld, neutron_xs
     sld = neutron_sld(M,wavelength=4.75)
     xs = neutron_xs(M,wavelength=4.75)
-    print M,"sld",sld
-    print M,"xs",xs,"1/e",1/sum(xs)
+    print("%s sld %s"%(M,sld))
+    print("%s xs %s 1/e %s"%(M,xs,1/sum(xs)))
     #return
-    for el in M.atoms.keys():
-        print el,"density",el.density
-        print el,"sld",el.neutron.sld(wavelength=4.75)
-        print el,"xs","%.15g %.15g %.15g"%el.neutron.xs(wavelength=4.75)
-        print el,"1/e",1./sum(el.neutron.xs(wavelength=4.75))
+    for el in list(M.atoms.keys()):
+        print("%s density %s"%(el,el.density))
+        print("%s sld %s"%(el,el.neutron.sld(wavelength=4.75)))
+        print("%s xs"%el + " %.15g %.15g %.15g"%el.neutron.xs(wavelength=4.75))
+        print("%s 1/e %s"%(el,1./sum(el.neutron.xs(wavelength=4.75))))
 
 def molecule_table():
     # Table of scattering length densities for various molecules
-    print "SLDS for some molecules"
+    print("SLDS for some molecules")
     for molecule,density in [('SiO2',2.2),('B4C',2.52)]:
         atoms = formula(molecule).atoms
         rho,mu,inc = neutron_sld(atoms,density,wavelength=4.75)
-        print "%s(%g g/cm**3)  rho=%.4g mu=%.4g inc=%.4g"\
-            %(molecule,density,rho,mu,inc)
+        print("%s(%g g/cm**3)  rho=%.4g mu=%.4g inc=%.4g"
+              %(molecule,density,rho,mu,inc))
 
 def show_tables():
     molecule_table()
@@ -241,13 +241,13 @@ def show_tables():
     periodictable.nsf.coherent_comparison_table()
     periodictable.nsf.incoherent_comparison_table()
 
-    print """\
+    print("""\
 Specific elements with b_c values different from Neutron News 1992.
-This is not a complete list."""
+This is not a complete list.""")
     for sym in ['Sc','Te','Xe','Sm','Eu','Gd','W','Au','Hg']:
         el = getattr(elements,sym)
-        print el.symbol,el.neutron.b_c,el.neutron.coherent,\
-            el.neutron.incoherent,el.neutron.absorption
+        print("%s %s %s %s %s"%(el.symbol,el.neutron.b_c,el.neutron.coherent,
+              el.neutron.incoherent,el.neutron.absorption))
 
 
 

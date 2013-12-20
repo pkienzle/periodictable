@@ -47,7 +47,7 @@ Check that it works:
 
     >>> import discoverer
     >>> import periodictable
-    >>> print periodictable.magnesium.discoverer
+    >>> print(periodictable.magnesium.discoverer)
     J. Black
 
 
@@ -82,9 +82,9 @@ Check that it works:
 
     >>> import shelltable 
     >>> import periodictable
-    >>> print periodictable.Fe[56].shells
+    >>> print(periodictable.Fe[56].shells)
     56-Fe shell info
-    >>> print periodictable.Ni[58].shells
+    >>> print(periodictable.Ni[58].shells)
     None
 
 

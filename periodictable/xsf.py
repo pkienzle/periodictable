@@ -411,7 +411,7 @@ def xray_sld(compound, density=None,  natural_density=None,
     assert energy is not None, "scattering calculation needs energy or wavelength"
 
     mass,sum_f1,sum_f2 = 0,0,0
-    for element,quantity in compound.atoms.iteritems():
+    for element,quantity in compound.atoms.items():
         mass += element.mass*quantity
         f1,f2 = element.xray.scattering_factors(energy=energy)
         #print element,f1,f2,wavelength
@@ -702,12 +702,12 @@ def sld_table(wavelength=None, table=None):
     if wavelength == None: wavelength = table.Cu.K_alpha
 
     # NBCU spreadsheet format
-    print "X-ray scattering length density for",wavelength,"Ang"
-    print "%3s %6s %6s"%('El','rho','irho')
+    print("X-ray scattering length density for %g Ang"%wavelength)
+    print("%3s %6s %6s"%('El','rho','irho'))
     for el in table:
         rho,irho = el.xray.sld(wavelength=table.Cu.K_alpha)
         if rho is not None:
-            print "%3s %6.2f %6.2f"%(el.symbol,rho,irho)
+            print("%3s %6.2f %6.2f"%(el.symbol,rho,irho))
 
 def emission_table(table=None):
     """
@@ -731,8 +731,8 @@ def emission_table(table=None):
          ...
     """
     table = default_table(table)
-    print "%3s %7s %7s"%('El','Kalpha','Kbeta1')
+    print("%3s %7s %7s"%('El','Kalpha','Kbeta1'))
     for el in table:
         if hasattr(el,'K_alpha'):
-            print "%3s %7.4f %7.4f"%(el.symbol,el.K_alpha,el.K_beta1)
+            print("%3s %7.4f %7.4f"%(el.symbol,el.K_alpha,el.K_beta1))
 

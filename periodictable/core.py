@@ -595,7 +595,7 @@ element_base = {
     5: ['Boron',       'B',  (3,)],
     6: ['Carbon',      'C',  (2,-4,4)],
     7: ['Nitrogen',    'N',  (2,-3,3,4,5)],
-    8: ['Oxygen',      'O',  (-2,)],
+    8: ['Oxygen',      'O',  (-2,-1,1,2)],
     9: ['Fluorine',    'F',  (-1,)],
     10: ['Neon',       'Ne', ()],
     11: ['Sodium',     'Na', (1,)],

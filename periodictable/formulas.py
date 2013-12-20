@@ -364,18 +364,18 @@ class Formula(object):
     @property
     def charge(self):
         """
-        Charge of the molecule
+        Net charge of the molecule.
         """
         return sum([m*a.charge for a,m in self.atoms.items()])
 
     @property
     def mass_fraction(self):
         """
+        Fractional mass representation of each element/isotope/ion
         Mass fraction representation of the elements in the molecule
         """
         total_mass = self.mass
         return dict((a,m*a.mass/total_mass) for a,m in self.atoms.items())
-
 
     def _pf(self):
         """

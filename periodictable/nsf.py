@@ -125,9 +125,9 @@ associated with the periodictable package.
     Wiley InterScience. pp 126-146.
     doi: 10.1107/97809553602060000584
 
-.. [#Glinka2001] Glinka, C.J. (2011)
-    Incoherent Neutron Scattering from Multi-element Materials. 
-    J. Appl. Cryst. 44, 618-624. 
+.. [#Glinka2011] Glinka, C.J. (2011)
+    Incoherent Neutron Scattering from Multi-element Materials.
+    J. Appl. Cryst. 44, 618-624.
     doi: 10.1107/S0021889811008223
 """
 
@@ -733,7 +733,7 @@ def neutron_scattering(compound, density=None,
 
     In general, the total scattering cross section $\Sigma_{\rm s}$ is not the
     sum of the coherent and incoherent cross sections 
-    $\Sigma_{\rm coh}+\Sigma_{\rm inc}$.\ [Glinka2011]_
+    $\Sigma_{\rm coh}+\Sigma_{\rm inc}$.\ [#Glinka2011]_
 
     Including unit conversion with $\mu=10^{-6}$ the full scattering equations 
     are:

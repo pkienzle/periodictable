@@ -371,8 +371,7 @@ class Formula(object):
     @property
     def mass_fraction(self):
         """
-        Fractional mass representation of each element/isotope/ion
-        Mass fraction representation of the elements in the molecule
+        Fractional mass representation of each element/isotope/ion.
         """
         total_mass = self.mass
         return dict((a,m*a.mass/total_mass) for a,m in self.atoms.items())

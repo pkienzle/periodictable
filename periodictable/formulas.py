@@ -652,7 +652,7 @@ def formula_grammar(table):
     implicit_separator = separator | space
     composite << group + ZeroOrMore(implicit_separator + group)
 
-    density = Literal('@').suppress() + count + Optional(Regex("[ni]"),default='n')
+    density = Literal('@').suppress() + count + Optional(Regex("[ni]"),default='i')
     compound = composite + Optional(density,default=None)
     def convert_compound(string,location,tokens):
         #print "compound",tokens

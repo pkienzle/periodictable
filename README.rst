@@ -27,6 +27,13 @@ give different results from other packages.
 Change history
 ==============
 
+1.4.1 2014-02-04
+----------------
+
+Modified:
+
+* default density is now the isotopic density rather than the natural density
+
 1.4.0 2013-12-20
 ----------------
 

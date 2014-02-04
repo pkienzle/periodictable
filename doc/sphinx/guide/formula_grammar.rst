@@ -73,22 +73,22 @@ A formula string is translated into a formula using
     >>> print(formula("NaCl@2.16").density)
     2.16
 
-  These uses the natural density of the compound, so for example, D2O
-  could be specified using the density of H2O:
+  Density gives the isotopic density of the compound, so for example, D2O
+  could be specified using:
 
-    >>> print("%.3f"%formula("D2O@1").density)
+    >>> print("%.3f"%formula("D2O@1.112").density)
     1.112
 
-  or the density could be set according from a known value for that
-  particular isotopic formulation:
+  It can also be specified using the natural density of the compound,
+  assuming the isotopes substitution does not change the unit cell volume:
 
-    >>> print("%.3f"%formula("D2O@1.113i").density)
-    1.113
+    >>> print("%.3f"%formula("D2O@1n").density)
+    1.112
 
   Density applies to the entire formula, so for example a D2O-H2O
   2:1 mixture (not by mass or by volume) would be:
 
-    >>> print("%.3f"%formula("2D2O + H2O@1").density)
+    >>> print("%.3f"%formula("2D2O + H2O@1n").density)
     1.074
 
 * Mass fractions use %wt, with the final portion adding to 100%:
@@ -116,7 +116,7 @@ A formula string is translated into a formula using
 * Mixtures can nest.  The following is a 10% salt solution by weight mixed
   20:80 by volume with D2O:
 
-    >>> print(formula("20%vol (10%wt NaCl@2.16 // H2O@1) // D2O@1"))
+    >>> print(formula("20%vol (10%wt NaCl@2.16 // H2O@1) // D2O@1n"))
     NaCl(H2O)29.1966(D2O)122.794
 
 * Empty formulas are supported, e.g., for air or vacuum:

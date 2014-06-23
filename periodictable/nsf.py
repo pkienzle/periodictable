@@ -633,7 +633,7 @@ def neutron_scattering(compound, density=None,
 
     .. math::
 
-        b_c = \left.\sum n_i \rm{Im}(b_c) \right/ \sum n_i
+        b_c = \left.\sum n_i b_c \right/ \sum n_i
 
     This is converted to a scattering cross section and scaled
     by 1 barn = 100 |fm^2|:

@@ -196,12 +196,10 @@ def _mix_by_layer_triples(pairs, substrate, sub_vol):
 
     result = Formula()
     if len(pairs) > 0:
-        # cell mass = mass
-        # target mass = q
-        # cell mass * n = target mass
-        #   => n = target mass / cell mass
-        #        = q / mass
-        # scale this so that n = 1 for the smallest quantity
+        # layer volume: substrae area*thickness
+        # layer mass: layer volume * density
+        # mass fraction: layer mass/ total mass
+        # scale this so that n = 1 for the substrate
         if not all(f.density for f,_,_ in pairs):
             raise ValueError("Need a density for each formula")
         if not substrate.density:
@@ -210,10 +208,17 @@ def _mix_by_layer_triples(pairs, substrate, sub_vol):
         v_sub = sub_vol[0]*sub_vol[1]*sub_vol[2]
         a_sub = sub_vol[0]*sub_vol[1]
         m_sub = v_sub * substrate.density
-        for f,t,u   in pairs:
+        m_total = m_sub
+        p2 = []
+        for f,t,u in pairs:
             v = a_sub*t*tunits2mm[u]
             m = v * f.density
-            result += m/m_sub* f
+            m_total += m
+            p2.append((m,f))
+
+        scale = 1/((m_sub)/m_total)
+        for (m,f) in p2:
+            result += scale*(m/m_total)*f
         result += substrate
     return result
 
@@ -731,11 +736,11 @@ def formula_grammar(table):
 
     layer_mul = Literal("*").suppress() + count + Optional(space)
     layer_base = Literal('#').suppress() + count + layer_mul + layer_mul + Optional(space)
-    layer_thick = Regex("(nm|um|mm)") + space
+    layer_thick = count +Regex("(nm|um|mm)") + space
     layer_start = Literal('[').suppress() + Optional(space)
     layer_end = layer_base + Literal(']').suppress()
 
-    layer_spec = count + layer_thick + mixture + ZeroOrMore(partsep + count + layer_thick + mixture)
+    layer_spec = layer_thick + mixture + ZeroOrMore(partsep + layer_thick + mixture)
     layer_group = opengrp + layer_spec + closegrp + count
     def convert_layercount(string,location,tokens):
         # print "layercount",tokens

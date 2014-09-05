@@ -185,6 +185,45 @@ def _mix_by_volume_pairs(pairs):
 
     return result
 
+def _mix_by_layer_triples(pairs, substrate, sub_vol):
+
+    tunits2mm = { 'nm': 1e-6,
+              'um': 1e-3,
+              'mm': 1}
+    # Drop pairs with zero quantity
+    # Note: must be first statement in order to accept iterators
+    pairs = [(f,t,u) for f,t,u in pairs if t > 0]
+
+    result = Formula()
+    if len(pairs) > 0:
+        # layer volume: substrae area*thickness
+        # layer mass: layer volume * density
+        # mass fraction: layer mass/ total mass
+        # scale this so that n = 1 for the substrate
+        if not all(f.density for f,_,_ in pairs):
+            raise ValueError("Need a density for each formula")
+        if not substrate.density:
+            raise ValueError("Need a density for each formula")
+
+        v_sub = sub_vol[0]*sub_vol[1]*sub_vol[2]
+        a_sub = sub_vol[0]*sub_vol[1]
+        m_sub = v_sub * substrate.density
+        m_total = m_sub
+        p2 = []
+        for f,t,u in pairs:
+            v = a_sub*t*tunits2mm[u]
+            m = v * f.density
+            m_total += m
+            p2.append((m,f))
+
+        scale = 1/((m_sub)/m_total)
+        for (m,f) in p2:
+            result += scale*(m/m_total)*f
+        result += substrate
+    return result
+
+
+
 def formula(compound=None, density=None, natural_density=None,
             name=None, table=None):
     r"""
@@ -584,6 +623,8 @@ def formula_grammar(table):
     # Recursive
     composite = Forward()
     mixture = Forward()
+    thinlayer = Forward()
+    layers = Forward()
 
     # whitespace and separators
     space = Optional(White().suppress())
@@ -692,9 +733,45 @@ def formula_grammar(table):
         if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
         return _mix_by_volume_pairs(zip(piece,fract))
     mixture_by_volume = by_volume.setParseAction(convert_by_volume)
-    
-    mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume) + closegrp))
-    formula = compound | mixture_by_weight | mixture_by_volume
+
+    layer_mul = Literal("*").suppress() + count + Optional(space)
+    layer_base = Literal('#').suppress() + count + layer_mul + layer_mul + Optional(space)
+    layer_thick = count +Regex("(nm|um|mm)") + space
+    layer_start = Literal('[').suppress() + Optional(space)
+    layer_end = layer_base + Literal(']').suppress()
+
+    layer_spec = layer_thick + mixture + ZeroOrMore(partsep + layer_thick + mixture)
+    layer_group = opengrp + layer_spec + closegrp + count
+    def convert_layercount(string,location,tokens):
+        # print "layercount",tokens
+        count = tokens[-1]
+        fragment = tokens[:-1]
+        if count == 1:
+            return fragment
+        else:
+            return fragment * count
+
+    layer_group = layer_group.setParseAction(convert_layercount)
+
+    layers << (layer_spec|layer_group) + ZeroOrMore(partsep + (layer_spec|layer_group))
+    by_layer = layer_start + layers + partsep + mixture + layer_end
+    def convert_by_layer(string,location,tokens):
+        try:
+            # print "by layers",tokens
+            piece = tokens[2:-4:3]
+            fract = [float(v) for v in tokens[:-4:3]]
+            tunit = tokens[1:-4:3]
+            substrat =  tokens[-4]
+            sub_vol =  tokens[-3:]
+            if len(piece) != len(fract) : raise ValueError("Missing substrate in layer definition"+string)
+            return _mix_by_layer_triples(zip(piece,fract,tunit), substrat, sub_vol)
+        except Exception as e:
+            print e
+            raise
+    mixture_by_layer = by_layer.setParseAction(convert_by_layer)
+
+    mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume | mixture_by_layer) + closegrp))
+    formula = compound | mixture_by_weight | mixture_by_volume | mixture_by_layer
     grammar = Optional(formula, default=Formula()) + StringEnd()
 
     grammar.setName('Chemical Formula')

@@ -28,7 +28,7 @@ whose conditions may differ from those of your experiment.
 __docformat__ = 'restructuredtext en'
 __all__ = ['elements', 'neutron_sld','xray_sld',
            'formula','mix_by_weight','mix_by_volume'] # and all elements
-__version__ = "1.4.1"
+__version__ = "1.4.2-dev"
 
 from . import core
 from . import mass
@@ -188,6 +188,17 @@ def formula(*args, **kw):
     Parentheses can nest: "(CaCO3(H2O)6)1"
     Isotopes are represented by index, e.g., "CaCO[18]3+6H2O".
     Counts can be integer or decimal, e.g. "CaCO3+(3HO0.5)2".
+
+    Layer systeme:
+    [ <float>(nm|um|mm) Formula[<@Density>] [//  <float>(nm|um|mm) Formula<@Density>] // SubstrateFormaula[@<density>]#x*y*z ]
+
+    layers can get grouped an repeated.
+    x,y are substrate dimensions (mm)
+    z is the substrate thickness (mm).
+
+    Example:
+       [( 1mm Fe[59] // 1mm Fe[58] )10 //  Fe[57]#5*5*20 ]
+       10 times  (1mm Fe[59]/1mm Fe[58]) on  20 mm Fe[57] with a 5x5 mm sq area.
 
     For full details see help(periodictable.formulas.formula_grammar)
 

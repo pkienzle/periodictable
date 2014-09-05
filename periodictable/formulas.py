@@ -231,7 +231,7 @@ def formula(compound=None, density=None, natural_density=None,
         structure = tuple()
     elif isinstance(compound,Formula):
         structure = compound.structure
-        if density is None and natural_density is None: 
+        if density is None and natural_density is None:
             density = compound.density
         if not name: name = compound.name
     elif isatom(compound):
@@ -658,7 +658,7 @@ def formula_grammar(table):
         #print "compound",tokens
         if tokens[-1] is None:
             return Formula(structure=_immutable(tokens[:-1]))
-        elif tokens[-1] == 'n': 
+        elif tokens[-1] == 'n':
             return Formula(structure=_immutable(tokens[:-2]), natural_density=tokens[-2])
         else:
             return Formula(structure=_immutable(tokens[:-2]), density=tokens[-2])
@@ -681,7 +681,7 @@ def formula_grammar(table):
     mixture_by_weight = by_weight.setParseAction(convert_by_weight)
 
     volume_percent = Regex("%v(ol(ume)?)?").suppress() + space
-    by_volume = count + volume_percent + mixture + ZeroOrMore(partsep+count+(volume_percent|percent)+mixture) + partsep + mixture 
+    by_volume = count + volume_percent + mixture + ZeroOrMore(partsep+count+(volume_percent|percent)+mixture) + partsep + mixture
     def convert_by_volume(string,location,tokens):
         #print "by volume",tokens
         piece = tokens[1:-1:2] + [tokens[-1]]
@@ -692,9 +692,44 @@ def formula_grammar(table):
         if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
         return _mix_by_volume_pairs(zip(piece,fract))
     mixture_by_volume = by_volume.setParseAction(convert_by_volume)
-    
-    mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume) + closegrp))
-    formula = compound | mixture_by_weight | mixture_by_volume
+
+
+    layer_thick = count + Regex("(nm|um|mm)") + space
+    layer_part = layer_thick + mixture + ZeroOrMore(partsep + layer_thick + mixture)
+    layer_groupx = Literal('[').suppress() + layer_part + Literal(']').suppress() + count
+    def convert_layergroup(string, location, tokens):
+        count = tokens[-1]
+        fragment = tokens[:-1]
+        if count == 1:
+            return fragment
+        else:
+            ret = []
+            for _ in range(count):
+                for frag in fragment:
+                    ret.append(frag)
+            return ret
+    layer_group = layer_groupx.setParseAction(convert_layergroup)
+    layer_elem = (layer_part | layer_group)
+    by_layer = layer_elem + ZeroOrMore(partsep + layer_elem)
+    def convert_by_layer(string,location,tokens):
+
+        units = {'nm': 1e-9,
+                 'um': 1e-6,
+                 'mm': 1e-3,
+                 }
+        piece = tokens[2::3]
+        fract = [float(v* units[u]) for v,u in zip(tokens[0::3],tokens[1::3])]
+        unit = tokens[1::3]
+        total = sum(fract)
+        vfract = [ (v/total)*100 for v in fract]
+        if len(piece) != len(fract): raise ValueError("Missing base component of mixture "+string)
+        if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
+        return _mix_by_volume_pairs(zip(piece,vfract))
+    mixture_by_layer = by_layer.setParseAction(convert_by_layer)
+
+
+    mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume ) + closegrp))
+    formula = compound | mixture_by_weight | mixture_by_volume | mixture_by_layer
     grammar = Optional(formula, default=Formula()) + StringEnd()
 
     grammar.setName('Chemical Formula')

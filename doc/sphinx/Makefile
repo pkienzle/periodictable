@@ -71,12 +71,8 @@ latex: build
 	@echo "Run \`make all-pdf' or \`make all-ps' in that directory to" \
 	      "run these through (pdf)latex."
 
-pdf: latex _build/html/PeriodicTable.pdf
+pdf: latex
 	$(MAKE) -C _build/latex all-pdf
-
-_build/html/PeriodicTable.pdf:
-	-mkdir _build/html
-	ln -s $$PWD/_build/latex/PeriodicTable.pdf _build/html/PeriodicTable.pdf
 
 changes:
 	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) _build/changes
@@ -93,10 +89,6 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) _build/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
-
-upload:
-	scp -r _build/html/* reflectometry.org:web/danse/docs/elements
-	scp _build/latex/PeriodicTable.pdf reflectometry.org:web/danse/download
 
 build:
 	cd ../.. && python setup.py build

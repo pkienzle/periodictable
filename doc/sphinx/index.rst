@@ -13,8 +13,6 @@ Periodic table is written entirely in Python and does not require any external l
    :Release: |version|
    :Date:    |today|
 
-   Download pdf version `here <PeriodicTable.pdf>`_
-
 .. toctree::
    :maxdepth: 2
 

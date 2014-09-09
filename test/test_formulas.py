@@ -161,4 +161,8 @@ def test():
     # can't do mix by volume without component densities
     glass = mix_by_weight('SiO2',75,'Na2O',15,'CaO',10,density=2.52)
 
+    #layers
+    f_l = formula('1mm Fe // 1mm Ni')
+    assert f_l == formula('50%vol Fe // Ni')
+
 if __name__ == "__main__": test()

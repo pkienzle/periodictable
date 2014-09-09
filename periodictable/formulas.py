@@ -727,9 +727,49 @@ def formula_grammar(table):
         return _mix_by_volume_pairs(zip(piece,vfract))
     mixture_by_layer = by_layer.setParseAction(convert_by_layer)
 
+    absmass_mass = count + Regex("(ng|ug|mg|g|kg)") + space
+    absmass_part = absmass_mass + mixture + ZeroOrMore(partsep + absmass_mass + mixture)
+    def convert_by_absmass(string,location,tokens):
+
+        units = {'ng': 1e-9,
+                 'ug': 1e-6,
+                 'mg': 1e-3,
+                 'g': 1e+0,
+                 'kg': 1e+3,
+                 }
+        piece = tokens[2::3]
+        fract = [float(m* units[u]) for m,u in zip(tokens[0::3],tokens[1::3])]
+        unit = tokens[1::3]
+        total = sum(fract)
+        mfract = [ (m/total)*100 for m in fract]
+        if len(piece) != len(fract): raise ValueError("Missing base component of mixture "+string)
+        if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
+        return _mix_by_weight_pairs(zip(piece,mfract))
+    mixture_by_absmass = absmass_part.setParseAction(convert_by_absmass)
+
+    absvolume_vol = count + Regex("(nl|ul|ml|l)") + space
+    absvolume_part = absvolume_vol + mixture + ZeroOrMore(partsep + absvolume_vol + mixture)
+    def convert_by_absvolume(string,location,tokens):
+
+        units = {'nl': 1e-9,
+                 'ul': 1e-6,
+                 'ml': 1e-3,
+                 'l': 1e+0,
+                 }
+        piece = tokens[2::3]
+        fract = [float(v* units[u]) for v,u in zip(tokens[0::3],tokens[1::3])]
+        unit = tokens[1::3]
+        total = sum(fract)
+        vfract = [ (v/total)*100 for v in fract]
+        if len(piece) != len(fract): raise ValueError("Missing base component of mixture "+string)
+        if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
+        return _mix_by_volume_pairs(zip(piece,vfract))
+    mixture_by_absvolume = absvolume_part.setParseAction(convert_by_absvolume)
+
+
 
     mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume ) + closegrp))
-    formula = compound | mixture_by_weight | mixture_by_volume | mixture_by_layer
+    formula = compound | mixture_by_weight | mixture_by_volume | mixture_by_layer | mixture_by_absmass | mixture_by_absvolume
     grammar = Optional(formula, default=Formula()) + StringEnd()
 
     grammar.setName('Chemical Formula')

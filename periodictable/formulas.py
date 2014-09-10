@@ -10,7 +10,7 @@ from math import pi, sqrt
 # Requires that the pyparsing module is installed.
 
 from pyparsing import (Literal, Optional, White, Regex,
-                       ZeroOrMore, OneOrMore, Forward, StringEnd)
+                       ZeroOrMore, OneOrMore, Forward, StringEnd, Group)
 
 from .core import default_table, isatom, isisotope, change_table
 from .constants import avogadro_number
@@ -693,42 +693,40 @@ def formula_grammar(table):
         return _mix_by_volume_pairs(zip(piece,fract))
     mixture_by_volume = by_volume.setParseAction(convert_by_volume)
 
-
-    layer_thick = count + Regex("(nm|um|mm)") + space
-    layer_part = layer_thick + mixture + ZeroOrMore(partsep + layer_thick + mixture)
-    layer_groupx = Literal('[').suppress() + layer_part + Literal(']').suppress() + count
-    def convert_layergroup(string, location, tokens):
-        count = tokens[-1]
-        fragment = tokens[:-1]
-        if count == 1:
-            return fragment
-        else:
-            ret = []
-            for _ in range(count):
-                for frag in fragment:
-                    ret.append(frag)
-            return ret
-    layer_group = layer_groupx.setParseAction(convert_layergroup)
-    layer_elem = (layer_part | layer_group)
-    by_layer = layer_elem + ZeroOrMore(partsep + layer_elem)
+    mixture_by_layer = Forward()
+    layer_thick = Group(count + Regex("(nm|um|mm)") + space)
+    layer_part = (layer_thick + mixture ) | (opengrp + mixture_by_layer + closegrp +count)
+    mixture_by_layer <<   layer_part + ZeroOrMore(partsep + layer_part)
     def convert_by_layer(string,location,tokens):
 
         units = {'nm': 1e-9,
                  'um': 1e-6,
                  'mm': 1e-3,
                  }
-        piece = tokens[2::3]
-        fract = [float(v* units[u]) for v,u in zip(tokens[0::3],tokens[1::3])]
-        unit = tokens[1::3]
+        if len (tokens) < 2:
+            return tokens
+        piece = []
+        fract = []
+        for p1, p2 in zip(tokens[0::2], tokens[1::2]):
+            if isinstance(p1, Formula):
+                f = p1.absthick * float(p2)
+                p = p1
+            else:
+                f = float(p1[0]) * units[p1[1]]
+                p = p2
+            piece.append(p)
+            fract.append(f)
         total = sum(fract)
         vfract = [ (v/total)*100 for v in fract]
-        if len(piece) != len(fract): raise ValueError("Missing base component of mixture "+string)
-        if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
-        return _mix_by_volume_pairs(zip(piece,vfract))
-    mixture_by_layer = by_layer.setParseAction(convert_by_layer)
+        result = _mix_by_volume_pairs(zip(piece,vfract))
+        result.absthick = total
+        return result
+    mixture_by_layer = mixture_by_layer.setParseAction(convert_by_layer)
 
-    absmass_mass = count + Regex("(ng|ug|mg|g|kg)") + space
-    absmass_part = absmass_mass + mixture + ZeroOrMore(partsep + absmass_mass + mixture)
+    mixture_by_absmass = Forward()
+    absmass_mass = Group(count + Regex("(ng|ug|mg|g|kg)") + space)
+    absmass_part = (absmass_mass + mixture) | (opengrp + mixture_by_absmass + closegrp + count)
+    mixture_by_absmass << absmass_part + ZeroOrMore( partsep + absmass_part)
     def convert_by_absmass(string,location,tokens):
 
         units = {'ng': 1e-9,
@@ -737,18 +735,31 @@ def formula_grammar(table):
                  'g': 1e+0,
                  'kg': 1e+3,
                  }
-        piece = tokens[2::3]
-        fract = [float(m* units[u]) for m,u in zip(tokens[0::3],tokens[1::3])]
-        unit = tokens[1::3]
+        if len (tokens) < 2:
+            return tokens
+        piece = []
+        fract = []
+        for p1, p2 in zip(tokens[0::2], tokens[1::2]):
+            if isinstance(p1, Formula):
+                f = p1.absmass * float(p2)
+                p = p1
+            else:
+                f = float(p1[0]) * units[p1[1]]
+                p = p2
+            piece.append(p)
+            fract.append(f)
+
         total = sum(fract)
         mfract = [ (m/total)*100 for m in fract]
-        if len(piece) != len(fract): raise ValueError("Missing base component of mixture "+string)
-        if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
-        return _mix_by_weight_pairs(zip(piece,mfract))
-    mixture_by_absmass = absmass_part.setParseAction(convert_by_absmass)
+        result = _mix_by_weight_pairs(zip(piece,mfract))
+        result.absmass=total
+        return result
+    mixture_by_absmass = mixture_by_absmass.setParseAction(convert_by_absmass)
 
-    absvolume_vol = count + Regex("(nl|ul|ml|l)") + space
-    absvolume_part = absvolume_vol + mixture + ZeroOrMore(partsep + absvolume_vol + mixture)
+    mixture_by_absvolume = Forward()
+    absvolume_vol = Group(count + Regex("(nl|ul|ml|l)") + space)
+    absvolume_part = ( absvolume_vol + mixture )|(opengrp + mixture_by_absvolume + closegrp + count)
+    mixture_by_absvolume << absvolume_part + ZeroOrMore( partsep + absvolume_part)
     def convert_by_absvolume(string,location,tokens):
 
         units = {'nl': 1e-9,
@@ -756,17 +767,27 @@ def formula_grammar(table):
                  'ml': 1e-3,
                  'l': 1e+0,
                  }
-        piece = tokens[2::3]
-        fract = [float(v* units[u]) for v,u in zip(tokens[0::3],tokens[1::3])]
-        unit = tokens[1::3]
+        if len (tokens) < 2:
+            return tokens
+        piece = []
+        fract = []
+        for p1, p2 in zip(tokens[0::2], tokens[1::2]):
+            if isinstance(p1, Formula):
+                f = p1.absvolume * float(p2)
+                p = p1
+            else:
+                f = float(p1[0]) * units[p1[1]]
+                p = p2
+            piece.append(p)
+            fract.append(f)
         total = sum(fract)
         vfract = [ (v/total)*100 for v in fract]
         if len(piece) != len(fract): raise ValueError("Missing base component of mixture "+string)
         if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
-        return _mix_by_volume_pairs(zip(piece,vfract))
-    mixture_by_absvolume = absvolume_part.setParseAction(convert_by_absvolume)
-
-
+        result = _mix_by_volume_pairs(zip(piece,vfract))
+        result.absvolume = total
+        return result
+    mixture_by_absvolume = mixture_by_absvolume.setParseAction(convert_by_absvolume)
 
     mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume ) + closegrp))
     formula = compound | mixture_by_weight | mixture_by_volume | mixture_by_layer | mixture_by_absmass | mixture_by_absvolume

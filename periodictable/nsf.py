@@ -903,7 +903,7 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
 
     The composite calculator takes a vector of weights and returns the
     scattering length density of the composite.  This is useful for operations
-    on large molecules, such as calculating a set of constrasts or fitting
+    on large molecules, such as calculating a set of contrasts or fitting
     a material composition.
 
     Table lookups and partial sums and constants are precomputed so that

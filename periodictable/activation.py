@@ -53,10 +53,18 @@ activation and after 1 hour, 1 day, and 15 days.
 Activation cross sections are mostly from IAEA-273\ [#IAEA1987]. See activation.dat in the
 package directory for details on individual isotopes.
 
+Activation can be run from the command line using::
+
+    $ python -m periodictable.activation FORMULA
+
+where FORMULA is the chemical formula for the material.
+
 ..[#IAEA1987] IAEA (1987)
 Handbook on Nuclear Activation Data. TR 273 (International Atomic Energy Agency, Vienna, Austria, 1987). 
 https://www-nds.iaea.org/publications/tecdocs/sti%252Fdoc%252F10%252F0273/
 """
+
+from __future__ import division
 
 from math import exp, log
 import os
@@ -462,3 +470,21 @@ class Activation(object):
     def __init__(self, **kw):
         self.__dict__ = kw
 
+
+def demo():
+    import sys
+    formula = sys.argv[1]
+    fluence = 1e5
+    exposure = 10
+    env = ActivationEnvironment(fluence=fluence,Cd_ratio=70,fast_ratio=50,location="BT-2")
+    sample = Sample(formula, 1)
+    sample.calculate_activation(
+            env, exposure=exposure, rest_times=[0,1,24,360],
+            abundance=IAEA1987_isotopic_abundance,
+            #abundance=NIST2001_isotopic_abundance,
+            )
+    print("1g %s for %g hours at %g n/cm^2/s"%(formula, exposure, fluence))
+    sample.show_table(cutoff=0.0)
+
+if __name__ == "__main__":
+    demo()

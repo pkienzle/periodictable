@@ -404,7 +404,7 @@ def activity(isotope, mass, env, exposure, rest_times):
             # Column U: nv1s1t
             U = flux*initialXS*3600*1e-24*exposure
             # Column V: nv2s2t+L2*t
-            V = (env.fluence*effectiveXS*36000*1e-24+lam)*exposure
+            V = (env.fluence*effectiveXS*3600*1e-24+lam)*exposure
             # Column W: L/(L-nvs1+nvs2)
             W = lam/(lam-flux*initialXS*3600*1e-24+env.fluence*effectiveXS*3600*1e-24)
             # Column X: V#*[e(-S#)-e(U#)]

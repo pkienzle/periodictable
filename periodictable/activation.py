@@ -36,7 +36,7 @@ Example::
     >>> sample.calculate_activation(env, exposure=10, rest_times=[0,1,24,360])
     >>> sample.show_table()
                                           ----------------- activity (uCi) ------------------
-    isotope  product  reaction T1/2 (hrs)      T@0 hrs      T@1 hrs     T@24 hrs    T@360 hrs
+    isotope  product  reaction T1/2 (hrs)        0 hrs        1 hrs       24 hrs      360 hrs
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
     Co-59    Co-60         act    5.272 y     0.000496     0.000496    0.0004958    0.0004933
     Co-59    Co-60m+       act     10.5 m        1.664       0.0317          ---          ---
@@ -211,7 +211,7 @@ class Sample(object):
         # Print the table header, with an overbar covering the various rest times
         # Print a dashed separator above and below each column
         header = ["isotope","product","reaction","T1/2 (hrs)"] \
-                 + ["T@%g hrs"%vi for vi in self.rest_times]
+                 + ["%g hrs"%vi for vi in self.rest_times]
         separator = ["-"*8,"-"*8,"-"*8,"-"*10] + ["-"*12]*len(self.rest_times)
         cformat = "%-8s %-8s %8s %10s " + " ".join(["%12s"]*len(self.rest_times))
 
@@ -278,7 +278,7 @@ class ActivationEnvironment(object):
 
         Thermal/fast ratio needed for fast reactions. Use 0 to suppress fast contribution.
     """
-    def __init__(self, fluence, Cd_ratio, fast_ratio, location=""):
+    def __init__(self, fluence=1e5, Cd_ratio=0., fast_ratio=0., location=""):
         self.fluence = fluence     # cell F13
         self.Cd_ratio = Cd_ratio   # cell F15
         self.fast_ratio = fast_ratio # cell F17
@@ -393,7 +393,7 @@ def activity(isotope, mass, env, exposure, rest_times):
         else:
             # Provide the fix for the limitied precision (15 digits) in the 
             # floating point calculation.  For neutron fluence rates above 
-            # 1e16 the precision is ncertain cells needs to be improved to 
+            # 1e16 the precision in certain cells needs to be improved to
             # avoid erroneous results.  Also, burnup for single capture 
             # reactions (excluding 'b') is included here.
             # See README file for details.
@@ -416,6 +416,9 @@ def activity(isotope, mass, env, exposure, rest_times):
             activity = root*precision_correction
             #print ai.thermalXS_parent, ai.resonance_parent,exposure
             #print "P",effectiveXS, "U",U,"V",V,"W",W,"X",precision_correction,"Y",activity
+            # columns: F32 H K L U V W X
+            #data = env.fluence, initialXS, flux, root, U, V, W, precision_correction
+            #print " ".join("%.5e"%v for v in data)
 
         result[ai] = [activity*exp(-lam*Ti) for Ti in rest_times]
         #print [(Ti,Ai) for Ti,Ai in zip(rest_times,result[ai])]
@@ -457,7 +460,7 @@ def init(table, reload=False):
         # Create an Activation record and add it to the isotope
         iso = table[kw['Z']][kw['A']]
         activation = getattr(iso,'neutron_activation',[])
-        activation.append(Activation(**kw))
+        activation.append(ActivationResult(**kw))
         iso.neutron_activation = activation
 
         # Check abundance values
@@ -466,12 +469,12 @@ def init(table, reload=False):
         #    print "Abundance of",iso,"is",iso.abundance,\
         #        "but activation.dat has",kw['abundance'],"(%.1f%%)"%percent
 
-class Activation(object):
+class ActivationResult(object):
     def __init__(self, **kw):
         self.__dict__ = kw
 
 
-def demo():
+def demo():  # pragma: nocover
     import sys
     formula = sys.argv[1]
     fluence = 1e5
@@ -486,5 +489,17 @@ def demo():
     print("1g %s for %g hours at %g n/cm^2/s"%(formula, exposure, fluence))
     sample.show_table(cutoff=0.0)
 
+    ## Print a table of flux vs. activity so we can debug the
+    ## precision_correction value in the activity() function.
+    ## Note that you also need to uncomment the print statement
+    ## at the end of activity() that shows the column values.
+    #import numpy as np
+    #sample = Sample('Co', mass=10)
+    #for fluence in np.logspace(3,20,20-3+1):
+    #    env = ActivationEnvironment(fluence=fluence)
+    #    sample.calculate_activation(
+    #        env, exposure=exposure, rest_times=[0],
+    #        abundance=IAEA1987_isotopic_abundance)
+
 if __name__ == "__main__":
-    demo()
+    demo()  # pragma: nocover

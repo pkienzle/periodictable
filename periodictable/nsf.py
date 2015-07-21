@@ -402,7 +402,7 @@ class Neutron(object):
         if not self.has_sld(): return None,None,None
         N = self._number_density*1e-24
 
-        sigma_c = 0.01 * 4 * pi * self.b_c**2
+        #sigma_c = 0.01 * 4 * pi * self.b_c**2
         sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
         sigma_i = self.incoherent
 
@@ -802,7 +802,7 @@ def neutron_scattering(compound, density=None,
 
     # Turn sums into scattering factors
     b_c /= num_atoms
-    sigma_c = 4*pi/100*b_c**2
+    sigma_c = 0.04*pi*b_c**2
     sigma_i /= num_atoms
     sigma_a *= wavelength/ABSORPTION_WAVELENGTH/num_atoms
     sigma_s /= num_atoms
@@ -916,13 +916,13 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
     SLD_IM = 0.01/(2*ABSORPTION_WAVELENGTH)
     SLD_RE = 10
     SLD_INC = 10*sqrt(100/(4*pi))
-    SIGMA_C = 4*pi/100
+    #SIGMA_C = 4*pi/100
     NB = 1e-24*avogadro_number # assumes density is 1
     def _compute(q, density=1):
         atoms = numpy.sum(q*V[0])
         number_density = density * NB * atoms / numpy.sum(q*V[1])
         b_c = numpy.sum(q*V[2])/atoms
-        sigma_c = SIGMA_C * b_c**2
+        #sigma_c = SIGMA_C * b_c**2
         sigma_i = numpy.sum(q*V[3])/atoms
         sigma_a = numpy.sum(q*V[4])/atoms # at tabulated wavelength
         sld_re = number_density * b_c * SLD_RE

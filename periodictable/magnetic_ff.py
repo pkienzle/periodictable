@@ -125,7 +125,10 @@ def init(table, reload=False):
         # j0, j2, j4, j6 or J.
         a,b = line.split('=')
         b = b.replace('/','')
-        state, values = eval(b)
+        # The following eval is used for parsing the CFM_DATA table defined
+        # below, so there is no risk that it can be invoked from a web
+        # service with a user-defined malicious string.
+        state, values = eval(b)  # eval checked for malicious usage
         if a.startswith('Magnetic_Form'):
             jn = "j0" if state[0] == 'M' else "J"
             state = state[1:]

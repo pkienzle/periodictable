@@ -757,15 +757,15 @@ def formula_grammar(table):
     mixture_by_absmass = mixture_by_absmass.setParseAction(convert_by_absmass)
 
     mixture_by_absvolume = Forward()
-    absvolume_vol = Group(count + Regex("(nl|ul|ml|l)") + space)
+    absvolume_vol = Group(count + Regex("(nL|uL|mL|L)") + space)
     absvolume_part = ( absvolume_vol + mixture )|(opengrp + mixture_by_absvolume + closegrp + count)
     mixture_by_absvolume << absvolume_part + ZeroOrMore( partsep + absvolume_part)
     def convert_by_absvolume(string,location,tokens):
 
-        units = {'nl': 1e-9,
-                 'ul': 1e-6,
-                 'ml': 1e-3,
-                 'l': 1e+0,
+        units = {'nL': 1e-9,
+                 'uL': 1e-6,
+                 'mL': 1e-3,
+                 'L': 1e+0,
                  }
         if len (tokens) < 2:
             return tokens

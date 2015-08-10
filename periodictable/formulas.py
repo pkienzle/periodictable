@@ -10,7 +10,7 @@ from math import pi, sqrt
 # Requires that the pyparsing module is installed.
 
 from pyparsing import (Literal, Optional, White, Regex,
-                       ZeroOrMore, OneOrMore, Forward, StringEnd)
+                       ZeroOrMore, OneOrMore, Forward, StringEnd, Group)
 
 from .core import default_table, isatom, isisotope, change_table
 from .constants import avogadro_number
@@ -231,7 +231,7 @@ def formula(compound=None, density=None, natural_density=None,
         structure = tuple()
     elif isinstance(compound,Formula):
         structure = compound.structure
-        if density is None and natural_density is None: 
+        if density is None and natural_density is None:
             density = compound.density
         if not name: name = compound.name
     elif isatom(compound):
@@ -658,7 +658,7 @@ def formula_grammar(table):
         #print "compound",tokens
         if tokens[-1] is None:
             return Formula(structure=_immutable(tokens[:-1]))
-        elif tokens[-1] == 'n': 
+        elif tokens[-1] == 'n':
             return Formula(structure=_immutable(tokens[:-2]), natural_density=tokens[-2])
         else:
             return Formula(structure=_immutable(tokens[:-2]), density=tokens[-2])
@@ -681,7 +681,7 @@ def formula_grammar(table):
     mixture_by_weight = by_weight.setParseAction(convert_by_weight)
 
     volume_percent = Regex("%v(ol(ume)?)?").suppress() + space
-    by_volume = count + volume_percent + mixture + ZeroOrMore(partsep+count+(volume_percent|percent)+mixture) + partsep + mixture 
+    by_volume = count + volume_percent + mixture + ZeroOrMore(partsep+count+(volume_percent|percent)+mixture) + partsep + mixture
     def convert_by_volume(string,location,tokens):
         #print "by volume",tokens
         piece = tokens[1:-1:2] + [tokens[-1]]
@@ -692,9 +692,105 @@ def formula_grammar(table):
         if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
         return _mix_by_volume_pairs(zip(piece,fract))
     mixture_by_volume = by_volume.setParseAction(convert_by_volume)
-    
-    mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume) + closegrp))
-    formula = compound | mixture_by_weight | mixture_by_volume
+
+    mixture_by_layer = Forward()
+    layer_thick = Group(count + Regex("(nm|um|mm)") + space)
+    layer_part = (layer_thick + mixture ) | (opengrp + mixture_by_layer + closegrp +count)
+    mixture_by_layer <<   layer_part + ZeroOrMore(partsep + layer_part)
+    def convert_by_layer(string,location,tokens):
+
+        units = {'nm': 1e-9,
+                 'um': 1e-6,
+                 'mm': 1e-3,
+                 }
+        if len (tokens) < 2:
+            return tokens
+        piece = []
+        fract = []
+        for p1, p2 in zip(tokens[0::2], tokens[1::2]):
+            if isinstance(p1, Formula):
+                f = p1.absthick * float(p2)
+                p = p1
+            else:
+                f = float(p1[0]) * units[p1[1]]
+                p = p2
+            piece.append(p)
+            fract.append(f)
+        total = sum(fract)
+        vfract = [ (v/total)*100 for v in fract]
+        result = _mix_by_volume_pairs(zip(piece,vfract))
+        result.absthick = total
+        return result
+    mixture_by_layer = mixture_by_layer.setParseAction(convert_by_layer)
+
+    mixture_by_absmass = Forward()
+    absmass_mass = Group(count + Regex("(ng|ug|mg|g|kg)") + space)
+    absmass_part = (absmass_mass + mixture) | (opengrp + mixture_by_absmass + closegrp + count)
+    mixture_by_absmass << absmass_part + ZeroOrMore( partsep + absmass_part)
+    def convert_by_absmass(string,location,tokens):
+
+        units = {'ng': 1e-9,
+                 'ug': 1e-6,
+                 'mg': 1e-3,
+                 'g': 1e+0,
+                 'kg': 1e+3,
+                 }
+        if len (tokens) < 2:
+            return tokens
+        piece = []
+        fract = []
+        for p1, p2 in zip(tokens[0::2], tokens[1::2]):
+            if isinstance(p1, Formula):
+                f = p1.absmass * float(p2)
+                p = p1
+            else:
+                f = float(p1[0]) * units[p1[1]]
+                p = p2
+            piece.append(p)
+            fract.append(f)
+
+        total = sum(fract)
+        mfract = [ (m/total)*100 for m in fract]
+        result = _mix_by_weight_pairs(zip(piece,mfract))
+        result.absmass=total
+        return result
+    mixture_by_absmass = mixture_by_absmass.setParseAction(convert_by_absmass)
+
+    mixture_by_absvolume = Forward()
+    absvolume_vol = Group(count + Regex("(nl|ul|ml|l)") + space)
+    absvolume_part = ( absvolume_vol + mixture )|(opengrp + mixture_by_absvolume + closegrp + count)
+    mixture_by_absvolume << absvolume_part + ZeroOrMore( partsep + absvolume_part)
+    def convert_by_absvolume(string,location,tokens):
+
+        units = {'nl': 1e-9,
+                 'ul': 1e-6,
+                 'ml': 1e-3,
+                 'l': 1e+0,
+                 }
+        if len (tokens) < 2:
+            return tokens
+        piece = []
+        fract = []
+        for p1, p2 in zip(tokens[0::2], tokens[1::2]):
+            if isinstance(p1, Formula):
+                f = p1.absvolume * float(p2)
+                p = p1
+            else:
+                f = float(p1[0]) * units[p1[1]]
+                p = p2
+            piece.append(p)
+            fract.append(f)
+        total = sum(fract)
+        vfract = [ (v/total)*100 for v in fract]
+        if len(piece) != len(fract): raise ValueError("Missing base component of mixture "+string)
+        if fract[-1] < 0: raise ValueError("Formula percentages must sum to less than 100%")
+        result = _mix_by_volume_pairs(zip(piece,vfract))
+        result.absvolume = total
+        return result
+    mixture_by_absvolume = mixture_by_absvolume.setParseAction(convert_by_absvolume)
+
+    mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume ) + closegrp))
+    formula = compound | mixture_by_weight | mixture_by_volume | mixture_by_layer | mixture_by_absmass | mixture_by_absvolume
     grammar = Optional(formula, default=Formula()) + StringEnd()
 
     grammar.setName('Chemical Formula')

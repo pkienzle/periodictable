@@ -109,7 +109,7 @@ associated with the periodictable package.
 .. [#Sears1999] Sears, V. F. (1999)
     4.4.4 Scattering lengths for neutrons.
     In Wilson & Prince eds. Intl. Tables for Crystallography C
-    Kluwer Academic Publishers. pp 448-449.
+    Kluwer Academic Publishers. pp 383.
 
 .. [#Sears1992] Sears, V.F. (1992)
     Neutron scattering lengths and cross sections.
@@ -667,7 +667,7 @@ def neutron_scattering(compound, density=None,
     are only valid for 1.798 |Ang|.
 
     From the scattering cross sections, the scattering length for a material
-    $b = b' = i b''$ can be computed using the following relations:[#Sears1999]_
+    $b = b' - i b''$ can be computed using the following relations:[#Sears1999]_
 
     .. math::
 

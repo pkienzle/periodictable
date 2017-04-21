@@ -734,9 +734,12 @@ def neutron_scattering(compound, density=None,
     Transmission rate can be computed from $e^{-d/t_u}$ for penetration i
     depth $t_u$ and sample thickness $d$.
 
-    In general, the total scattering cross section $\Sigma_{\rm s}$ is not the
-    sum of the coherent and incoherent cross sections
-    $\Sigma_{\rm coh}+\Sigma_{\rm inc}$.\ [#Glinka2011]_
+    In general, the total scattering cross section is not the sum of the
+    coherent and incoherent cross sections,
+    $\Sigma_{\rm s} \ne \Sigma_{\rm coh}+\Sigma_{\rm inc}$.\ [#Glinka2011]_
+    Instead, we compute $\Sigma_{\rm inc} = \Sigma_{\rm s} - \Sigma_{\rm coh}$
+    in accordance with Sect. 4.4.4 of the Internation Tables for Crystallography
+    Volume C.
 
     Including unit conversion with $\mu=10^{-6}$ the full scattering equations
     are:
@@ -822,10 +825,15 @@ def neutron_scattering(compound, density=None,
     sld_inc = number_density * sqrt((100/(4*pi) * sigma_i)) * 10
 
     # Compute scattering cross section per unit volume
+    total_xs = sigma_s * number_density
     coh_xs = sigma_c * number_density
     abs_xs = sigma_a * number_density
-    inc_xs = sigma_i * number_density
-    total_xs = sigma_s * number_density
+    #inc_xs = sigma_i * number_density
+    # PAK 2017-04-21: Make the relationship between incoherent, coherent
+    # and total cross sections consistent, in accordance Int. Tables for
+    # Crystallography 4.4.4, pg 383.  This will make the 1/e penetration
+    # length correspond to the sum of the parts.
+    inc_xs = total_xs - coh_xs
 
     # Compute 1/e length
     penetration = 1/(abs_xs + total_xs)

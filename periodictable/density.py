@@ -1,6 +1,6 @@
 # This program is public domain
 # Author: Paul Kienzle
-"""
+r"""
 
 The following properties are added:
 
@@ -23,7 +23,7 @@ is the same as that for the element in the natural abundance.
 .. doctest::
 
     >>> from periodictable import D, H
-    >>> print("H: %.4f, D: %.4f"%(H.density,D.density))
+    >>> print("H: %.4f, D: %.4f"%(H.density, D.density))
     H: 0.0708, D: 0.1415
     >>> print((D.density/H.density) / (D.mass/H.mass))
     1.0
@@ -64,7 +64,7 @@ def density(iso_el):
 
     """
 
-    if hasattr(iso_el,'element'):
+    if hasattr(iso_el, 'element'):
         return iso_el.element._density * (iso_el.mass/iso_el.element.mass)
     else:
         return iso_el._density
@@ -100,8 +100,10 @@ def interatomic_distance(element):
 
     """
 
-    if hasattr(element,'isotope'): element = element.element
-    if element.density is None or element.mass is None: return None
+    if hasattr(element, 'isotope'):
+        element = element.element
+    if element.density is None or element.mass is None:
+        return None
     return (element.mass/(element.density*avogadro_number*1e-24))**(1./3.)
 
 def number_density(element):
@@ -121,26 +123,28 @@ def number_density(element):
 
     .. math::
 
-        d = N_A \frac{\rho}{m} 
+        d = N_A \frac{\rho}{m}
 
     with units:
 
     .. math::
 
-        \rm (atoms\cdot mol^{-1})  (g\cdot cm^{-3}) / (g\cdot mol^{-1}) 
+        \rm (atoms\cdot mol^{-1})  (g\cdot cm^{-3}) / (g\cdot mol^{-1})
             = atoms\cdot cm^{-3}
 
     """
 
-    if hasattr(element,'isotope'): element = element.element
+    if hasattr(element, 'isotope'): element = element.element
     if element.density is None or element.mass is None: return None
     return (element.density/element.mass)*avogadro_number
 
 def init(table, reload=False):
     if 'density' in table.properties and not reload: return
     table.properties.append('density')
-    Isotope.density = property(density, "density using inter-atomic spacing from naturally occurring form")
-    Element.density = property(density, "density using inter-atomic spacing from naturally occurring form")
+    Isotope.density \
+        = property(density, "density using inter-atomic spacing from naturally occurring form")
+    Element.density \
+        = property(density, "density using inter-atomic spacing from naturally occurring form")
     Element.density_units = "g/cm^3"
 
     Element.interatomic_distance \
@@ -152,9 +156,9 @@ def init(table, reload=False):
                    "number density estimated from mass and density")
     Element.number_density_units = "1/cm^3"
 
-    for k,v in element_densities.items():
-        el = getattr(table,k)
-        if isinstance(v,tuple):
+    for k, v in element_densities.items():
+        el = getattr(table, k)
+        if isinstance(v, tuple):
             el._density = v[0]
             el.density_caveat = v[1]
         elif v is None:
@@ -179,36 +183,36 @@ element_densities = dict(
     Na=0.971,
     Mg=1.738,
     Al=2.6989,
-    Si=(2.33,"T=25"),
+    Si=(2.33, "T=25"),
     P=1.82,
     S=2.07,
-    Cl=(1.56,"T=-33.6, 0.44 C above boiling point"),
-    Ar=(1.40,"T=-185.85"),
+    Cl=(1.56, "T=-33.6, 0.44 C above boiling point"),
+    Ar=(1.40, "T=-185.85"),
     K=0.862,
     Ca=1.55,
-    Sc=(2.989,"T=25"),
+    Sc=(2.989, "T=25"),
     Ti=4.54,
-    V=(6.11,"T=18.7"),
-    Cr=(7.19,"7.18-7.20"),
-    Mn=(7.33,"7.21-7.44"),
+    V=(6.11, "T=18.7"),
+    Cr=(7.19, "7.18-7.20"),
+    Mn=(7.33, "7.21-7.44"),
     Fe=7.874,
     Co=8.9,
-    Ni=(8.902,"T=25"),
+    Ni=(8.902, "T=25"),
     Cu=8.96,
-    Zn=(7.133,"T=25"),
-    Ga=(5.904,"T=29.6"),
-    Ge=(5.323,"T=25"),
+    Zn=(7.133, "T=25"),
+    Ga=(5.904, "T=29.6"),
+    Ge=(5.323, "T=25"),
     As=5.73,
     Se=4.79,
     Br=3.12,
-    Kr=(2.16,"T=-153.22"),
+    Kr=(2.16, "T=-153.22"),
     Rb=1.532,
     Sr=2.54,
-    Y=(4.469,"T=25"),
+    Y=(4.469, "T=25"),
     Zr=6.506,
     Nb=8.57,
     Mo=10.22,
-    Tc=(11.50,"calculated"),
+    Tc=(11.50, "calculated"),
     Ru=12.41,
     Rh=12.41,
     Pd=12.02,
@@ -219,32 +223,32 @@ element_densities = dict(
     Sb=6.691,
     Te=6.24,
     I=4.93,
-    Xe=(3.52,"T=-108.12"),
+    Xe=(3.52, "T=-108.12"),
     Cs=1.873,
     Ba=3.5,
-    La=(6.145,"T=25"),
-    Ce=(6.770,"T=25"),
+    La=(6.145, "T=25"),
+    Ce=(6.770, "T=25"),
     Pr=6.773,
-    Nd=(7.008,"T=25"),
-    Pm=(7.264,"T=25"),
-    Sm=(7.520,"T=25"),
-    Eu=(5.244,"T=25"),
-    Gd=(7.901,"T=25"),
+    Nd=(7.008, "T=25"),
+    Pm=(7.264, "T=25"),
+    Sm=(7.520, "T=25"),
+    Eu=(5.244, "T=25"),
+    Gd=(7.901, "T=25"),
     Tb=8.230,
-    Dy=(8.551,"T=25"),
-    Ho=(8.795,"T=25"),
-    Er=(9.066,"T=25"),
-    Tm=(9.321,"T=25"),
+    Dy=(8.551, "T=25"),
+    Ho=(8.795, "T=25"),
+    Er=(9.066, "T=25"),
+    Tm=(9.321, "T=25"),
     Yb=6.966,
-    Lu=(9.841,"T=25"),
+    Lu=(9.841, "T=25"),
     Hf=13.31,
     Ta=16.654,
     W=19.3,
     Re=21.02,
     Os=22.57,
-    Ir=(22.42,"T=17"),
+    Ir=(22.42, "T=17"),
     Pt=21.45,
-    Au=(19.3,"approximate"),
+    Au=(19.3, "approximate"),
     Hg=13.546,
     Tl=11.85,
     Pb=11.35,
@@ -256,13 +260,13 @@ element_densities = dict(
     Ra=None,
     Ac=None,
     Th=11.72,
-    Pa=(15.37,"calculated"),
-    U=(18.95,"approximate"),
+    Pa=(15.37, "calculated"),
+    U=(18.95, "approximate"),
     Np=20.25,
-    Pu=(19.84,"T=25"),
+    Pu=(19.84, "T=25"),
     Am=13.67,
-    Cm=(13.51,"calculated"),
-    Bk=(14,"estimated"),
+    Cm=(13.51, "calculated"),
+    Bk=(14, "estimated"),
     Cf=None,
     Es=None,
     Fm=None,

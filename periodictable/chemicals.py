@@ -25,12 +25,13 @@ Chemical
         * value: median property value
         * variance: range of values for the property (1-sigma)
         * units: SI units for property (string, eg |g/cm^3|)
-        * notes: caveats on value to present to user (e.g., temperature or pressure for the measurement)
+        * notes: caveats on value to present to user (e.g., temperature
+          or pressure for the measurement)
         * reference: source of data
         * value_as('units'): value in particular units
         * variance_as('units'): variance in particular units
 
-lookup(chemical, properties=['formula','density'])
+lookup(chemical, properties=['formula', 'density'])
     Return information for the named chemical or formula,
     or *None* if the chemical is not found.  This command will
     search for the chemical in all available sources, including

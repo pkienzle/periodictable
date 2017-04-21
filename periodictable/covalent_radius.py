@@ -12,9 +12,9 @@ This module adds the following fields to the periodic table
 Use :func:`init` to initialize a private table.
 
 Data is taken from Cordero et al., 2008 [#Cordero2008]_.  Bond specific values
-(single, double, or triple) are available from Pyykkö et al., 2009 [#Pyykko2009]_,
+(single, double, or triple) are available from PyykkÃ¶ et al., 2009 [#Pyykko2009]_,
 but they are generally smaller.  The CRC Handbook uses the average of Cordero
-and Pyykkö. Note that the combined Cordero/Pyykkö tables are included
+and PyykkÃ¶. Note that the combined Cordero/PyykkÃ¶ tables are included
 herein as *periodictable.covalent_radius.CorderoPyykko*, but are not yet parsed.
 
 The abstract of Cordero reads as follows:
@@ -51,14 +51,14 @@ The abstract of Cordero reads as follows:
            compound was used is element dependent.  Details are available in
            the references.
 
-.. [#Cordero2008] Beatriz Cordero, Verónica Gómez, Ana E. Platero-Prats, Marc Revés,
-       Jorge Echeverría, Eduard Cremades, Flavia Barragán and Santiago Alvarez.
-       Covalent radii revisited. Dalton Trans., 2008, 2832-2838.
+.. [#Cordero2008] Beatriz Cordero, VerÃ³nica GÃ³mez, Ana E. Platero-Prats,
+       Marc RevÃ©s, Jorge EcheverrÃ­a, Eduard Cremades, Flavia BarragÃ¡n and
+       Santiago Alvarez. Covalent radii revisited. Dalton Trans., 2008, 2832-2838.
        `doi:10.1039/b801115j <http://dx.doi.org/10.1039/b801115j>`_
 
-.. [#Pyykko2009] P. Pyykkö and M. Atsumi.
+.. [#Pyykko2009] P. PyykkÃ¶ and M. Atsumi.
       Molecular Double-Bond Covalent Radii for Elements Li-E112.
-      Chemistry, A European Journal, 15, 2009,12770-12779.
+      Chemistry, A European Journal, 15, 2009, 12770-12779.
       `doi:10.1002/chem.200901472 <http://dx.doi.org/10.1002/chem.200901472>`_
 
 """
@@ -71,7 +71,8 @@ def init(table, reload=False):
     Use *reload = True* to replace the covalent radius property on an
     existing table.
     """
-    if 'covalent_radius' in table.properties and not reload: return
+    if 'covalent_radius' in table.properties and not reload:
+        return
     table.properties.append('covalent_radius')
 
     table[0].covalent_radius = 0.20
@@ -82,8 +83,10 @@ def init(table, reload=False):
 
     for line in Cordero.split('\n'):
         fields = line.split()
-        if len(fields) == 3: fields += ['0','0']  # Fill in uncertainties
-        if fields[0] == '-': continue  # Skip alternate spin states
+        if len(fields) == 3:
+            fields += ['0', '0']  # Fill in uncertainties
+        if fields[0] == '-':
+            continue  # Skip alternate spin states
         Z = int(fields[0])
         el = fields[1]
         r = float(fields[2])
@@ -94,7 +97,7 @@ def init(table, reload=False):
         table[Z].covalent_radius_uncertainty = dr
 
 # Table of radii from Cordero.  Note that in cases where there are
-# multiple spin states (C,Mn,Fe,Co) only the first spin state is used.
+# multiple spin states (C, Mn, Fe, Co) only the first spin state is used.
 #
 #Z,  Symbol, radius(A), uncertainty (0.01A), number of measurements
 Cordero = """\
@@ -206,7 +209,7 @@ Cordero = """\
 # r# are the single/double/triple bonded Pyykko radii.
 # Entries starting with # are for specific species mentioned in Cardero.
 # The CRC tables are obtained by averaging Cordero rC and Pyykko r1.
-#Z  Symbol   rC(Å)       r1(Å)    r2(Å)    r3(Å)
+#Z  Symbol   rC(A)       r1(A)    r2(A)    r3(A)
 CorderoPyykko = """\
 1      H     0.31(5)     0.32
 2      He    0.28        0.46

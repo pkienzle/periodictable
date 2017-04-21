@@ -21,16 +21,18 @@ def table_plot(data, form="line", label=None, title=None):
     """
     import pylab
     if form == "line":
-        bbox = dict(boxstyle="round",lw=1,ec=(0,0,0),fc=(0.85,0.8,0.8))
-        for el,value in data.items():
+        bbox = dict(boxstyle="round", lw=1, ec=(0, 0, 0), fc=(0.85, 0.8, 0.8))
+        for el, value in data.items():
             if value is not None:
-                pylab.text(el.number,value,el.symbol,
-                           bbox=bbox,va='center',ha='center')
-        pylab.xlim(0,100)
+                pylab.text(el.number, value, el.symbol,
+                           bbox=bbox, va='center', ha='center')
+        pylab.xlim(0, 100)
         pylab.xlabel('Element number')
         values = [v for v in data.values()]
-        minv,maxv = min(values),max(values)
+        minv, maxv = min(values), max(values)
         margin = (maxv - minv)*0.05
-        pylab.ylim(minv-margin,maxv+margin)
-        if label is not None: pylab.ylabel(label)
-        if title is not None: pylab.title(title)
+        pylab.ylim(minv-margin, maxv+margin)
+        if label is not None:
+            pylab.ylabel(label)
+        if title is not None:
+            pylab.title(title)

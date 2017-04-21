@@ -57,7 +57,8 @@ def getCMformula(symbol):
 
     Return instance of CromerMannFormula.
     """
-    if not _cmformulas:  _update_cmformulas()
+    if not _cmformulas:
+        _update_cmformulas()
     return _cmformulas[symbol]
 
 
@@ -97,7 +98,8 @@ def fxrayatstol(symbol, stol, charge=None):
     # build standard element or ion symbol
     if charge is not None:
         smbl = symbol.rstrip('012345678+-')
-        if charge:  smbl += ("%+i" % charge)[::-1]
+        if charge:
+            smbl += ("%+i" % charge)[::-1]
     # convert Na+ or Cl- to Na1+, Cl1-
     elif symbol[-1:] in '+-' and not symbol[-2:-1].isdigit():
         smbl = (symbol[:-1] + "1" + symbol[-1:])

@@ -26,8 +26,8 @@ whose conditions may differ from those of your experiment.
 """
 
 __docformat__ = 'restructuredtext en'
-__all__ = ['elements', 'neutron_sld','xray_sld',
-           'formula','mix_by_weight','mix_by_volume'] # and all elements
+__all__ = ['elements', 'neutron_sld', 'xray_sld',
+           'formula', 'mix_by_weight', 'mix_by_volume'] # and all elements
 __version__ = "1.4.1"
 
 from . import core
@@ -46,19 +46,20 @@ def data_files():
     Return the data files associated with all periodic table attributes.
 
     The format is a list of (directory, [files...]) pairs which can be
-    used directly in setup(...,data_files=...) for setup.py.
+    used directly in setup(..., data_files=...) for setup.py.
 
     """
-    import os, glob
+    import os
+    import glob
     def _finddata(ext, patterns):
         files = []
         path = core.get_data_path(ext)
         for p in patterns:
-            files += glob.glob(os.path.join(path,p))
+            files += glob.glob(os.path.join(path, p))
         return files
 
     data_files = [('periodictable-data/xsf',
-                   _finddata('xsf', ['*.nff','read.me','f0_WaasKirf.dat'])),
+                   _finddata('xsf', ['*.nff', 'read.me', 'f0_WaasKirf.dat'])),
                   ('periodictable-data', _finddata('.', ['activation.dat']))]
     return data_files
 
@@ -99,7 +100,7 @@ def _load_neutron():
 
     from . import nsf
     nsf.init(elements)
-core.delayed_load(['neutron'],_load_neutron, isotope=True)
+core.delayed_load(['neutron'], _load_neutron, isotope=True)
 
 def _load_neutron_activation():
     """
@@ -111,7 +112,7 @@ def _load_neutron_activation():
     """
     from . import activation
     activation.init(elements)
-core.delayed_load(['neutron_activation'], _load_neutron_activation, 
+core.delayed_load(['neutron_activation'], _load_neutron_activation,
                   element=False, isotope=True)
 
 def _load_xray():
@@ -135,7 +136,7 @@ def _load_emission_lines():
 
     from . import xsf
     xsf.init_spectral_lines(elements)
-core.delayed_load(['K_alpha','K_beta1','K_alpha_units','K_beta1_units'],
+core.delayed_load(['K_alpha', 'K_beta1', 'K_alpha_units', 'K_beta1_units'],
                   _load_emission_lines)
 
 def _load_magnetic_ff():
@@ -143,7 +144,8 @@ def _load_magnetic_ff():
     Magnetic Form Fators. These values are directly from CrysFML.
 
     Reference:
-        *Brown. P. J.(Section 4.4.5) International Tables for Crystallography Volume C, Wilson. A.J.C.(ed).*
+        *Brown. P. J.(Section 4.4.5)
+        International Tables for Crystallography Volume C, Wilson. A.J.C.(ed).*
     """
 
     from . import magnetic_ff
@@ -161,7 +163,7 @@ def formula(*args, **kw):
        string:
           m = formula( "CaCO3+6H2O" )
        sequence of fragments:
-          m = formula( [(1,Ca),(2,C),(3,O),(6,[(2,H),(1,O)]] )
+          m = formula( [(1, Ca), (2, C), (3, O), (6, [(2, H), (1, O)]] )
        molecular math:
           m = formula( "CaCO3" ) + 6*formula( "H2O" )
        another formula (makes a copy):

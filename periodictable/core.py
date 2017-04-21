@@ -48,11 +48,15 @@ Helper functions:
 
 .. seealso::
 
-    :ref:`Adding properties <extending>` for details on extending the periodic table with your own attributes.
+    :ref:`Adding properties <extending>` for details on extending the periodic
+    table with your own attributes.
 
-    :ref:`Custom tables <custom-table>` for details on managing your own periodic table with custom values for the attributes.
+    :ref:`Custom tables <custom-table>` for details on managing your own
+    periodic table with custom values for the attributes.
 
 """
+from __future__ import print_function
+
 __docformat__ = 'restructuredtext en'
 __all__ = ['delayed_load', 'define_elements', 'get_data_path',
            'default_table', 'change_table',
@@ -65,14 +69,14 @@ from . import constants
 
 PUBLIC_TABLE_NAME = "public"
 
-def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
+def delayed_load(all_props, loader, element=True, isotope=False, ion=False):
     """
     Delayed loading of an element property table.  When any of property
     is first accessed the loader will be called to load the associated
     data. The help string starts out as the help string for the loader
-    function.
-    The attribute may be associated with any of :class:`Isotope`, :class:`Ion`, or :class:`Element`.
-    Some properties, such as :mod:`mass <periodictable.mass>`, have both an isotope property for the
+    function. The attribute may be associated with any of :class:`Isotope`,
+    :class:`Ion`, or :class:`Element`. Some properties, such as
+    :mod:`mass <periodictable.mass>`, have both an isotope property for the
     mass of specific isotopes, as well as an element property for the
     mass of the collection of isotopes at natural abundance.  Set the
     keyword flags *element*, *isotope* and/or *ion* to specify which
@@ -103,7 +107,7 @@ def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
         will be to the actual data.
         """
         def getfn(el):
-            #print "get",el,propname
+            #print "get", el, propname
             clearprops()
             loader()
             return getattr(el, propname)
@@ -126,7 +130,7 @@ def delayed_load(all_props,loader,element=True,isotope=False,ion=False):
         to debug.
         """
         def setfn(el, value):
-            #print "set",el,propname,value
+            #print "set", el, propname, value
             clearprops()
             setattr(el, propname, value)
         return setfn
@@ -192,7 +196,7 @@ class PeriodicTable(object):
 
         >>> from periodictable import *
         >>> for el in elements:  # lists the element symbols
-        ...     print("%s %s"%(el.symbol,el.name))  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        ...     print("%s %s"%(el.symbol, el.name))  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         n neutron
         H hydrogen
         He helium
@@ -211,11 +215,11 @@ class PeriodicTable(object):
         PRIVATE_TABLES[table] = self
         self.properties = []
         self._element = {}
-        for Z,(name,symbol,ions) in element_base.items():
-            element = Element(name=name.lower(),symbol=symbol,Z=Z,
-                              ions=ions,table=table)
+        for Z, (name, symbol, ions) in element_base.items():
+            element = Element(name=name.lower(), symbol=symbol, Z=Z,
+                              ions=ions, table=table)
             self._element[element.number] = element
-            setattr(self,symbol,element)
+            setattr(self, symbol, element)
 
         # There are two specially named isotopes D and T
         self.D = self.H.add_isotope(2)
@@ -235,7 +239,7 @@ class PeriodicTable(object):
         """
         Process the elements in Z order
         """
-        for _,el in sorted(self._element.items()):
+        for _, el in sorted(self._element.items()):
             yield el
 
     def symbol(self, input):
@@ -260,9 +264,9 @@ class PeriodicTable(object):
             >>> print(periodictable.elements.symbol('Fe'))
             Fe
         """
-        if hasattr(self,input):
-            value = getattr(self,input)
-            if isinstance(value,(Element,Isotope)):
+        if hasattr(self, input):
+            value = getattr(self, input)
+            if isinstance(value, (Element, Isotope)):
                 return value
         raise ValueError("unknown element "+input)
 
@@ -336,24 +340,24 @@ class PeriodicTable(object):
         # All elements are attributes of the table
         # Check that the attribute is an Element or an Isotope (for D or T)
         # If it is an element, check that the isotope exists
-        if hasattr(self,symbol):
-            attr = getattr(self,symbol)
-            if isinstance(attr,Element):
+        if hasattr(self, symbol):
+            attr = getattr(self, symbol)
+            if isinstance(attr, Element):
                 # If no isotope, return the element
                 if isotope == 0:
                     return attr
                 # If isotope, check that it is valid
                 if isotope in attr.isotopes:
                     return attr[isotope]
-            elif isinstance(attr,Isotope):
-                # D,T must not have an associated isotope; 4-D is meaningless.
+            elif isinstance(attr, Isotope):
+                # D, T must not have an associated isotope; 4-D is meaningless.
                 if isotope == 0:
                     return attr
 
         # If we can't parse the string as an element or isotope, raise an error
         raise ValueError("unknown element "+input)
 
-    def list(self,*props,**kw):
+    def list(self, *props, **kw):
         """
         Print a list of elements with the given set of properties.
 
@@ -371,7 +375,7 @@ class PeriodicTable(object):
         .. doctest::
 
             >>> from periodictable import elements
-            >>> elements.list('symbol','mass','density',
+            >>> elements.list('symbol', 'mass', 'density',
             ...     format="%-2s: %6.2f u %5.2f g/cm^3") # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
             H :   1.01 u   0.07 g/cm^3
             He:   4.00 u   0.12 g/cm^3
@@ -381,16 +385,16 @@ class PeriodicTable(object):
         """
         #TODO: override signature in sphinx with
         #    .. method:: list(prop1, prop2, ..., format='')
-        format = kw.pop('format',None)
+        format = kw.pop('format', None)
         assert len(kw) == 0
         for el in self:
             try:
-                L = tuple(getattr(el,p) for p in props)
+                L = tuple(getattr(el, p) for p in props)
             except AttributeError:
                 # Skip elements which don't define all the attributes
                 continue
             # Skip elements with a value of None
-            if any(v==None for v in L): continue
+            if any(v == None for v in L): continue
 
             if format is None:
                 print(" ".join(str(p) for p in L))
@@ -398,7 +402,7 @@ class PeriodicTable(object):
                 #try:
                 print(format%L)
                 #except:
-                #    print "format",format,"args",L
+                #    print "format", format, "args", L
                 #    raise
 
 
@@ -427,23 +431,23 @@ class Ion(object):
         self.element = element
         self.charge = charge
     def __getattr__(self, attr):
-        return getattr(self.element,attr)
+        return getattr(self.element, attr)
     @property
     def mass(self):
-        return getattr(self.element,'mass') - constants.electron_mass*self.charge
+        return getattr(self.element, 'mass') - constants.electron_mass*self.charge
     def __str__(self):
         sign = '+' if self.charge > 0 else '-'
-        value = '%d'%abs(self.charge) if abs(self.charge)>1 else ''
+        value = '%d'%abs(self.charge) if abs(self.charge) > 1 else ''
         charge_str = '{'+value+sign+'}' if self.charge != 0 else ''
         return str(self.element)+charge_str
     def __repr__(self):
         return repr(self.element)+'.ion[%d]'%self.charge
     def __reduce__(self):
         try:
-            return _make_isotope_ion,(self.element.table,
-                                      self.element.number,
-                                      self.element.isotope,
-                                      self.charge)
+            return _make_isotope_ion, (self.element.table,
+                                       self.element.number,
+                                       self.element.isotope,
+                                       self.charge)
         except:
             return _make_ion, (self.element.table,
                                self.element.number,
@@ -457,24 +461,24 @@ class Isotope(object):
     Properties not specific to the isotope (e.g., *x-ray scattering factors*)
     are retrieved from the associated element.
     """
-    def __init__(self,element,isotope_number):
+    def __init__(self, element, isotope_number):
         self.element = element
         self.isotope = isotope_number
         self.ion = IonSet(self)
-    def __getattr__(self,attr):
-        return getattr(self.element,attr)
+    def __getattr__(self, attr):
+        return getattr(self.element, attr)
     def __str__(self):
         # Deuterium and Tritium are special
         if 'symbol' in self.__dict__:
             return self.symbol
         else:
-            return "%d-%s"%(self.isotope,self.element.symbol)
+            return "%d-%s"%(self.isotope, self.element.symbol)
     def __repr__(self):
-        return "%s[%d]"%(self.element.symbol,self.isotope)
+        return "%s[%d]"%(self.element.symbol, self.isotope)
     def __reduce__(self):
-        return _make_isotope,(self.element.table,
-                              self.element.number,
-                              self.isotope)
+        return _make_isotope, (self.element.table,
+                               self.element.number,
+                               self.isotope)
 
 class Element(object):
     """Periodic table entry for an element.
@@ -484,7 +488,7 @@ class Element(object):
     """
     table = PUBLIC_TABLE_NAME
     charge = 0
-    def __init__(self,name,symbol,Z,ions,table):
+    def __init__(self, name, symbol, Z, ions, table):
         self.name = name
         self.symbol = symbol
         self.number = Z
@@ -518,13 +522,13 @@ class Element(object):
         try:
             return self._isotopes[number]
         except KeyError:
-            raise KeyError("%s is not an isotope of %s"%(number,self.symbol))
+            raise KeyError("%s is not an isotope of %s"%(number, self.symbol))
 
     def __iter__(self):
         """
         Process the isotopes in order
         """
-        for _,iso in sorted(self._isotopes.items()):
+        for _, iso in sorted(self._isotopes.items()):
             yield iso
 
     # Note: using repr rather than str for the element symbol so
@@ -539,21 +543,21 @@ class Element(object):
 
 def isatom(val):
     """Return true if value is an element, isotope or ion"""
-    return isinstance(val,(Element,Isotope,Ion))
+    return isinstance(val, (Element, Isotope, Ion))
 
 def isisotope(val):
     """Return true if value is an isotope or isotope ion."""
     if ision(val): val = val.element
-    return isinstance(val,Isotope)
+    return isinstance(val, Isotope)
 
 def ision(val):
     """Return true if value is a specific ion of an element or isotope"""
-    return isinstance(val,Ion)
+    return isinstance(val, Ion)
 
 def iselement(val):
     """Return true if value is an element or ion in natural abundance"""
     if ision(val): val = val.element
-    return isinstance(val,Element)
+    return isinstance(val, Element)
 
 def change_table(atom, table):
     """Search for the same element, isotope or ion from a different table"""
@@ -575,123 +579,123 @@ def _get_table(name):
     except KeyError:
         raise ValueError("Periodic table '%s' is not initialized"%name)
 
-def _make_element(table,Z):
+def _make_element(table, Z):
     return _get_table(table)[Z]
-def _make_isotope(table,Z,n):
+def _make_isotope(table, Z, n):
     return _get_table(table)[Z][n]
-def _make_ion(table,Z,c):
+def _make_ion(table, Z, c):
     return _get_table(table)[Z].ion[c]
-def _make_isotope_ion(table,Z,n,c):
+def _make_isotope_ion(table, Z, n, c):
     return _get_table(table)[Z][n].ion[c]
 
 
 element_base = {
-                # number: name symbol ions
+    # number: name symbol ions
     0: ['Neutron',     'n',  ()],
-    1: ['Hydrogen',    'H',  (1,)],
+    1: ['Hydrogen',    'H',  (1, )],
     2: ['Helium',      'He', ()],
-    3: ['Lithium',     'Li', (1,)],
-    4: ['Beryllium',   'Be', (2,)],
-    5: ['Boron',       'B',  (3,)],
-    6: ['Carbon',      'C',  (2,-4,4)],
-    7: ['Nitrogen',    'N',  (2,-3,3,4,5)],
-    8: ['Oxygen',      'O',  (-2,-1,1,2)],
-    9: ['Fluorine',    'F',  (-1,)],
+    3: ['Lithium',     'Li', (1, )],
+    4: ['Beryllium',   'Be', (2, )],
+    5: ['Boron',       'B',  (3, )],
+    6: ['Carbon',      'C',  (2, -4, 4)],
+    7: ['Nitrogen',    'N',  (2, -3, 3, 4, 5)],
+    8: ['Oxygen',      'O',  (-2, -1, 1, 2)],
+    9: ['Fluorine',    'F',  (-1, )],
     10: ['Neon',       'Ne', ()],
-    11: ['Sodium',     'Na', (1,)],
-    12: ['Magnesium',  'Mg', (2,)],
-    13: ['Aluminum',   'Al', (3,)],
-    14: ['Silicon',    'Si', (4,)],
-    15: ['Phosphorus', 'P',  (-3,3,4,5)],
-    16: ['Sulfur',     'S',  (-2,2,4,6)],
-    17: ['Chlorine',   'Cl', (-1,1,3,5,7)],
+    11: ['Sodium',     'Na', (1, )],
+    12: ['Magnesium',  'Mg', (2, )],
+    13: ['Aluminum',   'Al', (3, )],
+    14: ['Silicon',    'Si', (4, )],
+    15: ['Phosphorus', 'P',  (-3, 3, 4, 5)],
+    16: ['Sulfur',     'S',  (-2, 2, 4, 6)],
+    17: ['Chlorine',   'Cl', (-1, 1, 3, 5, 7)],
     18: ['Argon',      'Ar', ()],
-    19: ['Potassium',  'K',  (1,)],
-    20: ['Calcium',    'Ca', (2,)],
-    21: ['Scandium',   'Sc', (3,)],
-    22: ['Titanium',   'Ti', (3,4)],
-    23: ['Vanadium',   'V',  (2,3,4,5)],
-    24: ['Chromium',   'Cr', (2,3,6)],
-    25: ['Manganese',  'Mn', (2,3,4,6,7)],
-    26: ['Iron',       'Fe', (2,3)],
-    27: ['Cobalt',     'Co', (2,3)],
-    28: ['Nickel',     'Ni', (2,3)],
-    29: ['Copper',     'Cu', (1,2)],
-    30: ['Zinc',       'Zn', (2,)],
-    31: ['Gallium',    'Ga', (3,)],
-    32: ['Germanium',  'Ge', (4,)],
-    33: ['Arsenic',    'As', (-3,3,5)],
-    34: ['Selenium',   'Se', (-2,4,6)],
-    35: ['Bromine',    'Br', (-1,1,5)],
+    19: ['Potassium',  'K',  (1, )],
+    20: ['Calcium',    'Ca', (2, )],
+    21: ['Scandium',   'Sc', (3, )],
+    22: ['Titanium',   'Ti', (3, 4)],
+    23: ['Vanadium',   'V',  (2, 3, 4, 5)],
+    24: ['Chromium',   'Cr', (2, 3, 6)],
+    25: ['Manganese',  'Mn', (2, 3, 4, 6, 7)],
+    26: ['Iron',       'Fe', (2, 3)],
+    27: ['Cobalt',     'Co', (2, 3)],
+    28: ['Nickel',     'Ni', (2, 3)],
+    29: ['Copper',     'Cu', (1, 2)],
+    30: ['Zinc',       'Zn', (2, )],
+    31: ['Gallium',    'Ga', (3, )],
+    32: ['Germanium',  'Ge', (4, )],
+    33: ['Arsenic',    'As', (-3, 3, 5)],
+    34: ['Selenium',   'Se', (-2, 4, 6)],
+    35: ['Bromine',    'Br', (-1, 1, 5)],
     36: ['Krypton',    'Kr', ()],
-    37: ['Rubidium',   'Rb', (1,)],
-    38: ['Strontium',  'Sr', (2,)],
-    39: ['Yttrium',    'Y',  (3,)],
-    40: ['Zirconium',  'Zr', (4,)],
-    41: ['Niobium',    'Nb', (3,5)],
-    42: ['Molybdenum', 'Mo', (2,3,4,5,6)],
-    43: ['Technetium', 'Tc', (7,)],
-    44: ['Ruthenium',  'Ru', (2,3,4,6,8)],
-    45: ['Rhodium',    'Rh', (2,3,4)],
-    46: ['Palladium',  'Pd', (2,4)],
-    47: ['Silver',     'Ag', (1,)],
-    48: ['Cadmium',    'Cd', (2,)],
-    49: ['Indium',     'In', (3,)],
-    50: ['Tin',        'Sn', (2,4)],
-    51: ['Antimony',   'Sb', (-3,3,5)],
-    52: ['Tellurium',  'Te', (-2,4,6)],
-    53: ['Iodine',     'I',  (-1,1,5,7)],
+    37: ['Rubidium',   'Rb', (1, )],
+    38: ['Strontium',  'Sr', (2, )],
+    39: ['Yttrium',    'Y',  (3, )],
+    40: ['Zirconium',  'Zr', (4, )],
+    41: ['Niobium',    'Nb', (3, 5)],
+    42: ['Molybdenum', 'Mo', (2, 3, 4, 5, 6)],
+    43: ['Technetium', 'Tc', (7, )],
+    44: ['Ruthenium',  'Ru', (2, 3, 4, 6, 8)],
+    45: ['Rhodium',    'Rh', (2, 3, 4)],
+    46: ['Palladium',  'Pd', (2, 4)],
+    47: ['Silver',     'Ag', (1, )],
+    48: ['Cadmium',    'Cd', (2, )],
+    49: ['Indium',     'In', (3, )],
+    50: ['Tin',        'Sn', (2, 4)],
+    51: ['Antimony',   'Sb', (-3, 3, 5)],
+    52: ['Tellurium',  'Te', (-2, 4, 6)],
+    53: ['Iodine',     'I',  (-1, 1, 5, 7)],
     54: ['Xenon',      'Xe', ()],
-    55: ['Cesium',     'Cs', (1,)],
-    56: ['Barium',     'Ba', (2,)],
-    57: ['Lanthanum',  'La', (3,)],
-    58: ['Cerium',     'Ce', (3,4)],
-    59: ['Praseodymium', 'Pr', (3,4)],
-    60: ['Neodymium',  'Nd', (3,)],
-    61: ['Promethium', 'Pm', (3,)],
-    62: ['Samarium',   'Sm', (2,3)],
-    63: ['Europium',   'Eu', (2,3)],
-    64: ['Gadolinium', 'Gd', (3,)],
-    65: ['Terbium',    'Tb', (3,4)],
-    66: ['Dysprosium', 'Dy', (3,)],
-    67: ['Holmium',    'Ho', (3,)],
-    68: ['Erbium',     'Er', (3,)],
-    69: ['Thulium',    'Tm', (2,3)],
-    70: ['Ytterbium',  'Yb', (2,3)],
-    71: ['Lutetium',   'Lu', (3,)],
-    72: ['Hafnium',    'Hf', (4,)],
-    73: ['Tantalum',   'Ta', (5,)],
-    74: ['Tungsten',   'W',  (2,3,4,5,6)],
-    75: ['Rhenium',    'Re', (-1,2,4,6,7)],
-    76: ['Osmium',     'Os', (2,3,4,6,8)],
-    77: ['Iridium',    'Ir', (2,3,4,6)],
-    78: ['Platinum',   'Pt', (2,4)],
-    79: ['Gold',       'Au', (1,3)],
-    80: ['Mercury',    'Hg', (1,2)],
-    81: ['Thallium',   'Tl', (1,3)],
-    82: ['Lead',       'Pb', (2,4)],
-    83: ['Bismuth',    'Bi', (3,5)],
-    84: ['Polonium',   'Po', (2,4)],
-    85: ['Astatine',   'At', (-1,1,3,5,7)],
+    55: ['Cesium',     'Cs', (1, )],
+    56: ['Barium',     'Ba', (2, )],
+    57: ['Lanthanum',  'La', (3, )],
+    58: ['Cerium',     'Ce', (3, 4)],
+    59: ['Praseodymium', 'Pr', (3, 4)],
+    60: ['Neodymium',  'Nd', (3, )],
+    61: ['Promethium', 'Pm', (3, )],
+    62: ['Samarium',   'Sm', (2, 3)],
+    63: ['Europium',   'Eu', (2, 3)],
+    64: ['Gadolinium', 'Gd', (3, )],
+    65: ['Terbium',    'Tb', (3, 4)],
+    66: ['Dysprosium', 'Dy', (3, )],
+    67: ['Holmium',    'Ho', (3, )],
+    68: ['Erbium',     'Er', (3, )],
+    69: ['Thulium',    'Tm', (2, 3)],
+    70: ['Ytterbium',  'Yb', (2, 3)],
+    71: ['Lutetium',   'Lu', (3, )],
+    72: ['Hafnium',    'Hf', (4, )],
+    73: ['Tantalum',   'Ta', (5, )],
+    74: ['Tungsten',   'W',  (2, 3, 4, 5, 6)],
+    75: ['Rhenium',    'Re', (-1, 2, 4, 6, 7)],
+    76: ['Osmium',     'Os', (2, 3, 4, 6, 8)],
+    77: ['Iridium',    'Ir', (2, 3, 4, 6)],
+    78: ['Platinum',   'Pt', (2, 4)],
+    79: ['Gold',       'Au', (1, 3)],
+    80: ['Mercury',    'Hg', (1, 2)],
+    81: ['Thallium',   'Tl', (1, 3)],
+    82: ['Lead',       'Pb', (2, 4)],
+    83: ['Bismuth',    'Bi', (3, 5)],
+    84: ['Polonium',   'Po', (2, 4)],
+    85: ['Astatine',   'At', (-1, 1, 3, 5, 7)],
     86: ['Radon',      'Rn', ()],
-    87: ['Francium',   'Fr', (1,)],
-    88: ['Radium',     'Ra', (2,)],
-    89: ['Actinium',   'Ac', (3,)],
-    90: ['Thorium',        'Th', (4,)],
-    91: ['Protactinium',   'Pa', (4,5)],
-    92: ['Uranium',        'U',  (3,4,5,6)],
-    93: ['Neptunium',      'Np', (3,4,5,6)],
-    94: ['Plutonium',      'Pu', (3,4,5,6)],
-    95: ['Americium',      'Am', (3,4,5,6)],
-    96: ['Curium',         'Cm', (3,)],
-    97: ['Berkelium',      'Bk', (3,4)],
-    98: ['Californium',    'Cf', (3,)],
-    99: ['Einsteinium',    'Es', (3,)],
-    100: ['Fermium',       'Fm', (3,)],
-    101: ['Mendelevium',   'Md', (2,3)],
-    102: ['Nobelium',      'No', (2,3)],
-    103: ['Lawrencium',    'Lr', (3,)],
-    104: ['Rutherfordium', 'Rf', (4,)],
+    87: ['Francium',   'Fr', (1, )],
+    88: ['Radium',     'Ra', (2, )],
+    89: ['Actinium',   'Ac', (3, )],
+    90: ['Thorium',        'Th', (4, )],
+    91: ['Protactinium',   'Pa', (4, 5)],
+    92: ['Uranium',        'U',  (3, 4, 5, 6)],
+    93: ['Neptunium',      'Np', (3, 4, 5, 6)],
+    94: ['Plutonium',      'Pu', (3, 4, 5, 6)],
+    95: ['Americium',      'Am', (3, 4, 5, 6)],
+    96: ['Curium',         'Cm', (3, )],
+    97: ['Berkelium',      'Bk', (3, 4)],
+    98: ['Californium',    'Cf', (3, )],
+    99: ['Einsteinium',    'Es', (3, )],
+    100: ['Fermium',       'Fm', (3, )],
+    101: ['Mendelevium',   'Md', (2, 3)],
+    102: ['Nobelium',      'No', (2, 3)],
+    103: ['Lawrencium',    'Lr', (3, )],
+    104: ['Rutherfordium', 'Rf', (4, )],
     105: ['Dubnium',       'Db', ()],
     106: ['Seaborgium',    'Sg', ()],
     107: ['Bohrium',       'Bh', ()],
@@ -742,12 +746,12 @@ def define_elements(table, namespace):
     for el in table:
         names[el.symbol] = el
         names[el.name] = el
-    for el in [table.D,table.T]:
+    for el in [table.D, table.T]:
         names[el.symbol] = el
         names[el.name] = el
 
     # Copy it to the namespace
-    for k,v in names.items():
+    for k, v in names.items():
         namespace[k] = v
 
     # return the keys
@@ -766,12 +770,12 @@ def get_data_path(data):
     :Returns: string
          Path to the data.
     """
-    import os,sys
+    import os, sys
 
     # Check for data path in the environment
     key = 'PERIODICTABLE_DATA'
     if key in os.environ:
-        path = os.path.join(os.environ[key],data)
+        path = os.path.join(os.environ[key], data)
         if not os.path.isdir(path):
             raise RuntimeError('Path in environment %s not a directory'%key)
         return path

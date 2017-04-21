@@ -35,17 +35,18 @@ http://physics.nist.gov/PhysRefData/Compositions/
 Neutron mass from NIST Reference on Constants, Units, and Uncertainty
 http://physics.nist.gov/cuu/index.html
 
-.. [#Coursey] Coursey. J. S., Schwab. D. J., and Dragoset. R. A., NIST, Physics Laboratory,
-       Office of Electronic Commerce in Scientific and Engineering Data.
+.. [#Coursey] Coursey. J. S., Schwab. D. J., and Dragoset. R. A., NIST,
+       Physics Laboratory, Office of Electronic Commerce in Scientific
+       and Engineering Data.
 .. [#Coplen] Coplen. T. B. : U.S. Geological Survey, Reston, Virginia, USA.
-.. [#Rosman] Rosman. K. J. R. : Department of Applied Physics, Curtin University of
-       Technology, Australia.
-.. [#Taylor] Taylor. P. D. P. : Institute for Reference Materials and Measurements,
-       European Commission, Belgium.
-.. [#Audi] Audi. G. : Centre de Spectrométrie Nucléaire et de Spectrométrie de Masse,
-       Orsay Campus, France.
-.. [#Wapstra] Wapstra. A. H. : National Institute of Nuclear Physics and High-Energy Physics,
-       Amsterdam, The Netherlands.
+.. [#Rosman] Rosman. K. J. R. : Department of Applied Physics, Curtin University
+       of Technology, Australia.
+.. [#Taylor] Taylor. P. D. P. : Institute for Reference Materials and
+       Measurements, European Commission, Belgium.
+.. [#Audi] Audi. G. : Centre de SpectromÃ©trie NuclÃ©aire et de SpectromÃ©trie
+       de Masse, Orsay Campus, France.
+.. [#Wapstra] Wapstra. A. H. : National Institute of Nuclear Physics
+       and High-Energy Physics, Amsterdam, The Netherlands.
 """
 
 from .core import Element, Isotope
@@ -53,7 +54,7 @@ from .constants import neutron_mass
 
 #__all__ = ['init']
 
-def getval(str):
+def _parse_mass(str):
     idx = str.find('(')
     if idx > 0: # value(uncertainty)
         return float(str[:idx])
@@ -75,8 +76,8 @@ def mass(isotope):
             Atomic weight of the element.
 
     Reference:
-        *Coursey. J. S., Schwab. D. J, and Dragoset. R. A., NIST Atomic Weights and Isotopic Composition
-        Database.*
+        *Coursey. J. S., Schwab. D. J, and Dragoset. R. A.,
+        NIST Atomic Weights and Isotopic Composition Database.*
     """
     return isotope._mass
 
@@ -97,24 +98,26 @@ def abundance(isotope):
     return isotope._abundance
 
 def init(table, reload=False):
-    if 'mass' in table.properties and not reload: return
+    """Add mass attribute to period table elements and isotopes"""
+    if 'mass' in table.properties and not reload:
+        return
     table.properties.append('mass')
-    Element.mass = property(mass,doc=mass.__doc__)
-    Isotope.mass = property(mass,doc=mass.__doc__)
-    Isotope.abundance = property(abundance,doc=abundance.__doc__)
+    Element.mass = property(mass, doc=mass.__doc__)
+    Isotope.mass = property(mass, doc=mass.__doc__)
+    Isotope.abundance = property(abundance, doc=abundance.__doc__)
     Element.mass_units = "u"
     Element.abundance_units = "%"
 
     for line in massdata.split('\n'):
-        isotope,m,p,avg = line.split(',')
-        el,sym,iso = isotope.split('-')
+        isotope, m, p, avg = line.split(',')
+        el, sym, iso = isotope.split('-')
         el = table[int(el)]
         assert el.symbol == sym, \
-            "Symbol %s does not match %s"%(sym,el.symbol)
+            "Symbol %s does not match %s"%(sym, el.symbol)
         iso = el.add_isotope(int(iso))
-        el._mass = getval(avg)
-        iso._mass = getval(m)
-        iso._abundance = getval(p)
+        el._mass = _parse_mass(avg)
+        iso._mass = _parse_mass(m)
+        iso._abundance = _parse_mass(p)
 
     # A single neutron is an isotope of element 0
     el = table[0]
@@ -123,7 +126,7 @@ def init(table, reload=False):
     iso._mass = neutron_mass
     iso._abundance = 100
 
-massdata="""\
+massdata = """\
 1-H-1,1.0078250321(4),99.9885(70),1.00794(7)
 1-H-2,2.0141017780(4),0.0115(70),1.00794(7)
 1-H-3,3.0160492675(11),,1.00794(7)

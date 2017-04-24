@@ -1716,14 +1716,28 @@ def incoherent_comparison_table(table=None, tol=None):
             lambda el: el.neutron.total - 4*pi/100*el.neutron.b_c**2,
             table=table, tol=tol)
 
-def print_scattering(compound):
+def print_scattering(compound, wavelength=ABSORPTION_WAVELENGTH):
     """
     Print the scattering for a single compound.
+    """
+    from . import formulas
+    compound = formulas.formula(compound)
+    density = compound.density if compound.density is not None else 1.0
+    sld, xs, penetration = neutron_scattering(compound, wavelength=wavelength,
+                                              density=density)
+    print("%s at %g Ang  (density=%g g/cm^3)"
+          % (str(compound), wavelength, density))
+    print("  sld: %g + %g j  (%g incoherent)  1e-6/Ang^2"%sld)
+    print("  sigma_c: %g  sigma_i: %g  sigma_a: %g  1/cm"%sld)
+    print("  mu: %g 1/cm  1/e penetration: %g cm"%(1/penetration, penetration))
 
-    This function is used to define a simple command line interface, showing
-    the predicted neutron scattering for a compound with::
+def main():
+    """
+    Simple command line interface, showing the predicted neutron scattering.
 
-        python -m periodictable.nsf compound@density
+    Usage::
+
+        python -m periodictable.nsf [-Lwavelength] compound@density compound@density ...
 
     For example::
 
@@ -1733,18 +1747,16 @@ def print_scattering(compound):
           sigma_c: 3.37503  sigma_i: 0.000582313  sigma_a: 0.402605  1/cm
           1/e penetration: 2.23871 cm
     """
-    from . import formulas
-    compound = formulas.formula(compound)
-    wavelength = ABSORPTION_WAVELENGTH
-    density = compound.density if compound.density is not None else 1.0
-    sld, xs, penetration = neutron_scattering(compound, wavelength=wavelength,
-                                              density=density)
-    print("scattering for %s at %g Ang  (density=%g g/cm^3)"
-          % (str(compound), wavelength, density))
-    print("  sld: %g + %g j  (%g incoherent)  1e-6/Ang^2"%sld)
-    print("  sigma_c: %g  sigma_i: %g  sigma_a: %g  1/cm"%sld)
-    print("  1/e penetration: %g cm"%penetration)
+
+    import sys
+    compounds = sys.argv[1:]
+    if compounds[0].startswith('-L'):
+        wavelength = float(compounds[0][2:])
+        compounds = compounds[1:]
+    else:
+        wavelength = ABSORPTION_WAVELENGTH
+    for c in compounds:
+        print_scattering(c, wavelength)
 
 if __name__ == "__main__":
-    import sys
-    print_scattering(sys.argv[1])
+    main()

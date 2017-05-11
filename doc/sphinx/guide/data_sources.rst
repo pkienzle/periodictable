@@ -5,10 +5,10 @@ Data Sources
 ************
 
 Physical constants
-	`NIST Physics Laboratory - Constants, units and uncertainty <http://physics.nist.gov/cuu/index.html>`_
+    `NIST Physics Laboratory - Constants, units and uncertainty <http://physics.nist.gov/cuu/index.html>`_
 
 Atomic and isotope mass
-   `NIST Physics Laboratory - Atomic weights and isotope composition <http://physics.nist.gov/PhysRefData/Compositions/>`_
+    `NIST Physics Laboratory - Atomic weights and isotope composition <http://physics.nist.gov/PhysRefData/Compositions/>`_
 
 Atomic density
     ILL Neutron Data Booklet
@@ -26,4 +26,4 @@ X-ray scattering factors
    `Center for X-Ray Optics <http://www-cxro.lbl.gov/>`_
 
 Crystal structure
-	Ashcroft and Mermin
+    Ashcroft and Mermin

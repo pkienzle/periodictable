@@ -60,6 +60,7 @@ modules=[
     ('constants', 'Fundamental constants'),
     ('crystal_structure', 'Crystal structure'),
     ('density', 'Density'),
+    ('fasta', 'FASTA format for DNA/RNA and amino acid sequences'),
     ('magnetic_ff', 'Magnetic Form Factor'),
     ('mass', 'Mass'),
     ('activation', 'Neutron activation'),

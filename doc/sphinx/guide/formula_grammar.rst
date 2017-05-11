@@ -7,24 +7,24 @@ Chemical Composition
 
 Some properties are available for groups of elements.  Groups are specified
 as a chemical formula string and either density or cell volume for the crystal
-structure.  While it does not provide any information about molecular 
-structure, a formula does provide complete control over chemical composition. 
+structure.  While it does not provide any information about molecular
+structure, a formula does provide complete control over chemical composition.
 
-A formula string is translated into a formula using 
+A formula string is translated into a formula using
 :func:`periodictable.formulas.formula`:
 
-* Formula strings consist of counts and atoms, where individual atoms are 
-  represented by periodic table symbol.  The atoms are case sensitive, 
+* Formula strings consist of counts and atoms, where individual atoms are
+  represented by periodic table symbol.  The atoms are case sensitive,
   so "CO" is different from "Co".  Here is an example of calcium carbonate:
- 
+
     >>> from periodictable import formula
     >>> print(formula("CaCO3"))
     CaCO3
-  
+
 * Formulas can contain multiple groups separated by space or plus or by using
   parentheses.  Whole groups can have a repeat count.  The following are
   equivalent definitions of hydrated calcium carbonate:
-  
+
     >>> print(formula("CaCO3+6H2O"))
     CaCO3(H2O)6
     >>> print(formula("CaCO3 6H2O"))
@@ -96,7 +96,7 @@ A formula string is translated into a formula using
     >>> print(formula("10%wt Fe // 15% Co // Ni"))
     FeCo1.4214Ni7.13602
 
-  Only the first item needs to specify that it is a mass fraction, 
+  Only the first item needs to specify that it is a mass fraction,
   and the remainder can use a bare %.
 
 * Volume fractions use %vol, with the final portion adding to 100%:
@@ -104,14 +104,32 @@ A formula string is translated into a formula using
     >>> print(formula("10%vol Fe // Ni"))
     FeNi9.68121
 
-  Only the first item needs to specify that it is a volume fraction, and 
+  Only the first item needs to specify that it is a volume fraction, and
   the remainder can use a bare %.
 
   Volume fraction mixing is only possible if the densities are known for
-  the individual components, which will require the formula density tag 
+  the individual components, which will require the formula density tag
   if the component is not an element.  A density estimate is given for
   the mixture but in general it will not be correct, and should be set
   explicitly for the resulting compound.
+
+* Specific mass can be giving with count follwed by mass units:
+
+    >>> print(formula("5g NaCl // 50mL H2O@1"))
+    NaCl(H2O)32.4407
+
+  Density will be required for materials given by volume.  Mass will be
+  stored in the *total_mass* attribute of the resulting formula.
+
+* Multilayers can be specified by thickness:
+
+    >>> print(formula("1 um Si // 5 nm Cr // 10 nm Au"))
+    Si119.99CrAu1.41722
+
+  Density will be required for each layer. Thickness will be stored in
+  the *total_thickness* attribute of the resulting formula. Thickness can
+  be converted to *total_volume* by multiplying by cross section, and to
+  *total_mass* by multiplying that by *density*.
 
 * Mixtures can nest.  The following is a 10% salt solution by weight mixed
   20:80 by volume with D2O:
@@ -120,7 +138,7 @@ A formula string is translated into a formula using
     NaCl(H2O)29.1966(D2O)122.794
 
 * Empty formulas are supported, e.g., for air or vacuum:
-    
+
     >>> print(formula())
     <BLANKLINE>
     >>> formula()
@@ -130,20 +148,26 @@ The grammar used for parsing formula strings is the following:
 
 ::
 
-    formula   :: compound | mixture | nothing
-    mixture   :: count '%wt|%vol' part ('//' count '%' part)* '//' part 
-    part      :: compound | '(' mixture ')'
-    compound  :: group (separator group)* density?
-    group     :: count element+ | '(' formula ')' count
-    element   :: symbol isotope? ion? count?
-    symbol    :: [A-Z][a-z]*
-    isotope   :: '[' number ']'
-    ion       :: '{' number? [+-] '}'
-    density   :: '@' count
-    count     :: number | fraction
-    number    :: [1-9][0-9]*
-    fraction  :: ([1-9][0-9]* | 0)? '.' [0-9]*
-    separator :: space? '+'? space?
+    formula    :: compound | mixture | nothing
+    mixture    :: quantity | percentage
+    quantity   :: count unit part ('//' count unit part)*
+    percentage :: count '%wt|%vol' part ('//' count '%' part)* '//' part
+    part       :: compound | '(' mixture ')'
+    compound   :: group (separator group)* density?
+    group      :: count element+ | '(' formula ')' count
+    element    :: symbol isotope? ion? count?
+    symbol     :: [A-Z][a-z]*
+    isotope    :: '[' number ']'
+    ion        :: '{' number? [+-] '}'
+    density    :: '@' count
+    count      :: number | fraction
+    number     :: [1-9][0-9]*
+    fraction   :: ([1-9][0-9]* | 0)? '.' [0-9]*
+    separator  :: space? '+'? space?
+    unit       :: mass | volume | length
+    mass       :: 'kg' | 'g' | 'mg' | 'ug' | 'ng'
+    volume     :: 'L' | 'mL' | 'uL' | 'nL'
+    length     :: 'cm' | 'mm' | 'um' | 'nm'
 
 
 Formulas can also be constructed from atoms or other formulas:
@@ -161,12 +185,12 @@ Formulas can also be constructed from atoms or other formulas:
     CaCO3(H2O)6
 
 * Structures can also be built with simple formula math:
-    
+
     >>> print(formula("CaCO3") + 6*formula("H2O"))
     CaCO3(H2O)6
 
 * Formulas can be easily cloned:
-    
+
     >>> print(formula( formula("CaCO3+6H2O")))
     CaCO3(H2O)6
 
@@ -191,8 +215,8 @@ packing factor, or by knowing the lattice parameters of the crystal
 which makes up the material.  Standard packing factors for hcp, fcc,
 bcc, cubic and diamond on uniform spheres can be used if the components
 are of about the same size.  The formula should specify the number of
-atoms in the unit cell, which is 1 for cubic, 2 for bcc and 4 for fcc.  
-Be sure to use the molecular mass (M.molecular_mass in g) rather 
+atoms in the unit cell, which is 1 for cubic, 2 for bcc and 4 for fcc.
+Be sure to use the molecular mass (M.molecular_mass in g) rather
 than the molar mass (M.mass in u = g/mol) in your calculations.
 
 Because the packing fraction method relies on the covalent radius
@@ -227,7 +251,7 @@ following is a 2:1 mixture of water and heavy water:
     >>> mix = mix_by_volume(H2O,2,D2O,1)
     >>> print("%s %.4g"%(mix,mix.density))
     (H2O)2D2O 1.037
-    
+
 Note that this is different from a 2:1 mixture by weight:
 
     >>> mix = mix_by_weight(H2O,2,D2O,1)
@@ -257,3 +281,13 @@ compute molar mass and neutron/xray scattering length density:
     ... wavelength=periodictable.Cu.K_alpha)
     >>> print('%s X-ray sld %.3g'%(hydrated,rho))
     SiO2(H2O)3 X-ray sld 13.5
+
+Biomolecules
+------------
+
+The :mod:`periodictable.fasta` module can be used to load and manage bio
+molecules.  These can be used to compute molecular weights, approximate
+volumes and scattering for various lipids and proteins.  In addition it
+supports labile hydrogen calculations, allowing you to compute the neutron
+scattering length density of the molecule in the presence of D2O as a
+solvent, assuming all labile hydrogens are substituted.

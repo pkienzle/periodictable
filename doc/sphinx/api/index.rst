@@ -19,6 +19,7 @@
    constants.rst
    crystal_structure.rst
    density.rst
+   fasta.rst
    magnetic_ff.rst
    mass.rst
    activation.rst

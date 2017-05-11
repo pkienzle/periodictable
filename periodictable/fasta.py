@@ -6,10 +6,10 @@ specified using tritium (T) in the chemical formula.  The biomolecule object
 creates forms with natural isotope ratio, all hydrogen and all deuterium.
 Density can be provided as natural density or cell volume.  A %D2O contrast
 match value is computed for matching the molecule SLD in the presence of
-labile hydrogens.  :method:`Molecule.D2Osld` computes the neutron SLD for
+labile hydrogens.  :meth:`Molecule.D2Osld` computes the neutron SLD for
 the solvated molecule in a %D2O solvent.
 
-:fun:`D2Omatch` computes the %D2O constrast match value given the fully
+:func:`D2Omatch` computes the %D2O constrast match value given the fully
 hydrogenated and fully deuterated forms.
 
 :class:`Sequence` lets you read amino acid and DNA/RNA sequences from FASTA
@@ -47,11 +47,10 @@ class Molecule(object):
     way the tritium can be changed to H[1] for solutions with pure water, H for solutions
     with a natural abundance of water or D for solutions with pure deuterium.
 
-    Attributes
-    ==========
+    **Attributes**
 
     *formula* is the original tritiated formula.  You can retrieve the hydrogenated or
-    deuterated forms using :fun:`isotope_substitution` with *formula*, periodictable.T
+    deuterated forms using :func:`isotope_substitution` with *formula*, periodictable.T
     and periodictable.H or periodictable.D.
 
     *D2Omatch* is the % D2O in H2O required to contrast match the molecule, including
@@ -105,8 +104,11 @@ class Sequence(Molecule):
     Convert FASTA sequence into chemical formula.
 
     *name* sequence name
+
     *sequence* code string
-    *type* aa|dna|rna
+
+    *type* is one of::
+
        aa: amino acid sequence
        dna: dna sequence
        rna: rna sequence
@@ -120,7 +122,7 @@ class Sequence(Molecule):
 
         Yields one FASTA sequence each cycle.
         """
-        type=_guess_type_from_filename(filename, type)
+        type = _guess_type_from_filename(filename, type)
         with open(filename, 'rt') as fh:
             for name, seq in read_fasta(fh):
                 yield Sequence(name, seq, type=type)
@@ -130,7 +132,7 @@ class Sequence(Molecule):
         """
         Load the first FASTA sequence from a file.
         """
-        type=_guess_type_from_filename(filename, type)
+        type = _guess_type_from_filename(filename, type)
         with open(filename, 'rt') as fh:
             name, seq = next(read_fasta(fh))
             return Sequence(name, seq, type=type)
@@ -305,6 +307,7 @@ _set_amino_acid_average('J', 'LI')
 _set_amino_acid_average('Z', 'EQ')
 _set_amino_acid_average('X', 'ACDEFGHIKLMNPQRSTVWY', name='any')
 _set_amino_acid_average('-', '', name='gap')
+__doc__ += "\n\n*AMINO_ACID_CODES*::\n\n    " + "\n    ".join("%s: %s"%(k, v.name) for k, v in sorted(AMINO_ACID_CODES.items()))
 
 def _(formula, V, name):
     molecule = Molecule(name, formula, cell_volume=V)
@@ -320,6 +323,8 @@ NUCLEIC_ACID_COMPONENTS = dict((
     _("C5HT3N5O",  119, "guanine"),
     _("C4H2T2N3O", 103, "cytosine"),
     ))
+__doc__ += "\n\n*NUCLEIC_ACID_COMPONENTS*::\n\n  " + "\n  ".join("%s: %s"%(k, v.formula) for k, v in sorted(NUCLEIC_ACID_COMPONENTS.items()))
+
 CARBOHYDRATE_RESIDUES = dict((
     # formula, volume, name
     _("C6H7T3O5",    171.9, "Glc"),
@@ -335,6 +340,8 @@ CARBOHYDRATE_RESIDUES = dict((
     _("C14H17T5NO13SNa", 473.5, "keratan sulphate"), # Gal.GlcNAc.SO4
     _("C14H15T4NO14SNa", 443.5, "chondroitin sulphate"), # GlcA.GalNAc.SO4
     ))
+__doc__ += "\n\n*CARBOHYDRATE_RESIDUES*::\n\n  " + "\n  ".join("%s: %s"%(k, v.formula) for k, v in sorted(CARBOHYDRATE_RESIDUES.items()))
+
 LIPIDS = dict((
     # formula, volume, name
     _("CH2", 27, "methylene"),
@@ -349,6 +356,7 @@ LIPIDS = dict((
     _("C57H104O6", 1617, "trioleate form"),
     _("C39H77T2N2O2P", 1166, "palmitate ester"),
     ))
+__doc__ += "\n\n*LIPIDS*::\n\n  " + "\n  ".join("%s: %s"%(k, v.formula) for k, v in sorted(LIPIDS.items()))
 
 def _(code, formula, V, name):
     molecule = Molecule(name, formula, cell_volume=V)
@@ -361,6 +369,8 @@ RNA_BASES = dict((
     _("G",  "C10H7T4N5O7PNa", 304, "guanosine"),
     _("C",   "C9H8T3N3O7PNa", 288, "cytidine"),
     ))
+__doc__ += "\n\n*RNA_BASES*::\n\n  " + "\n  ".join("%s:%s"%(k, v.name) for k, v in sorted(RNA_BASES.items()))
+
 DNA_BASES = dict((
     # code, formula, volume, %D2O matchpoint, name
     _("A",  "C10H9T2N5O5PNa", 289, "adenosine"),
@@ -368,6 +378,7 @@ DNA_BASES = dict((
     _("G",  "C10H8T3N5O6PNa", 294, "guanosine"),
     _("C",   "C9H9T2N3O6PNa", 278, "cytidine"),
     ))
+__doc__ += "\n\n*DNA_BASES*::\n\n  " + "\n  ".join("%s:%s"%(k, v.name) for k, v in sorted(DNA_BASES.items()))
 
 def _(code, bases, name):
     D, V, _ = _code_average(bases, RNA_BASES)

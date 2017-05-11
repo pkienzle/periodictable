@@ -29,6 +29,10 @@ Crystal structure
     Ashcroft and Mermin
 
 Oxidation states
+    wikipedia: List of oxidation states of the elements
+
     Greenwood, Norman N.; Earnshaw, Alan (1997). Chemistry of the Elements (2nd ed.).
     Butterworth-Heinemann. pp. 27–28. ISBN 0-08-037941-9.
-    [Note: values from wikipedia: List of oxidation states of the elements]
+
+FASTA and biomolecule formulas
+    Perkins, Modern Physical Methods in Biochemistry Part B, 143-265 (1988)

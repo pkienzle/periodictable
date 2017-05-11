@@ -3,7 +3,9 @@
 """
 Chemical formula parser.
 """
-from __future__ import division
+from __future__ import division, print_function
+
+import sys
 from copy import copy
 from math import pi, sqrt
 
@@ -172,8 +174,9 @@ def _mix_by_volume_pairs(pairs):
     # Note: must be first statement in order to accept iterators
     pairs = [(f, q) for f, q in pairs if q > 0]
 
-    if not all(f.density for f, _ in pairs):
-        raise ValueError("Need a density for each formula")
+    for f, _ in pairs:
+        if f.density is None or f.density == 0.:
+            raise ValueError("Need the mass density of "+str(f))
 
     result = Formula()
     if len(pairs) > 0:
@@ -580,6 +583,11 @@ class Formula(object):
         return "formula('%s')"%(str(self))
 
 
+LENGTH_UNITS = {'nm': 1e-9, 'um': 1e-6, 'mm': 1e-3, 'cm': 1e-2}
+MASS_UNITS = {'ng': 1e-9, 'ug': 1e-6, 'mg': 1e-3, 'g': 1e+0, 'kg': 1e+3}
+VOLUME_UNITS = {'nL': 1e-9, 'uL': 1e-6, 'mL': 1e-3, 'L': 1e+0}
+LENGTH_RE = '('+'|'.join(LENGTH_UNITS.keys())+')'
+MASS_VOLUME_RE = '('+'|'.join(list(MASS_UNITS.keys())+list(VOLUME_UNITS.keys()))+')'
 def formula_grammar(table):
     """
     Construct a parser for molecular formulas.
@@ -597,6 +605,7 @@ def formula_grammar(table):
             an *element* or a list of pairs (*count, fragment*).
 
     """
+
     # Recursive
     composite = Forward()
     mixture = Forward()
@@ -723,15 +732,11 @@ def formula_grammar(table):
     mixture_by_volume = by_volume.setParseAction(convert_by_volume)
 
     mixture_by_layer = Forward()
-    layer_thick = Group(count + Regex("(nm|um|mm)") + space)
+    layer_thick = Group(count + Regex(LENGTH_RE) + space)
     layer_part = (layer_thick + mixture) | (opengrp + mixture_by_layer + closegrp +count)
     mixture_by_layer << layer_part + ZeroOrMore(partsep + layer_part)
     def convert_by_layer(string, location, tokens):
         """convert layer thickness '# nm material'"""
-        units = {'nm': 1e-9,
-                 'um': 1e-6,
-                 'mm': 1e-3,
-                }
         if len(tokens) < 2:
             return tokens
         piece = []
@@ -741,88 +746,67 @@ def formula_grammar(table):
                 f = p1.absthick * float(p2)
                 p = p1
             else:
-                f = float(p1[0]) * units[p1[1]]
+                f = float(p1[0]) * LENGTH_UNITS[p1[1]]
                 p = p2
             piece.append(p)
             fract.append(f)
         total = sum(fract)
         vfract = [(v/total)*100 for v in fract]
         result = _mix_by_volume_pairs(zip(piece, vfract))
-        result.absthick = total
+        result.thickness = total
         return result
     mixture_by_layer = mixture_by_layer.setParseAction(convert_by_layer)
 
     mixture_by_absmass = Forward()
-    absmass_mass = Group(count + Regex("(ng|ug|mg|g|kg)") + space)
+    absmass_mass = Group(count + Regex(MASS_VOLUME_RE) + space)
     absmass_part = (absmass_mass + mixture) | (opengrp + mixture_by_absmass + closegrp + count)
     mixture_by_absmass << absmass_part + ZeroOrMore(partsep + absmass_part)
     def convert_by_absmass(string, location, tokens):
         """convert mass '# mg material'"""
-        units = {'ng': 1e-9,
-                 'ug': 1e-6,
-                 'mg': 1e-3,
-                 'g': 1e+0,
-                 'kg': 1e+3,
-                }
         if len(tokens) < 2:
             return tokens
         piece = []
         fract = []
         for p1, p2 in zip(tokens[0::2], tokens[1::2]):
             if isinstance(p1, Formula):
-                f = p1.absmass * float(p2)
                 p = p1
+                f = p1.total_mass * float(p2)
             else:
-                f = float(p1[0]) * units[p1[1]]
                 p = p2
+                value = float(p1[0])
+                if p1[1] in VOLUME_UNITS:
+                    # convert to volume in liters to mass in grams before mixing
+                    if p.density is None:
+                        raise ValueError("Need the mass density of "+str(p))
+                    f = value * VOLUME_UNITS[p1[1]] * 1000.*p.density
+                else:
+                    f = value * MASS_UNITS[p1[1]]
             piece.append(p)
             fract.append(f)
 
         total = sum(fract)
         mfract = [(m/total)*100 for m in fract]
         result = _mix_by_weight_pairs(zip(piece, mfract))
-        result.absmass = total
+        result.total_mass = total
         return result
     mixture_by_absmass = mixture_by_absmass.setParseAction(convert_by_absmass)
 
-    mixture_by_absvolume = Forward()
-    absvolume_vol = Group(count + Regex("(nL|uL|mL|L)") + space)
-    absvolume_part = (absvolume_vol + mixture)|(opengrp + mixture_by_absvolume + closegrp + count)
-    mixture_by_absvolume << absvolume_part + ZeroOrMore(partsep + absvolume_part)
-    def convert_by_absvolume(string, location, tokens):
-        """convert volume '# mL material'"""
-        units = {'nL': 1e-9,
-                 'uL': 1e-6,
-                 'mL': 1e-3,
-                 'L': 1e+0,
-                 }
-        if len(tokens) < 2:
-            return tokens
-        piece = []
-        fract = []
-        for p1, p2 in zip(tokens[0::2], tokens[1::2]):
-            if isinstance(p1, Formula):
-                f = p1.absvolume * float(p2)
-                p = p1
-            else:
-                f = float(p1[0]) * units[p1[1]]
-                p = p2
-            piece.append(p)
-            fract.append(f)
-        total = sum(fract)
-        vfract = [(v/total)*100 for v in fract]
-        if len(piece) != len(fract):
-            raise ValueError("Missing base component of mixture "+string)
-        if fract[-1] < 0:
-            raise ValueError("Formula percentages must sum to less than 100%")
-        result = _mix_by_volume_pairs(zip(piece, vfract))
-        result.absvolume = total
-        return result
-    mixture_by_absvolume = mixture_by_absvolume.setParseAction(convert_by_absvolume)
+    ungrouped_mixture = (mixture_by_weight | mixture_by_volume
+                         | mixture_by_layer | mixture_by_absmass)
+    grouped_mixture = opengrp + ungrouped_mixture + closegrp + Optional(density, default=None)
+    def convert_mixture(string, location, tokens):
+        """convert (mixture) @ density"""
+        formula = tokens[0]
+        if tokens[-1] == 'n':
+            formula.natural_density = tokens[-2]
+        elif tokens[-1] == 'i':
+            formula.density = tokens[-2]
+        # elif tokens[-1] is None
+        return formula
+    grouped_mixture = grouped_mixture.setParseAction(convert_mixture)
 
-    mixture << (compound | (opengrp + (mixture_by_weight | mixture_by_volume) + closegrp))
-    formula = (compound | mixture_by_weight | mixture_by_volume
-               | mixture_by_layer | mixture_by_absmass | mixture_by_absvolume)
+    mixture << (compound | grouped_mixture)
+    formula = (compound | ungrouped_mixture | grouped_mixture)
     grammar = Optional(formula, default=Formula()) + StringEnd()
 
     grammar.setName('Chemical Formula')

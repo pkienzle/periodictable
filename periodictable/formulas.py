@@ -251,6 +251,11 @@ def formula(compound=None, density=None, natural_density=None,
     elif isinstance(compound, dict):
         structure = _convert_to_hill_notation(compound)
     elif _is_string_like(compound):
+        if ':' in compound:
+            from . import fasta
+            seq_type, seq = compound.split(':', 1)
+            if seq_type in fasta.CODE_TABLES:
+                return fasta.Sequence(name=None, sequence=seq, type=seq_type).Hnatural
         try:
             formula = parse_formula(compound, table=table)
             if name:

@@ -178,6 +178,8 @@ def test():
     check_mass(formula("50 mL (45 mL H2O@1 // 5 g NaCl)@1.0707 // 20 mL D2O@1n"),
                mass=50*1.0707 + 20*D2O.density)
 
+    # fasta
+    check_formula(formula('aa:A'), formula('C3H5NO'))
 
 def check_mass(f1, mass, tol=1e-14):
     """Check that the total mass of f1 is as expected."""

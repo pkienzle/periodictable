@@ -282,6 +282,10 @@ element_densities = dict(
     Ds=None,
     Rg=None,
     Cn=None,
-    Uuq=None,
-    Uuh=None,
+    Nh=None,
+    Fl=None,
+    Mc=None,
+    Lv=None,
+    Ts=None,
+    Og=None,
     )

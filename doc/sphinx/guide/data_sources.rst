@@ -27,3 +27,8 @@ X-ray scattering factors
 
 Crystal structure
     Ashcroft and Mermin
+
+Oxidation states
+    Greenwood, Norman N.; Earnshaw, Alan (1997). Chemistry of the Elements (2nd ed.).
+    Butterworth-Heinemann. pp. 27–28. ISBN 0-08-037941-9.
+    [Note: values from wikipedia: List of oxidation states of the elements]

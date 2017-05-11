@@ -76,7 +76,7 @@ Process all the elements:
     H hydrogen
     He helium
        ...
-    Uuh ununhexium
+    Og oganesson
 
 Another example for processing all elements:
 
@@ -159,4 +159,3 @@ Specific defined properties related to elements can be accessed in a table forma
     Cf K-alpha = 0.1094
     Es K-alpha = 0.1067
     Fm K-alpha = 0.104
-

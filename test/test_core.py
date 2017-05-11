@@ -12,9 +12,9 @@ def test():
     assert H[2].symbol == 'D'
     assert H[3].symbol == 'T'
     assert O[18].symbol == 'O'
-    assert str(H[2])=='D'
-    assert str(H[3])=='T'
-    assert str(O[18])=='18-O'
+    assert str(H[2]) == 'D'
+    assert str(H[3]) == 'T'
+    assert str(O[18]) == '18-O'
     try:
         Fe[12]
     except KeyError as msg:
@@ -52,16 +52,17 @@ def test():
         assert str(msg) == "unknown element 4-D"
 
     # Check that ions work
-    assert Fe.ion[2].charge==2
-    assert Fe.ions == (2,3)
+    assert Fe.ion[2].charge == 2
+    assert Fe.ions == (-4, -2, -1, 1, 2, 3, 4, 5, 6, 7)
     assert str(Fe.ion[2]) == "Fe{2+}"
     assert str(O.ion[-2]) == "O{2-}"
     try:
-        Fe.ion[1]
+        Fe.ion[-3]
         raise Exception("accepts invalid ions")
     except ValueError as msg:
-        assert str(msg) == "1 is not a valid charge for Fe"
+        assert str(msg) == "-3 is not a valid charge for Fe"
 
     assert data_files()[0][0] == "periodictable-data/xsf"
 
-if __name__ == "__main__": test()
+if __name__ == "__main__":
+    test()

@@ -9,11 +9,11 @@ Masses, densities and natural abundances come from the
 NIST Physics Laboratory, but do not represent a critical
 evaluation by NIST scientists.
 
-Neutron scattering calculations use values collected by the 
+Neutron scattering calculations use values collected by the
 Atomic Institute of the Austrian Universities.  These values
-do corresponding to those from other packages, though there 
-are some differences depending to the tables used.  Bound 
-coherent neutron scattering for gold in particular is significantly 
+do corresponding to those from other packages, though there
+are some differences depending to the tables used.  Bound
+coherent neutron scattering for gold in particular is significantly
 different from older value: 7.63(6) as measured in 1974
 compared to 7.90(7) as measured in 1990.
 
@@ -26,6 +26,22 @@ give different results from other packages.
 
 Change history
 ==============
+
+1.5.0 2017-05-11
+--------------
+
+New:
+
+* mixture by mass and volume, e.g., 5 g NaCl // 50 mL H2O@1
+* multilayer materials, e.g., 5 um Si // 3 nm Cr // 8 nm Au
+* add support for bio molecules with labile hydrogens
+* update list of possible oxidation states to include rare states
+
+Modified:
+
+* fixed computation of incoherent cross section so it is consistent with
+  coherent cross section and total cross section
+
 
 1.4.1 2014-02-04
 ----------------
@@ -76,7 +92,7 @@ New:
 Modified:
 
 * Change neutron scattering calculations for incoherent cross section
-  to be the linear combination of the incoherent cross sections of the 
+  to be the linear combination of the incoherent cross sections of the
   individual atoms rather than total cross section minus the coherent
   cross section.  Penetration depth of the unscattered beam still uses
   the total cross section plus the absorption cross section.
@@ -96,7 +112,7 @@ Modified:
 * update X-ray scattering tables for Zr
 * adjust ion mass for number of electrons
 * ions now display as Yy{#+} rather than Yy^{#+}
-* fix formula.natural_density 
+* fix formula.natural_density
 * fix formula.hill so C,H come first
 * fix element.interatomic_distance
 * formula(value=...) -> formula(compound=...)

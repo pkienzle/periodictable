@@ -1,60 +1,14 @@
 language: python
 
-sudo:  false
-
-matrix:
-  include:
-    - os: linux
-      env:
-        - PY=2.7
-    - os: linux
-      env:
-        - PY=3
-    - os: osx
-      language: generic
-      env:
-        - PY=2.7
-    - os: osx
-      language: generic
-      env:
-        - PY=3
-
-# whitelist
-branches:
-  only:
-    - master
-
-addons:
-  apt:
-    packages:
-      - python3-numpy python-numpy python-pyparsing
-
-before_install:
-  - echo $TRAVIS_OS_NAME
-
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-
-      bash miniconda.sh -b -p $HOME/miniconda;
-      export PATH="$HOME/miniconda/bin:$PATH";
-      hash -r;
-      conda update --yes conda;
-
-      # Useful for debugging any issues with conda
-      conda info -a;
-
-      conda install --yes python=$PY numpy pyparsing;
-
-    fi;
+python:
+  - "2.6"
+  - "2.7"
+  - "3.3"
+  - "3.6"
+  - "nightly"
 
 install:
-  - pip$PY install unittest-xml-reporting
+  - pip install numpy pyparsing
+  - pip install .
 
-script:
-  - export WORKSPACE=/home/travis/build/pkienzle/periodictable
-  - python$PY test.py
-
-notifications:
-  slack:
-    # Sasview slack notification
-    #secure: xNAUeSu1/it/x9Q2CSg79aw1LLc7d6mLpcqSCTeKROp71RhkFf8VjJnJm/lEbKHNC8yj5H9UHrz5DmzwJzI+6oMt4NdEeS6WvGhwGY/wCt2IcJKxw0vj1DAU04qFMS041Khwclo6jIqm76DloinXvmvsS+K/nSyQkF7q4egSlwA=
+script: test.py

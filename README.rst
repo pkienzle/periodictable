@@ -23,6 +23,10 @@ values differ from those given in other sources such as the
 International Tables for Crystallography, Volume C, and so may
 give different results from other packages.
 
+|TravisStatus|_
+
+.. |TravisStatus| image:: https://travis-ci.org/pkienzle/periodictable.svg?branch=master
+.. _TravisStatus: https://travis-ci.org/pkienzle/periodictable
 
 Change history
 ==============

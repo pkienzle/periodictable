@@ -6,7 +6,7 @@ python:
   #- "pypy"
 
 install:
-  - pip install numpy pyparsing nose
+  - pip install numpy pyparsing nose matplotlib
   - pip install .
 
 script: ./test.py

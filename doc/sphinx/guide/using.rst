@@ -121,7 +121,6 @@ for the ion index:
 
 .. doctest::
 
-    >>> import pylab
     >>> import periodictable
     >>> Fe_2 = periodictable.Fe.ion[2]
     >>> print(Fe_2.magnetic_ff[Fe_2.charge].M_Q([0,0.1,0.2]))
@@ -131,6 +130,7 @@ The following is a plot of the magnetic form factor vs. Q:
 
     >>> Q = pylab.linspace(0,16,200)
     >>> M = Fe_2.magnetic_ff[Fe_2.charge].j0_Q(Q)
+    >>> import pylab # doctest: +SKIP
     >>> pylab.xlabel(r'Magnetic Form Factor for Fe') # doctest: +SKIP
     >>> pylab.ylabel(r'$\AA^{-1}$') # doctest: +SKIP
     >>> pylab.title('Ion specific property for Fe') # doctest: +SKIP

@@ -128,6 +128,8 @@ for the ion index:
 
 The following is a plot of the magnetic form factor vs. Q:
 
+.. doctest::
+
     >>> import pylab # doctest: +SKIP
     >>> Q = pylab.linspace(0,16,200) # doctest: +SKIP
     >>> M = Fe_2.magnetic_ff[Fe_2.charge].j0_Q(Q) # doctest: +SKIP

@@ -27,7 +27,7 @@ branches:
 addons:
   apt:
     packages:
-      python3-numpy python-numpy python-pyparsing
+      - python3-numpy python-numpy python-pyparsing
 
 before_install:
   - echo $TRAVIS_OS_NAME
@@ -35,15 +35,15 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
 
-      bash miniconda.sh -b -p $HOME/miniconda
-      export PATH="$HOME/miniconda/bin:$PATH"
-      hash -r
-      conda update --yes conda
+      bash miniconda.sh -b -p $HOME/miniconda;
+      export PATH="$HOME/miniconda/bin:$PATH";
+      hash -r;
+      conda update --yes conda;
 
       # Useful for debugging any issues with conda
-      conda info -a
+      conda info -a;
 
-      conda install --yes python=$PY numpy pyparsing
+      conda install --yes python=$PY numpy pyparsing;
 
     fi;
 

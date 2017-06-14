@@ -101,10 +101,10 @@ def test_xsf():
     assert len(f0) == 0
 
     f0 = Ni.xray.f0(Q=[[1,2],[3,4]])
-    assert f0[0,0] == Ni.xray.f0(1)
-    assert f0[0,1] == Ni.xray.f0(2)
-    assert f0[1,0] == Ni.xray.f0(3)
-    assert f0[1,1] == Ni.xray.f0(4)
+    assert abs(f0[0,0] - Ni.xray.f0(1)) < 1e-14
+    assert abs(f0[0,1] - Ni.xray.f0(2)) < 1e-14
+    assert abs(f0[1,0] - Ni.xray.f0(3)) < 1e-14
+    assert abs(f0[1,1] - Ni.xray.f0(4)) < 1e-14
 
     # Check f0 calculation for ion
     Ni_2p_f0 = Ni.ion[2].xray.f0(Q=Q1)

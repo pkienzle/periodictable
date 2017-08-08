@@ -30,7 +30,7 @@ give different results from other packages.
 
 
 .. |DOI| image:: https://zenodo.org/badge/1146700.svg
-.. _DOI https://zenodo.org/badge/latestdoi/1146700
+.. _DOI: https://zenodo.org/badge/latestdoi/1146700
 
 
 Change history

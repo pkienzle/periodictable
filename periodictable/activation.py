@@ -36,7 +36,7 @@ Example::
     >>> sample.calculate_activation(env, exposure=10, rest_times=[0, 1, 24, 360])
     >>> sample.show_table()
                                           ----------------- activity (uCi) ------------------
-    isotope  product  reaction T1/2 (hrs)        0 hrs        1 hrs       24 hrs      360 hrs
+    isotope  product  reaction  half-life        0 hrs        1 hrs       24 hrs      360 hrs
     -------- -------- -------- ---------- ------------ ------------ ------------ ------------
     Co-59    Co-60         act    5.272 y     0.000496     0.000496    0.0004958    0.0004933
     Co-59    Co-60m+       act     10.5 m        1.664       0.0317          ---          ---
@@ -226,7 +226,7 @@ class Sample(object):
 
         # Print the table header, with an overbar covering the various rest times
         # Print a dashed separator above and below each column
-        header = ["isotope", "product", "reaction", "T1/2 (hrs)"] \
+        header = ["isotope", "product", "reaction", "half-life"] \
                  + ["%g hrs"%vi for vi in self.rest_times]
         separator = ["-"*8, "-"*8, "-"*8, "-"*10] + ["-"*12]*len(self.rest_times)
         cformat = "%-8s %-8s %8s %10s " + " ".join(["%12s"]*len(self.rest_times))

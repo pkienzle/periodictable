@@ -50,8 +50,9 @@ Example::
 The default rest times used above show the sample activity at the end of neutron
 activation and after 1 hour, 1 day, and 15 days.
 
-Activation cross sections are mostly from IAEA-273\ [#IAEA1987]. See activation.dat in the
-package directory for details on individual isotopes.
+The neutron activation table, *activation.dat*,\ [#Shleien1998] contains
+details about the individual isotopes, with interaction cross sections taken
+from from IAEA-273\ [#IAEA1987].
 
 Activation can be run from the command line using::
 
@@ -59,10 +60,14 @@ Activation can be run from the command line using::
 
 where FORMULA is the chemical formula for the material.
 
+.. [#Shleien1998] Shleien, B., Slaback, L.A., Birky, B.K., 1998.
+Handbook of health physics and radiological health.
+Williams & Wilkins, Baltimore.
+
 ..[#IAEA1987] IAEA (1987)
 Handbook on Nuclear Activation Data.
 TR 273 (International Atomic Energy Agency, Vienna, Austria, 1987).
-https://www-nds.iaea.org/publications/tecdocs/sti%252Fdoc%252F10%252F0273/
+http://cds.cern.ch/record/111089/files/IAEA-TR-273.pdf
 """
 
 from __future__ import division, print_function

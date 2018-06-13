@@ -25,7 +25,7 @@ give different results from other packages.
 
 There are several web interfaces to this package:
 
-* `NIST Center for Neutron Research <https://www.ncnr.nist.gov/resources/activation>`_
+* `NIST Center for Neutron Research (NCNR) <https://www.ncnr.nist.gov/resources/activation>`_
 * `Forschungs-Neutronenquelle Heinz Maier-Leibnitz (FRM II) <https://webapps.frm2.tum.de/intranet/activation/>`_
 * `SLD Calulator <https://sld-calculator.appspot.com/>`_
 

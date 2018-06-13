@@ -23,6 +23,17 @@ values differ from those given in other sources such as the
 International Tables for Crystallography, Volume C, and so may
 give different results from other packages.
 
+There are several web interfaces to this package:
+
+* `NIST Center for Neutron Research <https://www.ncnr.nist.gov/resources/activation>`_
+* `Forschungs-Neutronenquelle Heinz Maier-Leibnitz (FRM II) <https://webapps.frm2.tum.de/intranet/activation/>`_
+* `SLD Calulator <https://sld-calculator.appspot.com/>`_
+
+Source links:
+
+* https://github.com/pkienzle/periodictable
+* https://github.com/scattering/activation
+
 |TravisStatus|_ |DOI|_
 
 .. |TravisStatus| image:: https://travis-ci.org/pkienzle/periodictable.svg?branch=master

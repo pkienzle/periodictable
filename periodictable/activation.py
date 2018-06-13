@@ -364,7 +364,7 @@ def activity(isotope, mass, env, exposure, rest_times):
         #    ai.daughter
         # Column G: Half-life
         #    ai.Thalf_str
-        # Column H: initial efective cross-section (b)
+        # Column H: initial effective cross-section (b)
         initialXS = ai.thermalXS + env.epithermal_reduction_factor*ai.resonance
         # Column I: reaction
         #    ai.reaction

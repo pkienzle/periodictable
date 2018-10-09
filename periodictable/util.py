@@ -74,10 +74,14 @@ def require_keywords(function):
     use the \*args, \*\*kw call style.  Python 3+ provides the '\*' call
     signature element which will force all keywords after '\*' to be named.
     """
-    import inspect
     import functools
+    try:
+        from inspect import signature
+        getargspec = _getargspec_from_signature
+    except ImportError: # CRUFT: py 2.7 support
+        from inspect import getargspec
 
-    args, vararg, varkwd, defaults = inspect.getargspec(function)
+    args, vararg, varkwd, defaults = getargspec(function)
     if defaults is None:
         defaults = []
     named_args = args[:-len(defaults)]
@@ -91,3 +95,21 @@ def require_keywords(function):
             raise TypeError("name=value required for "+", ".join(named_kwds))
         return function(*args, **kw)
     return _require_kwds
+
+def _getargspec_from_signature(function):
+    """
+    Reproduce getargspec() interface using newer signature protocol
+    """
+    from inspect import signature
+
+    args, vararg, varkwd, defaults = [], None, None, []
+    sig = signature(function)
+    for p in sig.parameters.values():
+        args.append(p.name)
+        if p.default is not p.empty:
+            defaults.append(p.default)
+        if p.kind is p.VAR_POSITIONAL:
+            vararg = p.name
+        elif p.kind is p.VAR_KEYWORD:
+            varkwd = p.name
+    return args, vararg, varkwd, defaults

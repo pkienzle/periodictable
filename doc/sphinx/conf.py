@@ -37,7 +37,6 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
               'sphinx.ext.mathjax',
               #'only_directives',
               #'matplotlib.sphinxext.mathmpl',
-              'matplotlib.sphinxext.only_directives',
               'matplotlib.sphinxext.plot_directive',
               'dollarmath',
              ]

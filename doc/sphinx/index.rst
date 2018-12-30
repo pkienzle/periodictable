@@ -9,7 +9,7 @@ The periodictable package provides an extensible periodic table of the elements
 pre-populated with data important to neutron and X-ray scattering experiments.
 Periodic table is written entirely in Python and does not require any external libraries.
 
-.. htmlonly::
+.. only:: html
    :Release: |version|
    :Date:    |today|
 
@@ -25,7 +25,7 @@ Indices and Tables
 * :ref:`genindex`
 * :ref:`modindex`
 
-.. htmlonly::
+.. only:: html
   * :ref:`search`
 
 

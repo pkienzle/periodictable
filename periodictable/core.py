@@ -210,6 +210,7 @@ class PeriodicTable(object):
            See section :ref:`Adding properties <extending>` for details.
     """
     def __init__(self, table):
+        # type: (str) -> None
         if table in PRIVATE_TABLES:
             raise ValueError("Periodic table '%s' is already defined"%table)
         PRIVATE_TABLES[table] = self
@@ -567,6 +568,7 @@ def iselement(val):
 
 def change_table(atom, table):
     """Search for the same element, isotope or ion from a different table"""
+    # type: (Union[Element,Isotope,Ion])
     if ision(atom):
         if isisotope(atom):
             return table[atom.number][atom.isotope].ion[atom.charge]

@@ -43,21 +43,23 @@ class Molecule(object):
     """
     Specify a biomolecule by name, chemical formula, cell volume and charge.
 
-    Labile hydrogen positions should be coded using tritium (T) rather than H.  That
-    way the tritium can be changed to H[1] for solutions with pure water, H for solutions
-    with a natural abundance of water or D for solutions with pure deuterium.
+    Labile hydrogen positions should be coded using tritium (T) rather than H.
+    That way the tritium can be changed to H[1] for solutions with pure water,
+    H for solutions with a natural abundance of water or D for solutions with
+    pure deuterium.
 
     **Attributes**
 
-    *formula* is the original tritiated formula.  You can retrieve the hydrogenated or
-    deuterated forms using :func:`isotope_substitution` with *formula*, periodictable.T
-    and periodictable.H or periodictable.D.
+    *formula* is the original tritiated formula.  You can retrieve the
+    hydrogenated or deuterated forms using :func:`isotope_substitution` with
+    *formula*, periodictable.T and periodictable.H or periodictable.D.
 
-    *D2Omatch* is the % D2O in H2O required to contrast match the molecule, including
-    the the proton swapping effect.
+    *D2Omatch* is the % D2O in H2O required to contrast match the molecule,
+    including substitution of labile hydrogen in proportion to the D/H ratio.
 
-    *sld*/*Hsld*/*Dsld* are the the scattering length densities of the molecule with tritium
-    replaced by naturally occurring H/D ratios, pure H[1] and pure H[2] respectively.
+    *sld*/*Hsld*/*Dsld* are the the scattering length densities of the molecule
+    with tritium replaced by naturally occurring H/D ratios, pure H[1] and
+    pure H[2] respectively.
 
     *mass*/*Hmass*/*Dmass* are the masses the three conditions.
 
@@ -68,7 +70,7 @@ class Molecule(object):
     *density* is the estimated molecule density
     """
     def __init__(self, name, formula, cell_volume=None, density=None, charge=0):
-        # Fill in density or cell_volume
+        # Fill in density or cell_volume.
         M = pt.formula(formula, natural_density=density)
         if cell_volume is not None:
             M.density = 1e24*M.molecular_mass/cell_volume if cell_volume > 0 else 0

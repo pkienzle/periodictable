@@ -89,7 +89,7 @@ class Molecule(object):
         self.Hsld = pt.neutron_sld(H, wavelength=5)[0]
         self.Dsld = pt.neutron_sld(D, wavelength=5)[0]
         self.mass, self.Hmass, self.Dmass = Hnatural.mass, H.mass, D.mass
-        self.D2Omatch = D2Omatch(self.Hsld, self.Dsld)
+        self.D2Omatch = D2Omatch(self.sld, self.Dsld)
         self.charge = charge
         self.Hnatural = Hnatural
 
@@ -98,7 +98,7 @@ class Molecule(object):
         Neutron SLD of the molecule in a %D2O solvent.
         """
         solvent_sld = D2O_fraction*D2O_SLD + (1-D2O_fraction)*H2O_SLD
-        solute_sld = D2O_fraction*self.Dsld + (1-D2O_fraction)*self.Hsld
+        solute_sld = D2O_fraction*self.Dsld + (1-D2O_fraction)*self.sld
         return volume_fraction*solute_sld + (1-volume_fraction)*solvent_sld
 
 class Sequence(Molecule):

@@ -5,7 +5,6 @@ Chemical formula parser.
 """
 from __future__ import division, print_function
 
-import sys
 from copy import copy
 from math import pi, sqrt
 
@@ -91,7 +90,7 @@ def _mix_by_weight_pairs(pairs):
     pairs = [(f, q) for f, q in pairs if q > 0]
 
     result = Formula()
-    if len(pairs) > 0:
+    if pairs:
         # cell mass = mass
         # target mass = q
         # cell mass * n = target mass
@@ -179,7 +178,7 @@ def _mix_by_volume_pairs(pairs):
             raise ValueError("Need the mass density of "+str(f))
 
     result = Formula()
-    if len(pairs) > 0:
+    if pairs:
         # cell volume = mass/density
         # target volume = q
         # cell volume * n = target volume
@@ -223,13 +222,13 @@ def formula(compound=None, density=None, natural_density=None,
         *ValueError* : invalid formula initializer
 
     After creating a formula, a rough estimate of the density can be
-    computed using:
+    computed using::
 
-         formula.density = formula.molecular_mass/formula.volume(packing_factor=...)
+        formula.density = formula.molecular_mass/formula.volume(packing_factor=...)
 
     The volume() calculation uses the covalent radii of the components and
     the known packing factor or crystal structure name.  If the lattice
-    constants for the crystal are known, then they can be used instead:
+    constants for the crystal are known, then they can be used instead::
 
         formula.density = formula.molecular_mass/formula.volume(a, b, c, alpha, beta, gamma)
 
@@ -404,7 +403,7 @@ class Formula(object):
         """
         return self.density
 
-    def volume(self, packing_factor='hcp', *args, **kw):
+    def volume(self, *args, **kw):
         r"""
         Estimate unit cell volume.
 
@@ -452,7 +451,17 @@ class Formula(object):
             formula.density = n*formula.molecular_mass/formula.volume()
 
         where n is the number of molecules per unit cell.
+
+        Note: a single non-keyword argument is interpreted as a packing factor
+        rather than a lattice spacing of 'a'.
         """
+        # Get packing factor
+        if len(args) == 1 and not kw:
+            packing_factor = args[0]
+            args = []
+        else:
+            packing_factor = kw.pop('packing_factor', 'hcp')
+
         # Let cell_volume sort out its own parameters.
         if args or kw:
             return cell_volume(*args, **kw)*1e-24
@@ -542,8 +551,7 @@ class Formula(object):
         """
         if not isinstance(other, Formula):
             return False
-        else:
-            return self.structure == other.structure
+        return self.structure == other.structure
 
     def __add__(self, other):
         """
@@ -852,16 +860,14 @@ def _immutable(seq):
     """
     if isatom(seq):
         return seq
-    else:
-        return tuple((count+0, _immutable(fragment)) for count, fragment in seq)
+    return tuple((count+0, _immutable(fragment)) for count, fragment in seq)
 
 def _change_table(seq, table):
     """Converts lists to tuples so that structure is immutable."""
     if isatom(seq):
         return change_table(seq, table)
-    else:
-        return tuple((count, _change_table(fragment, table))
-                     for count, fragment in seq)
+    return tuple((count, _change_table(fragment, table))
+                 for count, fragment in seq)
 
 def _hill_compare(a, b):
     """

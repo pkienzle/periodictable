@@ -63,8 +63,6 @@ __all__ = ['delayed_load', 'define_elements', 'get_data_path',
            'Ion', 'Isotope', 'Element', 'PeriodicTable',
            'isatom', 'iselement', 'isisotope', 'ision']
 
-import copy
-
 from . import constants
 
 PUBLIC_TABLE_NAME = "public"
@@ -390,7 +388,7 @@ class PeriodicTable(object):
         #TODO: override signature in sphinx with
         #    .. method:: list(prop1, prop2, ..., format='')
         format = kw.pop('format', None)
-        assert len(kw) == 0
+        assert not kw  # make sure *format* is the only keyword argument
         for el in self:
             try:
                 L = tuple(getattr(el, p) for p in props)
@@ -398,7 +396,8 @@ class PeriodicTable(object):
                 # Skip elements which don't define all the attributes
                 continue
             # Skip elements with a value of None
-            if any(v == None for v in L): continue
+            if any(v is None for v in L):
+                continue
 
             if format is None:
                 print(" ".join(str(p) for p in L))
@@ -408,8 +407,6 @@ class PeriodicTable(object):
                 #except:
                 #    print "format", format, "args", L
                 #    raise
-
-
 
 class IonSet(object):
     def __init__(self, element_or_isotope):
@@ -425,7 +422,9 @@ class IonSet(object):
         return self.ionset[charge]
 
 class Ion(object):
-    """Periodic table entry for an individual ion.
+    """
+    Periodic table entry for an individual ion.
+
     An ion is associated with an element. In addition to the element
     properties (*symbol*, *name*, *atomic number*), it has specific ion
     properties (*charge*). Properties not specific to the ion (i.e., *charge*)
@@ -452,13 +451,15 @@ class Ion(object):
                                        self.element.number,
                                        self.element.isotope,
                                        self.charge)
-        except:
+        except Exception:
             return _make_ion, (self.element.table,
                                self.element.number,
                                self.charge)
 
 class Isotope(object):
-    """Periodic table entry for an individual isotope.
+    """
+    Periodic table entry for an individual isotope.
+
     An isotope is associated with an element.  In addition to the element
     properties (*symbol*, *name*, *atomic number*), it has specific isotope
     properties (*isotope number*, *nuclear spin*, *relative abundance*).
@@ -475,8 +476,7 @@ class Isotope(object):
         # Deuterium and Tritium are special
         if 'symbol' in self.__dict__:
             return self.symbol
-        else:
-            return "%d-%s"%(self.isotope, self.element.symbol)
+        return "%d-%s"%(self.isotope, self.element.symbol)
     def __repr__(self):
         return "%s[%d]"%(self.element.symbol, self.isotope)
     def __reduce__(self):
@@ -485,7 +485,9 @@ class Isotope(object):
                                self.isotope)
 
 class Element(object):
-    """Periodic table entry for an element.
+    """
+    Periodic table entry for an element.
+
     An element is a name, symbol and number, plus a set of properties.
     Individual isotopes can be referenced as element[*isotope_number*].
     Individual ionization states can be referenced by element.ion[*charge*].
@@ -785,7 +787,8 @@ def get_data_path(data):
     :Returns: string
          Path to the data.
     """
-    import os, sys
+    import sys
+    import os
 
     # Check for data path in the environment
     key = 'PERIODICTABLE_DATA'

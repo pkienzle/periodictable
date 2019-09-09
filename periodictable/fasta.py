@@ -37,7 +37,10 @@ ratio on the non-swappable hydrogens.
 """
 from __future__ import division
 
-import periodictable as pt
+from .formulas import formula as parse_formula
+from .nsf import neutron_sld
+from .xsf import xray_sld
+from .core import PUBLIC_TABLE as elements
 
 class Molecule(object):
     """
@@ -71,23 +74,23 @@ class Molecule(object):
     """
     def __init__(self, name, formula, cell_volume=None, density=None, charge=0):
         # Fill in density or cell_volume.
-        M = pt.formula(formula, natural_density=density)
+        M = parse_formula(formula, natural_density=density)
         if cell_volume is not None:
             M.density = 1e24*M.molecular_mass/cell_volume if cell_volume > 0 else 0
             #print name, M.molecular_mass, cell_volume, M.density
         else:
             cell_volume = 1e24*M.molecular_mass/M.density
 
-        Hnatural = isotope_substitution(M, pt.T, pt.H)
-        H = isotope_substitution(M, pt.T, pt.H[1])
-        D = isotope_substitution(M, pt.T, pt.D)
+        Hnatural = isotope_substitution(M, elements.T, elements.H)
+        H = isotope_substitution(M, elements.T, elements.H[1])
+        D = isotope_substitution(M, elements.T, elements.D)
 
         self.name = name
         self.formula = M
         self.cell_volume = cell_volume
-        self.sld = pt.neutron_sld(Hnatural, wavelength=5)[0]
-        self.Hsld = pt.neutron_sld(H, wavelength=5)[0]
-        self.Dsld = pt.neutron_sld(D, wavelength=5)[0]
+        self.sld = neutron_sld(Hnatural, wavelength=5)[0]
+        self.Hsld = neutron_sld(H, wavelength=5)[0]
+        self.Dsld = neutron_sld(D, wavelength=5)[0]
         self.mass, self.Hmass, self.Dmass = Hnatural.mass, H.mass, D.mass
         self.D2Omatch = D2Omatch(self.sld, self.Dsld)
         self.charge = charge
@@ -117,8 +120,8 @@ class Sequence(Molecule):
 
     Note: rna sequence files treat T as U and dna sequence files treat U as T.
     """
-    @classmethod
-    def loadall(self, filename, type=None):
+    @staticmethod
+    def loadall(filename, type=None):
         """
         Iterate over sequences in FASTA file, loading each in turn.
 
@@ -129,8 +132,8 @@ class Sequence(Molecule):
             for name, seq in read_fasta(fh):
                 yield Sequence(name, seq, type=type)
 
-    @classmethod
-    def load(self, filename, type=None):
+    @staticmethod
+    def load(filename, type=None):
         """
         Load the first FASTA sequence from a file.
         """
@@ -149,7 +152,7 @@ class Sequence(Molecule):
         structure = []
         for p in parts:
             structure.extend(list(p.formula.structure))
-        formula = pt.formula(structure).hill
+        formula = parse_formula(structure).hill
 
         Molecule.__init__(self, name, formula,
                           cell_volume=cell_volume, charge=charge)
@@ -170,8 +173,8 @@ def _guess_type_from_filename(filename, type):
     return type
 
 # Water density at 20C; neutron wavelength doesn't matter (use 5 A).
-H2O_SLD = pt.neutron_sld(pt.formula("H2O@0.9982"), wavelength=5)[0]
-D2O_SLD = pt.neutron_sld(pt.formula("D2O@0.9982"), wavelength=5)[0]
+H2O_SLD = neutron_sld(parse_formula("H2O@0.9982"), wavelength=5)[0]
+D2O_SLD = neutron_sld(parse_formula("D2O@0.9982"), wavelength=5)[0]
 def D2Omatch(Hsld, Dsld):
     """
     Find the D2O% concentration of solvent such that neutron SLD of the
@@ -234,7 +237,7 @@ def isotope_substitution(formula, source, target, portion=1):
             atoms[source] *= 1-portion
     else:
         density = formula.density
-    return pt.formula(atoms, density=density)
+    return parse_formula(atoms, density=density)
 
 def _code_average(bases, code_table):
     """
@@ -242,7 +245,7 @@ def _code_average(bases, code_table):
     precise nucleotide is not known
     """
     n = len(bases)
-    formula, cell_volume, charge = pt.formula(), 0, 0
+    formula, cell_volume, charge = parse_formula(), 0, 0
     for c in bases:
         base = code_table[c]
         formula += base.formula
@@ -432,7 +435,7 @@ def fasta_table():
     for v in rows:
         protons = sum(num*el.number for el, num in v.formula.atoms.items())
         electrons = protons - v.charge
-        Xsld = pt.xray_sld(v.formula, wavelength=pt.Cu.K_alpha)
+        Xsld = xray_sld(v.formula, wavelength=elements.Cu.K_alpha)
         print("%20s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
             v.name, v.Hmass, v.Dmass, v.cell_volume, v.formula.density,
             electrons, Xsld[0], v.Hsld, v.Dsld, v.D2Omatch))
@@ -450,11 +453,11 @@ def test():
     assert abs(s.Dsld-2.75) < 0.01
 
     # Check that X-ray sld is independent of isotope
-    H = isotope_substitution(s.formula, pt.T, pt.H)
-    D = isotope_substitution(s.formula, pt.T, pt.D)
-    Hsld, Dsld = pt.xray_sld(H, wavelength=1.54), pt.xray_sld(D, wavelength=1.54)
+    H = isotope_substitution(s.formula, elements.T, elements.H)
+    D = isotope_substitution(s.formula, elements.T, elements.D)
+    Hsld, Dsld = xray_sld(H, wavelength=1.54), xray_sld(D, wavelength=1.54)
     #print Hsld, Dsld
     assert abs(Hsld[0]-Dsld[0]) < 1e-10
 
-if __name__=="__main__":
+if __name__ == "__main__":
     fasta_table()

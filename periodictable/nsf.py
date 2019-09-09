@@ -1489,7 +1489,7 @@ def sld_table(wavelength=1, table=None, isotopes=True):
                   %(el, el.mass, el.density, coh, jcoh, inc,
                     ' *' if el.neutron.is_energy_dependent else ''))
             if isotopes:
-                isos = [iso for iso in el if iso.neutron != None and iso.neutron.has_sld()]
+                isos = [iso for iso in el if iso.neutron is not None and iso.neutron.has_sld()]
             else:
                 isos = []
             for iso in isos:
@@ -1532,8 +1532,8 @@ def energy_dependent_table(table=None):
             dep += [str(el)]
         dep += [str(el)+'-'+str(iso.isotope)
                 for iso in el
-                if iso.neutron != None and iso.neutron.is_energy_dependent]
-        if len(dep) > 0:
+                if iso.neutron is not None and iso.neutron.is_energy_dependent]
+        if dep:
             print("    " + " ".join(dep))
 
 def _diff(iso, a, b, tol=0.01):
@@ -1612,7 +1612,6 @@ def absorption_comparison_table(table=None, tol=None):
     compare(lambda el: el.neutron.absorption,
             lambda el: -2000*el.neutron.b_c_i*ABSORPTION_WAVELENGTH,
             table=table, tol=tol)
-    return
 
 def coherent_comparison_table(table=None, tol=None):
     r"""

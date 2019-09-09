@@ -58,10 +58,10 @@ def data_files():
             files += glob.glob(os.path.join(path, p))
         return files
 
-    data_files = [('periodictable-data/xsf',
-                   _finddata('xsf', ['*.nff', 'read.me', 'f0_WaasKirf.dat'])),
-                  ('periodictable-data', _finddata('.', ['activation.dat']))]
-    return data_files
+    files = [('periodictable-data/xsf',
+              _finddata('xsf', ['*.nff', 'read.me', 'f0_WaasKirf.dat'])),
+             ('periodictable-data', _finddata('.', ['activation.dat']))]
+    return files
 
 # Export variables for each element name and symbol.
 __all__ += core.define_elements(elements, globals())

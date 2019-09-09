@@ -183,9 +183,8 @@ class Sample(object):
         # Return target time, or 0 if target time is negative
         if f(0) < target:
             return 0
-        else:
-            t, ft = find_root(0, f, df)
-            return t
+        t, ft = find_root(0, f, df)
+        return t
 
     def _accumulate(self, activity):
         for el, activity_el in activity.items():
@@ -407,9 +406,12 @@ def activity(isotope, mass, env, exposure, rest_times):
             product_2n = lam if ai.reaction == '2n' else 0
             # Column T: activity if 2n mode
             activity = root*lam*(parent_activity-parent_lam)*(
-                exp(-lam_2n*exposure) / ((parent_activity-lam_2n)*(product_2n-lam_2n))
-                + exp(-parent_activity*exposure) / ((lam_2n-parent_activity)*(product_2n-parent_activity))
-                + exp(-product_2n*exposure) / ((lam_2n-product_2n)*(parent_activity-product_2n))
+                (exp(-lam_2n*exposure)
+                 / ((parent_activity-lam_2n)*(product_2n-lam_2n)))
+                + (exp(-parent_activity*exposure)
+                   / ((lam_2n-parent_activity)*(product_2n-parent_activity)))
+                + (exp(-product_2n*exposure)
+                   / ((lam_2n-product_2n)*(parent_activity-product_2n)))
                 )
             #print("N", parent_lam, "P", effectiveXS, "Q", lam_2n,
             #      "R", parent_activity, "S", product_2n, "T", activity)
@@ -464,7 +466,6 @@ def init(table, reload=False):
                 del el[iso].neutron_activation
 
     path = os.path.join(core.get_data_path('.'), 'activation.dat')
-    lastA = 0
     for row in open(path, 'r'):
         columns = row.split('\t')
         if columns[0].strip() in ('', 'xx'):

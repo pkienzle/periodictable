@@ -182,7 +182,6 @@ __all__ = ['Xray', 'init', 'init_spectral_lines',
            'index_of_refraction', 'mirror_reflectivity',
            ]
 import os.path
-import glob
 
 import numpy
 from numpy import nan, pi, exp, sin, cos, sqrt, radians
@@ -193,7 +192,7 @@ from .constants import (avogadro_number, plancks_constant, speed_of_light,
 from .util import require_keywords
 
 def xray_wavelength(energy):
-    """
+    r"""
     Convert X-ray energy to wavelength.
 
     :Parameters:
@@ -217,7 +216,7 @@ def xray_wavelength(energy):
     return plancks_constant*speed_of_light/numpy.asarray(energy)*1e7
 
 def xray_energy(wavelength):
-    """
+    r"""
     Convert X-ray wavelength to energy.
 
     :Parameters:
@@ -378,7 +377,7 @@ class Xray(object):
 
 # Note: docs and function prototype are reproduced in __init__
 @require_keywords
-def xray_sld(compound, density=None,  natural_density=None,
+def xray_sld(compound, density=None, natural_density=None,
              wavelength=None, energy=None):
     """
     Compute xray scattering length densities for molecules.
@@ -407,7 +406,8 @@ def xray_sld(compound, density=None,  natural_density=None,
                                 natural_density=natural_density)
     assert compound.density is not None, "scattering calculation needs density"
 
-    if wavelength is not None: energy = xray_energy(wavelength)
+    if wavelength is not None:
+        energy = xray_energy(wavelength)
     assert energy is not None, "scattering calculation needs energy or wavelength"
 
     mass, sum_f1, sum_f2 = 0, 0, 0
@@ -454,11 +454,12 @@ def index_of_refraction(compound, density=None, natural_density=None,
     Formula taken from http://xdb.lbl.gov (section 1.7) and checked
     against http://henke.lbl.gov/optical_constants/getdb2.html
     """
-    if energy is not None: wavelength = xray_wavelength(energy)
-    assert wavelength is not None,  "scattering calculation needs energy or wavelength"
+    if energy is not None:
+        wavelength = xray_wavelength(energy)
+    assert wavelength is not None, "scattering calculation needs energy or wavelength"
     f1, f2 = xray_sld(compound,
-                     density=density, natural_density=natural_density,
-                     wavelength=wavelength)
+                      density=density, natural_density=natural_density,
+                      wavelength=wavelength)
     return 1 - wavelength**2/(2*pi)*(f1 + f2*1j)*1e-6
 
 @require_keywords
@@ -493,11 +494,14 @@ def mirror_reflectivity(compound, density=None, natural_density=None,
     Formula taken from http://xdb.lbl.gov (section 4.2) and checked
     against http://henke.lbl.gov/optical_constants/mirror2.html
     """
-    if energy is not None: wavelength = xray_wavelength(energy)
+    if energy is not None:
+        wavelength = xray_wavelength(energy)
     assert wavelength is not None, "scattering calculation needs energy or wavelength"
     angle = radians(angle)
-    if (numpy.isscalar(wavelength)): wavelength=numpy.array( [wavelength] )
-    if (numpy.isscalar(angle))     : angle =numpy.array( [angle] )
+    if numpy.isscalar(wavelength):
+        wavelength = numpy.array([wavelength])
+    if numpy.isscalar(angle):
+        angle = numpy.array([angle])
     nv = index_of_refraction(compound=compound,
                              density=density, natural_density=natural_density,
                              wavelength=wavelength)
@@ -507,11 +511,11 @@ def mirror_reflectivity(compound, density=None, natural_density=None,
     return abs(r)**2
 
 
-def xray_sld_from_atoms(*args,  **kw):
+def xray_sld_from_atoms(*args, **kw):
     """
     .. deprecated:: 0.91
 
-        :func:`xray_sld` now accepts a dictionary of \{atom\: count\} directly.
+        :func:`xray_sld` now accepts a dictionary of *{atom: count}* directly.
     """
     return xray_sld(*args, **kw)
 
@@ -624,7 +628,8 @@ def init_spectral_lines(table):
 
 def init(table, reload=False):
 
-    if 'xray' in table.properties and not reload: return
+    if 'xray' in table.properties and not reload:
+        return
     table.properties.append('xray')
 
     # Create an xray object for the particular element/ion.  Note that
@@ -699,7 +704,8 @@ def sld_table(wavelength=None, table=None):
           ...
     """
     table = default_table(table)
-    if wavelength == None: wavelength = table.Cu.K_alpha
+    if wavelength is None:
+        wavelength = table.Cu.K_alpha
 
     # NBCU spreadsheet format
     print("X-ray scattering length density for %g Ang"%wavelength)
@@ -735,4 +741,3 @@ def emission_table(table=None):
     for el in table:
         if hasattr(el, 'K_alpha'):
             print("%3s %7.4f %7.4f"%(el.symbol, el.K_alpha, el.K_beta1))
-

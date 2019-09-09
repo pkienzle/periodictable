@@ -66,8 +66,7 @@ def density(iso_el):
 
     if hasattr(iso_el, 'element'):
         return iso_el.element._density * (iso_el.mass/iso_el.element.mass)
-    else:
-        return iso_el._density
+    return iso_el._density
 
 def interatomic_distance(element):
     r"""
@@ -133,13 +132,15 @@ def number_density(element):
             = atoms\cdot cm^{-3}
 
     """
-
-    if hasattr(element, 'isotope'): element = element.element
-    if element.density is None or element.mass is None: return None
+    if hasattr(element, 'isotope'):
+        element = element.element
+    if element.density is None or element.mass is None:
+        return None
     return (element.density/element.mass)*avogadro_number
 
 def init(table, reload=False):
-    if 'density' in table.properties and not reload: return
+    if 'density' in table.properties and not reload:
+        return
     table.properties.append('density')
     Isotope.density \
         = property(density, "density using inter-atomic spacing from naturally occurring form")

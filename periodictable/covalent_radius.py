@@ -88,10 +88,10 @@ def init(table, reload=False):
         if fields[0] == '-':
             continue  # Skip alternate spin states
         Z = int(fields[0])
-        el = fields[1]
+        #el = fields[1]
         r = float(fields[2])
         dr = float(fields[3])*0.01
-        n = int(fields[4])
+        #n = int(fields[4])
 
         table[Z].covalent_radius = r
         table[Z].covalent_radius_uncertainty = dr

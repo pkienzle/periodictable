@@ -47,6 +47,16 @@ Source links:
 Change history
 ==============
 
+1.5.1 2019-09-09
+----------------
+
+Modified:
+
+* fasta uses natural abundance of H for biomolecule when computing the
+  D2O contrast match rather than the biomolecule with pure H[1].
+* remove half-life units from column header in activation table since
+  each row gives its own units.
+
 1.5.0 2017-05-11
 ----------------
 

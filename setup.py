@@ -5,13 +5,16 @@ import os
 from setuptools import setup, find_packages
 #import fix_setuptools_chmod
 
-import periodictable
+version = None
+for line in open(os.path.join("periodictable", "__init__.py")):
+    if "__version__" in line:
+        version = line.split('"')[1]
 
 if len(sys.argv) == 1:
     sys.argv.append('install')
 dist = setup(
         name = 'periodictable',
-        version = periodictable.__version__,
+        version = version,
         author='Paul Kienzle',
         author_email='pkienzle@gmail.com',
         license='public domain',

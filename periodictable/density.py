@@ -176,7 +176,7 @@ element_densities = dict(
     Li=0.534,
     Be=1.848,
     B=2.34,
-    C=(2.1, "1.9-2.3 (graphite)"),
+    C=(2.2, "1.9-2.3 (graphite); CXRO, RSC and CRC use 2.2; NIST Xray tables use 2.26"),
     N=(0.808, "T=-195.79"),
     O=(1.14, "T=-182.95"),
     F=(1.50, "T=-188.12"),

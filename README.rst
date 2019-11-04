@@ -47,6 +47,18 @@ Source links:
 Change history
 ==============
 
+1.5.2 pending
+----------------
+
+Modified:
+
+* Carbon density changed from 2.1 to 2.2 to match CXRO, CRC and RSC. The NIST
+  X-ray attenuation tables use 2.26; the Handbook of Mineralogy has 2.09-2.23.
+  The Neutron Data Booklet gave the value as 1.9-2.3, and 2.1 was chosen
+  from this range.  The remaining density will continue to use values from the
+  Neutron Data Booklet, which cites CRC as the primary source.
+* Updated references.
+
 1.5.1 2019-09-09
 ----------------
 

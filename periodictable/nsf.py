@@ -93,6 +93,7 @@ associated with the periodictable package.
     Neutron Scattering Lengths in ILL
     Neutron Data Booklet (second edition), A.-J. Dianoux, G. Lander, Eds.
     Old City Publishing, Philidelphia, PA. pp 1.1-1 to 1.1-17.
+    (https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf)
 
 .. [#Rauch2000] Rauch, H. and Waschkowski, W. (2000)
     Neutron scattering lengths. Schopper, H. (ed.).
@@ -106,10 +107,12 @@ associated with the periodictable package.
     Resonance effects in neutron scattering lengths of rare-earth nuclides.
     Atomic Data and Nuclear Data Tables 44, 191-207.
 
-.. [#Sears1999] Sears, V. F. (1999)
+.. [#Sears2006] Sears, V. F. (2006)
     4.4.4 Scattering lengths for neutrons.
-    In Wilson & Prince eds. Intl. Tables for Crystallography C
-    Kluwer Academic Publishers. pp 383.
+    In Prince, E. ed. Intl. Tables for Crystallography C
+    Kluwer Academic Publishers. pp 444-454.
+    (https://it.iucr.org/Cb/ch4o4v0001/sec4o4o4/)
+    doi: 10.1107/97809553602060000103
 
 .. [#Sears1992] Sears, V.F. (1992)
     Neutron scattering lengths and cross sections.

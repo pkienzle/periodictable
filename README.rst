@@ -47,7 +47,7 @@ Source links:
 Change history
 ==============
 
-1.5.2 pending
+1.5.2 2019-11-19
 ----------------
 
 Modified:

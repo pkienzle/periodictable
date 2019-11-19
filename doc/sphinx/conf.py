@@ -221,14 +221,39 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
 LATEX_PREAMBLE=r"""
 \renewcommand{\AA}{\text{\r{A}}} % Allow \AA in math mode
 \usepackage[utf8]{inputenc}      % Allow unicode symbols in text
-\DeclareUnicodeCharacter {00B7} {\ensuremath{\cdot}}   % cdot
-\DeclareUnicodeCharacter {00B0} {\ensuremath{^\circ}}  % degrees
-\DeclareUnicodeCharacter {212B} {\AA}                  % Angstrom
+\ifdefined\DeclareUnicodeCharacter
+  \DeclareUnicodeCharacter{00B7}{\ensuremath{\cdot}}   % cdot
+  \DeclareUnicodeCharacter{00B0}{\ensuremath{^\circ}}  % degrees
+  \DeclareUnicodeCharacter{212B}{\AA}                  % Angstrom
+\else
+% substitute workaround for missing unicode characters (see conf.py)
+\fi
 """
+# Note: When building with unicode-aware latex program tectonic some
+# characters are not showing up in the pdf, with errors like the following:
+#
+#    warning: could not represent character "Å" in font "ptmr8t"
+#
+# This is true for the following characters:
+#
+#    … = \ldots (ellipsis)
+#    ’ = '  (close single)
+#    “ = `` (open double)
+#    Å = \r{A} (Angstrom)
+#
+# The following do not appear even though they might be expected to:
+#
+#    · = \cdot (center dot)
+#    ° = ^\circ  (degrees)
+#
+# Attempted workaround failed:
+#
+#    \catcode`\Å=\active
+#    \def Å{\AA}%
+#
 latex_elements = {'preamble' : LATEX_PREAMBLE}
 
 # Documents to append as an appendix to all manuals.

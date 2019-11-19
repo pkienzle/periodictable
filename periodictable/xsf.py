@@ -694,7 +694,7 @@ def sld_table(wavelength=None, table=None):
          Li   3.92   0.00
          Be  13.93   0.01
           B  18.40   0.01
-          C  17.86   0.03
+          C  18.71   0.03
           N   6.88   0.02
           O   9.74   0.04
           F  12.16   0.07

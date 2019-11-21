@@ -29,20 +29,26 @@ There are several web interfaces to this package:
 * `Forschungs-Neutronenquelle Heinz Maier-Leibnitz (FRM II) <https://webapps.frm2.tum.de/intranet/activation/>`_
 * `SLD Calulator <https://sld-calculator.appspot.com/>`_
 
+Documentation is `available online <https://periodictable.readthedocs.io>`_.
+
 Source links:
 
 * https://github.com/pkienzle/periodictable
 * https://github.com/scattering/activation
 
-|TravisStatus|_ |DOI|_
+|TravisStatus|_ |DOI|_ |RTD|_
 
 .. |TravisStatus| image:: https://travis-ci.org/pkienzle/periodictable.svg?branch=master
+:alt: Build status
 .. _TravisStatus: https://travis-ci.org/pkienzle/periodictable
 
-
 .. |DOI| image:: https://zenodo.org/badge/1146700.svg
+:alt: DOI tag
 .. _DOI: https://zenodo.org/badge/latestdoi/1146700
 
+.. |RTD| image:: https://readthedocs.org/projects/periodictable/badge/?version=latest
+:alt: Documentation status
+.. _RTD: https://periodictable.readthedocs.io/en/latest/?badge=latest
 
 Change history
 ==============

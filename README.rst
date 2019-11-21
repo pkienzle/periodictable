@@ -23,6 +23,10 @@ values differ from those given in other sources such as the
 International Tables for Crystallography, Volume C, and so may
 give different results from other packages.
 
+Install using::
+
+    pip install periodictable
+
 There are several web interfaces to this package:
 
 * `NIST Center for Neutron Research (NCNR) <https://www.ncnr.nist.gov/resources/activation>`_

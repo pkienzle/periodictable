@@ -36,19 +36,19 @@ Source links:
 * https://github.com/pkienzle/periodictable
 * https://github.com/scattering/activation
 
-|TravisStatus|_ |RTD|_ |DOI|_
+|Travis| |RTD| |DOI|
 
-.. |TravisStatus| image:: https://travis-ci.org/pkienzle/periodictable.svg?branch=master
+.. |Travis| image:: https://travis-ci.org/pkienzle/periodictable.svg?branch=master
    :alt: Build status
-.. _TravisStatus: https://travis-ci.org/pkienzle/periodictable
+   :target: https://travis-ci.org/pkienzle/periodictable
 
 .. |DOI| image:: https://zenodo.org/badge/1146700.svg
    :alt: DOI tag
-.. _DOI: https://zenodo.org/badge/latestdoi/1146700
+   :target: https://zenodo.org/badge/latestdoi/1146700
 
 .. |RTD| image:: https://readthedocs.org/projects/periodictable/badge/?version=latest
    :alt: Documentation status
-.. _RTD: https://periodictable.readthedocs.io/en/latest/?badge=latest
+   :target: https://periodictable.readthedocs.io/en/latest/?badge=latest
 
 Change history
 ==============

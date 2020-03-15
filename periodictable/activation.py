@@ -1,4 +1,7 @@
 # -*- coding: iso-8859-15 -*-
+# This program is public domain
+# Author: Paul Kienzle
+# Based on spreadsheet by Les Slaback (1998).
 r"""
 Calculate expected neutron activation from time spent in beam line.
 

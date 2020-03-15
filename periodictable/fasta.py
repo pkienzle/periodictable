@@ -1,3 +1,5 @@
+# This program is public domain
+# Author: Paul Kienzle
 """
 Biomolecule support.
 

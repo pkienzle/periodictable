@@ -42,4 +42,4 @@ def test():
     assert str(privateH2O) == str(publicH2O)
     assert privateH2O == publicH2O.change_table(private)
     private.H._mass = 1
-    assert formula('H2',table=private).mass == 2
+    assert formula('H2', table=private).mass == 2

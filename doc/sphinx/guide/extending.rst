@@ -6,7 +6,7 @@ Adding properties
 
 The periodic table is extensible.  Third party packages can
 add attributes to the table, and they will appear in all of
-the elements.  
+the elements.
 
 In order to add a new property to the table, you need to define
 a python package which contains the required information, and can
@@ -39,7 +39,7 @@ package init file ``discoverer/__init__.py``:
 The first argument to delayed_load is the list of all attributes that will
 be defined when the module is loaded.  The second argument is the loading
 function, whose docstring will appear as the attribute description for
-each attribute in the first list.  
+each attribute in the first list.
 
 Check that it works:
 
@@ -55,7 +55,7 @@ Isotope and ion specific data is also supported.  In this case we
 need a data table that contains information for each isotope of
 each element.  The following example uses a dictionary of elements,
 with a dictionary of isotopes for each.  It adds the ``shells``
-attribute to Fe[56] and Fe[58]. 
+attribute to Fe[56] and Fe[58].
 
 Define ``shelltable/core.py``:
 
@@ -68,8 +68,8 @@ keyword in the ``delayed_load`` call.  If we don't, then the magic we
 use to return the correct value after loading the new table information
 fails.  Since unknown attributes are delegated to the underlying
 element, the value for the natural abundance will be returned
-instead.  On subsequent calls the isotope specific value will be 
-returned.  
+instead.  On subsequent calls the isotope specific value will be
+returned.
 
 This is demonstrated in ``shelltable/__init__.py``:
 
@@ -80,7 +80,7 @@ Check that it works:
 
 .. doctest::
 
-    >>> import shelltable 
+    >>> import shelltable
     >>> import periodictable
     >>> print(periodictable.Fe[56].shells)
     56-Fe shell info
@@ -91,10 +91,10 @@ Check that it works:
 Ion specific data is more complicated, particularly because of the
 interaction with isotopes.  For example, ``Ni[58].ion[3]`` should have
 the same neutron scattering factors as ``Ni[58]`` (the neutron is
-only sensitive to the nucleus), but different scattering factors 
+only sensitive to the nucleus), but different scattering factors
 from ``Ni.ion[3]``.  X-rays are sensitive to the electronic structure
-of the atom and not the nucleus, so ``Ni[58].ion[3].xray.f0(Q)`` 
-and ``Ni.ion[3].xray.f0(Q)`` are the same but different 
+of the atom and not the nucleus, so ``Ni[58].ion[3].xray.f0(Q)``
+and ``Ni.ion[3].xray.f0(Q)`` are the same but different
 from ``Ni.xray.f0(Q)``.
 
 Current support for ion dependent properties is awkward.  The X-ray
@@ -102,7 +102,7 @@ table :mod:`periodictable.xsf` creates a specialized structure
 for each ion as it is requested.  The magnetic form factor table
 :mod:`periodictable.magnetic_ff` does not try to support ``ion.magnetic_ff``
 directly, but instead the user must request ``ion.magnetic_ff[ion.charge]``.
-Support for ion mass, which is isotope mass adjusted for the number of 
+Support for ion mass, which is isotope mass adjusted for the number of
 electrons is built into the Ion class.  There are not yet any examples of
 extension tables that depend on both isotope and ion.
 

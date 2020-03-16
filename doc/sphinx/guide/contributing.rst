@@ -31,8 +31,8 @@ doctests on all of our examples that we know our documentation is correct.
 More thorough tests are found in test directory.  Using the the nose test
 package, you can run both sets of tests::
 
-    pip install nose
-    python test.py
+    pip install pytest pytest-cov
+    pytest
 
 When all the tests run, create a pull request (PR) on the github page.
 

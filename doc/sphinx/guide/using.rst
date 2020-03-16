@@ -27,8 +27,9 @@ Access particular elements as symbols:
     >>> from periodictable import H,B,Cu,Ni
     >>> print("B absorption %s"%B.neutron.absorption)
     B absorption 767.0
-    >>> print("Ni f1/f2 for Cu K-alpha X-rays %s"%str(Ni.xray.scattering_factors(wavelength=Cu.K_alpha)))
-    Ni f1/f2 for Cu K-alpha X-rays (25.022929905648375, 0.52493074546535157)
+    >>> print("Ni f1/f2 for Cu K-alpha X-rays f'=%.5f f''=%.5f"
+    ...       % Ni.xray.scattering_factors(wavelength=Cu.K_alpha))
+    Ni f1/f2 for Cu K-alpha X-rays f'=25.02293 f''=0.52493
 
 Access isotopes using mass number subscripts:
 
@@ -123,8 +124,9 @@ for the ion index:
 
     >>> import periodictable
     >>> Fe_2 = periodictable.Fe.ion[2]
-    >>> print(Fe_2.magnetic_ff[Fe_2.charge].M_Q([0,0.1,0.2]))
-    [ 1.          0.99935255  0.99741366]
+    >>> print("[%.5f, %.5f, %.5f]"
+    ...       % tuple(Fe_2.magnetic_ff[Fe_2.charge].M_Q([0,0.1,0.2])))
+    [1.00000, 0.99935, 0.99741]
 
 The following is a plot of the magnetic form factor vs. Q:
 

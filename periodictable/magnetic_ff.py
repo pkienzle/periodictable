@@ -63,8 +63,9 @@ class MagneticFormFactor(object):
 
         >>> import periodictable
         >>> ion = periodictable.Fe.ion[2]
-        >>> print(ion.magnetic_ff[ion.charge].M_Q([0, 0.1, 0.2]))
-        [ 1.          0.99935255  0.99741366]
+        >>> print("[%.5f, %.5f, %.5f]"
+        ...       % tuple(ion.magnetic_ff[ion.charge].M_Q([0, 0.1, 0.2])))
+        [1.00000, 0.99935, 0.99741]
 
     """
 

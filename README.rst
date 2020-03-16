@@ -57,6 +57,13 @@ Source links:
 Change history
 ==============
 
+1.5.3a1
+----------------
+
+Modified:
+
+* Switch unit test framework from nose to pytest.
+
 1.5.2 2019-11-19
 ----------------
 

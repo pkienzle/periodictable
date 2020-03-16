@@ -3,7 +3,6 @@ import sys
 import os
 
 from setuptools import setup, find_packages
-#import fix_setuptools_chmod
 
 version = None
 for line in open(os.path.join("periodictable", "__init__.py")):
@@ -41,6 +40,7 @@ setup(
     },
     #data_files = periodictable.data_files(),
     install_requires=['pyparsing', 'numpy'],
+    tests_require=['pytest', 'pytest-cov'],
 )
 
 # End of file

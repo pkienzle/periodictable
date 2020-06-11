@@ -22,7 +22,7 @@ Example:
     >>> scale = elements.H[1].mass
     >>> for el in mytable:
     ...    el._mass /= scale
-    ...    if hasattr(el,'_density') and el._density != None: 
+    ...    if hasattr(el,'_density') and el._density is not None:
     ...        el._density /= scale
     ...    for iso in el:
     ...        iso._mass /= scale

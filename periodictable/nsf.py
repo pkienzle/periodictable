@@ -1025,7 +1025,7 @@ def sld_plot(table=None):
 #   respectively
 # c
 #   'E' if there is a strong energy dependency.
-#   '+/-' if separate b+/b- values are available [doesn't seem true -PAK]
+#   '+/-' if separate b+/b- values are available [PAK: doesn't seem true]
 # coherent, incoherent, total
 #   The coherent and incoherent scattering cross-sections in barns.
 # absorption

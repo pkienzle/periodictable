@@ -4,9 +4,9 @@
 Periodic Table of Elements
 ##########################
 
-The periodictable package provides an extensible periodic table with various 
-properties of the elements like name, symbol, mass, desnity etc and also 
-provides data important to neutron and X-ray scattering experiments. With the 
+The periodictable package provides an extensible periodic table with various
+properties of the elements like name, symbol, mass, desnity etc and also
+provides data important to neutron and X-ray scattering experiments. With the
 elements package you can compute the scattering potential of a compound at a
 given wavelength.
 
@@ -25,7 +25,7 @@ Features
 ********
 
 Standard properties
-   Name, symbol, :mod:`mass <periodictable.mass>` and 
+   Name, symbol, :mod:`mass <periodictable.mass>` and
    :mod:`density <periodictable.density>` of elements are built in.
 
 :class:`Chemical Formula <periodictable.formulas.Formula>`
@@ -43,8 +43,8 @@ Standard properties
    elements, isotopes, and formulas.
 
 :ref:`Extensible <extending>`
-   New properties can be added to the :class:`Periodic Table <periodictable.core.PeriodicTable>` 
-   from outside the package.  Specialized tables can be created with 
+   New properties can be added to the :class:`Periodic Table <periodictable.core.PeriodicTable>`
+   from outside the package.  Specialized tables can be created with
    alternatives to the standard values.
 
 :ref:`Data Sources <data-sources>`

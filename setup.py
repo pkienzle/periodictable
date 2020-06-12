@@ -17,7 +17,7 @@ setup(
     author='Paul Kienzle',
     author_email='pkienzle@gmail.com',
     license='public domain',
-    url='http://www.reflectometry.org/danse/elements.html',
+    url='https://github.com/pkienzle/periodictable',
     description='Extensible periodic table of the elements',
     long_description=open('README.rst').read() if os.path.exists('README.rst') else None,
     classifiers=[

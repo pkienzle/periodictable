@@ -674,8 +674,8 @@ def neutron_scattering(compound, density=None,
 
     Similarly, the absorption cross section $\sigma_a$, the incoherent cross
     section $\sigma_i$, and the total cross section $\sigma_s$ can be computed
-    from the corresponding cross sections of the constituent elements,\ [#Sears1999]_
-    already expressed in barns:
+    from the corresponding cross sections of the constituent
+    elements,\ [#Sears2006]_ already expressed in barns:
 
     .. math::
 
@@ -697,7 +697,7 @@ def neutron_scattering(compound, density=None,
     are only valid for 1.798 |Ang|.
 
     From the scattering cross sections, the scattering length for a material
-    $b = b' - i b''$ can be computed using the following relations:[#Sears1999]_
+    $b = b' - i b''$ can be computed using the following relations:[#Sears2006]_
 
     .. math::
 

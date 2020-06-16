@@ -26,8 +26,7 @@ X-ray scattering factors
    `Center for X-Ray Optics <http://www-cxro.lbl.gov/>`_
 
 Neutron activation
-    `IAEA (1987) Handbook on Nuclear Activation Data. TR 273 (International Atomic Energy Agency, Vienna, Austria, 1987).
-<http://cds.cern.ch/record/111089/files/IAEA-TR-273.pdf>`_
+    `IAEA (1987) Handbook on Nuclear Activation Data. TR 273 (International Atomic Energy Agency, Vienna, Austria, 1987). <http://cds.cern.ch/record/111089/files/IAEA-TR-273.pdf>`_
 
     Shleien, B., Slaback, L.A., Birky, B.K., (1998).
     *Handbook of health physics and radiological health*.

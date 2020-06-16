@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
+import io
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -269,5 +271,6 @@ autoclass_content = 'both'
 autodoc_member_order = 'groupwise'
 
 if os.path.exists('rst_prolog'):
-    with open('rst_prolog') as fid:
+    with io.open('rst_prolog', encoding='utf-8') as fid:
         rst_prolog = fid.read()
+

@@ -14,6 +14,7 @@ and if you want to know in detail about Periodic Table, refer to the
    :Release: |version|
    :Date: |today|
 
+
 .. toctree::
    :maxdepth: 2
 
@@ -26,4 +27,3 @@ and if you want to know in detail about Periodic Table, refer to the
    data_sources.rst
    contributing.rst
    license.rst
-   

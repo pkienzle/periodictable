@@ -3,21 +3,22 @@
 r"""
 Allow $math$ markup in text and docstrings, ignoring \$.
 
-The $math$ markup should be separated from the surrounding text by spaces.  To
-embed markup within a word, place backslash-space before and after.  For
+The $math$ markup should be separated from the surrounding text by spaces.
+To embed markup within a word, place backslash-space before and after. For
 convenience, the final $ can be followed by punctuation (period, comma or
 semicolon).
 """
 
 import re
 
-_dollar = re.compile(r"(?:^|(?<=\s|[-(]))[$]([^\n]*?)(?<![\\])[$](?:$|(?=\s|[-.,;:?\\)]))")
-_notdollar = re.compile(r"\\[$]")
+_DOLLAR = re.compile(
+    r"(?:^|(?<=\s|[-(]))[$]([^\n]*?)(?<![\\])[$](?:$|(?=\s|[-.,;:?\\)]))")
+_NOTDOLLAR = re.compile(r"\\[$]")
 
 def replace_dollar(content):
-    original = content
-    content = _dollar.sub(r":math:`\1`",content)
-    content = _notdollar.sub("$", content)
+    #original = content
+    content = _DOLLAR.sub(r":math:`\1`", content)
+    content = _NOTDOLLAR.sub("$", content)
     #if '$' in content:
     #    import sys
     #    sys.stdout.write("\n========> not converted\n")
@@ -42,25 +43,28 @@ def setup(app):
 
 
 def test_dollar():
-    assert replace_dollar(u"no dollar")==u"no dollar"
-    assert replace_dollar(u"$only$")==u":math:`only`"
-    assert replace_dollar(u"$first$ is good")==u":math:`first` is good"
-    assert replace_dollar(u"so is $last$")==u"so is :math:`last`"
-    assert replace_dollar(u"and $mid$ too")==u"and :math:`mid` too"
-    assert replace_dollar(u"$first$, $mid$, $last$")==u":math:`first`, :math:`mid`, :math:`last`"
-    assert replace_dollar(u"dollar\$ escape")==u"dollar$ escape"
-    assert replace_dollar(u"dollar \$escape\$ too")==u"dollar $escape$ too"
-    assert replace_dollar(u"spaces $in the$ math")==u"spaces :math:`in the` math"
-    assert replace_dollar(u"emb\ $ed$\ ed")==u"emb\ :math:`ed`\ ed"
-    assert replace_dollar(u"$first$a")==u"$first$a"
-    assert replace_dollar(u"a$last$")==u"a$last$"
-    assert replace_dollar(u"$37")==u"$37"
-    assert replace_dollar(u"($37)")==u"($37)"
-    assert replace_dollar(u"$37 - $43")==u"$37 - $43"
-    assert replace_dollar(u"($37, $38)")==u"($37, $38)"
-    assert replace_dollar(u"a $mid$dle a")==u"a $mid$dle a"
-    assert replace_dollar(u"a ($in parens$) a")==u"a (:math:`in parens`) a"
-    assert replace_dollar(u"a (again $in parens$) a")==u"a (again :math:`in parens`) a"
+    assert replace_dollar(u"no dollar") == u"no dollar"
+    assert replace_dollar(u"$only$") == u":math:`only`"
+    assert replace_dollar(u"$first$ is good") == u":math:`first` is good"
+    assert replace_dollar(u"so is $last$") == u"so is :math:`last`"
+    assert replace_dollar(u"and $mid$ too") == u"and :math:`mid` too"
+    assert (replace_dollar(u"$first$, $mid$, $last$")
+            == u":math:`first`, :math:`mid`, :math:`last`")
+    assert replace_dollar(u"dollar\\$ escape") == u"dollar$ escape"
+    assert replace_dollar(u"dollar \\$escape\\$ too") == u"dollar $escape$ too"
+    assert (replace_dollar(u"spaces $in the$ math")
+            == u"spaces :math:`in the` math")
+    assert replace_dollar(u"emb\\ $ed$\\ ed") == u"emb\\ :math:`ed`\\ ed"
+    assert replace_dollar(u"$first$a") == u"$first$a"
+    assert replace_dollar(u"a$last$") == u"a$last$"
+    assert replace_dollar(u"$37") == u"$37"
+    assert replace_dollar(u"($37)") == u"($37)"
+    assert replace_dollar(u"$37 - $43") == u"$37 - $43"
+    assert replace_dollar(u"($37, $38)") == u"($37, $38)"
+    assert replace_dollar(u"a $mid$dle a") == u"a $mid$dle a"
+    assert replace_dollar(u"a ($in parens$) a") == u"a (:math:`in parens`) a"
+    assert (replace_dollar(u"a (again $in parens$) a")
+            == u"a (again :math:`in parens`) a")
 
 if __name__ == "__main__":
     test_dollar()

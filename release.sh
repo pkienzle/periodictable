@@ -5,7 +5,7 @@
 # Build an official elements package release
 #
 # Releasing this package requires some setup in your local environment
-#    nosetests and coverage package
+#    pytest
 #    sphinx and latex
 #    reflectometry.org server key for updating docs
 #    ~/.pypirc should be defined
@@ -17,7 +17,7 @@
 # [distutils]
 # index-servers =
 #     pypi
-#   
+#
 # [pypi]
 # username:...
 # password:...

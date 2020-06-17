@@ -767,7 +767,7 @@ def neutron_scattering(compound, density=None,
     Transmission rate can be computed from $e^{-d/t_u}$ for penetration
     depth $t_u$ and sample thickness $d$. This does not include many
     real world effects, such as single phonon scattering\ [#Mildner1998]_
-    and forward scattering\ [#May1983]_, which result in measured
+    and forward scattering\ [#May1982]_, which result in measured
     transmission significantly different from the values predicted from
     nuclear properties alone.
 

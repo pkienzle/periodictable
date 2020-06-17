@@ -4,22 +4,29 @@ import os
 
 from setuptools import setup, find_packages
 
-version = None
-for line in open(os.path.join("periodictable", "__init__.py")):
+ROOT = os.path.join(os.path.dirname(__file__))
+
+VERSION = None
+for line in open(os.path.join(ROOT, "periodictable", "__init__.py")):
     if "__version__" in line:
-        version = line.split('"')[1]
+        VERSION = line.split('"')[1]
 
 if len(sys.argv) == 1:
     sys.argv.append('install')
+
+def readtext(path):
+    with open(os.path.join(ROOT, path)) as fid:
+        return fid.read()
+
 setup(
     name='periodictable',
-    version=version,
+    version=VERSION,
     author='Paul Kienzle',
     author_email='pkienzle@gmail.com',
     license='public domain',
     url='https://github.com/pkienzle/periodictable',
     description='Extensible periodic table of the elements',
-    long_description=open('README.rst').read() if os.path.exists('README.rst') else None,
+    long_description=readtext('README.rst'),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',

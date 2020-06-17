@@ -14,5 +14,5 @@ install:
   - pip install .
 
 script:
-  - pytest
+  - pytest -v
   - if [ -n "$BUILDDOC" ]; then make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html; fi

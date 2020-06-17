@@ -96,20 +96,21 @@ associated with the periodictable package.
     (https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf)
 
 .. [#Rauch2000] Rauch, H. and Waschkowski, W. (2000)
-    Neutron scattering lengths. Schopper, H. (ed.).
-    SpringerMaterials - The Landolt-Börnstein Database (http://www.springermaterials.com).
+    Neutron scattering lengths. Schopper, H. (ed.). SpringerMaterials -
+    The Landolt-Börnstein Database (http://www.springermaterials.com).
     doi: 10.1007/10499706_6
 
 .. [#Koester1991] Koester, L., Rauch, H., Seymann. E. (1991)
-    Atomic Data Nuclear Data Tables 49, 65
+    Atomic Data Nuclear Data Tables 49, 65. doi:10.1016/0092-640X(91)90012-S
 
 .. [#Lynn1990] Lynn, J.E. and Seeger, P.A. (1990)
     Resonance effects in neutron scattering lengths of rare-earth nuclides.
     Atomic Data and Nuclear Data Tables 44, 191-207.
+    doi:10.1016/0092-640X(90)90013-A
 
 .. [#Sears2006] Sears, V. F. (2006)
     4.4.4 Scattering lengths for neutrons.
-    In Prince, E. ed. Intl. Tables for Crystallography C
+    In Prince, E. ed. Intl. Tables for Crystallography C.
     Kluwer Academic Publishers. pp 444-454.
     (https://it.iucr.org/Cb/ch4o4v0001/sec4o4o4/)
     doi: 10.1107/97809553602060000103
@@ -120,18 +121,20 @@ associated with the periodictable package.
 
 .. [#May1982] May, R.P.,  Ibel, K. and Haas, J. (1982)
     The forward scattering of cold neutrons by mixtures of light and heavy water.
-    J. Appl. Cryst. 15, 15-19.
+    J. Appl. Cryst. 15, 15-19. doi:10.1107/S0021889882011285
+
+.. [#Mildner1998] Mildner, D.F.R., Lamaze, G.P. (1998)
+   Neutron Transmission of Single-Crystal Sapphire.
+   J Appl Crystallogr 31, 835–840. doi:10.1107/S0021889898005846
 
 .. [#Smith2006] Smith, G.S. and Majkrzak, C.M. (2006)
     2.9 Neutron reflectometry.
-    In E. Prince ed. Intl. Tables for Crystallography C
-    Wiley InterScience. pp 126-146.
-    doi: 10.1107/97809553602060000584
+    In E. Prince ed. Intl. Tables for Crystallography C.
+    Wiley InterScience. pp 126-146. doi: 10.1107/97809553602060000584
 
 .. [#Glinka2011] Glinka, C.J. (2011)
     Incoherent Neutron Scattering from Multi-element Materials.
-    J. Appl. Cryst. 44, 618-624.
-    doi: 10.1107/S0021889811008223
+    J. Appl. Cryst. 44, 618-624. doi: 10.1107/S0021889811008223
 """
 from __future__ import print_function
 
@@ -422,7 +425,7 @@ class Neutron(object):
 
         number_density = self._number_density*1e-24
 
-        # PAK 2017-04-21: compute incoherent cross section from total cross section
+        # PAK 2017-04-21: compute incoherent xs from total xs
         sigma_c = 4*pi/100 * b_c**2
         sigma_i = max(sigma_s - sigma_c, 0.)
 
@@ -469,7 +472,7 @@ class Neutron(object):
 
         number_density = self._number_density*1e-24
 
-        # PAK 2017-04-21: compute incoherent cross section from total cross section
+        # PAK 2017-04-21: compute incoherent xs from total xs
         sigma_c = 4*pi/100 * b_c**2
         sigma_i = max(sigma_s - sigma_c, 0.)
 
@@ -574,7 +577,8 @@ def init(table, reload=False):
     # Xe total cross section is missing from the table
     # put it in even though it has not been independently measured
     if table.Xe.neutron.total is None:
-        table.Xe.neutron.total = table.Xe.neutron.coherent + table.Xe.neutron.incoherent
+        table.Xe.neutron.total = (
+            table.Xe.neutron.coherent + table.Xe.neutron.incoherent)
 
 
 # Note: docs and function prototype are reproduced in __init__
@@ -702,7 +706,8 @@ def neutron_scattering(compound, density=None,
     .. math::
 
         \sigma_c &= 4 \pi |b_c|^2 \\
-        \sigma_a &= \left. 4 \pi \left< b'' \right> \right/k \ {\rm for} \ k=2\pi / \lambda \\
+        \sigma_a &= \left. 4 \pi \left< b'' \right> \right/k
+            \ {\rm for} \ k=2\pi / \lambda \\
         \sigma_i &= 4 \pi |b_i|^2 \\
         \sigma_s &= 4 \pi \left< |b|^2 \right>
 
@@ -727,12 +732,13 @@ def neutron_scattering(compound, density=None,
         \rho_{\rm im}  &= -N b'' / 100 \\
         \rho_{\rm inc} &= 10 N b_i
 
-    with the factors of 10 chosen to give SLD in units of $\AA^{-2}$.  The
+    with the factors of 10 chosen to give SLD in units of $\AA^{-2}$. The
     resulting $\rho = \rho_{\rm re} + i \rho_{\rm im}$ can be used in the
-    scattering equations.  Treatment of the incoherent scattering $\rho_{\rm inc}$
-    will depend on the equation.  For example, it can be treated as an absorption
-    in specular reflectivity calculations since the incoherently scattered neutrons
-    are removed from the multilayer recurrence calculation.
+    scattering equations. Treatment of the incoherent scattering
+    $\rho_{\rm inc}$ will depend on the equation. For example, it can be
+    treated as an absorption in specular reflectivity calculations since the
+    incoherently scattered neutrons are removed from the multilayer
+    recurrence calculation.
 
     Similarly, scattering cross section includes number density:
 
@@ -744,7 +750,7 @@ def neutron_scattering(compound, density=None,
         \Sigma_{\rm s} &= N \sigma_s
 
 
-    The 1/e penetration depth *t_u* represents the the depth into the sample at
+    The 1/e penetration depth $t_u$ represents the the depth into the sample at
     which the unscattered intensity is reduced by a factor of $e$:
 
     .. math::
@@ -758,8 +764,12 @@ def neutron_scattering(compound, density=None,
     If you instead want to calculate the effective shielding of the sample,
     you should recalculate penetration depth without the coherent scattering.
 
-    Transmission rate can be computed from $e^{-d/t_u}$ for penetration i
-    depth $t_u$ and sample thickness $d$.
+    Transmission rate can be computed from $e^{-d/t_u}$ for penetration
+    depth $t_u$ and sample thickness $d$. This does not include many
+    real world effects, such as single phonon scattering\ [#Mildner1998]
+    and forward scattering\ [#May1982], which result in measured
+    transmission significantly different from the values predicted from
+    nuclear properties alone.
 
     In general, the total scattering cross section is not the sum of the
     coherent and incoherent cross sections,

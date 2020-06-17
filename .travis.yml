@@ -9,4 +9,6 @@ install:
   - pip install numpy pyparsing pytest pytest-cov
   - pip install .
 
-script: pytest
+script:
+  - pytest
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.8" ]; then make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html; fi

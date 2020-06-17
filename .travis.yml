@@ -10,7 +10,7 @@ matrix:
     python: 3.8
 
 install:
-  - pip install numpy pyparsing pytest "pytest-cov<2.6" sphinx
+  - pip install numpy pyparsing pytest "pytest-cov<2.6" sphinx matplotlib
   - pip install .
 
 script:

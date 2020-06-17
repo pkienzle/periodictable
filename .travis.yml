@@ -1,14 +1,18 @@
 language: python
-
-python:
-  - "2.7"
-  - "3.6"
-  - "3.8"
+matrix:
+  include:
+  - os: linux
+    python: 2.7
+  - os: linux
+    python: 3.6
+    env: BUILDDOC=1
+  - os: linux
+    python: 3.8
 
 install:
-  - pip install numpy pyparsing pytest pytest-cov
+  - pip install numpy pyparsing pytest "pytest-cov<2.6"
   - pip install .
 
 script:
   - pytest
-  - if [ "$TRAVIS_PYTHON_VERSION" == "3.8" ]; then make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html; fi
+  - if [ -n "BUILDDOC" ]; then make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html; fi

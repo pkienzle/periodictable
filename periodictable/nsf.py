@@ -581,11 +581,12 @@ def init(table, reload=False):
             table.Xe.neutron.coherent + table.Xe.neutron.incoherent)
 
 
+# TODO: require parsed compound rather than including formula() keywords in api
 # Note: docs and function prototype are reproduced in __init__
 @require_keywords
 def neutron_scattering(compound, density=None,
-                       wavelength=ABSORPTION_WAVELENGTH, energy=None,
-                       natural_density=None):
+                       wavelength=None, energy=None,
+                       natural_density=None, table=None):
     r"""
     Computes neutron scattering cross sections for molecules.
 
@@ -597,9 +598,11 @@ def neutron_scattering(compound, density=None,
         *natural_density* : float | |g/cm^3|
             Mass density of formula with naturally occuring abundances
         *wavelength* 1.798 : float | |Ang|
-            Neutron wavelength.
+            Neutron wavelength (default=1.798 |Ang|).
         *energy* : float | meV
             Neutron energy.  If energy is specified then wavelength is ignored.
+        *table* : PeriodicTable
+            Alternate table to use when parsing *compound*.
 
     :Returns:
         *sld* : (float, float, float) | |1e-6/Ang^2|
@@ -817,11 +820,14 @@ def neutron_scattering(compound, density=None,
     """
     from . import formulas
     compound = formulas.formula(compound, density=density,
-                                natural_density=natural_density)
+                                natural_density=natural_density, table=table)
     assert compound.density is not None, "scattering calculation needs density"
+    #print("sld", compound, compound.density)
     if energy is not None:
         wavelength = neutron_wavelength(energy)
-    assert wavelength is not None, "scattering calculation needs energy or wavelength"
+    # PAK: 1.5.3 wavelength now defaults to ABSORPTION_WAVELENGTH
+    if wavelength is None:
+        wavelength = ABSORPTION_WAVELENGTH
 
     # Sum over the quantities
     molar_mass = num_atoms = 0
@@ -885,10 +891,11 @@ def neutron_sld(*args, **kw):
         *natural_density* : float | |g/cm^3|
             Mass density of formula with naturally occuring abundances
         *wavelength* : float | |Ang|
-            Neutron wavelength.
+            Neutron wavelength (default=1.798 |Ang|).
         *energy* : float | meV
             Neutron energy.  If energy is specified then wavelength is ignored.
-
+        *table* : PeriodicTable
+            Alternate table to use when parsing *compound*.
     :Returns:
         *sld* : (float, float, float) | |1e-6/Ang^2|
             (*real*, -*imaginary*, *incoherent*) scattering length density.
@@ -905,10 +912,119 @@ def neutron_sld_from_atoms(*args, **kw):
     r"""
     .. deprecated:: 0.91
 
-        :func:`neutron_sld` now accepts dictionaries of \{atom\: count\} directly.
+        :func:`neutron_sld` accepts dictionaries of \{atom\: count\}.
 
     """
     return neutron_scattering(*args, **kw)[0]
+
+
+def D2O_match(compound, **kw):
+    """
+    Find the D2O contrast match point for the compound.
+
+    *wavelength* or *energy* select neutron wavelength or energy.
+
+    Additional keyword arguments (*density*, *natural_density*, *name*, *table*)
+    are passed to :func:`formulas.formula` when parsing the compound.
+
+    Returns *D2O_fraction* and *SLD* at match point.
+
+    See :func:`D2O_sld` for details on the calculation.
+
+    Note that the resulting fraction is only meaningful in [0, 1]. Beyond
+    100% you will need an additional constrast agent in the 100% D2O
+    solvent to increase the SLD enough to match.
+    """
+    H2O_sld, D2O_sld, Hsld, Dsld = _D2O_slds(compound, **kw)
+    # SLD(%Dsample + (1-%)Hsample) = SLD(%D2O + (1-%)H2O)
+    # => %SLD(Dsample) + (1-%)SLD(Hsample) = %SLD(D2O) + (1-%)SLD(H2O)
+    # => %(SLD(Dsample) - SLD(Hsample) + SLD(H2O) - SLD(D2O))
+    #      = SLD(H2O) - SLD(Hsample)
+    # => % = 100*(SLD(H2O) - SLD(Hsample))
+    #      / (SLD(Dsample) - SLD(Hsample) + SLD(H2O) - SLD(D2O))
+    D2O_fraction = \
+        (H2O_sld[0] - Hsld[0]) / (Dsld[0] - Hsld[0] + H2O_sld[0] - D2O_sld[0])
+
+    match_point_sld = mix_values(Dsld, Hsld, D2O_fraction)
+    return D2O_fraction, match_point_sld[0]
+
+def D2O_sld(compound, volume_fraction=1., D2O_fraction=0., **kw):
+    """
+    Compute the neutron SLD for a D2O contrast solution.
+
+    *compound* is a string or parsed formula object. Labile hydrogen should
+    be marked as H[1] in the formula. These will be substituted according to
+    %D2O in the solvent.
+
+    The D2O contrast mixture is assumed to be made using pure H2O (with
+    its natural H:D ratios) and pure D2O with no H present, so H[1] will be
+    substituted alternately with H and D when computing mixture SLD.
+    Solvent SLD is calculated using the density at 20 C.
+
+    Only the coherent scattering crosssection will be matched. Incoherent
+    and absorption crosssections are likely to be different for the compound
+    and the solvent, especially due to the large incoherent crosssection for
+    hydrogen.
+
+    Note that incoherent scattering does not mix linearly, so the incoherent
+    sld for the mixture will differ slightly from incoherent scattering
+    computed returned from a compound with the same isotope ratios.
+
+    *volume_fraction* is the portion by volume of solute in the solution.
+
+    *D2O_fraction* is the portion by volume of D2O in the solvent.
+
+    *wavelength* or *energy* to select neutron wavelength or energy.
+
+    Additional keyword arguments (*density*, *natural_density*, *name*, *table*)
+    are passed to :func:`formulas.formula` when parsing the compound.
+
+    Returns (real, imag, incoh) SLD.
+    """
+    # TODO: fix incoherent scattering so it is consistent with compound
+    # Need to compute sld from mixture rather than mixing parts
+    H2O_sld, D2O_sld, Hsld, Dsld = _D2O_slds(compound, **kw)
+    solvent_sld = mix_values(D2O_sld, H2O_sld, D2O_fraction)
+    solute_sld = mix_values(Dsld, Hsld, D2O_fraction)
+    solution_sld = mix_values(solute_sld, solvent_sld, volume_fraction)
+    #print(D2O_fraction, volume_fraction)
+    #print(compound, "solvent", solvent_sld)
+    #print(compound, "solute", solute_sld)
+    #print(compound, "solution", solution_sld)
+    return solution_sld
+
+
+def _D2O_slds(compound, **kw):
+    from . import formulas
+
+    # Water density at 20C; neutron wavelength doesn't matter.
+    sld_args = dict(
+        wavelength=kw.pop("wavelength", None),
+        energy=kw.pop("energy", None),
+        # Note: using get() rather than pop() for table since table can be a
+        # parameter for formula and for neutron_sld (which calls formula)
+        table=kw.get('table', None),
+    )
+    # TODO: use same table for solvent as solute?
+    H2O_sld = neutron_sld("H2O@0.9982n", **sld_args)
+    D2O_sld = neutron_sld("D2O@0.9982n", **sld_args)
+    mol = formulas.formula(compound, **kw)
+    # Be sure to pull H and H[1] from the table for the compound, otherwise
+    # the elements may not match in the substitution.
+    # TODO: include table in compound so parsed
+    table = default_table(kw.get('table', None))
+    labile_H, H, D = table.H[1], table.H, table.D
+    Hsld = neutron_sld(mol.replace(labile_H, H), **sld_args)
+    Dsld = neutron_sld(mol.replace(labile_H, D), **sld_args)
+
+    return H2O_sld, D2O_sld, Hsld, Dsld
+
+
+def mix_values(a, b, fraction):
+    """
+    Mix two tuples with floating point values according to fraction of a.
+    """
+    return tuple(aj*fraction + bj*(1-fraction) for aj, bj in zip(a, b))
 
 
 def _sum_piece(wavelength, compound):

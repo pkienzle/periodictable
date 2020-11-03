@@ -4,15 +4,12 @@
 Biomolecule support.
 
 :class:`Molecule` lets you define biomolecules with labile hydrogen atoms
-specified using tritium (T) in the chemical formula.  The biomolecule object
+specified using H[1] in the chemical formula.  The biomolecule object
 creates forms with natural isotope ratio, all hydrogen and all deuterium.
 Density can be provided as natural density or cell volume.  A %D2O contrast
 match value is computed for matching the molecule SLD in the presence of
 labile hydrogens.  :meth:`Molecule.D2Osld` computes the neutron SLD for
 the solvated molecule in a %D2O solvent.
-
-:func:`D2Omatch` computes the %D2O constrast match value given the fully
-hydrogenated and fully deuterated forms.
 
 :class:`Sequence` lets you read amino acid and DNA/RNA sequences from FASTA
 files.
@@ -29,7 +26,7 @@ Tables for common molecules are provided[1]:
 
 Neutron SLD for water at 20C is also provided as *H2O_SLD* and *D2O_SLD*.
 
-For unmodified protein need to add 2*T and O for terminations.
+For unmodified protein need to add 2*H[1] and O for terminations.
 
 Assumes that proteins were created in an environment with the usual H/D isotope
 ratio on the non-swappable hydrogens.
@@ -39,68 +36,122 @@ ratio on the non-swappable hydrogens.
 """
 from __future__ import division
 
+import warnings
+
 from .formulas import formula as parse_formula
 from .nsf import neutron_sld
 from .xsf import xray_sld
-from .core import PUBLIC_TABLE as elements
+from .core import default_table
 
+# CRUFT 1.5.2: retaining fasta.isotope_substitution for compatibility
+def isotope_substitution(formula, source, target, portion=1):
+    """
+    Substitute one atom/isotope in a formula with another in some proportion.
+
+    *formula* is the formula being updated.
+
+    *source* is the isotope/element to be substituted.
+
+    *target* is the replacement isotope/element.
+
+    *portion* is the proportion of source which is substituted for target.
+
+    .. deprecated:: 1.5.3
+        Use formula.replace(source, target, portion) instead.
+    """
+    return formula.replace(source, target, portion=portion)
+
+# TODO: allow Molecule to be used as compound in formulas.formula()
 class Molecule(object):
     """
     Specify a biomolecule by name, chemical formula, cell volume and charge.
 
-    Labile hydrogen positions should be coded using tritium (T) rather than H.
-    That way the tritium can be changed to H[1] for solutions with pure water,
-    H for solutions with a natural abundance of water or D for solutions with
-    pure deuterium.
+    Labile hydrogen positions should be coded using H[1] rather than H.
+    H[1] will be substituded with H for solutions with natural water
+    or D for solutions with heavy water. Any deuterated non-labile hydrogen
+    can be marked with D, and they will stay as D regardless of the solvent.
+
+    *name* is the molecule name.
+
+    *formula* is the chemical formula as string or atom dictionary, with
+    H[1] for labile hydrogen.
+
+    *cell_volume* is the volume of the molecule. If None, cell volume will
+    be inferred from the natural density of the molecule. Cell volume is
+    assumed to be independent of isotope.
+
+    *density* is the natural density of the molecule. If None, density will
+    be inferred from cell volume.
+
+    *charge* is the overall charge on the molecule.
 
     **Attributes**
 
-    *formula* is the original tritiated formula.  You can retrieve the
-    hydrogenated or deuterated forms using :func:`isotope_substitution` with
-    *formula*, periodictable.T and periodictable.H or periodictable.D.
+    *labile_formula* is the original formula, with H[1] for the labile H.
+    You can retrieve the deuterated from using::
 
-    *D2Omatch* is the % D2O in H2O required to contrast match the molecule,
-    including substitution of labile hydrogen in proportion to the D/H ratio.
+        molecule.labile_formula.replace(elements.H[1], elements.D)
 
-    *sld*/*Hsld*/*Dsld* are the the scattering length densities of the molecule
-    with tritium replaced by naturally occurring H/D ratios, pure H[1] and
-    pure H[2] respectively.
+    *natural_formula* has H substituted for H[1] in *labile_formula*.
 
-    *mass*/*Hmass*/*Dmass* are the masses the three conditions.
+    *D2Omatch* is percentage of D2O by volume in H2O required to match the
+    SLD of the molecule, including substitution of labile hydrogen in
+    proportion to the D/H ratio in the solvent. Values will be outside
+    the range [0, 100] if the contrast match is impossible.
+
+    *sld*/*Dsld* are the the SLDs of the molecule with H[1] replaced by
+    naturally occurring H/D ratios and pure D respectively.
+
+    *mass*/*Dmass* are the masses for natural H/D and pure D respectively.
 
     *charge* is the charge on the molecule
 
     *cell_volume* is the estimated cell volume for the molecule
 
     *density* is the estimated molecule density
+
+    Change 1.5.3: drop *Hmass* and *Hsld*. Move *formula* to *labile_formula*.
+    Move *Hnatural* to *formula*.
     """
     def __init__(self, name, formula, cell_volume=None, density=None, charge=0):
+        # TODO: fasta does not work with table substitution
+        elements = default_table()
+
         # Fill in density or cell_volume.
         M = parse_formula(formula, natural_density=density)
+        # CRUFT: use of T rather than H[1] is deprecated since 1.5.3
+        if elements.T in M.atoms:
+            warnings.warn("Use of tritium for labile hydrogen is deprecated."
+                          " Use H[1] instead of T in your formula.")
+            M = M.replace(elements.T, elements.H[1])
         if cell_volume is not None:
+            # Note: cell_volume is only zero if there are no components
             M.density = 1e24*M.molecular_mass/cell_volume if cell_volume > 0 else 0
             #print name, M.molecular_mass, cell_volume, M.density
         else:
             cell_volume = 1e24*M.molecular_mass/M.density
 
-        Hnatural = isotope_substitution(M, elements.T, elements.H)
-        H = isotope_substitution(M, elements.T, elements.H[1])
-        D = isotope_substitution(M, elements.T, elements.D)
+        H = M.replace(elements.H[1], elements.H)
+        D = M.replace(elements.H[1], elements.D)
 
         self.name = name
-        self.formula = M
         self.cell_volume = cell_volume
-        self.sld = neutron_sld(Hnatural, wavelength=5)[0]
-        self.Hsld = neutron_sld(H, wavelength=5)[0]
-        self.Dsld = neutron_sld(D, wavelength=5)[0]
-        self.mass, self.Hmass, self.Dmass = Hnatural.mass, H.mass, D.mass
+        self.sld, self.Dsld = neutron_sld(H)[0], neutron_sld(D)[0]
+        self.mass, self.Dmass = H.mass, D.mass
         self.D2Omatch = D2Omatch(self.sld, self.Dsld)
         self.charge = charge
-        self.Hnatural = Hnatural
+        self.natural_formula = H
+        self.labile_formula = M
+
+        # TODO: formula should be natural_formula to be consistent
+        # with sld and mass, which are computed with H-substitution.
+        self.formula = self.labile_formula
 
     def D2Osld(self, volume_fraction=1., D2O_fraction=0.):
         """
-        Neutron SLD of the molecule in a %D2O solvent.
+        Neutron SLD of the molecule in a deuterated solvent.
+
+        Changed 1.5.3: fix errors in SLD calculations.
         """
         solvent_sld = D2O_fraction*D2O_SLD + (1-D2O_fraction)*H2O_SLD
         solute_sld = D2O_fraction*self.Dsld + (1-D2O_fraction)*self.sld
@@ -153,11 +204,11 @@ class Sequence(Molecule):
         charge = sum(p.charge for p in parts)
         structure = []
         for p in parts:
-            structure.extend(list(p.formula.structure))
+            structure.extend(list(p.labile_formula.structure))
         formula = parse_formula(structure).hill
 
-        Molecule.__init__(self, name, formula,
-                          cell_volume=cell_volume, charge=charge)
+        Molecule.__init__(
+            self, name, formula, cell_volume=cell_volume, charge=charge)
         self.sequence = sequence
 
 def _guess_type_from_filename(filename, type):
@@ -174,9 +225,12 @@ def _guess_type_from_filename(filename, type):
             type = 'aa'
     return type
 
-# Water density at 20C; neutron wavelength doesn't matter (use 5 A).
-H2O_SLD = neutron_sld(parse_formula("H2O@0.9982"), wavelength=5)[0]
-D2O_SLD = neutron_sld(parse_formula("D2O@0.9982"), wavelength=5)[0]
+# PAK: Fixed in 1.5.3. Previous calculation used H2O density rather than D2O.
+#: real portion of H2O sld at 20 C
+H2O_SLD = neutron_sld("H2O@0.9982n")[0]
+#: real portion of D2O sld at 20 C
+#: Change 1.5.2: Use correct density in SLD calculation
+D2O_SLD = neutron_sld("D2O@0.9982n")[0]
 def D2Omatch(Hsld, Dsld):
     """
     Find the D2O% concentration of solvent such that neutron SLD of the
@@ -189,18 +243,28 @@ def D2Omatch(Hsld, Dsld):
     Note that the resulting percentage is only meaningful between
     0% to 100%.  Beyond 100% you will need an additional constrast agent
     in the 100% D2O solvent to increase the SLD enough to match.
+
+    .. deprecated:: 1.5.3
+        Use periodictable.nsf.D2O_match(formula) instead.
+
+    Change 1.5.3: corrected D2O sld, which will change the computed match point.
     """
     # SLD(%Dsample + (1-%)Hsample) = SLD(%D2O + (1-%)H2O)
-    # %SLD(Dsample) + (1-%)SLD(Hsample) = %SLD(D2O) + (1-%)SLD(H2O)
-    # %(SLD(Dsample) - SLD(Hsample) + SLD(H2O) - SLD(D2O)) = SLD(H2O) - SLD(Hsample)
-    # % = 100*(SLD(H2O) - SLD(Hsample)) / (SLD(Dsample) - SLD(Hsample) + SLD(H2O) - SLD(D2O))
-    return 100*(H2O_SLD - Hsld) / (Dsld - Hsld + H2O_SLD - D2O_SLD)
+    # => %SLD(Dsample) + (1-%)SLD(Hsample) = %SLD(D2O) + (1-%)SLD(H2O)
+    # => %(SLD(Dsample) - SLD(Hsample) + SLD(H2O) - SLD(D2O))
+    #       = SLD(H2O) - SLD(Hsample)
+    # => % = 100*(SLD(H2O) - SLD(Hsample))
+    #           / (SLD(Dsample) - SLD(Hsample) + SLD(H2O) - SLD(D2O))
+    return 100 * (H2O_SLD - Hsld) / (Dsld - Hsld + H2O_SLD - D2O_SLD)
+
 
 def read_fasta(fp):
     """
     Iterate over the sequences in a FASTA file.
 
     Each iteration is a pair (sequence name, sequence codes).
+
+    Change 1.5.3: Now uses H[1] rather than T for labile hydrogen.
     """
     name, seq = None, []
     for line in fp:
@@ -215,32 +279,6 @@ def read_fasta(fp):
         yield (name, ''.join(seq))
 
 
-def isotope_substitution(formula, source, target, portion=1):
-    """
-    Substitute one atom/isotope in a formula with another in some proportion.
-
-    *formula* is the formula being updated.
-
-    *source* is the isotope/element to be substituted.
-
-    *target* is the replacement isotope/element.
-
-    *portion* is the proportion of source which is substituted for target.
-    """
-    atoms = formula.atoms
-    if source in atoms:
-        mass = formula.mass
-        mass_reduction = atoms[source]*portion*(source.mass - target.mass)
-        density = formula.density * (mass - mass_reduction)/mass
-        atoms[target] = atoms.get(target, 0) + atoms[source]*portion
-        if portion == 1:
-            del atoms[source]
-        else:
-            atoms[source] *= 1-portion
-    else:
-        density = formula.density
-    return parse_formula(atoms, density=density)
-
 def _code_average(bases, code_table):
     """
     Compute average over possible nucleotides, assuming equal weight if
@@ -250,7 +288,7 @@ def _code_average(bases, code_table):
     formula, cell_volume, charge = parse_formula(), 0, 0
     for c in bases:
         base = code_table[c]
-        formula += base.formula
+        formula += base.labile_formula
         cell_volume += base.cell_volume
         charge += base.charge
     if n > 0:
@@ -281,31 +319,31 @@ def _(code, V, formula, name):
 # pylint: disable=bad-whitespace
 AMINO_ACID_CODES = dict((
     #code, volume, formula,        name
-    _("A",  91.5, "C3H4TNO",    "alanine"),
+    _("A",  91.5, "C3H4H[1]NO",    "alanine"),
     #B: D or N
-    _("C", 105.6, "C3H3TNOS",   "cysteine"),
-    _("D", 124.5, "C4H3TNO3-",  "aspartic acid"),
-    _("E", 155.1, "C5H5TNO3-",  "glutamic acid"),
-    _("F", 203.4, "C9H8TNO",    "phenylalanine"),
-    _("G",  66.4, "C2H2TNO",    "glycine"),
-    _("H", 167.3, "C6H5T3N3O+", "histidine"),
-    _("I", 168.8, "C6H10TNO",   "isoleucine"),
+    _("C", 105.6, "C3H3H[1]NOS",   "cysteine"),
+    _("D", 124.5, "C4H3H[1]NO3-",  "aspartic acid"),
+    _("E", 155.1, "C5H5H[1]NO3-",  "glutamic acid"),
+    _("F", 203.4, "C9H8H[1]NO",    "phenylalanine"),
+    _("G",  66.4, "C2H2H[1]NO",    "glycine"),
+    _("H", 167.3, "C6H5H[1]3N3O+", "histidine"),
+    _("I", 168.8, "C6H10H[1]NO",   "isoleucine"),
     #J: L or I
-    _("K", 171.3, "C6H9T4N2O+", "lysine"),
-    _("L", 168.8, "C6H10TNO",   "leucine"),
-    _("M", 170.8, "C5H8TNOS",   "methionine"),
-    _("N", 135.2, "C4H3T3N2O2", "asparagine"),
+    _("K", 171.3, "C6H9H[1]4N2O+", "lysine"),
+    _("L", 168.8, "C6H10H[1]NO",   "leucine"),
+    _("M", 170.8, "C5H8H[1]NOS",   "methionine"),
+    _("N", 135.2, "C4H3H[1]3N2O2", "asparagine"),
     #O: _("O", ???.?, "C12H21N3O3", "pyrrolysine") -- update X below
     _("P", 129.3, "C5H7NO",     "proline"),
-    _("Q", 161.1, "C5H5T3N2O2", "glutamine"),
-    _("R", 202.1, "C6H7T6N4O+", "arginine"),
-    _("S",  99.1, "C3H3T2NO2",  "serine"),
-    _("T", 122.1, "C4H5T2NO2",  "threonine"),
+    _("Q", 161.1, "C5H5H[1]3N2O2", "glutamine"),
+    _("R", 202.1, "C6H7H[1]6N4O+", "arginine"),
+    _("S",  99.1, "C3H3H[1]2NO2",  "serine"),
+    _("T", 122.1, "C4H5H[1]2NO2",  "threonine"),
     #U: selenocysteine -- update X below
-    _("V", 141.7, "C5H8TNO",    "valine"),
-    _("W", 237.6, "C11H8T2N2O", "tryptophan"),
+    _("V", 141.7, "C5H8H[1]NO",    "valine"),
+    _("W", 237.6, "C11H8H[1]2N2O", "tryptophan"),
     #X: any
-    _("Y", 203.6, "C9H7T2NO2",  "tyrosine"),
+    _("Y", 203.6, "C9H7H[1]2NO2",  "tyrosine"),
     #Z: E or Q
     #-: gap
     ))
@@ -314,7 +352,8 @@ _set_amino_acid_average('J', 'LI')
 _set_amino_acid_average('Z', 'EQ')
 _set_amino_acid_average('X', 'ACDEFGHIKLMNPQRSTVWY', name='any')
 _set_amino_acid_average('-', '', name='gap')
-__doc__ += "\n\n*AMINO_ACID_CODES*::\n\n    " + "\n    ".join("%s: %s"%(k, v.name) for k, v in sorted(AMINO_ACID_CODES.items()))
+__doc__ += "\n\n*AMINO_ACID_CODES*::\n\n    " + "\n    ".join(
+    "%s: %s"%(k, v.name) for k, v in sorted(AMINO_ACID_CODES.items()))
 
 def _(formula, V, name):
     molecule = Molecule(name, formula, cell_volume=V)
@@ -322,32 +361,34 @@ def _(formula, V, name):
 NUCLEIC_ACID_COMPONENTS = dict((
     # formula, volume, name
     _("NaPO3",      60, "phosphate"),
-    _("C5H6TO3",   125, "ribose"),
+    _("C5H6H[1]O3",   125, "ribose"),
     _("C5H7O2",    115, "deoxyribose"),
-    _("C5H2T2N5",  114, "adenine"),
-    _("C4H2TN2O2",  99, "uracil"),
-    _("C5H4TN2O2", 126, "thymine"),
-    _("C5HT3N5O",  119, "guanine"),
-    _("C4H2T2N3O", 103, "cytosine"),
+    _("C5H2H[1]2N5",  114, "adenine"),
+    _("C4H2H[1]N2O2",  99, "uracil"),
+    _("C5H4H[1]N2O2", 126, "thymine"),
+    _("C5HH[1]3N5O",  119, "guanine"),
+    _("C4H2H[1]2N3O", 103, "cytosine"),
     ))
-__doc__ += "\n\n*NUCLEIC_ACID_COMPONENTS*::\n\n  " + "\n  ".join("%s: %s"%(k, v.formula) for k, v in sorted(NUCLEIC_ACID_COMPONENTS.items()))
+__doc__ += "\n\n*NUCLEIC_ACID_COMPONENTS*::\n\n  " + "\n  ".join(
+    "%s: %s"%(k, v.formula) for k, v in sorted(NUCLEIC_ACID_COMPONENTS.items()))
 
 CARBOHYDRATE_RESIDUES = dict((
     # formula, volume, name
-    _("C6H7T3O5",    171.9, "Glc"),
-    _("C6H7T3O5",    166.8, "Gal"),
-    _("C6H7T3O5",    170.8, "Man"),
-    _("C6H7T4O5",    170.8, "Man (terminal)"),
-    _("C8H10T3NO5",  222.0, "GlcNAc"),
-    _("C8H10T3NO5",  232.9, "GalNAc"),
-    _("C6H7T3O4",    160.8, "Fuc (terminal)"),
-    _("C11H11T5NO8", 326.3, "NeuNac (terminal)"),
+    _("C6H7H[1]3O5",    171.9, "Glc"),
+    _("C6H7H[1]3O5",    166.8, "Gal"),
+    _("C6H7H[1]3O5",    170.8, "Man"),
+    _("C6H7H[1]4O5",    170.8, "Man (terminal)"),
+    _("C8H10H[1]3NO5",  222.0, "GlcNAc"),
+    _("C8H10H[1]3NO5",  232.9, "GalNAc"),
+    _("C6H7H[1]3O4",    160.8, "Fuc (terminal)"),
+    _("C11H11H[1]5NO8", 326.3, "NeuNac (terminal)"),
     # Glycosaminoglycans
-    _("C14H15T5NO11Na", 390.7, "hyaluronate"),  # GlcA.GlcNAc
-    _("C14H17T5NO13SNa", 473.5, "keratan sulphate"), # Gal.GlcNAc.SO4
-    _("C14H15T4NO14SNa", 443.5, "chondroitin sulphate"), # GlcA.GalNAc.SO4
+    _("C14H15H[1]5NO11Na", 390.7, "hyaluronate"),  # GlcA.GlcNAc
+    _("C14H17H[1]5NO13SNa", 473.5, "keratan sulphate"), # Gal.GlcNAc.SO4
+    _("C14H15H[1]4NO14SNa", 443.5, "chondroitin sulphate"), # GlcA.GalNAc.SO4
     ))
-__doc__ += "\n\n*CARBOHYDRATE_RESIDUES*::\n\n  " + "\n  ".join("%s: %s"%(k, v.formula) for k, v in sorted(CARBOHYDRATE_RESIDUES.items()))
+__doc__ += "\n\n*CARBOHYDRATE_RESIDUES*::\n\n  " + "\n  ".join(
+    "%s: %s"%(k, v.formula) for k, v in sorted(CARBOHYDRATE_RESIDUES.items()))
 
 LIPIDS = dict((
     # formula, volume, name
@@ -357,13 +398,14 @@ LIPIDS = dict((
     _("C6H5O6", 240, "triglyceride headgroup"),
     _("C36H72NO8P", 1089, "DMPC"),
     _("C36H20D52NO8P", 1089, "DMPC-D52"),
-    _("C29H55T3NO8P", 932, "DLPE"),
-    _("C27H45TO", 636, "cholesteral"),
+    _("C29H55H[1]3NO8P", 932, "DLPE"),
+    _("C27H45H[1]O", 636, "cholesteral"),
     _("C45H78O2", 1168, "oleate"),
     _("C57H104O6", 1617, "trioleate form"),
-    _("C39H77T2N2O2P", 1166, "palmitate ester"),
+    _("C39H77H[1]2N2O2P", 1166, "palmitate ester"),
     ))
-__doc__ += "\n\n*LIPIDS*::\n\n  " + "\n  ".join("%s: %s"%(k, v.formula) for k, v in sorted(LIPIDS.items()))
+__doc__ += "\n\n*LIPIDS*::\n\n  " + "\n  ".join(
+    "%s: %s"%(k, v.formula) for k, v in sorted(LIPIDS.items()))
 
 def _(code, formula, V, name):
     molecule = Molecule(name, formula, cell_volume=V)
@@ -371,21 +413,23 @@ def _(code, formula, V, name):
     return code, molecule
 RNA_BASES = dict((
     # code, formula, volume, name
-    _("A",  "C10H8T3N5O6PNa", 299, "adenosine"),
-    _("T",   "C9H8T2N2O8PNa", 284, "uridine"), # Use T for U in RNA
-    _("G",  "C10H7T4N5O7PNa", 304, "guanosine"),
-    _("C",   "C9H8T3N3O7PNa", 288, "cytidine"),
+    _("A",  "C10H8H[1]3N5O6PNa", 299, "adenosine"),
+    _("T",   "C9H8H[1]2N2O8PNa", 284, "uridine"), # Use H[1] for U in RNA
+    _("G",  "C10H7H[1]4N5O7PNa", 304, "guanosine"),
+    _("C",   "C9H8H[1]3N3O7PNa", 288, "cytidine"),
     ))
-__doc__ += "\n\n*RNA_BASES*::\n\n  " + "\n  ".join("%s:%s"%(k, v.name) for k, v in sorted(RNA_BASES.items()))
+__doc__ += "\n\n*RNA_BASES*::\n\n  " + "\n  ".join(
+    "%s:%s"%(k, v.name) for k, v in sorted(RNA_BASES.items()))
 
 DNA_BASES = dict((
     # code, formula, volume, %D2O matchpoint, name
-    _("A",  "C10H9T2N5O5PNa", 289, "adenosine"),
-    _("T", "C10H11T1N2O7PNa", 301, "thymidine"),
-    _("G",  "C10H8T3N5O6PNa", 294, "guanosine"),
-    _("C",   "C9H9T2N3O6PNa", 278, "cytidine"),
+    _("A",  "C10H9H[1]2N5O5PNa", 289, "adenosine"),
+    _("T", "C10H11H[1]1N2O7PNa", 301, "thymidine"),
+    _("G",  "C10H8H[1]3N5O6PNa", 294, "guanosine"),
+    _("C",   "C9H9H[1]2N3O6PNa", 278, "cytidine"),
     ))
-__doc__ += "\n\n*DNA_BASES*::\n\n  " + "\n  ".join("%s:%s"%(k, v.name) for k, v in sorted(DNA_BASES.items()))
+__doc__ += "\n\n*DNA_BASES*::\n\n  " + "\n  ".join(
+    "%s:%s"%(k, v.name) for k, v in sorted(DNA_BASES.items()))
 
 def _(code, bases, name):
     D, V, _ = _code_average(bases, RNA_BASES)
@@ -426,6 +470,8 @@ CODE_TABLES = {
 }
 
 def fasta_table():
+    elements = default_table()
+
     rows = []
     rows += [v for k, v in sorted(AMINO_ACID_CODES.items())]
     rows += [v for k, v in sorted(NUCLEIC_ACID_COMPONENTS.items())]
@@ -435,28 +481,34 @@ def fasta_table():
           % ("name", "M(H2O)", "M(D2O)", "volume",
              "den", "#el", "xray", "nH2O", "nD2O", "%D2O match"))
     for v in rows:
-        protons = sum(num*el.number for el, num in v.formula.atoms.items())
+        protons = sum(num*el.number for el, num in v.natural_formula.atoms.items())
         electrons = protons - v.charge
         Xsld = xray_sld(v.formula, wavelength=elements.Cu.K_alpha)
         print("%20s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
-            v.name, v.Hmass, v.Dmass, v.cell_volume, v.formula.density,
-            electrons, Xsld[0], v.Hsld, v.Dsld, v.D2Omatch))
+            v.name, v.mass, v.Dmass, v.cell_volume, v.natural_formula.density,
+            electrons, Xsld[0], v.sld, v.Dsld, v.D2Omatch))
 
 beta_casein = "RELEELNVPGEIVESLSSSEESITRINKKIEKFQSEEQQQTEDELQDKIHPFAQTQSLVYPFPGPIPNSLPQNIPPLTQTPVVVPPFLQPEVMGVSKVKEAMAPKHKEMPFPKYPVEPFTESQSLTLTDVENLHLPLPLLQSWMHQPHQPLPPTVMFPPQSVLSLSQSKVLPVPQKAVPYPQRDMPIQAFLLYQEPVLGPVRGPFPIIV"
 
 def test():
     from periodictable.constants import avogadro_number
+    elements = default_table()
+
     # Beta casein results checked against Duncan McGillivray's spreadsheet
+    # name        Hmass   Dmass   vol     den   #el   xray  Hsld  Dsld
+    # =========== ======= ======= ======= ===== ===== ===== ===== =====
     # beta casein 23561.9 23880.9 30872.9  1.27 12614 11.55  1.68  2.75
-    s = Sequence("beta casein", beta_casein)
-    assert abs(s.Dmass-23880.9) < 0.1
-    #print "density",s.mass/avogadro_number/s.cell_volume*1e24
-    assert abs(s.mass/avogadro_number/s.cell_volume*1e24 - 1.267) < 0.01
-    assert abs(s.Dsld-2.75) < 0.01
+    seq = Sequence("beta casein", beta_casein)
+    assert abs(seq.mass - 23561.9) < 0.1
+    assert abs(seq.Dmass - 23880.9) < 0.1
+    assert abs(seq.cell_volume - 30872.9) < 0.1
+    assert abs(seq.mass/avogadro_number/seq.cell_volume*1e24 - 1.267) < 0.01
+    assert abs(seq.sld - 1.68) < 0.01
+    assert abs(seq.Dsld - 2.75) < 0.01
 
     # Check that X-ray sld is independent of isotope
-    H = isotope_substitution(s.formula, elements.T, elements.H)
-    D = isotope_substitution(s.formula, elements.T, elements.D)
+    H = seq.labile_formula.replace(elements.H[1], elements.H)
+    D = seq.labile_formula.replace(elements.H[1], elements.D)
     Hsld, Dsld = xray_sld(H, wavelength=1.54), xray_sld(D, wavelength=1.54)
     #print Hsld, Dsld
     assert abs(Hsld[0]-Dsld[0]) < 1e-10

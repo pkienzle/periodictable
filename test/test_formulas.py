@@ -179,7 +179,7 @@ def test():
                mass=50*1.0707 + 20*D2O.density)
 
     # fasta
-    check_formula(formula('aa:A'), formula('C3H5NO'))
+    check_formula(formula('aa:A'), formula('C3H4H[1]NO'))
 
 def check_mass(f1, mass, tol=1e-14):
     """Check that the total mass of f1 is as expected."""

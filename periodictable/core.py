@@ -569,8 +569,8 @@ def iselement(val):
     return isinstance(val, Element)
 
 def change_table(atom, table):
-    """Search for the same element, isotope or ion from a different table"""
     # type: (Union[Element,Isotope,Ion])
+    """Search for the same element, isotope or ion from a different table"""
     if ision(atom):
         if isisotope(atom):
             return table[atom.number][atom.isotope].ion[atom.charge]

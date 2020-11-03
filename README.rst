@@ -60,9 +60,38 @@ Change history
 1.5.3 2020-??-??
 ----------------
 
+Notes:
+
+* Incoherent scattering computed for contrast matched mixture differs from
+  the value that would be computed for a complex compound with the same
+  isotope proportions and density. This may change in a future release.
+
+Breaking changes:
+
+* Fix calculation of contrast match points for biomolecules. The old
+  formula used the density of H2O for the D2O sld calculation.
+* Modify biomolecule support to use H[1] rather than T for labile hydrogen.
+  This will result in less error when the labile formula is used in lieu
+  of the natural formula or the contrast-matched formula, and make it more
+  obvious from glancing at the formula that labile hydrogen is present.
+* Modify biomolecule object attributes, dropping *Hmass* and *Hsld*.
+* *Hnatural* has been moved to *natural_formula*. The formula with labile
+  hydrogen is stored in *labile_formula*. *formula* is currently set to
+  *labile_formula* as before.
+
+New:
+
+* Add *replace()* method to formula to allow isotope substitution.
+* Add *nsf.D2O_match()* and *nsf.D2O_sld()* functions.
+
 Modified:
 
+* Neutron wavelength now defaults to 1.798 A when wavelength and energy are
+  both None in *neutron_sld()* and *neutron_scattering()* rather than
+  throwing an assertion error.
 * Switch unit test framework from nose to pytest.
+* *table* can be passed to neutron sld calculators as the source of isotope
+  information when parsing the chemical formula.
 * Update docs.
 
 1.5.2 2019-11-19

@@ -251,19 +251,22 @@ def formula(compound=None, density=None, natural_density=None,
         structure = _convert_to_hill_notation(compound)
     elif _is_string_like(compound):
         if ':' in compound:
+            # TODO: avoid circular imports
+            # TODO: support other biochemicals (carbohydrate residues, lipids)
             from . import fasta
             seq_type, seq = compound.split(':', 1)
             if seq_type in fasta.CODE_TABLES:
-                return fasta.Sequence(name=None, sequence=seq, type=seq_type).Hnatural
+                seq = fasta.Sequence(name=None, sequence=seq, type=seq_type)
+                return seq.labile_formula
         try:
-            formula = parse_formula(compound, table=table)
+            chem = parse_formula(compound, table=table)
             if name:
-                formula.name = name
+                chem.name = name
             if density is not None:
-                formula.density = density
+                chem.density = density
             elif natural_density is not None:
-                formula.natural_density = natural_density
-            return formula
+                chem.natural_density = natural_density
+            return chem
         except ValueError as exception:
             raise ValueError(str(exception))
             #print "parsed", compound, "as", self
@@ -543,6 +546,20 @@ class Formula(object):
         self.structure = _change_table(self.structure, table)
         return self
 
+    def replace(self, source, target, portion=1):
+        """
+        Create a new formula with one atom/isotope substituted for another.
+
+        *formula* is the formula being updated.
+
+        *source* is the isotope/element to be substituted.
+
+        *target* is the replacement isotope/element.
+
+        *portion* is the proportion of source which is substituted for target.
+        """
+        return _isotope_substitution(self, source, target, portion=portion)
+
     def __eq__(self, other):
         """
         Return True if two formulas represent the same structure. Note
@@ -594,6 +611,33 @@ class Formula(object):
 
     def __repr__(self):
         return "formula('%s')"%(str(self))
+
+
+def _isotope_substitution(compound, source, target, portion=1):
+    """
+    Substitute one atom/isotope in a formula with another in some proportion.
+
+    *compound* is the formula being updated.
+
+    *source* is the isotope/element to be substituted.
+
+    *target* is the replacement isotope/element.
+
+    *portion* is the proportion of source which is substituted for target.
+    """
+    atoms = compound.atoms
+    if source in atoms:
+        mass = compound.mass
+        mass_reduction = atoms[source]*portion*(source.mass - target.mass)
+        density = compound.density * (mass - mass_reduction)/mass
+        atoms[target] = atoms.get(target, 0) + atoms[source]*portion
+        if portion == 1:
+            del atoms[source]
+        else:
+            atoms[source] *= 1-portion
+    else:
+        density = compound.density
+    return formula(atoms, density=density)
 
 
 LENGTH_UNITS = {'nm': 1e-9, 'um': 1e-6, 'mm': 1e-3, 'cm': 1e-2}

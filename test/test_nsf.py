@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import periodictable
 from periodictable import elements, formula, nsf
 from periodictable.nsf import neutron_scattering, neutron_sld
@@ -95,13 +95,13 @@ def test():
     sld,xs,depth = neutron_scattering('',density=0,wavelength=4.75)
     assert all(v == 0 for v in sld)
     assert all(v == 0 for v in xs)
-    assert numpy.isinf(depth)
+    assert np.isinf(depth)
 
     # Check density == 0 works
     sld,xs,depth = neutron_scattering('Si',density=0,wavelength=4.75)
     assert all(v == 0 for v in sld)
     assert all(v == 0 for v in xs)
-    assert numpy.isinf(depth)
+    assert np.isinf(depth)
 
     # Test natural density
     D2O_density = (2*D.mass + O.mass)/(2*H.mass + O.mass)
@@ -161,22 +161,56 @@ def test_formula():
     assert abs(sld[2] - sld_inc) < 1e-14
     assert abs(xs[0] - coh_xs) < 1e-14
 
+def test_contrast_matching():
+    from periodictable import fasta
+
+    # Test constrast match holds for varying volume fractions (no labile)
+    SiO2 = formula("SiO2@2.4")
+    match, sld_real = nsf.D2O_match(SiO2)
+    sld_0p0 = nsf.D2O_sld(SiO2, volume_fraction=0.0, D2O_fraction=match)
+    sld_0p7 = nsf.D2O_sld(SiO2, volume_fraction=0.7, D2O_fraction=match)
+    sld_1p0 = nsf.D2O_sld(SiO2, volume_fraction=1.0, D2O_fraction=match)
+    assert np.isclose(sld_0p0[0], sld_real, 1e-14)
+    assert np.isclose(sld_0p7[0], sld_real, 1e-14)
+    assert np.isclose(sld_1p0[0], sld_real, 1e-14)
+    assert not np.isclose(sld_1p0[0], sld_1p0[1], 1e-14)
+
+    mol = fasta.LIPIDS["cholesteral"].labile_formula
+    match, sld_real = nsf.D2O_match(mol)
+    sld_0p7 = nsf.D2O_sld(mol, volume_fraction=0.7, D2O_fraction=match)
+    assert np.isclose(sld_0p7[0], sld_real, 1e-14)
+
+    # Test that labile hydrogens are being subsituted in contrast match
+    # Note that D2O mixture is formed from pure D2O and pure water with
+    # natural H:D ratios.
+    mol = formula("C3H4H[1]NO@1.29n") # alanine
+    sld_0p7 = nsf.D2O_sld(mol, volume_fraction=1., D2O_fraction=0.7)
+    sld_0p7_direct = nsf.neutron_sld("C3H4H0.3D0.7NO@1.29n")
+    #print(sld_0p7)
+    #print(sld_0p7_direct)
+    assert np.isclose(sld_0p7[0], sld_0p7_direct[0], 1e-14)
+    assert np.isclose(sld_0p7[1], sld_0p7_direct[1], 1e-14)
+    # Not testing incoherent since it will differ
+    #assert np.isclose(sld_0p7[2], sld_0p7_direct[2], 1e-14)
+
+
 def test_composite():
     from periodictable.nsf import neutron_composite_sld
     calc = neutron_composite_sld([formula(s) for s in ('HSO4','H2O','CCl4')],
                                  wavelength=4.75)
-    sld = calc(numpy.array([3,1,2]),density=1.2)
+    sld = calc(np.array([3,1,2]),density=1.2)
     sld2 = neutron_sld('3HSO4+1H2O+2CCl4',density=1.2,wavelength=4.75)
     #print(sld)
     #print(sld2)
     assert all(abs(v-w)<1e-14 for v,w in zip(sld,sld2))
+
 
 def time_composite():
     from periodictable.nsf import neutron_composite_sld
     import time
     calc = neutron_composite_sld([formula(s) for s in ('HSO4','H2O','CCl4')],
                                  wavelength=4.75)
-    q = numpy.array([3,1,2])
+    q = np.array([3,1,2])
     N = 1000
     bits = [formula(s) for s in ('HSO4','H2O','CCl4')]
     tic = time.time()
@@ -208,7 +242,6 @@ def test_abundance():
         # TODO: abundance tables are not very good
         assert abs(abundance-100) < 1.1 or abundance==0,\
             "total abundance for %s is %.15g%%"%(el.symbol,abundance)
-
 
 
 def _summarize(M):
@@ -252,4 +285,5 @@ This is not a complete list.""")
 
 
 if __name__ == "__main__":
-    time_composite()
+    #time_composite()
+    test_contrast_matching()

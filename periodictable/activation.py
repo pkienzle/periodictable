@@ -114,8 +114,9 @@ class Sample(object):
 
     *formula* : chemical formula
 
-        Chemical formula.  Any format accepted by :func:`periodictable.formula` can be
-        used, including formula string.
+        Chemical formula.  Any format accepted by
+        :func:`.formulas.formula` can be used, including
+        formula string.
 
     *mass* : float | g
 
@@ -150,7 +151,7 @@ class Sample(object):
 
         *abundance* is a function that returns the relative abundance of an isotope.  By
         default it uses :func:`NIST2001_isotopic_abundance`, and there is the alternative
-        :func:`IAEA273_isotopic_abundance`.
+        :func:`IAEA1987_isotopic_abundance`.
         """
         self.activity = {}
         self.environment = environment

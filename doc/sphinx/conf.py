@@ -46,6 +46,11 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
 # MathJax CDN is discontinued
 mathjax_path = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"
 
+nitpick_ignore = [
+    ('py:class', 'type'),
+    ('py:class', 'object'),
+    ]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

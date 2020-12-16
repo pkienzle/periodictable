@@ -40,11 +40,11 @@ Source links:
 * https://github.com/pkienzle/periodictable
 * https://github.com/scattering/activation
 
-|Travis| |RTD| |DOI|
+|CI| |RTD| |DOI|
 
-.. |Travis| image:: https://travis-ci.org/pkienzle/periodictable.svg?branch=master
+.. |CI| image:: https://github.com/pkienzle/periodictable/workflows/Test/badge.svg
    :alt: Build status
-   :target: https://travis-ci.org/pkienzle/periodictable
+   :target: https://github.com/pkienzle/periodictable/actions
 
 .. |DOI| image:: https://zenodo.org/badge/1146700.svg
    :alt: DOI tag

@@ -9,29 +9,23 @@ on:
 jobs:
   test:
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.cfg.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        py: [3.8]
-        doc: [1]
-        #cfg:
-        #  - { os: ubuntu-latest, py: 2.7 }
-        #  - { os: ubuntu-latest, py: 3.6 }
-        #  - { os: ubuntu-latest, py: 3.9, doc: 1 }
-        #  - { os: windows-latest, py: 3.9 }
-        #  - { os: macos-latest, py: 3.9 }
+        cfg:
+          - { os: ubuntu-latest, py: 2.7 }
+          - { os: ubuntu-latest, py: 3.6 }
+          - { os: ubuntu-latest, py: 3.9, doc: 1 }
+          - { os: windows-latest, py: 3.9 }
+          - { os: macos-latest, py: 3.9 }
 
     steps:
-    #- name: Add debugging
-    #  uses: actions/debug-action@559167ee1cb13c2c18a0fdd94850d6b5139ec133
-
     - uses: actions/checkout@v1
 
-    - name: Set up Python ${{ matrix.py }}
+    - name: Set up Python ${{ matrix.cfg.py }}
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.py }}
+        python-version: ${{ matrix.cfg.py }}
 
     - name: Install Python dependencies
       run: |
@@ -44,6 +38,6 @@ jobs:
         pytest -v
 
     - name: check that the docs build (linux only)
-      if: matrix.doc == 1
+      if: matrix.cfg.doc == 1
       run: |
         make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html

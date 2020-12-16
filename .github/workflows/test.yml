@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: Add debugging
-    - uses: hmarr/debug-action@v1.0.0
+      uses: hmarr/debug-action@v1.0.0
 
     - uses: actions/checkout@v1
 

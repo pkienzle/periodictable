@@ -306,7 +306,7 @@ class Neutron(object):
 
     * b_pp (fm)
         Imaginary scattering length b'' derived from the tabulated absorption
-        using $- \sigma_a / (2000 \lambda)$.
+        using $- \sigma_a / (1000 \cdot 2 \lambda)$.
 
     Additional fields not used for calculation include:
 
@@ -762,7 +762,7 @@ def neutron_scattering(compound, density=None,
 
     .. math::
 
-        b'' (fm) &= \left. \sigma_a \right/ (2000 \lambda) \\
+        b'' (fm) &= \left. \sigma_a \right/ (1000 \cdot 2 \lambda) \\
         b_i (fm) &= \sqrt{ 100 \sigma_i / (4 \pi) }
 
     The incoherent scattering length $b_i$ can be treated primarily

@@ -57,6 +57,13 @@ Source links:
 Change history
 ==============
 
+1.5.4 2021-04-??
+----------------
+
+New:
+
+* Add energy dependence for rare earths (Lynn and Seeger, 1990).
+
 1.5.3 2020-11-04
 ----------------
 

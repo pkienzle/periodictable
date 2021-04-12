@@ -411,14 +411,15 @@ class Neutron(object):
         and $b''$, but $\sigma_s = 0$. $b_c$ and $b''$ are extrapolated
         with constant values at the ends of the table.
         """
+        ones = 1 if np.isscalar(wavelength) else np.ones_like(wavelength)
         wavelength_p, xs_p = getattr(self, 'nsf_table', (None, None))
         if wavelength_p is None:
-            return self.b_c, self.b_pp, self.total
+            return ones*self.b_c, ones*self.b_pp, ones*self.total
         xs = np.interp(wavelength, wavelength_p, xs_p)
         # TODO: use correct value for sigma_s with energy dependence
         # Using zero for sigma_s leads to:
         #     sigma_i = max(sigma_s - sigma_c, 0) = 0
-        return xs.real, xs.imag, 0.
+        return xs.real, xs.imag, ones*0.0
 
     @require_keywords
     def sld(self, wavelength=ABSORPTION_WAVELENGTH):
@@ -1060,19 +1061,17 @@ def _sum_piece(wavelength, compound):
     Helper for neutron_composite_sld which precomputes quantities of interest
     for material fragments in a composite formula.
     """
-    # Sum over the quantities
+    # Sum over the quantities. Note that wavelengths might be vectors.
     molar_mass = num_atoms = 0
-    b_c = b_pp = sigma_s = 0
-    #is_energy_dependent = False
+    b_c, b_pp, sigma_s = wavelength*0., wavelength*0., wavelength*0.
     for element, quantity in compound.atoms.items():
-        #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
         molar_mass += element.mass*quantity
         num_atoms += quantity
         b_c_k, b_pp_k, sigma_s_k = element.neutron.xs_by_wavelength(wavelength)
         b_c += quantity * b_c_k
+        print("updated", b_c)
         b_pp += quantity * b_pp_k
         sigma_s += quantity * sigma_s_k
-        #is_energy_dependent |= element.neutron.is_energy_dependent
 
     return num_atoms, molar_mass, b_c, b_pp, sigma_s
 
@@ -1105,29 +1104,17 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
     the calculation consists of a few simple array operations regardless
     of the size of the material fragments.
     """
+    # Input may be a scalar or a sequence. If it is a sequence, turn it into
+    # an array before proceeding. If it is a scalar leave it as a scalar so
+    # that float input returns float output.
+    is_multi = not np.isscalar(wavelength)
+    if is_multi:
+        wavelength = np.asarray(wavelength)
     # Query all parts of the composition
     parts = [_sum_piece(wavelength, m) for m in materials]
-    V = list(zip(*parts))
-
-    # Check that all parts have the same arity. They may not if the data
-    # is a mixture of energy dependent and energy independent isotopes and
-    # there are multiple wavelengths being computed.
-    if not np.isscalar(wavelength):
-        N = len(wavelength)
-        # B_c_parts is V[2]
-        has_energy = [isinstance(v, np.ndarray) for v in V[2]]
-        is_multi = any(has_energy)
-        if is_multi and not all(has_energy):
-            for k in 2, 3, 4: # b_c, b_pp, sigma_s
-                V[k] = [
-                    v if isinstance(v, np.ndarray) else np.full(N, v)
-                    for v in V[k]]
-    else:
-        is_multi = False
-
-    # Make parts into arrays
-    V = [np.array(v) for v in V]
-    num_atoms_parts, molar_mass_parts, b_c_parts, b_pp_parts, sigma_s_parts = V
+    num_atoms_parts, molar_mass_parts, b_c_parts, b_pp_parts, sigma_s_parts = [
+        np.array(v) for v in zip(*parts)
+    ]
 
     #for name, v in zip("N mass bc b'' total".split(), V): print(name, v)
     def _compute(weights, density=1):

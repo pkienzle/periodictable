@@ -54,6 +54,19 @@ Source links:
    :alt: Documentation status
    :target: https://periodictable.readthedocs.io/en/latest/?badge=latest
 
+Known issues
+============
+
+* Incoherent scattering computed for contrast matched mixture in D2O_sld(),
+  differs from the value that would be computed for a compound with the same
+  isotope proportions and density computed in neutron_sld(). This may change
+  in a future release.
+
+* Incoherent scattering is not computed for energy-dependent rare-earth
+  isotopes.
+
+* Using mass and composition tables from 1997. IUPAC updated them in 2009.
+
 Change history
 ==============
 
@@ -64,15 +77,14 @@ New:
 
 * Add energy dependence for rare earths (Lynn and Seeger, 1990).
 
+Breaking changes:
+
+* Neutron scattering factors are returned with one value for each wavelength
+  even for energy independent elements. Previous versions returned a scalar
+  if the returned value was identical for each wavelength.
+
 1.5.3 2020-11-04
 ----------------
-
-Known issues:
-
-* Incoherent scattering computed for contrast matched mixture in D2O_sld(),
-  differs from the value that would be computed for a compound with the same
-  isotope proportions and density computed in neutron_sld(). This may change
-  in a future release.
 
 Breaking changes:
 

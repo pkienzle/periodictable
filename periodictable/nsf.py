@@ -411,6 +411,7 @@ class Neutron(object):
         and $b''$, but $\sigma_s = 0$. $b_c$ and $b''$ are extrapolated
         with constant values at the ends of the table.
         """
+        # TODO: do vector conversion at the end rather than the beginning.
         ones = 1 if np.isscalar(wavelength) else np.ones_like(wavelength)
         wavelength_p, xs_p = getattr(self, 'nsf_table', (None, None))
         if wavelength_p is None:

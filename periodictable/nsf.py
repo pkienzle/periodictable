@@ -1061,15 +1061,14 @@ def _sum_piece(wavelength, compound):
     Helper for neutron_composite_sld which precomputes quantities of interest
     for material fragments in a composite formula.
     """
-    # Sum over the quantities. Note that wavelengths might be vectors.
+    # Sum over the quantities.
     molar_mass = num_atoms = 0
-    b_c, b_pp, sigma_s = wavelength*0., wavelength*0., wavelength*0.
+    b_c = b_pp = sigma_s = 0
     for element, quantity in compound.atoms.items():
         molar_mass += element.mass*quantity
         num_atoms += quantity
         b_c_k, b_pp_k, sigma_s_k = element.neutron.xs_by_wavelength(wavelength)
         b_c += quantity * b_c_k
-        print("updated", b_c)
         b_pp += quantity * b_pp_k
         sigma_s += quantity * sigma_s_k
 

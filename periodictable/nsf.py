@@ -532,6 +532,8 @@ def init(table, reload=False):
         nsf.is_energy_dependent = (columns[6] == 'E')
         nsf.coherent, nsf.incoherent, nsf.total, nsf.absorption \
             = [fix_number(a) for a in columns[7:]]
+        # 1 fm = (1 barn)(100 fm^2/barn)/(1 A) (1e-5 A/fm)
+        # Note: Sears (1992) uses b = b' - i b'', so negate sigma_a for b''.
         nsf.b_pp = nsf.absorption/(-2000*ABSORPTION_WAVELENGTH)
 
         parts = columns[0].split('-')
@@ -694,7 +696,7 @@ def neutron_scattering(compound, density=None,
         N = \left.\sum{n_k} \right/ V
 
     The scattering cross sections of the molecule are computed from the
-    average scattering length $b_c - i b''$ and total cross section
+    average scattering length $b = b_c - i b''$ and total cross section
     $\sigma_s$ of the constituent atoms, weighted by their frequency.\ [#Sears2006]_
 
     .. math::
@@ -895,6 +897,7 @@ def _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s):
     """
     #print("in scat", number_density, wavelength, b_c, b_pp, sigma_s)
     # Compute SLD (1e-6/A^2)
+    # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sld_im.
     sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
     sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
 
@@ -910,6 +913,7 @@ def _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s):
     sld_inc = number_density * b_i * 10 # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
 
     # Compute absorption cross section (barn)
+    # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sigma_a
     sigma_a = -2000 * b_pp * wavelength # 1 barn = 1 fm 1 A 1e5 A/fm 1e-2 barn/fm
 
     # Compute scattering cross section per unit volume (1/cm)
@@ -1158,6 +1162,7 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
 
         # TODO: duplicated from _calculate_scattering
         # Compute SLD
+        # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sld_im.
         sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
         sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
 

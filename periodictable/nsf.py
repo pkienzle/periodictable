@@ -180,10 +180,10 @@ def neutron_wavelength(energy):
     Convert neutron energy to wavelength.
 
     :Parameters:
-        *energy* : float or vector | meV
+        *energy* \: float or vector | meV
 
     :Returns:
-        *wavelength* : float or vector | |Ang|
+        *wavelength* \: float or vector | |Ang|
 
     Energy is converted to wavelength using
 
@@ -206,10 +206,10 @@ def neutron_wavelength_from_velocity(velocity):
     Convert neutron velocity to wavelength.
 
     :Parameters:
-        *velocity* : float or vector | m/s
+        *velocity* \: float or vector | m/s
 
     :Returns:
-        *wavelength* : float or vector | |Ang|
+        *wavelength* \: float or vector | |Ang|
 
     Velocity is converted to wavelength using
 
@@ -230,10 +230,10 @@ def neutron_energy(wavelength):
     Convert neutron wavelength to energy.
 
     :Parameters:
-        *wavelength* : float or vector | |Ang|
+        *wavelength* \: float or vector | |Ang|
 
     :Returns:
-        *energy* : float or vector | meV
+        *energy* \: float or vector | meV
 
     Wavelength is converted to energy using
 
@@ -254,12 +254,12 @@ def _CHECK_scattering_potential(sld):
     Convert neutron scattering length density to energy potential.
 
     :Parameters:
-        *sld* : float or vector | |1e-6/Ang^2|
+        *sld* \: float or vector | |1e-6/Ang^2|
 
             Scattering length density.
 
     :Returns:
-        *energy* : float or vector | $10^{-6}$ eV
+        *energy* \: float or vector | $10^{-6}$ eV
 
             Scattering potential.
 
@@ -413,12 +413,12 @@ class Neutron(object):
         with constant values at the ends of the table.
 
         :Parameters:
-            *wavelength* : float(s) | |Ang|
+            *wavelength* \: float(s) | |Ang|
 
         :Returns:
-            *b_c* : float(s) | fm
-            *b''* : float(s) | fm
-            *sigma_s* : float(s) | barn
+            *b_c* \: float(s) | fm
+            *b''* \: float(s) | fm
+            *sigma_s* \: float(s) | barn
         """
         # TODO: do vector conversion at the end rather than the beginning.
         ones = 1 if np.isscalar(wavelength) else np.ones_like(wavelength)
@@ -437,10 +437,10 @@ class Neutron(object):
         abundance and density.
 
         :Parameters:
-            *wavelength* : float(s) | |Ang|
+            *wavelength* \: float(s) | |Ang|
 
         :Returns:
-            *sld* : (float(s), float(s), float(s)) | |1e-6/Ang^2|
+            *sld* \: (float(s), float(s), float(s)) | |1e-6/Ang^2|
                 (*real*, -*imaginary*, *incoherent*) scattering length density.
 
         Returns (None, None, None) if sld is not known for this element.
@@ -462,14 +462,14 @@ class Neutron(object):
         abundance and density.
 
         :Parameters:
-            *wavelength* : float(s) | |Ang|
+            *wavelength* \: float(s) | |Ang|
 
         :Returns:
-            *sld* : (float(s), float(s), float(s)) | |1e-6/Ang^2|
+            *sld* \: (float(s), float(s), float(s)) | |1e-6/Ang^2|
                 (*real*, -*imaginary*, *incoherent*) scattering length density
-            *xs* : (float(s), float(s), float(s)) | |1/cm|
+            *xs* \: (float(s), float(s), float(s)) | |1/cm|
                 (*coherent*, *absorption*, *incoherent*) cross sections.
-            *penetration* : float(s) | cm
+            *penetration* \: float(s) | cm
                 1/e penetration length.
 
         Returns (None, None, None) if sld is not known for this element.
@@ -614,31 +614,31 @@ def neutron_scattering(compound, density=None,
     Computes neutron scattering cross sections for molecules.
 
     :Parameters:
-        *compound* : Formula initializer
+        *compound* \: Formula initializer
             Chemical formula
-        *density* : float | |g/cm^3|
+        *density* \: float | |g/cm^3|
             Mass density
-        *natural_density* : float | |g/cm^3|
+        *natural_density* \: float | |g/cm^3|
             Mass density of formula with naturally occuring abundances
-        *wavelength* 1.798 : float(s) | |Ang|
+        *wavelength* 1.798 \: float(s) | |Ang|
             Neutron wavelength (default=1.798 |Ang|).
-        *energy* : float(s) | meV
+        *energy* \: float(s) | meV
             Neutron energy.  If energy is specified then wavelength is ignored.
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             Alternate table to use when parsing *compound*.
 
     :Returns:
-        *sld* : (float(s), float(s), float(s)) | |1e-6/Ang^2|
+        *sld* \: (float(s), float(s), float(s)) | |1e-6/Ang^2|
             (*real*, -*imaginary*, *incoherent*) scattering length density.
-        *xs* : (float(s), float(s), float(s)) | |1/cm|
+        *xs* \: (float(s), float(s), float(s)) | |1/cm|
             (*coherent*, *absorption*, *incoherent*) cross sections.
-        *penetration* : float(s) | cm
+        *penetration* \: float(s) | cm
             1/e penetration depth of the beam
 
     Returns (None, None, None) if sld is unknown for any component.
 
     :Raises:
-        *AssertionError* : density is missing.
+        *AssertionError* \: density is missing.
 
 
     .. Note:
@@ -880,15 +880,15 @@ def neutron_scattering(compound, density=None,
 def _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s):
     """
     :Parameters:
-        *number_density* : float | N/|Ang^3|
+        *number_density* \: float | N/|Ang^3|
             Scatterers per unit volume.
-        *wavelength* : float(s) | |Ang|
+        *wavelength* \: float(s) | |Ang|
             Neutron wavelength(s).
-        *b_c* : float(s) | fm
+        *b_c* \: float(s) | fm
             Coherent scattering length $b_c$.
-        *b_pp* : float(s) | fm
+        *b_pp* \: float(s) | fm
             Imaginary scattering length $b''$.
-        *sigma_c* : float(s) | barn
+        *sigma_c* \: float(s) | barn
             Total cross section
 
     See neutron_scattering docstring for calculation details.
@@ -929,24 +929,24 @@ def neutron_sld(*args, **kw):
     Computes neutron scattering length densities for molecules.
 
     :Parameters:
-        *compound* : Formula initializer
+        *compound* \: Formula initializer
             Chemical formula
-        *density* : float | |g/cm^3|
+        *density* \: float | |g/cm^3|
             Mass density
-        *natural_density* : float | |g/cm^3|
+        *natural_density* \: float | |g/cm^3|
             Mass density of formula with naturally occuring abundances
-        *wavelength* : float | |Ang|
+        *wavelength* \: float | |Ang|
             Neutron wavelength (default=1.798 |Ang|).
-        *energy* : float | meV
+        *energy* \: float | meV
             Neutron energy.  If energy is specified then wavelength is ignored.
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             Alternate table to use when parsing *compound*.
     :Returns:
-        *sld* : (float, float, float) | |1e-6/Ang^2|
+        *sld* \: (float, float, float) | |1e-6/Ang^2|
             (*real*, -*imaginary*, *incoherent*) scattering length density.
 
     :Raises:
-        *AssertionError* : density is missing.
+        *AssertionError* \: density is missing.
 
     Returns the scattering length density of the compound.
     See :func:`neutron_scattering` for details.
@@ -1098,13 +1098,13 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
     Create a composite SLD calculator.
 
     :Parameters:
-        *materials* : [Formula]
+        *materials* \: [Formula]
             List of materials
         *wavelength* = 1.798: float OR [float] | |Ang|
             Probe wavelength(s).
 
     :Returns:
-        *calculator* : f(w, density=1) -> (*real*, -*imaginary*, *incoherent*)
+        *calculator* \: f(w, density=1) -> (*real*, -*imaginary*, *incoherent*)
 
     The composite calculator takes a vector of weights and returns the
     scattering length density of the composite.  This is useful for operations
@@ -1177,7 +1177,7 @@ def sld_plot(table=None):
     Plots SLD as a function of element number.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
 
     :Returns: None
@@ -1641,10 +1641,10 @@ def sld_table(wavelength=1, table=None, isotopes=True):
 
     :Parameters:
 
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             If *table* is not specified, use the common periodic table.
 
-        *isotopes* = True : boolean
+        *isotopes* = True \: boolean
             Whether to consider isotopes or not.
 
     :Returns: None
@@ -1696,7 +1696,7 @@ def energy_dependent_table(table=None):
     Prints a table of energy dependent isotopes.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             If *table* is not specified, use the common periodic table.
 
     :Returns: None
@@ -1779,9 +1779,9 @@ def absorption_comparison_table(table=None, tol=None):
     |Ang|\ |cdot|\ fm to barn.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
+        *tol* = 0.01 \: float | barn
             Show differences greater than this amount.
 
     :Returns: None
@@ -1813,9 +1813,9 @@ def coherent_comparison_table(table=None, tol=None):
     The table only prints where b_c exists.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
+        *tol* = 0.01 \: float | barn
             Amount of difference to show
 
     :Returns: None
@@ -1846,9 +1846,9 @@ def total_comparison_table(table=None, tol=None):
     of the data and formula.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
+        *tol* = 0.01 \: float | barn
             Amount of difference to show
 
     :Returns: None
@@ -1881,9 +1881,9 @@ def incoherent_comparison_table(table=None, tol=None):
     Prints a table of incoherent computed from total and b_c with incoherent.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
+        *tol* = 0.01 \: float | barn
             Amount of difference to show
 
     :Returns: None

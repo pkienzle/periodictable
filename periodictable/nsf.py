@@ -898,8 +898,8 @@ def _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s):
     #print("in scat", number_density, wavelength, b_c, b_pp, sigma_s)
     # Compute SLD (1e-6/A^2)
     # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sld_im.
-    sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
-    sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
+    sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
+    sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
 
     # PAK 2017-04-21: compute incoherent xs from total xs
     # Compute coherent and incoherent cross sections (barn)
@@ -910,7 +910,7 @@ def _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s):
     b_i = sqrt(sigma_i / (4*pi/100)) # 1 fm = sqrt(1 barn * 1e-2 fm^2/barn)
 
     # Compute incoherent scattering length density (1e-6/A^2)
-    sld_inc = number_density * b_i * 10 # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
+    sld_inc = number_density * b_i * 10 # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
 
     # Compute absorption cross section (barn)
     # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sigma_a
@@ -1163,14 +1163,14 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
         # TODO: duplicated from _calculate_scattering
         # Compute SLD
         # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sld_im.
-        sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
-        sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
+        sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
+        sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
 
         # PAK 2017-04-21: compute incoherent xs from total xs
         sigma_c = 4*pi/100 * b_c**2 # 1 barn = 1e-2 fm^2
         sigma_i = np.maximum(sigma_s - sigma_c, 0.) # 1 barn = 1 barn
         b_i = sqrt(sigma_i / (4*pi/100)) # 1 fm = sqrt(1 barn * 1e-2 fm^2/barn)
-        sld_inc = number_density * b_i * 10 # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6
+        sld_inc = number_density * b_i * 10 # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
 
         return sld_re, sld_im, sld_inc
 

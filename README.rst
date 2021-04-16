@@ -62,10 +62,10 @@ Known issues
   isotope proportions and density computed in neutron_sld(). This may change
   in a future release.
 
-* Incoherent scattering is not computed for energy-dependent rare-earth
-  isotopes.
-
 * Using mass and composition tables from 1997. IUPAC updated them in 2009.
+
+* Incoherent scattering calculations for energy-dependent rare earth elements
+  have not been verified.
 
 Change history
 ==============

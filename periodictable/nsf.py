@@ -138,7 +138,7 @@ associated with the periodictable package.
 """
 from __future__ import print_function
 
-import numpy
+import numpy as np
 from numpy import sqrt, pi, asarray, inf
 from .core import Element, Isotope, default_table
 from .constants import (avogadro_number, plancks_constant, electron_volt,
@@ -180,10 +180,10 @@ def neutron_wavelength(energy):
     Convert neutron energy to wavelength.
 
     :Parameters:
-        *energy* : float or vector | meV
+        *energy* \: float or vector | meV
 
     :Returns:
-        *wavelength* : float or vector | |Ang|
+        *wavelength* \: float or vector | |Ang|
 
     Energy is converted to wavelength using
 
@@ -206,10 +206,10 @@ def neutron_wavelength_from_velocity(velocity):
     Convert neutron velocity to wavelength.
 
     :Parameters:
-        *velocity* : float or vector | m/s
+        *velocity* \: float or vector | m/s
 
     :Returns:
-        *wavelength* : float or vector | |Ang|
+        *wavelength* \: float or vector | |Ang|
 
     Velocity is converted to wavelength using
 
@@ -230,10 +230,10 @@ def neutron_energy(wavelength):
     Convert neutron wavelength to energy.
 
     :Parameters:
-        *wavelength* : float or vector | |Ang|
+        *wavelength* \: float or vector | |Ang|
 
     :Returns:
-        *energy* : float or vector | meV
+        *energy* \: float or vector | meV
 
     Wavelength is converted to energy using
 
@@ -254,12 +254,12 @@ def _CHECK_scattering_potential(sld):
     Convert neutron scattering length density to energy potential.
 
     :Parameters:
-        *sld* : float or vector | |1e-6/Ang^2|
+        *sld* \: float or vector | |1e-6/Ang^2|
 
             Scattering length density.
 
     :Returns:
-        *energy* : float or vector | $10^{-6}$ eV
+        *energy* \: float or vector | $10^{-6}$ eV
 
             Scattering potential.
 
@@ -304,15 +304,18 @@ class Neutron(object):
         by dividing by periodictable.nsf.ABSORPTION_WAVELENGTH and multiplying
         by your wavelength.
 
+    * b_pp (fm)
+        Imaginary scattering length b'' derived from the tabulated absorption
+        using $- \sigma_a / (1000 \cdot 2 \lambda)$.
 
-    Additional fields not used for calculation include:
+    Additional columns not used for calculation include:
 
     * b_c_i (fm)
-        Imaginary bound coherent scattering length.  This is
-        related to absorption cross section by $\sigma_a = 4 \pi b_i/k$ where
+        Imaginary bound coherent scattering length.  This is related to
+        absorption cross section by $\sigma_a = 4 \pi \mathrm{Im}(b_c)/k$ where
         $k = 2 \pi/\lambda$ and an additional factor of 1000 for converting
-        between |Ang|\ |cdot|\ fm and barns.  b_c_i is not available
-        for all isotopes for which absorption cross sections have been measured.
+        between |Ang|\ |cdot|\ fm and barns.  b_c_i is not available for
+        all isotopes for which absorption cross sections have been measured.
 
     * bp, bm (fm)
         Spin-dependent scattering for I+1/2 and I-1/2 (not always available).
@@ -358,16 +361,19 @@ class Neutron(object):
         Spin on the nucleus: '0', '1/2', '3/2', etc.
 
     Each field ``T`` above has a corresponding ``T_units`` attribute with
-    the name of the units. For scattering calculations, the scattering
-    length density is the value of interest. This is computed from the
-    *number_density* of the individual elements, as derived from the element
-    density and atomic mass.
+    the name of the units.
+
+    For scattering calculations the scattering length density is the value
+    of interest. This is computed from the *number_density* of the individual
+    elements, as derived from the element density and atomic mass.
 
     .. Note:: 1 barn = 100 |fm^2|
     """
     b_c = None
     b_c_i = None
     b_c_units = "fm"
+    b_pp = None
+    b_pp_units = "fm"
     bp = None
     bp_i = None
     bp_units = "fm"
@@ -385,56 +391,72 @@ class Neutron(object):
     abundance = 0.
     abundance_units = "%"
     is_energy_dependent = False
+    nsf_table = None
     def __init__(self):
         self._number_density = None
     def __str__(self):
         return ("b_c=%.3g coh=%.3g inc=%.3g abs=%.3g"
                 % (self.b_c, self.coherent, self.incoherent, self.absorption))
+
     def has_sld(self):
         """Returns *True* if sld is defined for this element/isotope."""
-        return None not in [self.b_c, self._number_density]
+        # TODO: use NaN for missing information
+        #return np.isnan(self.b_c * self._number_density)
+        return self.b_c is not None and self._number_density is not None
+
+    # PAK 2021-04-05: allow energy dependent b_c, b''
+    def xs_by_wavelength(self, wavelength):
+        r"""
+        Return scattering length and total cross section for each wavelength.
+
+        For rare earth isotopes this returns the energy-dependent $b_c$
+        and $b''$, but $\sigma_s = 0$. $b_c$ and $b''$ are extrapolated
+        with constant values at the ends of the table.
+
+        :Parameters:
+            *wavelength* \: float(s) | |Ang|
+
+        :Returns:
+            *b_c* \: float(s) | fm
+
+            *b''* \: float(s) | fm
+
+            *sigma_s* \: float(s) | barn
+        """
+        # TODO: do vector conversion at the end rather than the beginning.
+        ones = 1 if np.isscalar(wavelength) else np.ones_like(wavelength)
+        if self.nsf_table is None:
+            return ones*self.b_c, ones*self.b_pp, ones*self.total
+        xs = np.interp(wavelength, self.nsf_table[0], self.nsf_table[1])
+        # TODO: Is this the correct value to use for sigma_s?
+        # Maybe just (4*pi/100)*xs.real**2
+        sigma_s = (0.04*np.pi)*abs(xs)**2 # 1 barn = 1 fm^2 1e-2 barn/fm^2
+        return xs.real, xs.imag, sigma_s
+
     @require_keywords
     def sld(self, wavelength=ABSORPTION_WAVELENGTH):
-        """
+        r"""
         Returns scattering length density for the element at natural
         abundance and density.
 
         :Parameters:
-            *wavelength* : float | |Ang|
+            *wavelength* \: float(s) | |Ang|
 
         :Returns:
-            *sld* : (float, float, float) | |1e-6/Ang^2|
+            *sld* \: float(s), float(s), float(s) | |1e-6/Ang^2|
                 (*real*, -*imaginary*, *incoherent*) scattering length density.
 
-        .. Note:
-
-           Values may not be correct when the element or isotope has
-           *is_energy_dependent=True*
+        Returns (None, None, None) if sld is not known for this element.
 
         See :func:`neutron_scattering` for details.
         """
-
-        # Compute number and absorption density assuming isotope has
-        # same structure as the bulk element
+        # TODO: deprecate in favour of neutron_scattering(el)
+        # TODO: return NaN instead of None for missing sld.
+        # This should happen automatically if the cross sections are NaN in
+        # the table.
         if not self.has_sld():
             return None, None, None
-
-        b_c = self.b_c
-        sigma_s = self.total
-        sigma_a = self.absorption/ABSORPTION_WAVELENGTH*wavelength
-
-        number_density = self._number_density*1e-24
-
-        # PAK 2017-04-21: compute incoherent xs from total xs
-        sigma_c = 4*pi/100 * b_c**2
-        sigma_i = max(sigma_s - sigma_c, 0.)
-
-        # Compute SLD
-        sld_re = number_density * b_c * 10
-        sld_im = number_density * sigma_a / (2 * wavelength) * 0.01
-        sld_inc = number_density * sqrt(sigma_i / (4*pi/100)) * 10
-
-        return sld_re, sld_im, sld_inc
+        return self.scattering(wavelength=wavelength)[0]
 
     @require_keywords
     def scattering(self, wavelength=ABSORPTION_WAVELENGTH):
@@ -443,55 +465,53 @@ class Neutron(object):
         abundance and density.
 
         :Parameters:
-            *wavelength* : float | |Ang|
+            *wavelength* \: float(s) | |Ang|
 
         :Returns:
-            *sld* : (float, float, float) | |1e-6/Ang^2|
+            *sld* \: float(s), float(s), float(s) | |1e-6/Ang^2|
                 (*real*, -*imaginary*, *incoherent*) scattering length density
-            *xs* : (float, float, float) | |1/cm|
+
+            *xs* \: float(s), float(s), float(s) | |1/cm|
                 (*coherent*, *absorption*, *incoherent*) cross sections.
-            *penetration* : float | cm
+                :w
+
+            *penetration* \: float(s) | cm
                 1/e penetration length.
 
-        .. Note:
-
-           Values may not be correct when the element or isotope has
-           *is_energy_dependent=True*
+        Returns (None, None, None) if sld is not known for this element.
 
         See :func:`neutron_scattering` for details.
         """
-
+        # TODO: deprecate in favour of neutron_scattering(el)
         # Compute number and absorption density assuming isotope has
         # same structure as the bulk element
         if not self.has_sld():
             return None, None, None
 
-        b_c = self.b_c
-        sigma_s = self.total
-        sigma_a = self.absorption*wavelength/ABSORPTION_WAVELENGTH
+        number_density = self._number_density*1e-24  # N/A^3 = N/cm^3 (1e-8 cm/A)^3
+        b_c, b_pp, sigma_s = self.xs_by_wavelength(wavelength)
+        return _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s)
 
-        number_density = self._number_density*1e-24
+def energy_dependent_init(table):
+    from .nsf_tables import ENERGY_DEPENDENT_TABLES
 
-        # PAK 2017-04-21: compute incoherent xs from total xs
-        sigma_c = 4*pi/100 * b_c**2
-        sigma_i = max(sigma_s - sigma_c, 0.)
+    for (el_name, iso_num), values in ENERGY_DEPENDENT_TABLES.items():
+        energy, re_a, im_a, _ = zip(*values) # Ignoring abs(a)
+        wavelength = neutron_wavelength(asarray(energy)*1000) # 1 eV = 1000 meV
+        el = getattr(table, el_name)
+        atom = el if iso_num is None else el[iso_num]
+        xs = asarray(re_a) + 1j*asarray(im_a)
+        atom.neutron.nsf_table = wavelength[::-1], xs[::-1]
+        #print(f"adding {atom}")
 
-        # Compute SLD
-        sld_re = number_density * b_c * 10
-        sld_im = number_density * sigma_a / (2 * wavelength) * 0.01
-        sld_inc = number_density * sqrt(sigma_i / (4*pi/100)) * 10
-
-        # Compute scattering cross section per unit volume
-        total_xs = number_density * sigma_s
-        coh_xs = number_density * sigma_c
-        abs_xs = number_density * sigma_a
-        inc_xs = number_density * sigma_i
-
-        # Compute 1/e length
-        penetration = 1/(abs_xs + total_xs)
-
-        return (sld_re, sld_im, sld_inc), (coh_xs, abs_xs, inc_xs), penetration
-
+    # Lu nat missing from Lynn and Seeger, so mix Lu[175] and Lu[176]
+    Lu175 = table.Lu[175]
+    Lu176 = table.Lu[176]
+    xs_175 = Lu175.neutron.b_c + 1j*Lu175.neutron.b_pp
+    wavelength, xs_176 = Lu176.neutron.nsf_table
+    xs_nat = (xs_175*Lu175.abundance + xs_176*Lu176.abundance)/100.0 # 1 fm = 1fm * %/100
+    table.Lu.neutron.nsf_table = wavelength, xs_nat
+    #table.Lu.neutron.total = 0.  # zap total cross section
 
 def init(table, reload=False):
     """
@@ -518,6 +538,9 @@ def init(table, reload=False):
         nsf.is_energy_dependent = (columns[6] == 'E')
         nsf.coherent, nsf.incoherent, nsf.total, nsf.absorption \
             = [fix_number(a) for a in columns[7:]]
+        # 1 fm = (1 barn)(100 fm^2/barn)/(1 A) (1e-5 A/fm)
+        # Note: Sears (1992) uses b = b' - i b'', so negate sigma_a for b''.
+        nsf.b_pp = nsf.absorption/(-2000*ABSORPTION_WAVELENGTH)
 
         parts = columns[0].split('-')
         Z = int(parts[0])
@@ -531,7 +554,7 @@ def init(table, reload=False):
 
         # Plug the default number density for the element into the nsf so
         # it can calculate sld.
-        nsf._number_density = element.number_density
+        nsf._number_density = element.number_density # N/cm^3 = N/cm^3
 
 
         # For new elements, clear out 'neutron' attribute for isotopes
@@ -557,6 +580,17 @@ def init(table, reload=False):
             if element.neutron is missing:
                 element.neutron = nsf
 
+    # Gaps in the table for Xe and Eu[151]. Fill them in with guesses from
+    # other columns even though they have not been measured directly. The
+    # assertions are here so that we remember to remove this code if the
+    # table eventually gets updated.
+    assert table.Xe.neutron.total is None
+    assert table.Eu[151].neutron.b_c is None
+    table.Xe.neutron.total = (
+        table.Xe.neutron.coherent + table.Xe.neutron.incoherent)
+    table.Eu[151].neutron.b_c = (
+        sqrt(100/(4*pi))*table.Eu[151].neutron.coherent)
+
     for line in nsftableI.split('\n'):
         columns = line.split(',')
 
@@ -574,13 +608,11 @@ def init(table, reload=False):
         # Read imaginary values
         nsf.b_c_i, nsf.bp_i, nsf.bm_i = [fix_number(a) for a in columns[1:]]
 
-    # Xe total cross section is missing from the table
-    # put it in even though it has not been independently measured
-    if table.Xe.neutron.total is None:
-        table.Xe.neutron.total = (
-            table.Xe.neutron.coherent + table.Xe.neutron.incoherent)
+    # Add energy-dependent tables
+    energy_dependent_init(table)
 
 
+# TODO: split incoherent into spin and isotope incoherence (eq 17-19 of Sears)
 # TODO: require parsed compound rather than including formula() keywords in api
 # Note: docs and function prototype are reproduced in __init__
 @require_keywords
@@ -591,49 +623,53 @@ def neutron_scattering(compound, density=None,
     Computes neutron scattering cross sections for molecules.
 
     :Parameters:
-        *compound* : Formula initializer
+        *compound* \: Formula initializer
             Chemical formula
-        *density* : float | |g/cm^3|
+        *density* \: float | |g/cm^3|
             Mass density
-        *natural_density* : float | |g/cm^3|
+        *natural_density* \: float | |g/cm^3|
             Mass density of formula with naturally occuring abundances
-        *wavelength* 1.798 : float | |Ang|
+        *wavelength* 1.798 \: float(s) | |Ang|
             Neutron wavelength (default=1.798 |Ang|).
-        *energy* : float | meV
+        *energy* \: float(s) | meV
             Neutron energy.  If energy is specified then wavelength is ignored.
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             Alternate table to use when parsing *compound*.
 
     :Returns:
-        *sld* : (float, float, float) | |1e-6/Ang^2|
+        *sld* \: float(s), float(s), float(s) | |1e-6/Ang^2|
             (*real*, -*imaginary*, *incoherent*) scattering length density.
-        *xs* : (float, float, float) | |1/cm|
+        *xs* \: float(s), float(s), float(s) | |1/cm|
             (*coherent*, *absorption*, *incoherent*) cross sections.
-        *penetration* : float | cm
+        *penetration* \: float(s) | cm
             1/e penetration depth of the beam
 
+    Returns (None, None, None) if sld is unknown for any component.
+
     :Raises:
-        *AssertionError* : density is missing.
+        *AssertionError* \: density is missing.
 
 
     .. Note:
 
-        Values may not correct if any element or isotope has
-        *is_energy_dependent=True*
+        The returned values will be vectors if *wavelength* is a vector.
 
-    The coherent and incoherent cross sections are calculated from the
-    bound scattering lengths for nuclei. The actual cross sections depend
-    on the incoming neutron energy and sample temperature, especially for
-    light elements. For low energy neutrons (cold neutrons), the tabulated
+    Neutron scattering cross sections for materials are calculated from
+    tabulated values for the different nuclei. The result is only an
+    approximation. Actual scattering depends on details of sample composition,
+    as well as the incoming neutron energy and sample temperature, especially
+    for light elements. For low energy neutrons (cold neutrons), the tabulated
     cross sections are generally a lower limit. The measured incoherent
     scattering from hydrogen, for example, can be considerably larger
-    (by more than 20%) than its bound value. For example, the incoherent
-    scattering cross section of H2O is 5.621/cm as computed from these tables
-    compared to ~7.0/cm as measured with 5 meV neutrons at 290K. [#May1982]_
+    (by more than 20%) than its bound value, leading to an estimate of 5.621/cm
+    for H2O as computed compared to ~7.0/cm as measured with 5 meV neutrons
+    at 290K.\ [#May1982]_ The alignment of the neutron spin with the nuclei
+    spin also matters, as demonstrated by $^3\mathrm{He}$ polarizers.
 
-    The scattering factor tables are not self consistent.  The following
-    functions show discrepencies between the various measurements of the
-    scattering potential:
+    The tables themselves are not self-consistent.  Because the different
+    quantities are measured indirectly with a variety of techniques, there
+    are discrepencies when converting values from column to another. These
+    differences can be seen with the following:
 
         :func:`absorption_comparison_table`
 
@@ -641,17 +677,20 @@ def neutron_scattering(compound, density=None,
 
         :func:`total_comparison_table`
 
-    To compute the neutron cross sections we first need to average
-    quantities for the unit cell of the molecule.
+    For our calculations we use the real part of the bound coherent scattering
+    length $\mathrm{Re}(b_c)$ and the absorption cross section $\sigma_a$ (from
+    which we derive the imaginary scattering length, $b''=\mathrm{Im}(b_c)$).
+    See Sears (1992) for details.\ [#Sears1992]_
 
+    We first need to average quantities for the unit cell of the molecule.
     Molar mass *m* (g/mol) is the sum of the masses of each component:
 
     .. math::
 
-        m = \sum{n_i m_i}\ {\rm for\ each\ atom}\ i=1,2,\ldots
+        m = \sum{n_k m_k}\ {\rm for\ each\ atom}\ k=1,2,\ldots
 
     Cell volume $V$ (|Ang^3|/molecule) is molar mass $m$ over density
-    $rho$, with a correction based on Avogadro's number $N_A$ (atoms/mol)
+    $\rho$, with a correction based on Avogadro's number $N_A$ (atoms/mol)
     and the length conversion $10^8$ |Ang|/cm:
 
     .. math::
@@ -662,110 +701,101 @@ def neutron_scattering(compound, density=None,
 
     .. math::
 
-        N = \left.\sum{n_i} \right/ V
+        N = \left.\sum{n_k} \right/ V
 
-    Coherent scattering cross section $\sigma_c$ of the molecule is computed
-    from the average scattering length of its constituent atoms, weighted by
-    their frequency.
-
-    .. math::
-
-        b_c = \left.\sum n_i b_c \right/ \sum n_i
-
-    This is converted to a scattering cross section and scaled
-    by 1 barn = 100 |fm^2|:
+    The coherent scattering length of the molecule is computed from the
+    average scattering length $b = b_c - i b''$ weighted by frequency:
 
     .. math::
 
-        \sigma_c = \left. 4 \pi b_c^2 \right/ 100
+        b_c &= \left.\sum n_k b_{ck} \right/ \sum n_k \\
+        b'' &= \left.\sum n_k b_k'' \right/ \sum n_k \\
 
-    Similarly, the absorption cross section $\sigma_a$, the incoherent cross
-    section $\sigma_i$, and the total cross section $\sigma_s$ can be computed
-    from the corresponding cross sections of the constituent
-    elements,\ [#Sears2006]_ already expressed in barns:
+    The individual $b_k''$ values are derived from the absorption cross
+    sections $\sigma_a$, tabulated at wavelength $\lambda = 1.798$ |Ang|
+    and scaled to fm (with 1000 fm = 1 barn/|Ang|):
 
     .. math::
 
-        \sigma_a &= \left. \sum n_j \sigma_{aj} \right/ \sum n_j \\
-        \sigma_i &= \left. \sum n_j \sigma_{ij} \right/ \sum n_j \\
-        \sigma_s &= \left. \sum n_j \sigma_{sj} \right/ \sum n_j
+        b_k'' = \left. \sigma_{ak} \right/ (1000 \cdot 2 \lambda)
 
-    The neutron cross sections are tabulated at wavelength 1.798 |Ang|.
-    In the thermal neutron energy range most absorption cross sections
-    scale linearly with wavelength,\ [#Lynn1990]_ and can be adjusted
+    Some rare earth isotopes are energy-dependent with scattering
+    length $b = \mathrm{Re}(b) - i \mathrm{Im}(b) = b_c + i b''$ tabulated
+    by energy.\ [#Lynn1990]_ For the given input wavelength $\lambda$, $b$ is
+    interpolated from the table values, with the end points used for values
+    outside the tabulated range.
+
+    The average scattering length is converted to scattering cross
+    sections, with $\sigma_c$ scaled to barn (with 1 barn= 100 |fm^2|)
+    and $\sigma_a$ scaled to barn (with 1000 barn = 1 fm |Ang|):
+
+    .. math::
+
+        \sigma_c &= \left. 4 \pi b_c^2 \right/ 100 \\
+        \sigma_a &= \left. 1000 \cdot 4 \pi \left< b'' \right> \right/k
+            \ {\rm for} \ k=2\pi / \lambda
+
+    For most elements the scattering length is independent of energy in
+    the thermal neutron energy range so the coherent scattering length
+    $\sigma_c$ is unchanged. The absorption cross section $\sigma_a$ for
+    these elements scales linearly with wavelength and can be adjusted
     with a simple multiplication:
 
     .. math::
 
-        \sigma_a = \sigma_a \lambda / \lambda_o = \sigma_a \lambda / 1.798
+        \sigma_a' = \sigma_a \lambda' / \lambda_o = \sigma_a \lambda' / 1.798
 
-    If *isotope.neutron.is_energy_dependent()* is true for any part of
-    the material, then this relation may not hold, and the returned values
-    are only valid for 1.798 |Ang|.
-
-    From the scattering cross sections, the scattering length for a material
-    $b = b' - i b''$ can be computed using the following relations:[#Sears2006]_
-
-    .. math::
-
-        \sigma_c &= 4 \pi |b_c|^2 \\
-        \sigma_a &= \left. 4 \pi \left< b'' \right> \right/k
-            \ {\rm for} \ k=2\pi / \lambda \\
-        \sigma_i &= 4 \pi |b_i|^2 \\
-        \sigma_s &= 4 \pi \left< |b|^2 \right>
-
-    Transforming we get:
+    The incoherent scattering length is more complicated, including
+    contributions from spin incoherence for different possible spin states
+    as well as isotope incoherence from diffuse coherent
+    scattering.\ [#Glinka2011]_ Using the total cross section $\sigma_s$ from
+    the table, the incoherent scattering length is estimated as:
 
     .. math::
 
-        b'' &= \left. \sigma_a \right/ (2 \lambda) \\
-        b_i &= \sqrt{ \sigma_i / (4 \pi) }
+        \sigma_s &= \left.\sum n_k \sigma_{sk} \right/ \sum n_k \\
+        \sigma_i &= \sigma_s - \sigma_c \\
+        b_i &= \sqrt{ 100 \sigma_i / (4 \pi) }
 
-    The incoherent scattering length $b_i$ can be treated primarily
-    as an absorption length in large scale structure calculations, with the
-    complex scattering length approximated by $b = b_c - i (b'' + b_i)$.
+    For the energy dependent rare earth isotopes the total scattering is
+    estimated as $\sigma_s = 4\pi|b_c + i b''|^2$, ignoring any spin isotope
+    incoherence effects. Incoherent scattering for energy-dependent
+    rare earth isotopes with non-zero nuclear spin will be underestimated.
 
-    The scattering potential is often expressed as a scattering length
-    density (SLD).  This is just the number density of the scatterers times
-    their scattering lengths, with a correction for units.
-
-    .. math::
-
-        \rho_{\rm re}  &= 10 N b_c \\
-        \rho_{\rm im}  &= -N b'' / 100 \\
-        \rho_{\rm inc} &= 10 N b_i
-
-    with the factors of 10 chosen to give SLD in units of $\AA^{-2}$. The
-    resulting $\rho = \rho_{\rm re} + i \rho_{\rm im}$ can be used in the
-    scattering equations. Treatment of the incoherent scattering
-    $\rho_{\rm inc}$ will depend on the equation. For example, it can be
-    treated as an absorption in specular reflectivity calculations since the
-    incoherently scattered neutrons are removed from the multilayer
-    recurrence calculation.
-
-    Similarly, scattering cross section includes number density:
+    The scattering potential can be expressed as a scattering length
+    density (SLD).  This is the number density of the scatterers
+    (per $\AA^3$) times their scattering lengths, scaled to
+    $10^6/\AA^2$ (with $1/\AA^2$ = $10^{5} \mathrm{fm}/\AA^3$).
 
     .. math::
 
-        \Sigma_{\rm coh} &= N \sigma_c \\
-        \Sigma_{\rm inc} &= N \sigma_i \\
-        \Sigma_{\rm abs} &= N \sigma_a \\
-        \Sigma_{\rm s} &= N \sigma_s
+        \rho_{\rm re} (10^6 / \AA^2) &= 10 N b_c \\
+        \rho_{\rm im} (10^6 / \AA^2) &= -10 N b'' \\
+        \rho_{\rm inc} (10^6 / \AA^2) &= 10 N b_i
 
-
-    The 1/e penetration depth $t_u$ represents the the depth into the sample at
-    which the unscattered intensity is reduced by a factor of $e$:
+    Similarly, the macroscopic scattering cross section for the sample includes
+    number density:
 
     .. math::
 
-        t_u = \left. 1 \right/ (\Sigma_{\rm s} + \Sigma_{\rm abs})
+        \Sigma_{\rm coh} (1/{\rm cm}) &= N \sigma_c \\
+        \Sigma_{\rm inc} (1/{\rm cm}) &= N \sigma_i \\
+        \Sigma_{\rm abs} (1/{\rm cm}) &= N \sigma_a \\
+        \Sigma_{\rm s} (1/{\rm cm}) &= N \sigma_s
 
-    Note that the calculated penetration depth includes the effects of both
-    absorption and incoherent scattering (which spreads the beam in the
+    The 1/e penetration depth $t_u$ represents the the depth into the sample
+    at which the unscattered intensity is reduced by a factor of $e$:
+
+    .. math::
+
+        t_u (cm) = \left. 1 \right/ (\Sigma_{\rm s} + \Sigma_{\rm abs})
+
+    The calculated penetration depth includes the effects of both
+    absorption and incoherent scattering (which spreads the beam over the
     full $4\pi$ spherical surface, and so it looks like absorption with
     respect to the beam), as well as the coherent scattering from the sample.
     If you instead want to calculate the effective shielding of the sample,
-    you should recalculate penetration depth without the coherent scattering.
+    you should recalculate penetration depth with absorption only.
 
     Transmission rate can be computed from $e^{-d/t_u}$ for penetration
     depth $t_u$ and sample thickness $d$. This does not include many
@@ -773,13 +803,6 @@ def neutron_scattering(compound, density=None,
     and forward scattering\ [#May1982]_, which result in measured
     transmission significantly different from the values predicted from
     nuclear properties alone.
-
-    In general, the total scattering cross section is not the sum of the
-    coherent and incoherent cross sections,
-    $\Sigma_{\rm s} \ne \Sigma_{\rm coh}+\Sigma_{\rm inc}$.\ [#Glinka2011]_
-    Instead, we compute $\Sigma_{\rm inc} = \Sigma_{\rm s} - \Sigma_{\rm coh}$
-    in accordance with Sect. 4.4.4 of the Internation Tables for Crystallography
-    Volume C.
 
     Including unit conversion with $\mu=10^{-6}$ the full scattering equations
     are:
@@ -793,6 +816,10 @@ def neutron_scattering(compound, density=None,
         \rho_{\rm im}\,(\mu/\AA^2) &= (N/\AA^3)
             \, (\sigma_a\,{\rm barn})
             \, (10^{-8}\,\AA^2/{\rm barn}) / (2 \lambda\, \AA)
+            \, (10^6\,\mu) \\
+            &= (N/\AA^3)
+            \, (b''\,{\rm fm})
+            \, (10^{-5} \AA/{\rm\,fm})
             \, (10^6\,\mu) \\
         \rho_{\rm inc}\,(\mu/\AA^2) &= (N/\AA^3)
             \, \sqrt{(\sigma_i\, {\rm barn})/(4 \pi)
@@ -818,6 +845,7 @@ def neutron_scattering(compound, density=None,
         t_u\,({\rm cm}) &= 1/(\Sigma_{\rm s}\, 1/{\rm cm}
             \,+\, \Sigma_{\rm abs}\, 1/{\rm cm})
     """
+
     from . import formulas
     compound = formulas.formula(compound, density=density,
                                 natural_density=natural_density, table=table)
@@ -826,12 +854,12 @@ def neutron_scattering(compound, density=None,
     if energy is not None:
         wavelength = neutron_wavelength(energy)
     # PAK: 1.5.3 wavelength now defaults to ABSORPTION_WAVELENGTH
-    if wavelength is None:
+    elif wavelength is None:
         wavelength = ABSORPTION_WAVELENGTH
 
     # Sum over the quantities
     molar_mass = num_atoms = 0
-    sigma_s = sigma_a = b_c = 0
+    b_c = b_pp = sigma_s = 0
     is_energy_dependent = False
     for element, quantity in compound.atoms.items():
         if not element.neutron.has_sld():
@@ -839,9 +867,12 @@ def neutron_scattering(compound, density=None,
         #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
         molar_mass += element.mass*quantity
         num_atoms += quantity
-        sigma_a += quantity * element.neutron.absorption
-        sigma_s += quantity * element.neutron.total
-        b_c += quantity * element.neutron.b_c
+        # PAK 2021-04-05: allow energy dependent b_c, b''
+        re_a, im_a, total_xs = element.neutron.xs_by_wavelength(wavelength)
+        #print(f"{element=}; {re_a=}; {im_a=}; {total_xs=}")
+        b_c += quantity * re_a
+        b_pp += quantity * im_a
+        sigma_s += quantity * total_xs
         is_energy_dependent |= element.neutron.is_energy_dependent
 
     # If nothing to sum, return values for a vacuum.  This might be because
@@ -849,59 +880,91 @@ def neutron_scattering(compound, density=None,
     if molar_mass*compound.density == 0:
         return (0, 0, 0), (0, 0, 0), inf
 
-    # Turn sums into scattering factors
+    # Turn weighted sums into scattering factors
     b_c /= num_atoms
+    b_pp /= num_atoms
     sigma_s /= num_atoms
-    sigma_a *= wavelength/ABSORPTION_WAVELENGTH/num_atoms
 
-    # Compute number density
-    cell_volume = (molar_mass/compound.density)/avogadro_number*1e24 # (10^8 A/cm)^3
-    number_density = num_atoms / cell_volume
+    # Compute number density (N/A^3)
+    # volume A^3/N = ((1 g/mole) / (1 g/cm^3)) / (N/mole) * (10^8 A/cm)^3
+    cell_volume = (molar_mass/compound.density)/avogadro_number*1e24
+    number_density = num_atoms / cell_volume # N/A^3 = N/A^3
 
-    # PAK 2017-04-21: compute incoherent cross section from total cross section
-    sigma_c = 4*pi/100 * b_c**2  # = 4 pi |b_c/10|^2
-    sigma_i = max(sigma_s - sigma_c, 0.0)
+    return _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s)
 
-    # Compute SLD
-    sld_re = number_density * b_c * 10
-    sld_im = number_density * sigma_a / (2 * wavelength) * 0.01
-    sld_inc = number_density * sqrt(sigma_i / (4*pi/100)) * 10
 
-    # Compute scattering cross section per unit volume
-    total_xs = number_density * sigma_s
+def _calculate_scattering(number_density, wavelength, b_c, b_pp, sigma_s):
+    r"""
+    :Parameters:
+        *number_density* \: float | N/|Ang^3|
+            Scatterers per unit volume.
+        *wavelength* \: float(s) | |Ang|
+            Neutron wavelength(s).
+        *b_c* \: float(s) | fm
+            Coherent scattering length $b_c$.
+        *b_pp* \: float(s) | fm
+            Imaginary scattering length $b''$.
+        *sigma_c* \: float(s) | barn
+            Total cross section
+
+    See neutron_scattering docstring for calculation details.
+    """
+    #print("in scat", number_density, wavelength, b_c, b_pp, sigma_s)
+    # Compute SLD (1e-6/A^2)
+    # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sld_im.
+    sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
+    sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
+
+    # PAK 2017-04-21: compute incoherent xs from total xs
+    # Compute coherent and incoherent cross sections (barn)
+    sigma_c = 4*pi/100 * b_c**2 # 1 barn = 1e-2 fm^2
+    sigma_i = np.maximum(sigma_s - sigma_c, 0.)  # 1 barn = 1 barn
+
+    # Compute incoherent scattering length from incoherent cross section (fm)
+    b_i = sqrt(sigma_i / (4*pi/100)) # 1 fm = sqrt(1 barn * 1e-2 fm^2/barn)
+
+    # Compute incoherent scattering length density (1e-6/A^2)
+    sld_inc = number_density * b_i * 10 # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
+
+    # Compute absorption cross section (barn)
+    # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sigma_a
+    sigma_a = -2000 * b_pp * wavelength # 1 barn = 1 fm 1 A 1e5 A/fm 1e-2 barn/fm
+
+    # Compute scattering cross section per unit volume (1/cm)
+    total_xs = number_density * sigma_s # 1/cm = 1/A^3 1 barn 1e-8 A^2/barn 1e8 A/cm
     coh_xs = number_density * sigma_c
     abs_xs = number_density * sigma_a
     inc_xs = number_density * sigma_i
 
-    # Compute 1/e length
-    penetration = 1/(abs_xs + total_xs)
+    # Compute 1/e length (cm)
+    penetration = 1/(abs_xs + total_xs) # 1 cm = 1 / (1/cm)
 
     return (sld_re, sld_im, sld_inc), (coh_xs, abs_xs, inc_xs), penetration
 
 
 def neutron_sld(*args, **kw):
-    """
+    r"""
     Computes neutron scattering length densities for molecules.
 
     :Parameters:
-        *compound* : Formula initializer
+        *compound* \: Formula initializer
             Chemical formula
-        *density* : float | |g/cm^3|
+        *density* \: float | |g/cm^3|
             Mass density
-        *natural_density* : float | |g/cm^3|
+        *natural_density* \: float | |g/cm^3|
             Mass density of formula with naturally occuring abundances
-        *wavelength* : float | |Ang|
+        *wavelength* \: float | |Ang|
             Neutron wavelength (default=1.798 |Ang|).
-        *energy* : float | meV
+        *energy* \: float | meV
             Neutron energy.  If energy is specified then wavelength is ignored.
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             Alternate table to use when parsing *compound*.
     :Returns:
-        *sld* : (float, float, float) | |1e-6/Ang^2|
+        *sld* \: (float, float, float) | |1e-6/Ang^2|
             (*real*, -*imaginary*, *incoherent*) scattering length density.
 
     :Raises:
-        *AssertionError* : density is missing.
+        *AssertionError* \: density is missing.
 
     Returns the scattering length density of the compound.
     See :func:`neutron_scattering` for details.
@@ -942,8 +1005,8 @@ def D2O_match(compound, **kw):
     #      = SLD(H2O) - SLD(Hsample)
     # => % = 100*(SLD(H2O) - SLD(Hsample))
     #      / (SLD(Dsample) - SLD(Hsample) + SLD(H2O) - SLD(D2O))
-    D2O_fraction = \
-        (H2O_sld[0] - Hsld[0]) / (Dsld[0] - Hsld[0] + H2O_sld[0] - D2O_sld[0])
+    D2O_fraction = (
+        (H2O_sld[0] - Hsld[0]) / (Dsld[0] - Hsld[0] + H2O_sld[0] - D2O_sld[0]))
 
     match_point_sld = mix_values(Dsld, Hsld, D2O_fraction)
     return D2O_fraction, match_point_sld[0]
@@ -1032,77 +1095,96 @@ def _sum_piece(wavelength, compound):
     Helper for neutron_composite_sld which precomputes quantities of interest
     for material fragments in a composite formula.
     """
-    # Sum over the quantities
+    # Sum over the quantities.
     molar_mass = num_atoms = 0
-    sigma_a = sigma_s = b_c = 0
-    is_energy_dependent = False
+    b_c = b_pp = sigma_s = 0
     for element, quantity in compound.atoms.items():
-        #print element,quantity,element.neutron.b_c,element.neutron.absorption,element.neutron.total
         molar_mass += element.mass*quantity
         num_atoms += quantity
-        sigma_a += quantity * element.neutron.absorption
-        sigma_s += quantity * element.neutron.total
-        b_c += quantity * element.neutron.b_c
-        is_energy_dependent |= element.neutron.is_energy_dependent
+        b_c_k, b_pp_k, sigma_s_k = element.neutron.xs_by_wavelength(wavelength)
+        b_c += quantity * b_c_k
+        b_pp += quantity * b_pp_k
+        sigma_s += quantity * sigma_s_k
 
-    return num_atoms, molar_mass, b_c, sigma_s, sigma_a
+    return num_atoms, molar_mass, b_c, b_pp, sigma_s
 
+# TODO: compute density from material densities if requested
+# You ought to be able to use mixby="mass" or "volume" when creating the
+# calculator, and ignore any density provided.
 def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
-    """
+    r"""
     Create a composite SLD calculator.
 
     :Parameters:
-        *materials* : [Formula]
+        *materials* \: [Formula]
             List of materials
         *wavelength* = 1.798: float OR [float] | |Ang|
             Probe wavelength(s).
 
     :Returns:
-        *calculator* : f(w, density=1) -> (*real*, -*imaginary*, *incoherent*)
+        *calculator* \: f(w, density=1) -> (*real*, -*imaginary*, *incoherent*)
 
     The composite calculator takes a vector of weights and returns the
     scattering length density of the composite.  This is useful for operations
     on large molecules, such as calculating a set of contrasts or fitting
-    a material composition.
+    a material composition. Note that density must be provided for each set
+    of material weights. The density on the individual materials is ignored.
+
+    The returned slds will be vectors if the input wavelength is a vector
+    and if any of the elements are energy dependent.
 
     Table lookups and partial sums and constants are precomputed so that
     the calculation consists of a few simple array operations regardless
     of the size of the material fragments.
     """
+    # Input may be a scalar or a sequence. If it is a sequence, turn it into
+    # an array before proceeding. If it is a scalar leave it as a scalar so
+    # that float input returns float output.
+    is_multi = not np.isscalar(wavelength)
+    if is_multi:
+        wavelength = np.asarray(wavelength)
+    # Query all parts of the composition
     parts = [_sum_piece(wavelength, m) for m in materials]
-    V = [numpy.array(v) for v in zip(*parts)]
-    num_atoms_parts, molar_mass_parts, b_c_parts, sigma_s_parts, sigma_a_parts = V
+    num_atoms_parts, molar_mass_parts, b_c_parts, b_pp_parts, sigma_s_parts = [
+        np.array(v) for v in zip(*parts)
+    ]
 
+    #for name, v in zip("N mass bc b'' total".split(), V): print(name, v)
     def _compute(weights, density=1):
+        multiweights = weights[:, None] if is_multi else weights
         # Sum over the quantities
-        molar_mass = numpy.sum(weights*molar_mass_parts)
-        num_atoms = numpy.sum(weights*num_atoms_parts)
-        sigma_a = numpy.sum(weights*sigma_a_parts)
-        sigma_s = numpy.sum(weights*sigma_s_parts)
-        b_c = numpy.sum(weights*b_c_parts)
+        molar_mass = np.sum(weights*molar_mass_parts)
+        num_atoms = np.sum(weights*num_atoms_parts)
+        b_c = np.sum(multiweights*b_c_parts, axis=0)
+        b_pp = np.sum(multiweights*b_pp_parts, axis=0)
+        sigma_s = np.sum(multiweights*sigma_s_parts, axis=0)
 
         # If nothing to sum, return values for a vacuum.  This might be because
         # the material has no atoms or it might be because the density is zero.
         if molar_mass*density == 0:
             return 0, 0, 0
 
-        # Turn sums into scattering factors
-        b_c /= num_atoms
-        sigma_a *= wavelength/ABSORPTION_WAVELENGTH/num_atoms # at tabulated wavelength
-        sigma_s /= num_atoms
-
-        # Compute number density
+        # Compute number density (1/A^3)
         cell_volume = (molar_mass/density)/avogadro_number*1e24
         number_density = num_atoms / cell_volume
+        #print("in compute", b_c, b_pp, number_density)
 
-        # PAK 2017-04-21: compute incoherent cross section from total cross section
-        sigma_c = 4*pi/100 * b_c**2
-        sigma_i = max(sigma_s - sigma_c, 0.0)
+        # Turn sums into scattering factors
+        b_c /= num_atoms
+        b_pp /= num_atoms
+        sigma_s /= num_atoms
 
+        # TODO: duplicated from _calculate_scattering
         # Compute SLD
-        sld_re = number_density * b_c * 10
-        sld_im = number_density * sigma_a / (2 * wavelength) * 0.01
-        sld_inc = number_density * sqrt(sigma_i / (4*pi/100)) * 10
+        # Note: Sears (1992) uses b = b' - i b'', so negate b'' for sld_im.
+        sld_re = 10*number_density * b_c # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
+        sld_im = -10*number_density * b_pp # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
+
+        # PAK 2017-04-21: compute incoherent xs from total xs
+        sigma_c = 4*pi/100 * b_c**2 # 1 barn = 1e-2 fm^2
+        sigma_i = np.maximum(sigma_s - sigma_c, 0.) # 1 barn = 1 barn
+        b_i = sqrt(sigma_i / (4*pi/100)) # 1 fm = sqrt(1 barn * 1e-2 fm^2/barn)
+        sld_inc = number_density * b_i * 10 # 1e-6/A^2 = 1/A^3 1 fm 1e-5 A/fm 1e6 1e-6
 
         return sld_re, sld_im, sld_inc
 
@@ -1110,11 +1192,11 @@ def neutron_composite_sld(materials, wavelength=ABSORPTION_WAVELENGTH):
 
 
 def sld_plot(table=None):
-    """
+    r"""
     Plots SLD as a function of element number.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
 
     :Returns: None
@@ -1573,15 +1655,15 @@ def fix_number(str):
     return float(str)
 
 def sld_table(wavelength=1, table=None, isotopes=True):
-    """
+    r"""
     Scattering length density table for wavelength 4.75 |Ang|.
 
     :Parameters:
 
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             If *table* is not specified, use the common periodic table.
 
-        *isotopes* = True : boolean
+        *isotopes* = True \: boolean
             Whether to consider isotopes or not.
 
     :Returns: None
@@ -1629,11 +1711,11 @@ def sld_table(wavelength=1, table=None, isotopes=True):
     print("* Energy dependent cross sections")
 
 def energy_dependent_table(table=None):
-    """
+    r"""
     Prints a table of energy dependent isotopes.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             If *table* is not specified, use the common periodic table.
 
     :Returns: None
@@ -1672,7 +1754,9 @@ def _diff(iso, a, b, tol=0.01):
                 print("%10s %8s %8.2f"%(iso, "----", b))
             elif b is None and a > tol:
                 print("%10s %8.2f %8s"%(iso, a, "----"))
-    elif abs(a - b) > tol:
+    # Tricky code: Using tolerance of -tol selects for items within tolerance
+    # rather than outside tolerance by using -|a-b| > -tol.
+    elif np.sign(tol)*abs(a - b) > tol:
         print("%10s %8.2f %8.2f %5.1f%%"
               % (iso, a, b, (100*(a-b)/b if b != 0 else inf)))
 
@@ -1689,6 +1773,11 @@ def compare(fn1, fn2, table=None, tol=0.01):
             res2 = None
         _diff(el, res1, res2, tol=tol)
         for iso in el:
+            # Don't show isotope details if the isotope defers to the natural
+            # natural abundance for its value.
+            if 'neutron' not in iso.__dict__:
+                #print("dict has", iso.__dict__.keys())
+                continue
             try:
                 res1 = fn1(iso)
             except Exception:
@@ -1716,9 +1805,9 @@ def absorption_comparison_table(table=None, tol=None):
     |Ang|\ |cdot|\ fm to barn.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
+        *tol* = 0.01 \: float | barn
             Show differences greater than this amount.
 
     :Returns: None
@@ -1750,10 +1839,11 @@ def coherent_comparison_table(table=None, tol=None):
     The table only prints where b_c exists.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
-            Amount of difference to show
+        *tol* = 0.01 \: float | barn
+            Amount of difference to show. Use -tol to show elements within
+            tolerance rather than those outside tolerance.
 
     :Returns: None
 
@@ -1777,16 +1867,17 @@ def coherent_comparison_table(table=None, tol=None):
             table=table, tol=tol)
 
 def total_comparison_table(table=None, tol=None):
-    """
+    r"""
     Prints a table of neutron.total and sum coh,inc for each
     isotope where these exist.  This is used to checking the integrity
     of the data and formula.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
-            Amount of difference to show
+        *tol* = 0.01 \: float | barn
+            Amount of difference to show. Use -tol to show elements within
+            tolerance rather than those outside tolerance.
 
     :Returns: None
 
@@ -1806,22 +1897,21 @@ def total_comparison_table(table=None, tol=None):
             187-Os    13.00    13.30  -2.3%
 
     """
-
     print("Comparison of total cross section to (coherent + incoherent)")
     compare(lambda el: el.neutron.total,
             lambda el: el.neutron.coherent+el.neutron.incoherent,
             table=table, tol=tol)
 
-
 def incoherent_comparison_table(table=None, tol=None):
-    """
+    r"""
     Prints a table of incoherent computed from total and b_c with incoherent.
 
     :Parameters:
-        *table* : PeriodicTable
+        *table* \: PeriodicTable
             The default periodictable unless a specific table has been requested.
-        *tol* = 0.01 : float | barn
-            Amount of difference to show
+        *tol* = 0.01 \: float | barn
+            Amount of difference to show. Use -tol to show elements within
+            tolerance rather than those outside tolerance.
 
     :Returns: None
 
@@ -1838,7 +1928,6 @@ def incoherent_comparison_table(table=None, tol=None):
            ...
 
     """
-
     print("Comparison of incoherent and (total - 4 pi b_c^2/100)")
     compare(lambda el: el.neutron.incoherent,
             lambda el: el.neutron.total - 4*pi/100*el.neutron.b_c**2,
@@ -1856,7 +1945,7 @@ def print_scattering(compound, wavelength=ABSORPTION_WAVELENGTH):
     print("%s at %g Ang  (density=%g g/cm^3)"
           % (str(compound), wavelength, density))
     print("  sld: %g + %g j  (%g incoherent)  1e-6/Ang^2"%sld)
-    print("  sigma_c: %g  sigma_i: %g  sigma_a: %g  1/cm"%sld)
+    print("  sigma_c: %g  sigma_a: %g  sigma_i: %g  1/cm"%xs)
     print("  mu: %g 1/cm  1/e penetration: %g cm"%(1/penetration, penetration))
 
 def main():

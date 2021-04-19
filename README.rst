@@ -62,10 +62,13 @@ Known issues
   isotope proportions and density computed in neutron_sld(). This may change
   in a future release.
 
-* Using mass and composition tables from 1997. IUPAC updated them in 2009.
+* The mass and composition tables are out of date. This package uses tables
+  from 1997 but IUPAC produced new tables in 2009.
 
 * Incoherent scattering calculations for energy-dependent rare earth elements
-  have not been verified.
+  is underestimated. The calculation requires bound incoherent scattering
+  lengths (b_i) and the bound coherent lengths (b_c), but only b_c is
+  included.
 
 Change history
 ==============

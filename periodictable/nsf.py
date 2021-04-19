@@ -612,6 +612,7 @@ def init(table, reload=False):
     energy_dependent_init(table)
 
 
+# TODO: split incoherent into spin and isotope incoherence (eq 17-19 of Sears)
 # TODO: require parsed compound rather than including formula() keywords in api
 # Note: docs and function prototype are reproduced in __init__
 @require_keywords
@@ -758,7 +759,8 @@ def neutron_scattering(compound, density=None,
 
     For the energy dependent rare earth isotopes the total scattering is
     estimated as $\sigma_s = 4\pi|b_c + i b''|^2$, ignoring any spin isotope
-    incoherence effects.
+    incoherence effects. Incoherent scattering for energy-dependent
+    rare earth isotopes with non-zero nuclear spin will be underestimated.
 
     The scattering potential can be expressed as a scattering length
     density (SLD).  This is the number density of the scatterers
@@ -771,7 +773,8 @@ def neutron_scattering(compound, density=None,
         \rho_{\rm im} (10^6 / \AA^2) &= -10 N b'' \\
         \rho_{\rm inc} (10^6 / \AA^2) &= 10 N b_i
 
-    Similarly, scattering cross section from the sample includes number density:
+    Similarly, the macroscopic scattering cross section for the sample includes
+    number density:
 
     .. math::
 

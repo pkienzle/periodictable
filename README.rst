@@ -80,6 +80,13 @@ New:
 
 * Add energy dependence for rare earths (Lynn and Seeger, 1990).
 
+Modified:
+
+* Use complex b_c when computing the coherent cross section, leading to
+  correct values of sigma_c and sigma_i for materials with large absorption.
+  With this change the tabulated values for B[10] are now shown to be
+  self-consistent within a few percent.
+
 Breaking changes:
 
 * Neutron scattering factors are returned with one value for each wavelength

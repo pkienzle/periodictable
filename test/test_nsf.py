@@ -151,13 +151,13 @@ def test_formula():
     #   cell_volume = (molar_mass/density) / N_A * 1e24
     #   number_density = num_atoms/cell_volume
     #   sigma_i = inc_xs/number_density
-    #   sld_inc = number_density * sqrt ( 100/(4*pi) * sigma_i ) * 10
-    #   sld_re = number_density * b_c * 10
-    #   sigma_c = 4*pi/100*b_c**2
+    #   sld_inc = 10*number_density * sqrt ( 100/(4*pi) * sigma_i )
+    #   sld_re = 10*number_density * b_c.real
+    #   sigma_c = 4*pi/100*((sld_re - 1j*sld_im)/(10*number_density))**2
     #   coh_xs = sigma_c * number_density
     Nb = 0.13732585020640778
     sld_inc = Nb*sqrt(100/(4*pi)*xs[2]/Nb)*10
-    coh_xs = Nb*4*pi/100*(sld[0]/(10*Nb))**2
+    coh_xs = Nb*4*pi/100*(abs(sld[0] - 1j*sld[1])/(10*Nb))**2
     assert abs(sld[2] - sld_inc) < 1e-14
     assert abs(xs[0] - coh_xs) < 1e-14
 
@@ -196,13 +196,14 @@ def test_contrast_matching():
 
 def test_composite():
     from periodictable.nsf import neutron_composite_sld
+    molecule = '3HSO4+1H2O+2CCl4'
     material = [formula(s) for s in ('HSO4','H2O','CCl4')]
     weight = np.array([3, 1, 2])
     calc = neutron_composite_sld(material, wavelength=4.75)
     sld1 = calc(weight, density=1.2)
-    sld2 = neutron_sld('3HSO4+1H2O+2CCl4', density=1.2, wavelength=4.75)
-    #print(sld1)
-    #print(sld2)
+    sld2 = neutron_sld(molecule, density=1.2, wavelength=4.75)
+    #print(material, sld1)
+    #print(molecule, sld2)
     assert all(np.isscalar(v) for v in sld1 + sld2)
     assert all(abs(v-w)<1e-14 for v, w in zip(sld1, sld2))
 

@@ -812,19 +812,19 @@ def neutron_scattering(compound, density=None,
     If you instead want to calculate the effective shielding of the sample,
     you should recalculate penetration depth with absorption only.
 
-    There is also a wavelength dependence for single phonon interactions which
-    gives rise to significant inelastic scattering for lighter isotopes (H, D)
-    and/or longer wavelengths (above 5 |Ang|). This factor is both
-    temperature and material dependent and will not be included
-    in the scattering calculations. In particular, penetration length and
-    transmitted flux are going to be significantly overestimated.
-
     Transmission rate can be computed from $e^{-d/t_u}$ for penetration
     depth $t_u$ and sample thickness $d$. This does not include many
     real world effects, such as single phonon scattering\ [#Mildner1998]_
     and forward scattering\ [#May1982]_, which result in measured
     transmission significantly different from the values predicted from
     nuclear properties alone.
+
+    There is also a wavelength dependence for single phonon interactions which
+    gives rise to significant inelastic scattering for lighter isotopes (H, D)
+    and/or longer wavelengths (above 5 |Ang|). This factor is both
+    temperature and material dependent and will not be included
+    in the scattering calculations. In particular, penetration length and
+    transmitted flux are going to be significantly overestimated.
 
     Including unit conversion with $\mu=10^{-6}$ the full scattering equations
     are:

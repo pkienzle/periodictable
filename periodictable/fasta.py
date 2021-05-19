@@ -31,8 +31,9 @@ For unmodified protein need to add 2*H[1] and O for terminations.
 Assumes that proteins were created in an environment with the usual H/D isotope
 ratio on the non-swappable hydrogens.
 
-[1] Perkins, Modern Physical Methods in Biochemistry Part B, 143-265 (1988)
-
+[1] Perkins, S.J., 1985. Chapter 6 X-Ray and Neutron Solution Scattering,
+in: New Comprehensive Biochemistry. Elsevier, pp. 143–265.
+https://doi.org/10.1016/S0167-7306(08)60575-X
 """
 from __future__ import division
 

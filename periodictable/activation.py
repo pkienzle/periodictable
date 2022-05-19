@@ -197,7 +197,10 @@ class Sample(object):
         percent_error = 100*abs(ft)/target
         if percent_error > 0.1:
             #return 1e100*365*24 # Return 1e100 rather than raising an error
-            raise RuntimeError(f"Failed to compute decay time correctly ({percent_error}% error). Please report material, mass, flux and exposure.")
+            msg = (
+                "Failed to compute decay time correctly (%.1g error). Please"
+                " report material, mass, flux and exposure.") % percent_error
+            raise RuntimeError(msg)
         return t
 
     def _accumulate(self, activity):
@@ -471,7 +474,8 @@ def activity(isotope, mass, env, exposure, rest_times):
 
             activity = root*precision_correction
             if activity < 0:
-                raise RuntimeError(f"activity {activity} less than zero for {isotope}")
+                msg = "activity %g less than zero for %g"%(activity, isotope)
+                raise RuntimeError(msg)
             #print(ai.thermalXS_parent, ai.resonance_parent, exposure)
             #print("P", effectiveXS, "U", U, "V", V, "W", W, "X",
             #      precision_correction, "Y", activity)
@@ -556,8 +560,10 @@ def demo():  # pragma: nocover
         abundance=IAEA1987_isotopic_abundance,
         #abundance=NIST2001_isotopic_abundance,
         )
-    print(f"{mass}g {formula} for {exposure} hours at {fluence} n/cm^2/s")
-    print(f"time to decay to {decay_level} is {sample.decay_time(decay_level)}")
+    print("%gg %s for %g hours at %g n/cm^2/s"
+          % (mass, formula, exposure, fluence))
+    print("Time to decay to %g uCi is %g hours."
+          % (decay_level, sample.decay_time(decay_level)))
     sample.show_table(cutoff=0.0)
 
     ## Print a table of flux vs. activity so we can debug the

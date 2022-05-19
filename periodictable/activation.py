@@ -422,10 +422,6 @@ def activity(isotope, mass, env, exposure, rest_times):
             activity = root/(parent_lam - lam) * (
                 lam*expm1(-parent_lam*exposure) - parent_lam*expm1(-lam*exposure))
             #print("N", parent_lam, "O", activity)
-            if activity < 0:
-                #frac = lam/parent_lam
-                #print(f"{activity=} {root=} {lam=} {exposure=} {parent_lam=} {exp(-lam*exposure)=} {lam/parent_lam=} {exp(-lam*exposure)/(1-(lam/parent_lam))=} {(frac-expm1(-lam*exposure))/(1-frac)=}")
-                activity = 1e-10
         elif ai.reaction == '2n':
             # Column N: 0.69/t1/2 (1/h) lambda of parent nuclide
             parent_lam = LN2 / ai.Thalf_parent

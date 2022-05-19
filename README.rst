@@ -73,6 +73,15 @@ Known issues
 Change history
 ==============
 
+1.6.1 2022-05-18
+----------------
+
+Modified:
+
+* Calculate decay time correctly in the presence of significant long-lived
+  activation.
+* Calculate b mode activation correctly for Eu[151] => Gd[152]
+
 1.6.0 2021-04-21
 ----------------
 

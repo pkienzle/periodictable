@@ -75,7 +75,7 @@ where FORMULA is the chemical formula for the material.
 
 from __future__ import division, print_function
 
-from math import exp, log
+from math import exp, log, expm1
 import os
 
 from .formulas import formula as build_formula
@@ -177,17 +177,27 @@ class Sample(object):
             return 0
 
         # Find the small rest time (probably 0 hr)
-        i, To = min(enumerate(self.rest_times), key=lambda x: x[1])
+        min_rest, To = min(enumerate(self.rest_times), key=lambda x: x[1])
         # Find the activity at that time, and the decay rate
-        data = [(Ia[i], LN2/a.Thalf_hrs) for a, Ia in self.activity.items()]
+        data = [(Ia[min_rest], LN2/a.Thalf_hrs) for a, Ia in self.activity.items()]
         # Build functions for total activity at time T - target and its derivative
         # This will be zero when activity is at target
         f = lambda t: sum(Ia*exp(-La*(t-To)) for Ia, La in data) - target
-        df = lambda t: sum(-La*Ia*exp(-La*(t-To)) for Ia, La in data)
+        df = lambda t: sum(La*Ia*(To-1)*exp(-La*(t-To)) for Ia, La in data)
         # Return target time, or 0 if target time is negative
         if f(0) < target:
             return 0
-        t, ft = find_root(0, f, df)
+        # Need an initial guess near the answer otherwise find_root gets confused.
+        # Small but significant activation with an extremely long half-life will
+        # dominate at long times, but at short times they will not affect the
+        # derivative. Choosing a time that satisfies the longest half-life seems
+        # to work well enough.
+        initial = max(-log(target/Ia)/La + To for Ia, La in data)
+        t, ft = find_root(initial, f, df)
+        percent_error = 100*abs(ft)/target
+        if percent_error > 0.1:
+            #return 1e100*365*24 # Return 1e100 rather than raising an error
+            raise RuntimeError(f"Failed to compute decay time correctly ({percent_error}% error). Please report material, mass, flux and exposure.")
         return t
 
     def _accumulate(self, activity):
@@ -391,11 +401,28 @@ def activity(isotope, mass, env, exposure, rest_times):
             # Column N: 0.69/t1/2 (1/h) lambda of parent nuclide
             parent_lam = LN2 / ai.Thalf_parent
             # Column O: Activation if "b" mode production
-            # Note: problems resulting from precision limitiation not addredd in "b"
-            # mode production
-            activity = root*(1 - exp(-lam*exposure)/(1 - (lam/parent_lam))
-                             + exp(-parent_lam*exposure)/((parent_lam/lam)-1))
-            #print "N", parent_lam, "O", activity
+            # 2022-05-18 PAK: addressed the following
+            #    Note: problems resulting from precision limitation not addressed
+            #    in "b" mode production
+            # by rewriting equation to use expm1:
+            #    activity = root*(1 - exp(-lam*exposure)/(1 - (lam/parent_lam))
+            #                     + exp(-parent_lam*exposure)/((parent_lam/lam)-1))
+            # Let x1=-lam*exposure x2=-parent_lam*exposure a=x1/x2=lam/parent_lam
+            #    activity = root * (1 - exp(x1)/(1-a) + exp(x2)/(1/a - 1))
+            #             = root * (1 - x2*exp(x1)/(x2-x1)) + x1*exp(x2)/(x2-x1))
+            #             = root * ((x2-x1) - x2*exp(x1) + x1*exp(x2)) / (x2-x1)
+            #             = root * (x2*(1-exp(x1)) + x1*(exp(x2)-1)) / (x2-x1)
+            #             = root * (x1*expm1(x2) - x2*expm1(x1)) / (x2-x1)
+            #             = root * (lam*expm1(x2) - parent_lam*expm1(x1)) / (parent_lam - lam)
+            # Checked for each b-mode production that small halflife results are
+            # unchanged to four digits and Eu[151] => Gd[152] no longer fails.
+            activity = root/(parent_lam - lam) * (
+                lam*expm1(-parent_lam*exposure) - parent_lam*expm1(-lam*exposure))
+            #print("N", parent_lam, "O", activity)
+            if activity < 0:
+                #frac = lam/parent_lam
+                #print(f"{activity=} {root=} {lam=} {exposure=} {parent_lam=} {exp(-lam*exposure)=} {lam/parent_lam=} {exp(-lam*exposure)/(1-(lam/parent_lam))=} {(frac-expm1(-lam*exposure))/(1-frac)=}")
+                activity = 1e-10
         elif ai.reaction == '2n':
             # Column N: 0.69/t1/2 (1/h) lambda of parent nuclide
             parent_lam = LN2 / ai.Thalf_parent
@@ -443,15 +470,17 @@ def activity(isotope, mass, env, exposure, rest_times):
                 precision_correction = W * (exp(-U)-exp(-V))
 
             activity = root*precision_correction
+            if activity < 0:
+                raise RuntimeError(f"activity {activity} less than zero for {isotope}")
             #print(ai.thermalXS_parent, ai.resonance_parent, exposure)
             #print("P", effectiveXS, "U", U, "V", V, "W", W, "X",
             #      precision_correction, "Y", activity)
             # columns: F32 H K L U V W X
             #data = env.fluence, initialXS, flux, root, U, V, W, precision_correction
-            #print " ".join("%.5e"%v for v in data)
+            #print(" ".join("%.5e"%v for v in data))
 
         result[ai] = [activity*exp(-lam*Ti) for Ti in rest_times]
-        #print [(Ti, Ai) for Ti, Ai in zip(rest_times, result[ai])]
+        #print([(Ti, Ai) for Ti, Ai in zip(rest_times, result[ai])])
 
     return result
 
@@ -510,17 +539,25 @@ class ActivationResult(object):
 
 def demo():  # pragma: nocover
     import sys
+    decay_level = 5e-4
     formula = sys.argv[1]
     fluence = 1e5
     exposure = 10
+    mass = 1
+    if 0: # Make sure all elements compute
+        import periodictable as pt
+        formula = "".join(str(el) for el in pt.elements)[1:]
+        # Use an enormous mass to force significant activation of rare isotopes
+        mass, fluence = 1e15, 1e8
     env = ActivationEnvironment(fluence=fluence, Cd_ratio=70, fast_ratio=50, location="BT-2")
-    sample = Sample(formula, 1)
+    sample = Sample(formula, mass=mass)
     sample.calculate_activation(
         env, exposure=exposure, rest_times=(0, 1, 24, 360),
         abundance=IAEA1987_isotopic_abundance,
         #abundance=NIST2001_isotopic_abundance,
         )
-    print("1g %s for %g hours at %g n/cm^2/s"%(formula, exposure, fluence))
+    print(f"{mass}g {formula} for {exposure} hours at {fluence} n/cm^2/s")
+    print(f"time to decay to {decay_level} is {sample.decay_time(decay_level)}")
     sample.show_table(cutoff=0.0)
 
     ## Print a table of flux vs. activity so we can debug the

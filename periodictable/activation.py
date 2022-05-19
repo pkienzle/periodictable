@@ -540,11 +540,13 @@ class ActivationResult(object):
 def demo():  # pragma: nocover
     import sys
     decay_level = 5e-4
-    formula = sys.argv[1]
     fluence = 1e5
     exposure = 10
     mass = 1
-    if 0: # Make sure all elements compute
+    if len(sys.argv) > 1:
+        formula = sys.argv[1]
+    else:
+        # Make sure all elements compute
         import periodictable as pt
         formula = "".join(str(el) for el in pt.elements)[1:]
         # Use an enormous mass to force significant activation of rare isotopes

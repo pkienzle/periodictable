@@ -414,6 +414,8 @@ def xray_sld(compound, density=None, natural_density=None,
     for element, quantity in compound.atoms.items():
         mass += element.mass*quantity
         f1, f2 = element.xray.scattering_factors(energy=energy)
+        if f1 is None:
+            raise ValueError('X-ray scattering factors not available for '+str(element))
         #print element, f1, f2, wavelength
         sum_f1 += f1*quantity
         sum_f2 += f2*quantity

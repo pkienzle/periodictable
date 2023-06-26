@@ -456,6 +456,8 @@ class Neutron(object):
         # TODO: return NaN instead of None for missing sld.
         # This should happen automatically if the cross sections are NaN in
         # the table.
+        if not self.has_sld():
+            return None, None, None
         return self.scattering(wavelength=wavelength)[0]
 
     @require_keywords

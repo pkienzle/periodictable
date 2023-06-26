@@ -21,11 +21,13 @@ Atomic Weights and Isotopic Composition [#Coursey]_.
 The atomic weights are available for elements 1 through 118 and
 isotopic compositions or abundances are given when appropriate. The atomic
 weights data were published by Wang [#Wang]_ in The AME 2020 atomic mass
-evaluation (II). Tables, graphs and references, and the isotopic compositions
-data were published by Rosman [#Rosman]_ and Taylor [#Taylor]_ in Isotopic
-Compositions of the Elements 1997.  The relative atomic masses of the isotopes
-data were published by Audi [#Audi]_ and Wapstra [#Wapstra]_ in the 1995
-Update To The Atomic Mass Evaluation.
+evaluation (II). Hashes `#` after values indicate vlaues which are not solely
+derived from experiment, see the paper for details. Trailing zeros do not
+necessarily indicate uncertainties quoted in the reference. Tables, graphs and
+references, and the isotopic compositions data were published by Rosman
+[#Rosman]_ and Taylor [#Taylor]_ in Isotopic Compositions of the Elements 1997.
+The relative atomic masses of the isotopes data were published by Audi [#Audi]_
+and Wapstra [#Wapstra]_ in the 1995 Update To The Atomic Mass Evaluation.
 
 This data has been compiled from the above sources for the user's convenience
 and does not represent a critical evaluation by the NIST Physics Laboratory.

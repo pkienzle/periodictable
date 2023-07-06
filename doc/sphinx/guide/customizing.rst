@@ -28,9 +28,9 @@ Example:
     ...        iso._mass /= scale
 
     >>> print("%.10f %.10f"%(mytable.H[1].mass, mytable.C[12].mass))
-    1.0000000000 11.9068286833
+    1.0000000000 11.9068286857
     >>> print("%.10f %.10f"%(periodictable.H[1].mass, periodictable.C[12].mass))
-    1.0078250321 12.0000000000
+    1.0078250319 12.0000000000
     >>> print("%.10f"%formula('2H[1]', table=mytable).mass)
     2.0000000000
 

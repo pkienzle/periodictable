@@ -25,8 +25,8 @@ is the same as that for the element in the natural abundance.
     >>> from periodictable import D, H
     >>> print("H: %.4f, D: %.4f"%(H.density, D.density))
     H: 0.0708, D: 0.1415
-    >>> print((D.density/H.density) / (D.mass/H.mass))
-    1.0
+    >>> print("%.14f" % ((D.density/H.density) / (D.mass/H.mass)))
+    1.00000000000000
 
 The following plot shows density for all elements:
 

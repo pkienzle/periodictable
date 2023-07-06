@@ -62,7 +62,7 @@ some neutron information is available as 'n':
 .. doctest::
 
     >>> print("D mass %s"%D.mass)
-    D mass 2.014101778
+    D mass 2.01410177784
     >>> print("neutron mass %s"%n.mass)
     neutron mass 1.00866491597
 
@@ -97,12 +97,12 @@ Process all the :class:`isotopes <periodictable.core.Isotope>` for an element:
 
     >>> for iso in periodictable.H:
     ...     print("%s %s"%(iso,iso.mass))
-    1-H 1.0078250321
-    D 2.014101778
-    T 3.0160492675
-    4-H 4.02783
-    5-H 5.03954
-    6-H 6.04494
+    1-H 1.0078250319
+    D 2.01410177784
+    T 3.01604928132
+    4-H 4.02643
+    5-H 5.03531
+    6-H 6.04496
 
 You can create a unique handle to an individual ion.  In addition to storing
 the ion charge, this can be used to reference the underlying properties of
@@ -115,7 +115,7 @@ the element or isotope:
     >>> print("charge for Ni2+ is %d"%Ni_2.charge)
     charge for Ni2+ is 2
     >>> print("mass for Ni[58] and for natural abundance: %.4f %.4f"%(Ni58_2.mass, Ni_2.mass))
-    mass for Ni[58] and for natural abundance: 57.9343 58.6923
+    mass for Ni[58] and for natural abundance: 57.9342 58.6923
 
 The ion specific properties can be accessed from the ion using ion.charge
 for the ion index:

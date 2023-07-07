@@ -3,12 +3,12 @@
 # Author: Paul Kienzle
 u"""
 
-Adds average mass for the elements:
+Provides average mass for the elements:
 
 *    mass, mass_units (u)
          The molar mass averaged over natural isotope abundance.
 
-Adds mass and abundance information for isotopes:
+Provides mass and abundance information for isotopes:
 
 *    mass, mass_units (u)
          The molar mass of the individual isotope.
@@ -16,55 +16,78 @@ Adds mass and abundance information for isotopes:
 *    abundance, abundance_units (%)
          Natural abundance for the isotope.
 
-Atomic Weights and Isotopic Composition [#Coursey]_.
+The atomic mass data for the isotopes and for the neutron were published
+by Wang [#Wang]_ in the AME 2020 atomic mass evaluation (II).
 
-The atomic weights are available for elements 1 through 118 and
-isotopic compositions or abundances are given when appropriate. The atomic
-weights data were published by Wang [#Wang]_ in The AME 2020 atomic mass
-evaluation (II). Hashes `#` after values indicate vlaues which are not solely
-derived from experiment, see the paper for details. Trailing zeros do not
-necessarily indicate uncertainties quoted in the reference. Tables, graphs and
-references, and the isotopic compositions data were published by Rosman
-[#Rosman]_ and Taylor [#Taylor]_ in Isotopic Compositions of the Elements 1997.
-The relative atomic masses of the isotopes data were published by Audi [#Audi]_
-and Wapstra [#Wapstra]_ in the 1995 Update To The Atomic Mass Evaluation.
+Natural abundance mass and isotope fractions come from the IUPAC commission
+on isotopic abundances and atomic weights (CIAAW) [#CIAAW]_. This is an
+ill-defined problem since there is natural fractionation of the isotopes,
+giving different masses and ratios from different samples. The current
+recommended table therefore gives ranges of values for the natural mass
+and isotope abundance rather than a single value with an uncertainty.
 
-This data has been compiled from the above sources for the user's convenience
-and does not represent a critical evaluation by the NIST Physics Laboratory.
-http://physics.nist.gov/PhysRefData/Compositions/
+For periodictable, fractionation ranges for masses were replaced with abridged
+standard atomic weights as given in Prohaska [#Prohaska]. For the abundance
+ratios the center value of the range was chosen. A few elements had to be
+adjusted slightly so that they would sum to 100%.
 
-Neutron mass from NIST Reference on Constants, Units, and Uncertainty
-http://physics.nist.gov/cuu/index.html
+The values for Ar and N were set to the values present in the atmosphere
+and U was set to the values in a Namibian ore per the recommendations
+in Meija (2016).
 
-.. [#Coursey] Coursey. J. S., Schwab. D. J., and Dragoset. R. A., NIST,
-       Physics Laboratory, Office of Electronic Commerce in Scientific
-       and Engineering Data.
-.. [#Coplen] Coplen. T. B. : U.S. Geological Survey, Reston, Virginia, USA.
-.. [#Rosman] Rosman. K. J. R. : Department of Applied Physics, Curtin University
-       of Technology, Australia.
-.. [#Taylor] Taylor. P. D. P. : Institute for Reference Materials and
-       Measurements, European Commission, Belgium.
-.. [#Audi] Audi. G. : Centre de Spectrométrie Nucléaire et de Spectrométrie
-       de Masse, Orsay Campus, France.
-.. [#Wang] Wang. M., Huang. W. J., Kondev. F. G., Audi. G., Naimi. S.,
-       Institute of Modern Physics, Chinese Academy of Sciences,
-.. [#Wapstra] Wapstra. A. H. : National Institute of Nuclear Physics
-       and High-Energy Physics, Amsterdam, The Netherlands.
+The values for Pb in the CIAAW table are too broad to be usable. For example,
+206-Pb varies from 0.02 to 0.87 in monazite samples (Zhu 2020) [#Zhu]. Rather
+than return NaN for composition we replace the ranges with representative
+atomic abundance values in Meija (2016). See the CIAAW page on
+`lead <https://www.ciaaw.org/lead.htm>`_ for details.
+
+.. [#CIAAW] CIAAW. Isotopic compositions of the elements 2021.
+   Available online at www.ciaaw.org.
+.. [#Wang] Meng Wang et al. (2021) Chinese Phys. C 45 030003
+    DOI:10.1088/1674-1137/abddaf
+    From https://www-nds.iaea.org/amdc/ame2020/massround.mas20.txt (2023-07-06)
+.. [#Meija] J. Meija et al. (2016)
+    Isotopic compositions of the elements 2013
+    Pure and Applied Chemistry 88, 293-306.
+    From https://www.ciaaw.org/isotopic-abundances.htm (2023-07-06)
+.. [#Prohaska] T. Prohaska, et al. (2022)
+    Standard atomic weights of the elements 2021.
+    Pure Appl. Chem. 94. DOI:10.1515/pac-2019-0603
+    From https://www.ciaaw.org/atomic-weights.htm (2023-07-06)
+.. [*Zhu] Zhu, X., Benefield, J., Coplen, T., Gao, Z. & Holden, N. (2021).
+    Variation of lead isotopic composition and atomic weight in terrestrial
+    materials (IUPAC Technical Report). Pure and Applied Chemistry, 93(1), 155-166.
+    https://doi.org/10.1515/pac-2018-0916
 """
+from .core import Element, Isotope, default_table
+from .constants import neutron_mass, neutron_mass_unc
 
-from .core import Element, Isotope
-from .constants import neutron_mass
+def _parse_mass(s):
+    if s == "": # missing
+        return 0, 0
+    # Parse [nominal] or [low,high]
+    if s.startswith('['):
+        s = s[1:-1]
+        parts = s.split(',')
+        if len(parts) > 1:
+            low, high = float(parts[0]), float(parts[1])
+            return (high+low)/2, (high-low)/2
+        else:
+            return float(parts[0]), 0
+    # Parse value(unc) with perhaps '#' at the end
+    parts = s.split('(')
+    if len(parts) > 1:
+        # Split the value and uncertainty.
+        value, unc = parts[0], parts[1].split(')')[0]
+        # Count digits after the decimal for value and produce
+        # 0.00...0{unc} with the right number of zeros.
+        if not '.' in unc:
+            zeros = len(value.split('.')[1]) - len(unc)
+            unc = "0." + ("0"*zeros) + unc
+        return float(value), float(unc)
+    # Plain value with no uncertainty
+    return float(s), 0
 
-
-def _parse_mass(str):
-    idx = str.find('(')
-    if idx > 0: # value(uncertainty)
-        return float(str[:idx])
-    if str.startswith('['): # [nominal]
-        return int(str[1:-1])
-    if str == "": # missing
-        return 0
-    return float(str)
 
 def mass(isotope):
     """
@@ -110,25 +133,630 @@ def init(table, reload=False):
     Element.mass_units = "u"
     Element.abundance_units = "%"
 
-    for line in massdata.split('\n'):
+    # Parse isotope mass table where each line looks like:
+    #     z-el-iso,isotope mass(unc)#?,abundance(unc),element mass(unc)
+    # The abundance and element masses will be superceded below
+    for line in isotope_mass.split('\n'):
         isotope, m, p, avg = line.split(',')
-        el, sym, iso = isotope.split('-')
-        el = table[int(el)]
+        z, sym, iso = isotope.split('-')
+        el = table[int(z)]
         assert el.symbol == sym, \
             "Symbol %s does not match %s"%(sym, el.symbol)
         iso = el.add_isotope(int(iso))
-        el._mass = _parse_mass(avg)
-        iso._mass = _parse_mass(m)
-        iso._abundance = _parse_mass(p)
+        el._mass, el._mass_unc = _parse_mass(avg)
+        iso._mass, iso._mass_unc = _parse_mass(m)
+        iso._abundance, iso._abundance_unc = _parse_mass(p)
 
     # A single neutron is an isotope of element 0
     el = table[0]
-    el._mass = neutron_mass
+    el._mass, el._mass_unc = neutron_mass, neutron_mass_unc
     iso = el.add_isotope(1)
-    iso._mass = neutron_mass
-    iso._abundance = 100
+    iso._mass, iso._mass_unc = neutron_mass, neutron_mass_unc
+    iso._abundance, iso._abundance_unc = 100, 0
 
-massdata = """\
+    # Parse element mass table where each line looks like:
+    #    z  El  element mass(unc)|[low,high]|- note note ...
+    for line in element_mass.split('\n'):
+        z, symbol, name, value = line.split()[:4]
+        #print(z, symbol, name, value)
+        el = table[int(z)]
+        if value != '-':
+            #v, dv = _parse_mass(value)
+            #delta = abs(v-el._mass)/el._mass*100
+            #from uncertainties import ufloat as U
+            #if delta > 0.01:
+            #    print(f"{el.number}-{el.symbol} mass changed by {delta:.2f}% to {U(v,dv):fS} from {U(el._mass,el._mass_unc):fS}")
+            el._mass, el._mass_unc = _parse_mass(value)
+
+    #Li_ratio = table.Li[7]._abundance/table.Li[6]._abundance
+
+    # Parse isotope abundance table where lines look like:
+    #    z  El element\n    iso mass(unc)|[low,high] note ...
+    # Note: tables modified for Pb, Ar, and N to use 2013 values
+    z = 0
+    value = {}
+    for line in isotope_abundance.split('\n'):
+        #print(line)
+        # New element
+        if line[0] not in ' \t':
+            if z: # not the start
+                #print(f"update z {z}-{table[z]}", value)
+                el = table[z]
+                # Find total so we can normalize fractions to sum to one.
+                # This affects O, Mg, S, Hf by amounts less than the uncertainty.
+                total = sum(v[0] for k, v in value.items())
+                #if abs(total - 1) > 1e-10: print("total deviation for %s is %g"%(el, total-1))
+                for z, pair in value.items():
+                    iso = el[z]
+                    #from uncertainties import ufloat as U
+                    #v, dv = 100*pair[0]/total, 100*pair[1]/total
+                    #delta = abs(v-iso._abundance)
+                    #if delta >= 0.1  and v>1:
+                    #    print(f"{el.number}-{el.symbol}-{z} abundance changed by {delta:.2f}% to {U(v,dv):fS} from {U(iso._abundance,iso._abundance_unc):fS}")
+
+                    iso._abundance = 100*pair[0]/total
+                    iso._abundance_unc = 100*pair[1]/total
+            z = int(line.strip().split()[0])
+            value = {}
+            #print(f"new z {z}-{table[z]}")# from <{line}>")
+        else:
+            #print(line)
+            parts = line.strip().split()
+            #print(parts)
+            value[int(parts[0])] = _parse_mass(parts[1])
+
+    #new_Li_ratio = table.Li[7]._abundance/table.Li[6]._abundance
+    #print(f"Li6:Li7 ratio changed from {Li_ratio:.1f} to {new_Li_ratio:.1f}")
+
+
+def print_natural_mass(table=None):
+    from uncertainties import ufloat as U
+    table = default_table(table)
+    for el in table:
+        iso_mass = [
+            U(iso.abundance, iso._abundance_unc)/100*U(iso.mass, iso._mass_unc)
+            for iso in el if iso.abundance>0]
+        if iso_mass:
+            el_mass = U(el.mass, el._mass_unc)
+            iso_sum = sum(iso_mass)
+            delta = el_mass - iso_sum
+            # python 3.6 and above only
+            if abs(delta.n) > 1e-3 or delta.s/iso_sum.n > 0.01:
+                print(f"{el.number}-{el}: {el_mass:fS}, sum: {iso_sum:fS}, Δ={delta:fS}")
+                #print(f"{el.number}-{el}: {delta:fS}")
+            #print(f"{el.number}-{el}: {el_mass:fS}, sum: {iso_sum:fS}, Δ=")
+            #print(f"{el.number}-{el}: {delta:fS}")
+            #print("%d-%s: %s (from sum: %s)"%(el.number, el, str(el_mass), str(iso_sum)))
+
+def print_abundance(table=None):
+    table = default_table(table)
+    for el in table:
+        abundance = ["%8s %g"%(iso, iso.abundance/100) for iso in el if iso.abundance>0]
+        if abundance:
+            print("\n".join(abundance))
+            print()
+
+def check_abundance(table=None):
+    table = default_table(table)
+    for el in table:
+        abundance = [iso.abundance for iso in el if iso.abundance>0]
+        if abundance:
+            assert abs(sum(abundance) - 100.0) < 1e-12,\
+                "Inconsistent abundance for %d-%s: %g"%(el.number,el,sum(abundance))
+
+
+
+
+# Table of masses.
+# g Geological and biological materials are known in which the element has an
+#   isotopic composition outside the limits for normal material. The difference
+#   between the atomic weight of the element in such materials and that given in
+#   the table may exceed the stated uncertainty.
+# m Modified isotopic compositions may be found in commercially available
+#   material because the material has been subjected to some undisclosed
+#   or inadvertent isotopic fractionation. Substantial deviations in atomic
+#   weight of the element from that given in the table can occur.
+# r Range in isotopic composition of normal terrestrial material prevents
+#   a more precise standard atomic weight being given; the tabulated value
+#   and uncertainty should be applicable to normal material.
+#
+# Fractionation ranges have been replaced with the abridged standard weights
+# as giving in Prohaska(2022).
+#
+# CIAAW. Isotopic compositions of the elements 2021. Available online at www.ciaaw.org.
+#
+# https://www.ciaaw.org/atomic-weights.htm (2023-07-06)
+
+#Z 	Symbol 	Element 	Standard Atomic Weight 	Notes
+element_mass = """\
+1	H	hydrogen	  1.0080(2) [1.00784,1.00811]	m
+2	He	helium	   4.002602(2)	g r
+3	Li	lithium	  6.94(6)   [6.938,6.997]	m
+4	Be	beryllium	   9.0121831(5)
+5	B	boron	 10.81(2) [10.806,10.821]	m
+6	C	carbon	 12.011(2)  [12.0096,12.0116]
+7	N	nitrogen	 14.007(1)  [14.00643,14.00728]	m
+8	O	oxygen	 15.999(1)  [15.99903,15.99977]	m
+9	F	fluorine	  18.998403162(5)
+10	Ne	neon	  20.1797(6)	g m
+11	Na	sodium	  22.98976928(2)
+12	Mg	magnesium	 24.305(2)   [24.304,24.307]
+13	Al	aluminium	  26.9815384(3)
+14	Si	silicon	 28.085(1)  [28.084,28.086]
+15	P	phosphorus	  30.973761998(5)
+16	S	sulfur	 32.06(2)   [32.059,32.076]
+17	Cl	chlorine	 35.45(1)    [35.446,35.457]	m
+18	Ar	argon	 39.95(16)  [39.792,39.963]
+19	K	potassium	  39.0983(1)
+20	Ca	calcium	  40.078(4)	g
+21	Sc	scandium	  44.955907(4)
+22	Ti	titanium	  47.867(1)
+23	V	vanadium	  50.9415(1)
+24	Cr	chromium	  51.9961(6)
+25	Mn	manganese	  54.938043(2)
+26	Fe	iron	  55.845(2)
+27	Co	cobalt	  58.933194(3)
+28	Ni	nickel	  58.6934(4)	r
+29	Cu	copper	  63.546(3)	r
+30	Zn	zinc	  65.38(2)	r
+31	Ga	gallium	  69.723(1)
+32	Ge	germanium	  72.630(8)
+33	As	arsenic	  74.921595(6)
+34	Se	selenium	  78.971(8)	r
+35	Br	bromine	 79.904(3) [79.901,79.907]
+36	Kr	krypton	  83.798(2)	g m
+37	Rb	rubidium	  85.4678(3)	g
+38	Sr	strontium	  87.62(1)	g r
+39	Y	yttrium	  88.905838(2)
+40	Zr	zirconium	  91.224(2)	g
+41	Nb	niobium	  92.90637(1)
+42	Mo	molybdenum	  95.95(1)	g
+44	Ru	ruthenium	 101.07(2)	g
+45	Rh	rhodium	 102.90549(2)
+46	Pd	palladium	 106.42(1)	g
+47	Ag	silver	 107.8682(2)	g
+48	Cd	cadmium	 112.414(4)	g
+49	In	indium	 114.818(1)
+50	Sn	tin	 118.710(7)	g
+51	Sb	antimony	 121.760(1)	g
+52	Te	tellurium	 127.60(3)	g
+53	I	iodine	 126.90447(3)
+54	Xe	xenon	 131.293(6)	g m
+55	Cs	caesium	 132.90545196(6)
+56	Ba	barium	 137.327(7)
+57	La	lanthanum	 138.90547(7)	g
+58	Ce	cerium	 140.116(1)	g
+59	Pr	praseodymium	 140.90766(1)
+60	Nd	neodymium	 144.242(3)	g
+62	Sm	samarium	 150.36(2)	g
+63	Eu	europium	 151.964(1)	g
+64	Gd	gadolinium	 157.25(3)	g
+65	Tb	terbium	 158.925354(7)
+66	Dy	dysprosium	 162.500(1)	g
+67	Ho	holmium	 164.930329(5)
+68	Er	erbium	 167.259(3)	g
+69	Tm	thulium	 168.934219(5)
+70	Yb	ytterbium	 173.045(10)	g
+71	Lu	lutetium	 174.9668(1)	g
+72	Hf	hafnium	 178.486(6)	g
+73	Ta	tantalum	 180.94788(2)
+74	W	tungsten	 183.84(1)
+75	Re	rhenium	 186.207(1)
+76	Os	osmium	 190.23(3)	g
+77	Ir	iridium	 192.217(2)
+78	Pt	platinum	 195.084(9)
+79	Au	gold	 196.966570(4)
+80	Hg	mercury	 200.592(3)
+81	Tl	thallium	204.38(1)   [204.382,204.385]
+82	Pb	lead	207.2(1.1)  [206.14,207.94]
+83	Bi	bismuth	 208.98040(1)
+90	Th	thorium	 232.0377(4)	g
+91	Pa	protactinium	 231.03588(1)
+92	U	uranium	 238.02891(3)	g m\
+"""
+
+
+# From https://www.ciaaw.org/isotopic-abundances.htm (2023-07-06)
+# CIAAW. Isotopic compositions of the elements 2021. Available online at www.ciaaw.org.
+
+# Nominal values for lead are from Meija (2013) since the natural variation
+# given in the 2021 tables are completely unusable. Maybe better to use NaN?
+# Similarly nitrogen and argon were chosen to match air rather than average
+# terrestrial abundance.
+# All other values use midpoint of the range, scaled so that the sum of the
+# isotopes equals 100%.
+
+#Z 	El 	element
+#  isotope 	Representative isotopic composition 	Notes
+isotope_abundance = """\
+1	H	hydrogen
+    1	[0.99972,0.99999]	m
+    2	[0.00001,0.00028]
+2	He	helium
+    3	 0.000002(2)	g r
+    4	 0.999998(2)
+3	Li	lithium
+    6	[0.019,0.078]	m
+    7	[0.922,0.981]
+4	Be	beryllium
+    9	 1
+5	B	boron
+    10	[0.189,0.204]	m
+    11	[0.796,0.811]
+6	C	carbon
+    12	[0.9884,0.9904]
+    13	[0.0096,0.0116]
+7	N	nitrogen
+    14	0.996337(4) [0.99578,0.99663]
+    15	0.003663(4) [0.00337,0.00422]
+8	O	oxygen
+    16	[0.99738,0.99776]
+    17	[0.000367,0.000400]
+    18	[0.00187,0.00222]
+9	F	fluorine
+    19	 1
+10	Ne	neon
+    20	 0.9048(3)	g m
+    21	 0.0027(1)
+    22	 0.0925(3)
+11	Na	sodium
+    23	 1
+12	Mg	magnesium
+    24	[0.7888,0.7905]
+    25	[0.09988,0.10034]
+    26	[0.1096,0.1109]
+13	Al	aluminium
+    27	 1
+14	Si	silicon
+    28	[0.92191,0.92318]
+    29	[0.04645,0.04699]
+    30	[0.03037,0.03110]
+15	P	phosphorus
+    31	 1
+16	S	sulfur
+    32	[0.9441,0.9529]
+    33	[0.00729,0.00797]
+    34	[0.0396,0.0477]
+    36	[0.000129,0.000187]
+17	Cl	chlorine
+    35	[0.755,0.761]	m
+    37	[0.239,0.245]
+18	Ar	argon
+    36	0.0033361(35) [0.0000,0.0207]	g r
+    38	0.0006289(12) [0.000,0.043]
+    40	0.9960350(42) [0.936,1.000]
+19	K	potassium
+    39	 0.932581(44)
+    40	 0.000117(1)
+    41	 0.067302(44)
+20	Ca	calcium
+    40	 0.96941(156)	g
+    42	 0.00647(23)
+    43	 0.00135(10)
+    44	 0.02086(110)
+    46	 0.00004(3)
+    48	 0.00187(21)
+21	Sc	scandium
+    45	 1
+22	Ti	titanium
+    46	 0.0825(3)
+    47	 0.0744(2)
+    48	 0.7372(3)
+    49	 0.0541(2)
+    50	 0.0518(2)
+23	V	vanadium
+    50	 0.00250(10)
+    51	 0.99750(10)
+24	Cr	chromium
+    50	 0.04345(13)
+    52	 0.83789(18)
+    53	 0.09501(17)
+    54	 0.02365(7)
+25	Mn	manganese
+    55	 1
+26	Fe	iron
+    54	 0.05845(105)
+    56	 0.91754(106)
+    57	 0.02119(29)
+    58	 0.00282(12)
+27	Co	cobalt
+    59	 1
+28	Ni	nickel
+    58	 0.680769(190)	r
+    60	 0.262231(150)
+    61	 0.011399(13)
+    62	 0.036345(40)
+    64	 0.009256(19)
+29	Cu	copper
+    63	 0.6915(15)	r
+    65	 0.3085(15)
+30	Zn	zinc
+    64	 0.4917(75)	r
+    66	 0.2773(98)
+    67	 0.0404(16)
+    68	 0.1845(63)
+    70	 0.0061(10)
+31	Ga	gallium
+    69	 0.60108(50)
+    71	 0.39892(50)
+32	Ge	germanium
+    70	 0.2052(19)
+    72	 0.2745(15)
+    73	 0.0776(8)
+    74	 0.3652(12)
+    76	 0.0775(12)
+33	As	arsenic
+    75	 1
+34	Se	selenium
+    74	 0.0086(3)	r
+    76	 0.0923(7)
+    77	 0.0760(7)
+    78	 0.2369(22)
+    80	 0.4980(36)
+    82	 0.0882(15)
+35	Br	bromine
+    79	[0.505,0.508]
+    81	[0.492,0.495]
+36	Kr	krypton
+    78	 0.00355(3)	g m
+    80	 0.02286(10)
+    82	 0.11593(31)
+    83	 0.11500(19)
+    84	 0.56987(15)
+    86	 0.17279(41)
+37	Rb	rubidium
+    85	 0.7217(2)	g
+    87	 0.2783(2)
+38	Sr	strontium
+    84	 0.0056(2)	g r
+    86	 0.0986(20)
+    87	 0.0700(20)
+    88	 0.8258(35)
+39	Y	yttrium
+    89	 1
+40	Zr	zirconium
+    90	 0.5145(4)	g
+    91	 0.1122(5)
+    92	 0.1715(3)
+    94	 0.1738(4)
+    96	 0.0280(2)
+41	Nb	niobium
+    93	 1
+42	Mo	molybdenum
+    92	 0.14649(106)	g
+    94	 0.09187(33)
+    95	 0.15873(30)
+    96	 0.16673(8)
+    97	 0.09582(15)
+    98	 0.24292(80)
+    100	 0.09744(65)
+44	Ru	ruthenium
+    96	 0.0554(14)	g
+    98	 0.0187(3)
+    99	 0.1276(14)
+    100	 0.1260(7)
+    101	 0.1706(2)
+    102	 0.3155(14)
+    104	 0.1862(27)
+45	Rh	rhodium
+    103	 1
+46	Pd	palladium
+    102	 0.0102(1)	g
+    104	 0.1114(8)
+    105	 0.2233(8)
+    106	 0.2733(3)
+    108	 0.2646(9)
+    110	 0.1172(9)
+47	Ag	silver
+    107	 0.51839(8)	g
+    109	 0.48161(8)
+48	Cd	cadmium
+    106	 0.01245(22)	g
+    108	 0.00888(11)
+    110	 0.12470(61)
+    111	 0.12795(12)
+    112	 0.24109(7)
+    113	 0.12227(7)
+    114	 0.28754(81)
+    116	 0.07512(54)
+49	In	indium
+    113	 0.04281(52)
+    115	 0.95719(52)
+50	Sn	tin
+    112	 0.0097(1)	g
+    114	 0.0066(1)
+    115	 0.0034(1)
+    116	 0.1454(9)
+    117	 0.0768(7)
+    118	 0.2422(9)
+    119	 0.0859(4)
+    120	 0.3258(9)
+    122	 0.0463(3)
+    124	 0.0579(5)
+51	Sb	antimony
+    121	 0.5721(5)	g
+    123	 0.4279(5)
+52	Te	tellurium
+    120	 0.0009(1)	g
+    122	 0.0255(12)
+    123	 0.0089(3)
+    124	 0.0474(14)
+    125	 0.0707(15)
+    126	 0.1884(25)
+    128	 0.3174(8)
+    130	 0.3408(62)
+53	I	iodine
+    127	 1
+54	Xe	xenon
+    124	 0.00095(5)	g m
+    126	 0.00089(3)
+    128	 0.01910(13)
+    129	 0.26401(138)
+    130	 0.04071(22)
+    131	 0.21232(51)
+    132	 0.26909(55)
+    134	 0.10436(35)
+    136	 0.08857(72)
+55	Cs	caesium
+    133	 1
+56	Ba	barium
+    130	 0.0011(1)
+    132	 0.0010(1)
+    134	 0.0242(15)
+    135	 0.0659(10)
+    136	 0.0785(24)
+    137	 0.1123(23)
+    138	 0.7170(29)
+57	La	lanthanum
+    138	 0.0008881(71)	g
+    139	 0.9991119(71)
+58	Ce	cerium
+    136	 0.00185(2)	g
+    138	 0.00251(2)
+    140	 0.88450(51)
+    142	 0.11114(51)
+59	Pr	praseodymium
+    141	 1
+60	Nd	neodymium
+    142	 0.27152(40)	g
+    143	 0.12174(26)
+    144	 0.23798(19)
+    145	 0.08293(12)
+    146	 0.17189(32)
+    148	 0.05756(21)
+    150	 0.05638(28)
+62	Sm	samarium
+    144	 0.0308(4)	g
+    147	 0.1500(14)
+    148	 0.1125(9)
+    149	 0.1382(10)
+    150	 0.0737(9)
+    152	 0.2674(9)
+    154	 0.2274(14)
+63	Eu	europium
+    151	 0.4781(6)	g
+    153	 0.5219(6)
+64	Gd	gadolinium
+    152	 0.0020(3)	g
+    154	 0.0218(2)
+    155	 0.1480(9)
+    156	 0.2047(3)
+    157	 0.1565(4)
+    158	 0.2484(8)
+    160	 0.2186(3)
+65	Tb	terbium
+	159	 1
+66	Dy	dysprosium
+	156	 0.00056(3)	g
+    158	 0.00095(3)
+    160	 0.02329(18)
+    161	 0.18889(42)
+    162	 0.25475(36)
+    163	 0.24896(42)
+    164	 0.28260(54)
+67	Ho	holmium
+	165	 1
+68	Er	erbium
+	162	 0.00139(5)	g
+    164	 0.01601(3)
+    166	 0.33503(36)
+    167	 0.22869(9)
+    168	 0.26978(18)
+    170	 0.14910(36)
+69	Tm	thulium
+	169	 1
+70	Yb	ytterbium
+	168	 0.00126(1)	g
+    170	 0.03023(2)
+    171	 0.14216(7)
+    172	 0.21754(10)
+    173	 0.16098(9)
+    174	 0.31896(26)
+    176	 0.12887(30)
+71	Lu	lutetium
+	175	 0.97401(13)	g
+    176	 0.02599(13)
+72	Hf	hafnium
+	174	 0.00161(2)	g
+    176	 0.0524(14)
+    177	 0.1858(9)
+    178	 0.2728(6)
+    179	 0.1363(3)
+    180	 0.3512(16)
+73	Ta	tantalum
+	180	 0.0001176(23)
+    181	 0.9998824(23)
+74	W	tungsten
+	180	 0.0012(1)
+    182	 0.2650(16)
+    183	 0.1431(4)
+    184	 0.3064(2)
+    186	 0.2843(19)
+75	Re	rhenium
+	185	 0.3740(5)
+    187	 0.6260(5)
+76	Os	osmium
+	184	 0.0002(2)	g
+    186	 0.0159(64)
+    187	 0.0196(17)
+    188	 0.1324(27)
+    189	 0.1615(23)
+    190	 0.2626(20)
+    192	 0.4078(32)
+77	Ir	iridium
+	191	 0.3723(9)
+    193	 0.6277(9)
+78	Pt	platinum
+	190	 0.00012(2)
+    192	 0.00782(24)
+    194	 0.32864(410)
+    195	 0.33775(240)
+    196	 0.25211(340)
+    198	 0.07356(130)
+79	Au	gold
+	197	 1
+80	Hg	mercury
+	196	 0.0015(1)
+    198	 0.1004(3)
+    199	 0.1694(12)
+    200	 0.2314(9)
+    201	 0.1317(9)
+    202	 0.2974(13)
+    204	 0.0682(4)
+81	Tl	thallium
+	203	[0.2944,0.2959]
+    205	[0.7041,0.7056]
+82	Pb	lead
+	204	0.014(6) [0.0000,0.0158]
+    206	0.241(30) [0.0190,0.8673]
+    207	0.221(50) [0.0035,0.2351]
+    208	0.524(70) [0.0338,0.9775]
+83	Bi	bismuth
+	209	 1
+90	Th	thorium
+	230	 0.0002(2)	g
+    232	 0.9998(2)
+91	Pa	protactinium
+	231	 1
+92	U	uranium
+	234	 0.000054(5)	g m
+    235	 0.007204(6)
+    238	 0.992742(10)\
+"""
+
+
+# Table of isotope masses from Wang(2021). The mass uncertainties have been rounded to one
+# or two digits, but trailing zeros remain. Hashes `#` after mass(unc.) indicate
+# values which are not solely derived from experiment, see the paper for details.
+# Atomic weights and isotope ratios come from Coursey(?) downloaded c. 2010.
+# These are ignored, and will be replaced by the IUPAC CIAAW values from 2021.
+# Meng Wang et al. (2021) Chinese Phys. C 45 030003
+#    DOI:10.1088/1674-1137/abddaf
+# Coursey. J. S., Schwab. D. J., and Dragoset. R. A., NIST,
+#   Physics Laboratory, Office of Electronic Commerce in Scientific
+#   and Engineering Data.
+
+isotope_mass = """\
 1-H-1,1.0078250319000(100),99.9885(70),1.00794(7)
 1-H-2,2.0141017778400(200),0.0115(70),1.00794(7)
 1-H-3,3.0160492813200(800),,1.00794(7)

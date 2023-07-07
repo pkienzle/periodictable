@@ -73,6 +73,18 @@ Known issues
 Change history
 ==============
 
+1.7.0 2023-07-??
+----------------
+
+Modified:
+
+* Move to IAEA AME2020 for isotope mass
+* Move to IUPAC CIAAW for atomic weight and isotopic abundance
+* Li-6:Li-7 ratio changed from 12.2 to 19.6 (delta = 2.7%)
+* Isotope percentage changed by 0.1 to 0.5 for B, Zn, Ge, Se, Mo, Er, Yb, Pt, Hg
+* Atomic weight changed by 0.04% for Zn, 0.02% for S and 0.01% for Li, Ge, Se, Mo
+
+
 1.6.1 2022-05-18
 ----------------
 

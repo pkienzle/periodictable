@@ -1666,14 +1666,8 @@ def fix_number(str):
     uncertainty. Also accepts a limited range, e.g., <1e-6, which is
     converted as 1e-6.  Missing values are set to 0.
     """
-    if str == '':
-        return None
-    idx = str.find('(')
-    if idx >= 0:
-        str = str[0:idx]
-    if str[0] == '<':
-        str = str[1:]
-    return float(str)
+    from .util import parse_uncertainty
+    return parse_uncertainty(str.replace('<','').replace('*',''))[0]
 
 def sld_table(wavelength=1, table=None, isotopes=True):
     r"""

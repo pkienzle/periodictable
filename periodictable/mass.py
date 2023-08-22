@@ -61,33 +61,7 @@ atomic abundance values in Meija (2016). See the CIAAW page on
 """
 from .core import Element, Isotope, default_table
 from .constants import neutron_mass, neutron_mass_unc
-
-def _parse_mass(s):
-    if s == "": # missing
-        return 0, 0
-    # Parse [nominal] or [low,high]
-    if s.startswith('['):
-        s = s[1:-1]
-        parts = s.split(',')
-        if len(parts) > 1:
-            low, high = float(parts[0]), float(parts[1])
-            return (high+low)/2, (high-low)/2
-        else:
-            return float(parts[0]), 0
-    # Parse value(unc) with perhaps '#' at the end
-    parts = s.split('(')
-    if len(parts) > 1:
-        # Split the value and uncertainty.
-        value, unc = parts[0], parts[1].split(')')[0]
-        # Count digits after the decimal for value and produce
-        # 0.00...0{unc} with the right number of zeros.
-        if not '.' in unc:
-            zeros = len(value.split('.')[1]) - len(unc)
-            unc = "0." + ("0"*zeros) + unc
-        return float(value), float(unc)
-    # Plain value with no uncertainty
-    return float(s), 0
-
+from .util import parse_uncertainty
 
 def mass(isotope):
     """
@@ -143,9 +117,9 @@ def init(table, reload=False):
         assert el.symbol == sym, \
             "Symbol %s does not match %s"%(sym, el.symbol)
         iso = el.add_isotope(int(iso))
-        el._mass, el._mass_unc = _parse_mass(avg)
-        iso._mass, iso._mass_unc = _parse_mass(m)
-        iso._abundance, iso._abundance_unc = _parse_mass(p)
+        el._mass, el._mass_unc = parse_uncertainty(avg)
+        iso._mass, iso._mass_unc = parse_uncertainty(m)
+        iso._abundance, iso._abundance_unc = parse_uncertainty(p)
 
     # A single neutron is an isotope of element 0
     el = table[0]
@@ -161,12 +135,12 @@ def init(table, reload=False):
         #print(z, symbol, name, value)
         el = table[int(z)]
         if value != '-':
-            #v, dv = _parse_mass(value)
+            #v, dv = parse_uncertainty(value)
             #delta = abs(v-el._mass)/el._mass*100
             #from uncertainties import ufloat as U
             #if delta > 0.01:
             #    print(f"{el.number}-{el.symbol} mass changed by {delta:.2f}% to {U(v,dv):fS} from {U(el._mass,el._mass_unc):fS}")
-            el._mass, el._mass_unc = _parse_mass(value)
+            el._mass, el._mass_unc = parse_uncertainty(value)
 
     #Li_ratio = table.Li[7]._abundance/table.Li[6]._abundance
 
@@ -203,7 +177,7 @@ def init(table, reload=False):
             #print(line)
             parts = line.strip().split()
             #print(parts)
-            value[int(parts[0])] = _parse_mass(parts[1])
+            value[int(parts[0])] = parse_uncertainty(parts[1])
 
     #new_Li_ratio = table.Li[7]._abundance/table.Li[6]._abundance
     #print(f"Li6:Li7 ratio changed from {Li_ratio:.1f} to {new_Li_ratio:.1f}")

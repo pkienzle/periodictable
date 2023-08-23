@@ -18,7 +18,7 @@ Access particular elements by name:
 
     >>> from periodictable import hydrogen
     >>> print("H mass %s %s"%(hydrogen.mass, hydrogen.mass_units))
-    H mass 1.00794 u
+    H mass 1.008 u
 
 Access particular elements as symbols:
 
@@ -54,7 +54,7 @@ Import all elements:
     >>> print(periodictable.H)
     H
     >>> print(periodictable.H.mass)
-    1.00794
+    1.008
 
 Deuterium and tritium are special isotopes named D and T
 some neutron information is available as 'n':
@@ -64,7 +64,7 @@ some neutron information is available as 'n':
     >>> print("D mass %s"%D.mass)
     D mass 2.01410177784
     >>> print("neutron mass %s"%n.mass)
-    neutron mass 1.00866491597
+    neutron mass 1.0086649159
 
 Process all the elements:
 

@@ -116,7 +116,7 @@ A formula string is translated into a formula using
 * Specific mass can be giving with count follwed by mass units:
 
     >>> print(formula("5g NaCl // 50mL H2O@1"))
-    NaCl(H2O)32.4407
+    NaCl(H2O)32.4395
 
   Density will be required for materials given by volume.  Mass will be
   stored in the *total_mass* attribute of the resulting formula.
@@ -124,7 +124,7 @@ A formula string is translated into a formula using
 * Multilayers can be specified by thickness:
 
     >>> print(formula("1 um Si // 5 nm Cr // 10 nm Au"))
-    Si119.99CrAu1.41722
+    Si119.992CrAu1.41722
 
   Density will be required for each layer. Thickness will be stored in
   the *total_thickness* attribute of the resulting formula. Thickness can
@@ -135,7 +135,7 @@ A formula string is translated into a formula using
   20:80 by volume with D2O:
 
     >>> print(formula("20%vol (10%wt NaCl@2.16 // H2O@1) // D2O@1n"))
-    NaCl(H2O)29.1966(D2O)122.794
+    NaCl(H2O)29.1956(D2O)122.79
 
 * Empty formulas are supported, e.g., for air or vacuum:
 
@@ -256,7 +256,7 @@ Note that this is different from a 2:1 mixture by weight:
 
     >>> mix = mix_by_weight(H2O,2,D2O,1)
     >>> print("%s %.4g"%(mix,mix.density))
-    (H2O)2.2234D2O 1.035
+    (H2O)2.22339D2O 1.035
 
 Except in the simplest of cases, the density of the mixture cannot be
 computed from the densities of the components, and the resulting density
@@ -272,8 +272,8 @@ compute molar mass and neutron/xray scattering length density:
     >>> import periodictable
     >>> SiO2 = periodictable.formula('SiO2')
     >>> hydrated = SiO2 + periodictable.formula('3H2O')
-    >>> print('%s mass %s'%(hydrated,hydrated.mass))
-    SiO2(H2O)3 mass 114.13014
+    >>> print('%s mass %g'%(hydrated,hydrated.mass))
+    SiO2(H2O)3 mass 114.128
     >>> rho,mu,inc = periodictable.neutron_sld('SiO2+3H2O',density=1.5,wavelength=4.75)
     >>> print('%s neutron sld %.3g'%(hydrated,rho))
     SiO2(H2O)3 neutron sld 0.849

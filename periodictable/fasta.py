@@ -478,14 +478,14 @@ def fasta_table():
     rows += [v for k, v in sorted(NUCLEIC_ACID_COMPONENTS.items())]
     rows += [Sequence("beta casein", beta_casein)]
 
-    print("%20s %7s %7s %7s %5s %5s %5s %5s %5s %5s"
+    print("%25s %7s %7s %7s %5s %5s %5s %5s %5s %5s"
           % ("name", "M(H2O)", "M(D2O)", "volume",
              "den", "#el", "xray", "nH2O", "nD2O", "%D2O match"))
     for v in rows:
         protons = sum(num*el.number for el, num in v.natural_formula.atoms.items())
         electrons = protons - v.charge
         Xsld = xray_sld(v.formula, wavelength=elements.Cu.K_alpha)
-        print("%20s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
+        print("%25s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
             v.name, v.mass, v.Dmass, v.cell_volume, v.natural_formula.density,
             electrons, Xsld[0], v.sld, v.Dsld, v.D2Omatch))
 
@@ -499,11 +499,15 @@ def test():
     # name        Hmass   Dmass   vol     den   #el   xray  Hsld  Dsld
     # =========== ======= ======= ======= ===== ===== ===== ===== =====
     # beta casein 23561.9 23880.9 30872.9  1.27 12614 11.55  1.68  2.75
+    # ... updated for new mass table [2023-08]
+    #   same      23562.3 23881.2   same   1.27 same         1.68  2.75
     seq = Sequence("beta casein", beta_casein)
-    assert abs(seq.mass - 23561.9) < 0.1
-    assert abs(seq.Dmass - 23880.9) < 0.1
+    density = seq.mass/avogadro_number/seq.cell_volume*1e24
+    #print(seq.mass, seq.Dmass, density, seq.sld, seq.Dsld)
+    assert abs(seq.mass - 23562.3) < 0.1
+    assert abs(seq.Dmass - 23881.2) < 0.1
     assert abs(seq.cell_volume - 30872.9) < 0.1
-    assert abs(seq.mass/avogadro_number/seq.cell_volume*1e24 - 1.267) < 0.01
+    assert abs(density - 1.267) < 0.01
     assert abs(seq.sld - 1.68) < 0.01
     assert abs(seq.Dsld - 2.75) < 0.01
 
@@ -516,3 +520,4 @@ def test():
 
 if __name__ == "__main__":
     fasta_table()
+    #test()

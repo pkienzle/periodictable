@@ -83,8 +83,8 @@ Modified:
 * Li-6:Li-7 mass ratio changed from 12.2 to 19.6 (delta = 2.7%)
 * Isotope percentage changed by 0.1 to 0.5 for B, Zn, Ge, Se, Mo, Er, Yb, Pt, Hg
 * Atomic weight changed by 0.04% for Zn, 0.02% for S and 0.01% for Li, Ge, Se, Mo
-* Zn-70 b_c changed from 6.9 to 6.0 (fixing a typo in the ATI tables)
-* Fix typos in uncertainties for the ATI table (Zr-90, Te-124, Sm-147)
+* Zn-70 b_c changed from 6.9 to 6.0 in the neutron table (fixing a typo in the original)
+* Fix typos in uncertainties in the neutron table (Zr-90, Te-124, Ba-138, Sm-147)
 
 
 1.6.1 2022-05-18

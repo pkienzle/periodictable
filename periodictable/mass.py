@@ -109,7 +109,8 @@ def init(table, reload=False):
 
     # Parse isotope mass table where each line looks like:
     #     z-el-iso,isotope mass(unc)#?,abundance(unc),element mass(unc)
-    # The abundance and element masses will be superceded below
+    # The abundance and element masses will be set from other tables, so
+    # ignore them here.
     for line in isotope_mass.split('\n'):
         isotope, m, p, avg = line.split(',')
         z, sym, iso = isotope.split('-')
@@ -117,9 +118,13 @@ def init(table, reload=False):
         assert el.symbol == sym, \
             "Symbol %s does not match %s"%(sym, el.symbol)
         iso = el.add_isotope(int(iso))
+        # Note: new mass table doesn't include nominal values for transuranics
+        # so use old masses here and override later with new masses.
         el._mass, el._mass_unc = parse_uncertainty(avg)
+        #el._mass, el._mass_unc = None, None
         iso._mass, iso._mass_unc = parse_uncertainty(m)
-        iso._abundance, iso._abundance_unc = parse_uncertainty(p)
+        #iso._abundance, iso._abundance_unc = parse_uncertainty(p)
+        iso._abundance, iso._abundance_unc = 0, 0
 
     # A single neutron is an isotope of element 0
     el = table[0]

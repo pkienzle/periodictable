@@ -1686,8 +1686,8 @@ def sld_table(wavelength=1, table=None, isotopes=True):
         >>> sld_table(wavelength=4.75)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
          Neutron scattering length density table
         atom       mass density     sld    imag   incoh
-        H         1.008   0.071  -1.582   0.000  10.691
-        1-H       1.008   0.071  -1.583   0.000  10.691
+        H         1.008   0.071  -1.582   0.000  10.690
+        1-H       1.008   0.071  -1.583   0.000  10.690
         D         2.014   0.141   2.823   0.000   1.705
         T         3.016   0.212   2.027   0.000   0.453
         He        4.003   0.122   0.598   0.000   0.035
@@ -1869,7 +1869,6 @@ def coherent_comparison_table(table=None, tol=None):
                 Sc    18.40    19.00  -3.2%
              45-Sc    18.40    19.00  -3.2%
              65-Cu    13.08    14.10  -7.2%
-             70-Zn     5.98     4.50  33.0%
              84-Sr     3.14     6.00 -47.6%
            ...
 
@@ -1934,7 +1933,6 @@ def incoherent_comparison_table(table=None, tol=None):
                 Sc     4.50     5.10 -11.8%
              45-Sc     4.50     5.10 -11.8%
              65-Cu     0.40     1.42 -71.7%
-             70-Zn     0.00    -1.48 -100.0%
              84-Sr     0.00     2.86 -100.0%
            ...
 
@@ -1989,3 +1987,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #coherent_comparison_table(tol=0.5)
+    #incoherent_comparison_table(tol=0.5)

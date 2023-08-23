@@ -2,6 +2,7 @@ import numpy as np
 import periodictable
 from periodictable import elements, formula, nsf
 from periodictable.nsf import neutron_scattering, neutron_sld
+from periodictable.constants import avogadro_number as N_A
 from math import sqrt, pi
 
 def test():
@@ -120,7 +121,8 @@ def test():
     assert abs(depth-depth2)<1e-14
 
     # Test energy <=> velocity <=> wavelength
-    assert abs(nsf.neutron_wavelength_from_velocity(2200) - 1.7981972618436388) < 1e-14
+    # PAK: value changes with updated neutron and atomic mass constants [2023-08]
+    assert abs(nsf.neutron_wavelength_from_velocity(2200) - 1.7981972619684314) < 1e-14
     assert abs(nsf.neutron_wavelength(25) - 1.8) < 0.1
     assert abs(nsf.neutron_energy(nsf.neutron_wavelength(25)) - 25) < 1e-14
 
@@ -132,7 +134,8 @@ def test():
     assert abs(depth-depth2)<1e-14
 
 def test_formula():
-    M = formula('B4C', density=2.52)
+    density = 2.52
+    M = formula('B4C', density=density)
     sld,xs,depth = neutron_scattering(M,wavelength=4.75)
     # Compare to Alan Munter's numbers:
     #   SLD=7.65e-6 - 2.34e-7i /A^2
@@ -155,7 +158,9 @@ def test_formula():
     #   sld_re = 10*number_density * b_c.real
     #   sigma_c = 4*pi/100*((sld_re - 1j*sld_im)/(10*number_density))**2
     #   coh_xs = sigma_c * number_density
-    Nb = 0.13732585020640778
+    molar_mass = 4*elements.B.mass + elements.C.mass
+    cell_volume = (molar_mass/density) / N_A * 1e24
+    Nb = 5 / cell_volume
     sld_inc = Nb*sqrt(100/(4*pi)*xs[2]/Nb)*10
     coh_xs = Nb*4*pi/100*(abs(sld[0] - 1j*sld[1])/(10*Nb))**2
     assert abs(sld[2] - sld_inc) < 1e-14
@@ -251,7 +256,8 @@ def test_energy_dependent():
     # Use abundance from mass.py: 97.41% Lu[175] + 2.59% Lu[176]
     # Note: abundance uses mole fraction. DOI:10.1351/PAC-REP-10-06-02
     Lu = elements.Lu
-    Lu_equiv = "Lu[175]97.41+Lu[176]2.59"
+    Lu_175_abundance, Lu_176_abundance = 97.401, 2.599
+    Lu_equiv = f"Lu[175]{Lu_175_abundance}+Lu[176]{Lu_176_abundance}"
 
     # Note: skipping incoherent xs in returned value
 
@@ -260,9 +266,9 @@ def test_energy_dependent():
     sld1 = neutron_sld(Lu_equiv, wavelength=wavelength, natural_density=Lu.density)
     sld2 = Lu.neutron.sld(wavelength=wavelength)
     # sld elements are arrays of length 4
-    #print("multiple"); print(sld1); print(sld2)
     assert all(len(v) == 4 for v in sld1 + sld2)
-    assert all((abs((v-w)/v) < 1e-14).all() for v, w in zip(sld1[:2], sld2[:2]))
+    assert (abs((sld1[0]-sld2[0])/sld1[0]) < 1e-14).all()
+    assert (abs((sld1[1]-sld2[1])/sld1[1]) < 1e-14).all()
 
     # Length 1 wavelength energy dependent
     sld1 = neutron_sld(Lu_equiv, wavelength=wavelength[:1], natural_density=Lu.density)
@@ -270,7 +276,8 @@ def test_energy_dependent():
     # sld elements are arrays of length 1
     #print("length 1", sld1, sld2)
     assert all(len(v) == 1 for v in sld1 + sld2)
-    assert all((abs((v-w)/v) < 1e-14).all() for v, w in zip(sld1[:2], sld2[:2]))
+    assert (abs((sld1[0]-sld2[0])/sld1[0]) < 1e-14).all()
+    assert (abs((sld1[1]-sld2[1])/sld1[1]) < 1e-14).all()
 
     # Scalar wavelength energy dependent
     sld1 = neutron_sld(Lu_equiv, wavelength=wavelength[0], natural_density=Lu.density)
@@ -278,33 +285,37 @@ def test_energy_dependent():
     # sld elements are scalars; note no .all() on the comparison
     #print("scalar", sld1, sld2)
     assert all(np.isscalar(v) for v in sld1 + sld2)
-    assert all((abs((v-w)/v) < 1e-14) for v, w in zip(sld1[:2], sld2[:2]))
+    assert (abs((sld1[0]-sld2[0])/sld1[0]) < 1e-14).all()
+    assert (abs((sld1[1]-sld2[1])/sld1[1]) < 1e-14).all()
 
     # Check that composite sld calculator works with energy dependence and
     # various wavelength vectors.
     materials = formula('Lu[175]'), formula('Lu[176]')
-    weights = np.array((97.41, 2.59))
+    weights = np.array((Lu_175_abundance, Lu_176_abundance))
 
     # Multiple wavelength
     sld1 = neutron_sld(Lu_equiv, wavelength=wavelength, density=Lu.density)
     calc = neutron_composite_sld(materials, wavelength=wavelength)
     sld2 = calc(weights, density=Lu.density)
     assert all(len(v) == 4 for v in sld1 + sld2)
-    assert all((abs((v-w)/v) < 1e-14).all() for v, w in zip(sld1[:2], sld2[:2]))
+    assert (abs((sld1[0]-sld2[0])/sld1[0]) < 1e-14).all()
+    assert (abs((sld1[1]-sld2[1])/sld1[1]) < 1e-14).all()
 
     # Length 1 wavelength
     sld1 = neutron_sld(Lu_equiv, wavelength=wavelength[:1], density=Lu.density)
     calc = neutron_composite_sld(materials, wavelength=wavelength[:1])
     sld2 = calc(weights, density=Lu.density)
     assert all(len(v) == 1 for v in sld1 + sld2)
-    assert all((abs((v-w)/v) < 1e-14).all() for v, w in zip(sld1[:2], sld2[:2]))
+    assert (abs((sld1[0]-sld2[0])/sld1[0]) < 1e-14).all()
+    assert (abs((sld1[1]-sld2[1])/sld1[1]) < 1e-14).all()
 
     # scalar wavelength
     sld1 = neutron_sld(Lu_equiv, wavelength=wavelength[0], density=Lu.density)
     calc = neutron_composite_sld(materials, wavelength=wavelength[0])
     sld2 = calc(weights, density=Lu.density)
     assert all(np.isscalar(v) for v in sld1 + sld2)
-    assert all((abs((v-w)/v) < 1e-14) for v, w in zip(sld1[:2], sld2[:2]))
+    assert (abs((sld1[0]-sld2[0])/sld1[0]) < 1e-14)
+    assert (abs((sld1[1]-sld2[1])/sld1[1]) < 1e-14)
 
     # Check against Alex Grutter spreadsheet values computed from Lynn&Seeger
     wavelength = neutron_wavelength(80) # look at 80 meV in the table
@@ -313,7 +324,8 @@ def test_energy_dependent():
     # reconstruct density from the given number density
     density = elements.Gd.mass*number_density*1e21/NA
     sld2 = neutron_sld("Gd", wavelength=wavelength, density=density)
-    assert all(abs((v-w)/v)<1e-14 for v, w in zip(sld1[:2], sld2[:2]))
+    assert (abs((sld1[0]-sld2[0])/sld1[0]) < 1e-14)
+    assert (abs((sld1[1]-sld2[1])/sld1[1]) < 1e-14)
 
 def time_composite():
     from periodictable.nsf import neutron_composite_sld

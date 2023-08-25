@@ -75,13 +75,24 @@ There are a number of functions available in periodictable.nsf
 For private tables use :func:`init` to set the data.
 
 The neutron scattering information table is reproduced from the Atomic
-Institute for Austrian Universities\ [#Rauch2003]_  (retrieve March 2008):
+Institute for Austrian Universities\ [#Rauch2003]_  (retrieved March 2008):
 
 http://www.ati.ac.at/~neutropt/scattering/table.html
 
 The above site has references to the published values for every entry in
 the table.  We have included these in the documentation directory
-associated with the periodictable package.
+within the periodictable source package. Some typographical errors have
+been fixed. In particular, Zn-70 has b_c listed as 6.9 in the table,
+but 6.0 in the source materials for the table.
+
+Alternative tables from Sears\ [#Sears1992]\ [#Sears2006] and Dawidowski,
+et al.\ [#Dawidowski2013] make different choices for the recommended values.
+These are noted in periodictable issue #59
+(`https://github.com/pkienzle/periodictable/issues/59`_)
+with changes from Sears to Rauch
+`here <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1693686953>`_
+and from Rauch to Dawidowski
+`here <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1690212205>`_.
 
 .. Note:
 
@@ -113,7 +124,7 @@ associated with the periodictable package.
     In Prince, E. ed. Intl. Tables for Crystallography C.
     Kluwer Academic Publishers. pp 444-454.
     (https://it.iucr.org/Cb/ch4o4v0001/sec4o4o4/)
-    doi: 10.1107/97809553602060000103
+    doi:10.1107/97809553602060000103
 
 .. [#Sears1992] Sears, V.F. (1992)
     Neutron scattering lengths and cross sections.
@@ -130,11 +141,19 @@ associated with the periodictable package.
 .. [#Smith2006] Smith, G.S. and Majkrzak, C.M. (2006)
     2.9 Neutron reflectometry.
     In E. Prince ed. Intl. Tables for Crystallography C.
-    Wiley InterScience. pp 126-146. doi: 10.1107/97809553602060000584
+    Wiley InterScience. pp 126-146. doi:10.1107/97809553602060000584
 
 .. [#Glinka2011] Glinka, C.J. (2011)
     Incoherent Neutron Scattering from Multi-element Materials.
-    J. Appl. Cryst. 44, 618-624. doi: 10.1107/S0021889811008223
+    J. Appl. Cryst. 44, 618-624. doi:10.1107/S0021889811008223
+
+.. [#Dawidowski2013] Dawidowski, J., Granada, J. R., Santisteban,
+    J. R., Cantargi, F., & Palomino, L. A. R. (2013).
+    Appendix—Neutron Scattering Lengths and Cross Sections.
+    In F. Fernandez-Alonso & D. L. Price (Eds.),
+    Experimental Methods in the Physical Sciences (Vol. 44, pp. 471–528).
+    Academic Press. doi:10.1016/B978-0-12-398374-9.09989-7
+
 """
 from __future__ import print_function
 

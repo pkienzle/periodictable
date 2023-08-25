@@ -257,7 +257,7 @@ def test_energy_dependent():
     # Note: abundance uses mole fraction. DOI:10.1351/PAC-REP-10-06-02
     Lu = elements.Lu
     Lu_175_abundance, Lu_176_abundance = 97.401, 2.599
-    Lu_equiv = f"Lu[175]{Lu_175_abundance}+Lu[176]{Lu_176_abundance}"
+    Lu_equiv = "Lu[175]%g+Lu[176]%g"%(Lu_175_abundance, Lu_176_abundance)
 
     # Note: skipping incoherent xs in returned value
 

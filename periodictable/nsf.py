@@ -77,7 +77,7 @@ For private tables use :func:`init` to set the data.
 The neutron scattering information table is reproduced from the Atomic
 Institute for Austrian Universities\ [#Rauch2003]_  (retrieved March 2008):
 
-http://www.ati.ac.at/~neutropt/scattering/table.html
+`<http://www.ati.ac.at/~neutropt/scattering/table.html>`_
 
 The above site has references to the published values for every entry in
 the table.  We have included these in the documentation directory
@@ -88,11 +88,11 @@ but 6.0 in the source materials for the table.
 Alternative tables from Sears\ [#Sears1992]\ [#Sears2006] and Dawidowski,
 et al.\ [#Dawidowski2013] make different choices for the recommended values.
 These are noted in periodictable issue #59
-(`https://github.com/pkienzle/periodictable/issues/59`_)
+`<https://github.com/pkienzle/periodictable/issues/59>`_
 with changes from Sears to Rauch
-`here <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1693686953>`_
+`(a) <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1693686953>`__
 and from Rauch to Dawidowski
-`here <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1690212205>`_.
+`(b) <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1690212205>`__.
 
 .. Note:
 

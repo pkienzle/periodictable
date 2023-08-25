@@ -75,8 +75,9 @@ def mass(isotope):
             Atomic weight of the element.
 
     Reference:
-        *Wang. M., Huang. W. J., Kondev. F. G., Audi. G., Naimi. S., The AME
-        2020 atomic mass evaluation (II). Tables, graphs and references *
+        Wang. M., Huang. W. J., Kondev. F. G., Audi. G., Naimi. S. (2021)
+        The AME 2020 atomic mass evaluation (II). Tables, graphs and references
+        *Chinese Physics C*, Volume 45, Number 3
     """
     return isotope._mass
 
@@ -91,8 +92,8 @@ def abundance(isotope):
         *abundance* : float | %
 
     Reference:
-        *Coursey. J. S., Schwab. D. J, and Dragoset. R. A., NIST Atomic
-        Weights and Isotopic Composition Database.*
+        J. Meija et al. (2016) Isotopic compositions of the elements 2013
+        *Pure and Applied Chemistry* 88, 293-306.
     """
     return isotope._abundance
 

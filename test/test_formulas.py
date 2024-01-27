@@ -165,6 +165,8 @@ def test():
     check_formula(formula('1mm Fe // 1mm Ni'), formula('50%vol Fe // Ni'))
     check_formula(formula('50%vol Co // Ti'), formula('2mL Co // 2mL Ti'))
     check_formula(formula('50%wt Co // Ti'), formula('2g Co // 2g Ti'))
+    check_formula(formula('50vol% Co // Ti'), formula('2mL Co // 2mL Ti'))
+    check_formula(formula('50wt% Co // Ti'), formula('2g Co // 2g Ti'))
     check_formula(formula('2mL Co // 2mL Ti'), formula(((1.5922466356368357, Co), (1, Ti))))
     check_formula(formula('2g Co // 2g Ti'), formula(((1, Co), (1.231186412350889, Ti))))
     check_formula(formula('5g NaCl // 50mL H2O@1'), formula('5g NaCl // 50g H2O'))

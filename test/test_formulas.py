@@ -165,6 +165,8 @@ def test():
     check_formula(formula('1mm Fe // 1mm Ni'), formula('50%vol Fe // Ni'))
     check_formula(formula('50%vol Co // Ti'), formula('2mL Co // 2mL Ti'))
     check_formula(formula('50%wt Co // Ti'), formula('2g Co // 2g Ti'))
+    check_formula(formula('50vol% Co // Ti'), formula('2mL Co // 2mL Ti'))
+    check_formula(formula('50wt% Co // Ti'), formula('2g Co // 2g Ti'))
     # The relative quantities change whenenver the mass is updated.
     #print(formula('2mL Co // 2mL Ti').structure)
     #print(formula('2g Co // 2g Ti').structure)

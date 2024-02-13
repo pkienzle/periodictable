@@ -931,7 +931,7 @@ def count_elements(compound, by_isotope=False):
     """
     total = {}
     # Note: could accumulate charge at the same time as counting elements.
-    for part, count in compound.atoms.items():
+    for part, count in formula(compound).atoms.items():
         # Resolve isotopes and ions to the underlying element. Four cases:
         #    isotope with charge needs fragment.element.element
         #    isotope without charge needs fragment.element

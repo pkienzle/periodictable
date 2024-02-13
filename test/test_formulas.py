@@ -44,8 +44,9 @@ def test():
     assert formula("Fe2O4+3H2O").atoms == {Fe: 2, O: 7, H: 6}
 
     # Check element count. The formula includes element, charged element,
-    # isotope and charged isotope.
-    assert formula("HDS{6+}O{2-}3O[16]{2-}").elements == {S: 1, O: 4, H: 2}
+    # isotope and charged isotope. The "3" in front forces recursion into a
+    # formula tree.
+    assert formula("3HDS{6+}O{2-}3O[16]{2-}").elements == {S: 3, O: 12, H: 6}
     assert str(formula("HDS{6+}O{2-}3O[16]{2-}").elements_hill) == "H2O4S"
 
     # Check charge

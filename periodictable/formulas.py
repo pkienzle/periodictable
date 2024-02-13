@@ -13,7 +13,7 @@ from math import pi, sqrt
 from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd, Group)
 
-from .core import default_table, isatom, isisotope, change_table
+from .core import default_table, isatom, isisotope, change_table, Ion
 from .constants import avogadro_number
 from .util import require_keywords, cell_volume
 
@@ -333,7 +333,7 @@ class Formula(object):
         formula, summed across all subgroups. Isotopes and ions are considered
         equivalent.
         """
-        return _count_elements(self.structure)
+        return _count_elements(self)
 
     @property
     def elements_hill(self):
@@ -920,28 +920,23 @@ def _count_atoms(seq):
             total[atom] += atom_count*count
     return total
 
-def _count_elements(seq):
+def _count_elements(compound, by_isotope=False):
     """
     Traverse formula structure, counting the total number of atoms.
     """
     total = {}
     # Note: could accumulate charge at the same time as counting elements.
-    for count, fragment in seq:
-        if isinstance(fragment, (list, tuple)):
-            partial, part_charge = _count_elements(fragment)
-        else:
-            # Resolve isotopes and ions to the underlying element. Four cases:
-            #    isotope with charge needs fragment.element.element
-            #    isotope without charge needs fragment.element
-            #    element with charge needs fragment.element
-            #    element without charge needs fragment
-            element_or_isotope = getattr(fragment, "element", fragment)
-            element = getattr(element_or_isotope, "element", element_or_isotope)
-            partial = {element: 1}
-        for element, element_count in partial.items():
-            if element not in total:
-                total[element] = 0
-            total[element] += element_count*count
+    for part, count in compound.atoms.items():
+        # Resolve isotopes and ions to the underlying element. Four cases:
+        #    isotope with charge needs fragment.element.element
+        #    isotope without charge needs fragment.element
+        #    element with charge needs fragment.element
+        #    element without charge needs fragment
+        if isinstance(part, Ion):
+            part = part.element
+        if not by_isotope:
+            part = getattr(part, "element", part)
+        total[part] = count + total.get(part, 0)
     return total
 
 def _immutable(seq):

@@ -169,6 +169,8 @@ def test():
     #print(formula('2mL Co // 2mL Ti').structure)
     #print(formula('2g Co // 2g Ti').structure)
     #print(formula('5g NaCl // 50mL H2O@1').structure)
+    check_formula(formula('50vol% Co // Ti'), formula('2mL Co // 2mL Ti'))
+    check_formula(formula('50wt% Co // Ti'), formula('2g Co // 2g Ti'))
     check_formula(formula('2mL Co // 2mL Ti'), formula(((1.5922467977437773, Co), (1, Ti))))
     check_formula(formula('2g Co // 2g Ti'), formula(((1, Co), (1.2311862870035726, Ti))))
     check_formula(formula('5g NaCl // 50mL H2O@1'), formula('5g NaCl // 50g H2O'))

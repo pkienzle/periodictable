@@ -273,7 +273,7 @@ compute molar mass and neutron/xray scattering length density:
     >>> import periodictable
     >>> SiO2 = periodictable.formula('SiO2')
     >>> hydrated = SiO2 + periodictable.formula('3H2O')
-    >>> print(f"{hydrated} mass {hydrated.mass}")
+    >>> print(f"{hydrated} mass {hydrated.mass:.3f}")
     SiO2(H2O)3 mass 114.128
     >>> rho,mu,inc = periodictable.neutron_sld('SiO2+3H2O',density=1.5,wavelength=4.75)
     >>> print(f"{hydrated} neutron sld {rho:.3g}")

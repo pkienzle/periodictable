@@ -323,6 +323,29 @@ class Formula(object):
         """
         return formula(self.atoms)
 
+    @property
+    def elements(self):
+        """
+        { *element*: *count*, ... }
+
+        Composition of the molecule.  Referencing this attribute computes
+        the *count* as the total number of each element in the chemical
+        formula, summed across all subgroups. Isotopes and ions are considered
+        equivalent.
+        """
+        return _count_elements(self.structure)
+
+    @property
+    def elements_hill(self):
+        """
+        Formula
+
+        Convert the formula to a formula in Hill notation.  Carbon appears
+        first followed by hydrogen then the remaining elements in alphabetical
+        order.
+        """
+        return formula(self.elements)
+
     def natural_mass_ratio(self):
         """
         Natural mass to isotope mass ratio.
@@ -891,10 +914,34 @@ def _count_atoms(seq):
             partial = _count_atoms(fragment)
         else:
             partial = {fragment: 1}
-        for el, elcount in partial.items():
-            if el not in total:
-                total[el] = 0
-            total[el] += elcount*count
+        for atom, atom_count in partial.items():
+            if atom not in total:
+                total[atom] = 0
+            total[atom] += atom_count*count
+    return total
+
+def _count_elements(seq):
+    """
+    Traverse formula structure, counting the total number of atoms.
+    """
+    total = {}
+    # Note: could accumulate charge at the same time as counting elements.
+    for count, fragment in seq:
+        if isinstance(fragment, (list, tuple)):
+            partial, part_charge = _count_elements(fragment)
+        else:
+            # Resolve isotopes and ions to the underlying element. Four cases:
+            #    isotope with charge needs fragment.element.element
+            #    isotope without charge needs fragment.element
+            #    element with charge needs fragment.element
+            #    element without charge needs fragment
+            element_or_isotope = getattr(fragment, "element", fragment)
+            element = getattr(element_or_isotope, "element", element_or_isotope)
+            partial = {element: 1}
+        for element, element_count in partial.items():
+            if element not in total:
+                total[element] = 0
+            total[element] += element_count*count
     return total
 
 def _immutable(seq):
@@ -950,7 +997,7 @@ def _str_atoms(seq):
     """
     Convert formula structure to string.
     """
-    #print "str", seq
+    #print("str", seq)
     ret = ""
     for count, fragment in seq:
         if isatom(fragment):

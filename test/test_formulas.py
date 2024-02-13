@@ -2,7 +2,7 @@ from __future__ import division
 from copy import deepcopy
 from pickle import loads, dumps
 
-from periodictable import Ca, C, O, H, Fe, Ni, Si, D, Na, Cl, Co, Ti
+from periodictable import Ca, C, O, H, Fe, Ni, Si, D, Na, Cl, Co, Ti, S
 from periodictable import formula, mix_by_weight, mix_by_volume
 
 def test():
@@ -42,6 +42,11 @@ def test():
 
     # Check atom count
     assert formula("Fe2O4+3H2O").atoms == {Fe: 2, O: 7, H: 6}
+
+    # Check element count. The formula includes element, charged element,
+    # isotope and charged isotope.
+    assert formula("HDS{6+}O{2-}3O[16]{2-}").elements == {S: 1, O: 4, H: 2}
+    assert str(formula("HDS{6+}O{2-}3O[16]{2-}").elements_hill) == "H2O4S"
 
     # Check charge
     assert formula("P{5+}O{2-}4").charge == -3

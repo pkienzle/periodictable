@@ -672,7 +672,7 @@ def formula_grammar(table):
     separator = space+Literal('+').suppress()+space
 
     # Lookup the element in the element table
-    symbol = Regex("[A-Z][a-z]*")
+    symbol = Regex("[A-Z][a-z]?")
     symbol = symbol.setParseAction(lambda s, l, t: table.symbol(t[0]))
 
     # Translate isotope
@@ -751,13 +751,15 @@ def formula_grammar(table):
 
     partsep = space + Literal('//').suppress() + space
     percent = Literal('%').suppress()
-
-    weight_percent = Regex("%(w((eigh)?t)?|m(ass)?)").suppress() + space
+    weight = Regex("(w((eigh)?t)?|m(ass)?)").suppress()
+    volume = Regex("v(ol(ume)?)?").suppress()
+    weight_percent = (percent + weight) | (weight + percent) + space
+    volume_percent = (percent + volume) | (volume + percent) + space
     by_weight = (count + weight_percent + mixture
                  + ZeroOrMore(partsep+count+(weight_percent|percent)+mixture)
                  + partsep + mixture)
     def convert_by_weight(string, location, tokens):
-        """convert mixture by %wt or %mass"""
+        """convert mixture by wt% or mass%"""
         #print "by weight", tokens
         piece = tokens[1:-1:2] + [tokens[-1]]
         fract = [float(v) for v in tokens[:-1:2]]
@@ -770,12 +772,11 @@ def formula_grammar(table):
         return _mix_by_weight_pairs(zip(piece, fract))
     mixture_by_weight = by_weight.setParseAction(convert_by_weight)
 
-    volume_percent = Regex("%v(ol(ume)?)?").suppress() + space
     by_volume = (count + volume_percent + mixture
                  + ZeroOrMore(partsep+count+(volume_percent|percent)+mixture)
                  + partsep + mixture)
     def convert_by_volume(string, location, tokens):
-        """convert mixture by %vol"""
+        """convert mixture by vol%"""
         #print "by volume", tokens
         piece = tokens[1:-1:2] + [tokens[-1]]
         fract = [float(v) for v in tokens[:-1:2]]

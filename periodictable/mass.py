@@ -78,8 +78,8 @@ def mass(isotope):
             Atomic weight of the element.
 
     Reference:
-        *Wang. M., Huang. W. J., Kondev. F. G., Audi. G., Naimi. S., The AME
-        2020 atomic mass evaluation (II). Tables, graphs and references *
+        Wang. M., Huang. W. J., Kondev. F. G., Audi. G., Naimi. S., 
+        *The AME 2020 atomic mass evaluation (II). Tables, graphs and references*
     """
     return isotope._mass
 

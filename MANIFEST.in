@@ -1,7 +1,9 @@
 include LICENSE.txt
-include doc
-include periodictable/xsf/*
-include periodictable/activation.dat
+graft doc
 prune doc/sphinx/_build
 prune doc/sphinx/build
-exclude build dist *.pyc
+prune */__pycache__
+prune */*/__pycache__
+prune */*/*/__pycache__
+#recursive-exclude __pycache__ *
+#exclude build dist *.pyc __pycache__/*

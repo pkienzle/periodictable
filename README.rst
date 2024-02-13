@@ -5,23 +5,21 @@ Extensible periodic table of the elements
 This package provides a periodic table of the elements with
 support for mass, density and xray/neutron scattering information.
 
-Masses, densities and natural abundances come from the
-NIST Physics Laboratory, but do not represent a critical
-evaluation by NIST scientists.
-
 Neutron scattering calculations use values collected by the
-Atomic Institute of the Austrian Universities.  These values
-do corresponding to those from other packages, though there
-are some differences depending to the tables used.  Bound
-coherent neutron scattering for gold in particular is significantly
-different from older value: 7.63(6) as measured in 1974
-compared to 7.90(7) as measured in 1990.
+Atomic Institute of the Austrian Universities as they appear in the neutron
+data booklet, with support for some energy dependent scattering
+in rare earth elements given by Lynn and Seeger (1990). X-ray scattering
+calculations use a combination of empirical and theoretical values from
+the LBL Center for X-ray Optics.
 
-X-ray scattering calculations use a combination of empirical and
-theoretical values from the LBL Center for X-ray Optics.  These
-values differ from those given in other sources such as the
-International Tables for Crystallography, Volume C, and so may
-give different results from other packages.
+Tabulated values differ from those given in other sources such as the
+International Tables for Crystallography, Volume C, and so computed
+cross sections may give different results from other packages.
+
+Neutron activation calculations are based on Shleien (1998), with
+isotopes important to health physics. They do not perform a full
+activation analysis, but instead give a gross estimate of the amount
+of activation expected for a sample in the beam.
 
 Install using::
 
@@ -62,16 +60,27 @@ Known issues
   isotope proportions and density computed in neutron_sld(). This may change
   in a future release.
 
-* The mass and composition tables are out of date. This package uses tables
-  from 1997 but IUPAC produced new tables in 2009.
-
 * Incoherent scattering calculations for energy-dependent rare earth elements
   is underestimated. The calculation requires bound incoherent scattering
-  lengths (b_i) and the bound coherent lengths (b_c), but only b_c is
+  length (b_i) but only the bound coherent scattering length (b_c) is
   included.
 
 Change history
 ==============
+
+1.7.0 2023-07-??
+----------------
+
+Modified:
+
+* Move to IAEA AME2020 for isotope mass
+* Move to IUPAC CIAAW 2021 for atomic weight and isotopic abundance
+* Li-6:Li-7 mass ratio changed from 12.2 to 19.6 (delta = 2.7%)
+* Isotope percentage changed by 0.1 to 0.5 for B, Zn, Ge, Se, Mo, Er, Yb, Pt, Hg
+* Atomic weight changed by 0.04% for Zn, 0.02% for S and 0.01% for Li, Ge, Se, Mo
+* Neutron b_c changed for Zn-70 from 6.9 to 6.0 (fixes a typo in the original table)
+* Fix typos in uncertainties in the neutron table (Zr-90, Te-124, Ba-138, Sm-147)
+
 
 1.6.1 2022-05-18
 ----------------

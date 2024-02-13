@@ -165,13 +165,17 @@ def test():
     check_formula(formula('1mm Fe // 1mm Ni'), formula('50%vol Fe // Ni'))
     check_formula(formula('50%vol Co // Ti'), formula('2mL Co // 2mL Ti'))
     check_formula(formula('50%wt Co // Ti'), formula('2g Co // 2g Ti'))
+    # The relative quantities change whenenver the mass is updated.
+    #print(formula('2mL Co // 2mL Ti').structure)
+    #print(formula('2g Co // 2g Ti').structure)
+    #print(formula('5g NaCl // 50mL H2O@1').structure)
     check_formula(formula('50vol% Co // Ti'), formula('2mL Co // 2mL Ti'))
     check_formula(formula('50wt% Co // Ti'), formula('2g Co // 2g Ti'))
-    check_formula(formula('2mL Co // 2mL Ti'), formula(((1.5922466356368357, Co), (1, Ti))))
-    check_formula(formula('2g Co // 2g Ti'), formula(((1, Co), (1.231186412350889, Ti))))
+    check_formula(formula('2mL Co // 2mL Ti'), formula(((1.5922467977437773, Co), (1, Ti))))
+    check_formula(formula('2g Co // 2g Ti'), formula(((1, Co), (1.2311862870035726, Ti))))
     check_formula(formula('5g NaCl // 50mL H2O@1'), formula('5g NaCl // 50g H2O'))
     check_formula(formula('5g NaCl // 50mL H2O@1'),
-                  formula(((1, Na), (1, Cl), (32.4407, ((2, H), (1, O))))), tol=1e-5)
+                  formula(((1, Na), (1, Cl), (32.43950556758257, ((2, H), (1, O))))), tol=1e-5)
     assert abs(formula('1mm Fe // 1mm Ni').thickness - 0.002) < 0.002*1e014
     assert abs(formula('2g Co // 2g Ti').total_mass - 4) < 4*1e-14
     check_mass(formula('2mL Co // 2mL Ti'), mass=2*(Co.density+Ti.density))

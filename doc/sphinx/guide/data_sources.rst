@@ -7,8 +7,11 @@ Data Sources
 Physical constants
     `NIST Physics Laboratory - Constants, units and uncertainty <http://physics.nist.gov/cuu/index.html>`_
 
-Atomic and isotope mass
-    `NIST Physics Laboratory - Atomic weights and isotope composition <http://physics.nist.gov/PhysRefData/Compositions/>`_
+Isotope mass
+    `IAEA Atomic Mass Data Center AME2020 <https://www-nds.iaea.org/amdc/>`_
+
+Atomic weight and isotope abundance
+    `IUPAC commission on isotope abundances and atomic weights <https://www.ciaaw.org>`_
 
 Atomic density
     *ILL Neutron Data Booklet*

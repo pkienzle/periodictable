@@ -333,7 +333,7 @@ class Formula(object):
         formula, summed across all subgroups. Isotopes and ions are considered
         equivalent.
         """
-        return _count_elements(self)
+        return count_elements(self)
 
     @property
     def elements_hill(self):
@@ -920,9 +920,14 @@ def _count_atoms(seq):
             total[atom] += atom_count*count
     return total
 
-def _count_elements(compound, by_isotope=False):
+def count_elements(compound, by_isotope=False):
     """
-    Traverse formula structure, counting the total number of atoms.
+    Composition of the molecule.
+
+    Returns {*element*: *count*, ...} where the *count* is the total number
+    of each element in the chemical formula, summed across all isotopes and
+    ionization levels. If *by_isotope* is True, then sum the individual isotopes
+    separately across all ionization levels.
     """
     total = {}
     # Note: could accumulate charge at the same time as counting elements.

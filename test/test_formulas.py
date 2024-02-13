@@ -4,6 +4,7 @@ from pickle import loads, dumps
 
 from periodictable import Ca, C, O, H, Fe, Ni, Si, D, Na, Cl, Co, Ti, S
 from periodictable import formula, mix_by_weight, mix_by_volume
+import periodictable.formulas
 
 def test():
     ikaite = formula()
@@ -48,6 +49,10 @@ def test():
     # formula tree.
     assert formula("3HDS{6+}O{2-}3O[16]{2-}").elements == {S: 3, O: 12, H: 6}
     assert str(formula("HDS{6+}O{2-}3O[16]{2-}").elements_hill) == "H2O4S"
+    isotopes = periodictable.formulas.count_elements(
+        formula("HDS{6+}O{2-}3O[16]{2-}"), by_isotope=True
+    )
+    assert isotopes == {S: 1, O: 3, O[16]:1, H: 1, D: 1}
 
     # Check charge
     assert formula("P{5+}O{2-}4").charge == -3

@@ -250,14 +250,6 @@ def formula(compound=None, density=None, natural_density=None,
     elif isinstance(compound, dict):
         structure = _convert_to_hill_notation(compound)
     elif _is_string_like(compound):
-        if ':' in compound:
-            # TODO: avoid circular imports
-            # TODO: support other biochemicals (carbohydrate residues, lipids)
-            from . import fasta
-            seq_type, seq = compound.split(':', 1)
-            if seq_type in fasta.CODE_TABLES:
-                seq = fasta.Sequence(name=None, sequence=seq, type=seq_type)
-                return seq.labile_formula
         try:
             chem = parse_formula(compound, table=table)
             if name:
@@ -297,7 +289,9 @@ class Formula(object):
         elif density is not None:
             self.density = density
         elif len(self.atoms) == 1:
-            self.density = list(self.atoms.keys())[0].density
+            # Note: density for isotopes already corrected for natural density
+            atom = list(self.atoms.keys())[0]
+            self.density = atom.density
         else:
             self.density = None
 
@@ -458,6 +452,8 @@ class Formula(object):
         Note: a single non-keyword argument is interpreted as a packing factor
         rather than a lattice spacing of 'a'.
         """
+        # TODO: density estimated from H.covalent_radius is much too high
+        #H_radius = kw.pop('H_radius', None)
         # Get packing factor
         if len(args) == 1 and not kw:
             packing_factor = args[0]
@@ -472,7 +468,10 @@ class Formula(object):
         # Compute atomic volume
         V = 0
         for el, count in self.atoms.items():
-            V += el.covalent_radius**3*count
+            radius = el.covalent_radius
+            #if el.number == 1 and H_radius is not None:
+            #    radius = H_radius
+            V += radius**3*count
         V *= 4.*pi/3
 
         # Translate packing factor from string
@@ -640,6 +639,7 @@ def _isotope_substitution(compound, source, target, portion=1):
     return formula(atoms, density=density)
 
 
+# TODO: Parser can't handle meters as 'm' because it conflicts with the milli prefix
 LENGTH_UNITS = {'nm': 1e-9, 'um': 1e-6, 'mm': 1e-3, 'cm': 1e-2}
 MASS_UNITS = {'ng': 1e-9, 'ug': 1e-6, 'mg': 1e-3, 'g': 1e+0, 'kg': 1e+3}
 VOLUME_UNITS = {'nL': 1e-9, 'uL': 1e-6, 'mL': 1e-3, 'L': 1e+0}
@@ -696,6 +696,20 @@ def formula_grammar(table):
     whole = whole.setParseAction(lambda s, l, t: int(t[0]) if t[0] else 1)
     count = Optional(~White()+(fract|whole), default=1)
 
+    # Fasta code
+    fasta = Regex("aa|rna|dna") + Literal(":").suppress() + Regex("[A-Z *-]+")
+    def convert_fasta(string, location, tokens):
+        #print("fasta", string, location, tokens)
+        # TODO: avoid circular imports
+        # TODO: support other biochemicals (carbohydrate residues, lipids)
+        from . import fasta
+        seq_type, seq = tokens
+        if seq_type not in fasta.CODE_TABLES:
+            raise ValueError(f"Invalid fasta sequence type '{seq_type}:'")
+        seq = fasta.Sequence(name=None, sequence=seq, type=seq_type)
+        return seq.labile_formula
+    fasta.setParseAction(convert_fasta)
+
     # Convert symbol, isotope, ion, count to (count, isotope)
     element = symbol+isotope+ion+count
     def convert_element(string, location, tokens):
@@ -737,16 +751,32 @@ def formula_grammar(table):
     composite << group + ZeroOrMore(implicit_separator + group)
 
     density = Literal('@').suppress() + count + Optional(Regex("[ni]"), default='i')
-    compound = composite + Optional(density, default=None)
+    compound = (composite|fasta) + Optional(density, default=None)
     def convert_compound(string, location, tokens):
-        """convert material @ density"""
-        #print "compound", tokens
-        if tokens[-1] is None:
-            return Formula(structure=_immutable(tokens[:-1]))
-        elif tokens[-1] == 'n':
-            return Formula(structure=_immutable(tokens[:-2]), natural_density=tokens[-2])
+        """convert material @ density or fasta @ density"""
+        # Messiness: both composite and density can be one or more tokens
+        # If density is missing then it is None, otherwise it is count + [ni]
+        # Compound can be a sequence of (count, fragment) pairs, or if it is
+        # a fasta sequence it may already be a formula.
+        material = tokens[:-1] if tokens[-1] is None else tokens[:-2]
+        if len(material) == 1 and isinstance(material[0], Formula):
+            formula = material[0]
         else:
-            return Formula(structure=_immutable(tokens[:-2]), density=tokens[-2])
+            #print("unbundling material", material)
+            formula = Formula(structure=_immutable(material))
+        density, form = (None, None) if tokens[-1] is None else tokens[-2:]
+        #if density is None and formula.density is None:
+        #    # Estimate density from covalent radii and a 0.54 packing factor
+        #    mass = formula.molecular_mass
+        #    volume = formula.volume(packing_factor=0.54, H_radius=1.15)
+        #    density, form = mass/volume, 'n'
+        #    print(f"estimating density as {mass/volume=:.3f}")
+        if form == 'n':
+            formula.natural_density = density
+        elif form == 'i':
+            formula.density = density
+        #print("compound", formula, f"{formula.density=:.3f}")
+        return formula
     compound = compound.setParseAction(convert_compound)
 
     partsep = space + Literal('//').suppress() + space
@@ -879,7 +909,9 @@ def parse_formula(formula_str, table=None):
     table = default_table(table)
     if table not in _PARSER_CACHE:
         _PARSER_CACHE[table] = formula_grammar(table)
-    return _PARSER_CACHE[table].parseString(formula_str)[0]
+    parser = _PARSER_CACHE[table]
+    #print(parser)
+    return parser.parseString(formula_str)[0]
 
 def _count_atoms(seq):
     """
@@ -982,3 +1014,11 @@ def _is_string_like(val):
     except Exception:
         return False
     return True
+
+def demo():
+    import sys
+    compound = formula(sys.argv[1])
+    print(f"{compound.hill}@{compound.density:.3f} sld={compound.neutron_sld()}")
+
+if __name__ == "__main__":
+    demo()

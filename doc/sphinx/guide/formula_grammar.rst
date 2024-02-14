@@ -153,13 +153,15 @@ The grammar used for parsing formula strings is the following:
     quantity   :: count unit part ('//' count unit part)*
     percentage :: count 'wt%|vol%' part ('//' count '%' part)* '//' part
     part       :: compound | '(' mixture ')'
-    compound   :: group (separator group)* density?
+    compound   :: (composite | fasta) density?
+    fasta      :: ('dna' | 'rna' | 'aa') ':' [A-Z -*]+
+    composite  :: group (separator group)*
     group      :: count element+ | '(' formula ')' count
     element    :: symbol isotope? ion? count?
     symbol     :: [A-Z][a-z]*
     isotope    :: '[' number ']'
     ion        :: '{' number? [+-] '}'
-    density    :: '@' count
+    density    :: '@' count [ni]?
     count      :: number | fraction
     number     :: [1-9][0-9]*
     fraction   :: ([1-9][0-9]* | 0)? '.' [0-9]*

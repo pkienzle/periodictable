@@ -639,6 +639,7 @@ def _isotope_substitution(compound, source, target, portion=1):
     return formula(atoms, density=density)
 
 
+# TODO: Grammar should be independent of table
 # TODO: Parser can't handle meters as 'm' because it conflicts with the milli prefix
 LENGTH_UNITS = {'nm': 1e-9, 'um': 1e-6, 'mm': 1e-3, 'cm': 1e-2}
 MASS_UNITS = {'ng': 1e-9, 'ug': 1e-6, 'mg': 1e-3, 'g': 1e+0, 'kg': 1e+3}
@@ -662,6 +663,10 @@ def formula_grammar(table):
             an *element* or a list of pairs (*count, fragment*).
 
     """
+    # TODO: fix circular imports
+    # This ickiness is because the formula class returned from the circular
+    # import of fasta does not match the local formula class.
+    from .formulas import Formula
 
     # Recursive
     composite = Forward()
@@ -700,6 +705,7 @@ def formula_grammar(table):
     fasta = Regex("aa|rna|dna") + Literal(":").suppress() + Regex("[A-Z *-]+")
     def convert_fasta(string, location, tokens):
         #print("fasta", string, location, tokens)
+        # TODO: fasta is ignoring table when parsing
         # TODO: avoid circular imports
         # TODO: support other biochemicals (carbohydrate residues, lipids)
         from . import fasta
@@ -759,6 +765,7 @@ def formula_grammar(table):
         # Compound can be a sequence of (count, fragment) pairs, or if it is
         # a fasta sequence it may already be a formula.
         material = tokens[:-1] if tokens[-1] is None else tokens[:-2]
+        #print("compound", material, type(material[0]), len(material))
         if len(material) == 1 and isinstance(material[0], Formula):
             formula = material[0]
         else:

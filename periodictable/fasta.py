@@ -26,12 +26,21 @@ Tables for common molecules are provided[1]:
 
 Neutron SLD for water at 20C is also provided as *H2O_SLD* and *D2O_SLD*.
 
-For unmodified protein need to add 2*H[1] and O for terminations.
+For unmodified protein an H and an OH are added for terminations.
 
 Assumes that proteins were created in an environment with the usual H/D isotope
-ratio on the non-swappable hydrogens.
+ratio on the nonlabile hydrogen.
 
-[1] Perkins, S.J., 1985. Chapter 6 X-Ray and Neutron Solution Scattering,
+The value of residue volumes differs from that used by the bio
+scattering calculators from ISIS and ORSO, which will lead to different values
+for SLD. There are small differences for the number of hydrogen in His and Cys
+residues, where one table considers them present but labile and the other
+considers them absent.
+
+DNA and RNA residues from the source[1] included sodium in the chemical formula,
+but these have been removed and will not appear in the sequence.
+
+[1] Perkins, S.J., 1988. Chapter 6 X-Ray and Neutron Solution Scattering,
 in: New Comprehensive Biochemistry. Elsevier, pp. 143-265.
 https://doi.org/10.1016/S0167-7306(08)60575-X
 """
@@ -197,6 +206,10 @@ class Sequence(Molecule):
             return Sequence(name, seq, type=type)
 
     def __init__(self, name, sequence, type='aa'):
+        # TODO: duplicated in Molecule.__init__
+        # TODO: fasta does not work with table substitution
+        elements = default_table()
+
         codes = CODE_TABLES[type]
         sequence = sequence.split('*', 1)[0]  # stop at first '*'
         sequence = sequence.replace(' ', '')  # ignore spaces
@@ -206,6 +219,8 @@ class Sequence(Molecule):
         structure = []
         for p in parts:
             structure.extend(list(p.labile_formula.structure))
+        # Add H + OH terminators to the sequence
+        structure.extend(((2, elements.H[1]), (1, elements.O)))
         formula = parse_formula(structure).hill
 
         Molecule.__init__(
@@ -414,20 +429,20 @@ def _(code, formula, V, name):
     return code, molecule
 RNA_BASES = dict((
     # code, formula, volume, name
-    _("A",  "C10H8H[1]3N5O6PNa", 299, "adenosine"),
-    _("T",   "C9H8H[1]2N2O8PNa", 284, "uridine"), # Use H[1] for U in RNA
-    _("G",  "C10H7H[1]4N5O7PNa", 304, "guanosine"),
-    _("C",   "C9H8H[1]3N3O7PNa", 288, "cytidine"),
+    _("A",  "C10H8H[1]3N5O6P", 299, "adenosine"),
+    _("T",   "C9H8H[1]2N2O8P", 284, "uridine"), # Use H[1] for U in RNA
+    _("G",  "C10H7H[1]4N5O7P", 304, "guanosine"),
+    _("C",   "C9H8H[1]3N3O7P", 288, "cytidine"),
     ))
 __doc__ += "\n\n*RNA_BASES*::\n\n  " + "\n  ".join(
     "%s:%s"%(k, v.name) for k, v in sorted(RNA_BASES.items()))
 
 DNA_BASES = dict((
     # code, formula, volume, %D2O matchpoint, name
-    _("A",  "C10H9H[1]2N5O5PNa", 289, "adenosine"),
-    _("T", "C10H11H[1]1N2O7PNa", 301, "thymidine"),
-    _("G",  "C10H8H[1]3N5O6PNa", 294, "guanosine"),
-    _("C",   "C9H9H[1]2N3O6PNa", 278, "cytidine"),
+    _("A",  "C10H9H[1]2N5O5P", 289, "adenosine"),
+    _("T", "C10H11H[1]1N2O7P", 301, "thymidine"),
+    _("G",  "C10H8H[1]3N5O6P", 294, "guanosine"),
+    _("C",   "C9H9H[1]2N3O6P", 278, "cytidine"),
     ))
 __doc__ += "\n\n*DNA_BASES*::\n\n  " + "\n  ".join(
     "%s:%s"%(k, v.name) for k, v in sorted(DNA_BASES.items()))
@@ -493,15 +508,18 @@ beta_casein = "RELEELNVPGEIVESLSSSEESITRINKKIEKFQSEEQQQTEDELQDKIHPFAQTQSLVYPFPGP
 
 def test():
     from periodictable.constants import avogadro_number
+    from .formulas import formula
     elements = default_table()
+    H2O = formula("H2O@1n")
+    D2O = formula("D2O@1n")
 
     # Beta casein results checked against Duncan McGillivray's spreadsheet
     # name        Hmass   Dmass   vol     den   #el   xray  Hsld  Dsld
     # =========== ======= ======= ======= ===== ===== ===== ===== =====
     # beta casein 23561.9 23880.9 30872.9  1.27 12614 11.55  1.68  2.75
     seq = Sequence("beta casein", beta_casein)
-    assert abs(seq.mass - 23561.9) < 0.1
-    assert abs(seq.Dmass - 23880.9) < 0.1
+    assert abs((seq.mass-H2O.mass) - 23561.9) < 0.1
+    assert abs((seq.Dmass-D2O.mass) - 23880.9) < 0.1
     assert abs(seq.cell_volume - 30872.9) < 0.1
     assert abs(seq.mass/avogadro_number/seq.cell_volume*1e24 - 1.267) < 0.01
     assert abs(seq.sld - 1.68) < 0.01

@@ -182,6 +182,11 @@ def test():
 
     # fasta
     check_formula(formula('aa:A'), formula('C3H4H[1]3NO2'))
+    check_formula(formula('aa:RELEEL'), formula('C33H42H[1]13N9O13'))
+    check_formula(formula('aa:RELEEL'), formula('aa:RE-LEE L *UNUSED'))
+    check_formula(
+        formula('30%vol CCl4@1.2 //10% aa:RE-LE EL @1.8 // H2O@1'),
+        formula('30%vol CCl4@1.2 //10% C33H42H[1]13N9O13 @1.8 // H2O@1'))
 
 def check_mass(f1, mass, tol=1e-14):
     """Check that the total mass of f1 is as expected."""

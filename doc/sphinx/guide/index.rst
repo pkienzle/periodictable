@@ -27,3 +27,4 @@ and if you want to know in detail about Periodic Table, refer to the
    data_sources.rst
    contributing.rst
    license.rst
+   README_link.rst

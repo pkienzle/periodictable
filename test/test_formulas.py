@@ -2,8 +2,9 @@ from __future__ import division
 from copy import deepcopy
 from pickle import loads, dumps
 
-from periodictable import Ca, C, O, H, Fe, Ni, Si, D, Na, Cl, Co, Ti
+from periodictable import Ca, C, O, H, Fe, Ni, Si, D, Na, Cl, Co, Ti, S
 from periodictable import formula, mix_by_weight, mix_by_volume
+from periodictable.formulas import count_elements
 
 def test():
     ikaite = formula()
@@ -42,6 +43,14 @@ def test():
 
     # Check atom count
     assert formula("Fe2O4+3H2O").atoms == {Fe: 2, O: 7, H: 6}
+
+    # Check element count. The formula includes element, charged element,
+    # isotope and charged isotope. The "3" in front forces recursion into a
+    # formula tree.
+    f = formula("3HDS{6+}O{2-}3O[16]{2-}")
+    assert count_elements(f) == {S: 3, O: 12, H: 6}
+    assert str(formula(count_elements(f)).hill) == "H6O12S3"
+    assert count_elements(f, by_isotope=True) == {S: 3, O: 9, O[16]:3, H: 3, D: 3}
 
     # Check charge
     assert formula("P{5+}O{2-}4").charge == -3

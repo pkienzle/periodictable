@@ -13,7 +13,7 @@ from math import pi, sqrt
 from pyparsing import (Literal, Optional, White, Regex,
                        ZeroOrMore, OneOrMore, Forward, StringEnd, Group)
 
-from .core import default_table, isatom, isisotope, change_table
+from .core import default_table, isatom, isisotope, ision, change_table
 from .constants import avogadro_number
 from .util import require_keywords, cell_volume
 
@@ -930,10 +930,36 @@ def _count_atoms(seq):
             partial = _count_atoms(fragment)
         else:
             partial = {fragment: 1}
-        for el, elcount in partial.items():
-            if el not in total:
-                total[el] = 0
-            total[el] += elcount*count
+        for atom, atom_count in partial.items():
+            if atom not in total:
+                total[atom] = 0
+            total[atom] += atom_count*count
+    return total
+
+def count_elements(compound, by_isotope=False):
+    """
+    Element composition of the molecule.
+
+    Returns {*element*: *count*, ...} where the *count* is the total number
+    of each element in the chemical formula, summed across all isotopes and
+    ionization levels.
+
+    If *by_isotope* is True, then sum across ionization
+    levels, keeping the individual isotopes separate.
+    """
+    total = {}
+    # Note: could accumulate charge at the same time as counting elements.
+    for part, count in formula(compound).atoms.items():
+        # Resolve isotopes and ions to the underlying element. Four cases:
+        #    isotope with charge needs fragment.element.element
+        #    isotope without charge needs fragment.element
+        #    element with charge needs fragment.element
+        #    element without charge needs fragment
+        if ision(part):
+            part = part.element
+        if not by_isotope:
+            part = getattr(part, "element", part)
+        total[part] = count + total.get(part, 0)
     return total
 
 def _immutable(seq):

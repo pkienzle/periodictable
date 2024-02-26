@@ -794,35 +794,36 @@ def formula_grammar(table):
     volume_percent = (percent + volume) | (volume + percent) + space
     by_weight = (count + weight_percent + mixture
                  + ZeroOrMore(partsep+count+(weight_percent|percent)+mixture)
-                 + partsep + mixture)
-    def convert_by_weight(string, location, tokens):
-        """convert mixture by wt% or mass%"""
-        #print "by weight", tokens
-        piece = tokens[1:-1:2] + [tokens[-1]]
-        fract = [float(v) for v in tokens[:-1:2]]
-        fract.append(100-sum(fract))
+                 + Optional(partsep + mixture, default=None))
+    def _parts_by_weight_vol(tokens):
+        #print("by weight or volume", tokens)
+        if tokens[-1] is None:
+            piece = tokens[1:-1:2]
+            fract = [float(v) for v in tokens[:-1:2]]
+            if abs(sum(fract) - 100) > 1e-12:
+                raise ValueError(f"Formula percentages must sum to 100%, not {sum(fract)}")
+        else:
+            piece = tokens[1:-1:2] + [tokens[-1]]
+            fract = [float(v) for v in tokens[:-1:2]]
+            fract.append(100-sum(fract))
+            if fract[-1] < 0:
+                raise ValueError("Formula percentages must sum to less than 100%")
         #print piece, fract
         if len(piece) != len(fract):
             raise ValueError("Missing base component of mixture")
-        if fract[-1] < 0:
-            raise ValueError("Formula percentages must sum to less than 100%")
+        return piece, fract
+    def convert_by_weight(string, location, tokens):
+        """convert mixture by wt% or mass%"""
+        piece, fract = _parts_by_weight_vol(tokens)
         return _mix_by_weight_pairs(zip(piece, fract))
     mixture_by_weight = by_weight.setParseAction(convert_by_weight)
 
     by_volume = (count + volume_percent + mixture
                  + ZeroOrMore(partsep+count+(volume_percent|percent)+mixture)
-                 + partsep + mixture)
+                 + Optional(partsep + mixture, default=None))
     def convert_by_volume(string, location, tokens):
         """convert mixture by vol%"""
-        #print "by volume", tokens
-        piece = tokens[1:-1:2] + [tokens[-1]]
-        fract = [float(v) for v in tokens[:-1:2]]
-        fract.append(100-sum(fract))
-        #print piece, fract
-        if len(piece) != len(fract):
-            raise ValueError("Missing base component of mixture "+string)
-        if fract[-1] < 0:
-            raise ValueError("Formula percentages must sum to less than 100%")
+        piece, fract = _parts_by_weight_vol(tokens)
         return _mix_by_volume_pairs(zip(piece, fract))
     mixture_by_volume = by_volume.setParseAction(convert_by_volume)
 

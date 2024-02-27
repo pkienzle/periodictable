@@ -4,7 +4,14 @@ from pickle import loads, dumps
 
 from periodictable import Ca, C, O, H, Fe, Ni, Si, D, Na, Cl, Co, Ti, S
 from periodictable import formula, mix_by_weight, mix_by_volume
-from periodictable.formulas import count_elements
+from periodictable.formulas import count_elements, pretty
+
+def check_parse_fails(s):
+    try:
+        formula(s)
+    except Exception as exc:
+        return True
+    raise Exception(f'formula("{s}") should fail to parse')
 
 def test():
     ikaite = formula()
@@ -32,6 +39,18 @@ def test():
     assert ikaite.hill == formula("CCaO3(H2O)6").hill
     assert str(ikaite.hill) == "CH12CaO9"
     assert formula([(0.75, Fe), (0.25, Ni)]) == formula("Fe0.75Ni0.25")
+
+    # Unicode, latex and html subscripts
+    assert formula([(0.75, Fe), (0.25, Ni)]) == formula("Fe₀.₇₅Ni₀.₂₅")
+    assert ikaite == formula("CaCO₃(H₂O)₆")
+    assert ikaite == formula("CaCO₃6H₂O") # with subscripts we know it isn't O36
+    assert pretty(ikaite, 'unicode') == "CaCO₃(H₂O)₆"
+    assert pretty(ikaite, 'html') == "CaCO<sub>3</sub>(H<sub>2</sub>O)<sub>6</sub>"
+    assert pretty(ikaite, 'latex') == "CaCO$_{3}$(H$_{2}$O)$_{6}$"
+    # Only allow subscripts in the post position
+    assert check_parse_fails("₃H₂O")
+    assert check_parse_fails("H₂O@₁")
+    assert check_parse_fails("₁wt% NaCl@2.3 // H₂O@1n")
 
     # Test composition
     #print formula("CaCO3") + 6*formula("H2O")

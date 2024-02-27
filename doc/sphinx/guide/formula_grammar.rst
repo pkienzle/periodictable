@@ -68,6 +68,17 @@ A formula string is translated into a formula using
     >>> print(formula("CaCO3+(3HO1.5)2"))
     CaCO3((HO1.5)3)2
 
+* Unicode subscripts can be used for counts, with the usual decimal point:
+
+    >>> print(formula("CaCO₃+(3HO₁.₅)₂"))
+    CaCO3((HO1.5)3)2
+
+* Print formulas with unicode using the pretty() function:
+
+    >>> from periodictable.formulas import pretty
+    >>> print(pretty(formula("CaCO3+(3HO1.5)2")))
+    CaCO₃((HO₁.₅)₃)₂
+
 * Formula density can be specified using the special '@' tag:
 
     >>> print(formula("NaCl@2.16").density)
@@ -150,27 +161,26 @@ The grammar used for parsing formula strings is the following:
 
     formula    :: compound | mixture | nothing
     mixture    :: quantity | percentage
-    quantity   :: count unit part ('//' count unit part)*
-    percentage :: count 'wt%|vol%' part ('//' count '%' part)* '//' part
+    quantity   :: number unit part ('//' number unit part)*
+    percentage :: number 'wt%|vol%' part ('//' number '%' part)* '//' part
     part       :: compound | '(' mixture ')'
     compound   :: (composite | fasta) density?
     fasta      :: ('dna' | 'rna' | 'aa') ':' [A-Z -*]+
     composite  :: group (separator group)*
-    group      :: count element+ | '(' formula ')' count
-    element    :: symbol isotope? ion? count?
+    group      :: number element+ | '(' formula ')' number
+    element    :: symbol isotope? ion? number?
     symbol     :: [A-Z][a-z]*
-    isotope    :: '[' number ']'
-    ion        :: '{' number? [+-] '}'
-    density    :: '@' count [ni]?
-    count      :: number | fraction
-    number     :: [1-9][0-9]*
+    isotope    :: '[' integer ']'
+    ion        :: '{' integer? [+-] '}'
+    density    :: '@' number [ni]?
+    number     :: integer | fraction
+    integer    :: [1-9][0-9]*
     fraction   :: ([1-9][0-9]* | 0)? '.' [0-9]*
     separator  :: space? '+'? space?
     unit       :: mass | volume | length
     mass       :: 'kg' | 'g' | 'mg' | 'ug' | 'ng'
     volume     :: 'L' | 'mL' | 'uL' | 'nL'
     length     :: 'cm' | 'mm' | 'um' | 'nm'
-
 
 Formulas can also be constructed from atoms or other formulas:
 

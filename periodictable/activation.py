@@ -179,11 +179,16 @@ class Sample(object):
         # Find the small rest time (probably 0 hr)
         min_rest, To = min(enumerate(self.rest_times), key=lambda x: x[1])
         # Find the activity at that time, and the decay rate
-        data = [(Ia[min_rest], LN2/a.Thalf_hrs) for a, Ia in self.activity.items()]
+        data = [
+            (Ia[min_rest], LN2/a.Thalf_hrs)
+            for a, Ia in self.activity.items()
+            # TODO: not sure why Ia is zero, but it messes up the initial value guess if it is there
+            if Ia[min_rest] > 0.0
+            ]
         # Build functions for total activity at time T - target and its derivative
         # This will be zero when activity is at target
         f = lambda t: sum(Ia*exp(-La*(t-To)) for Ia, La in data) - target
-        df = lambda t: sum(La*Ia*(To-1)*exp(-La*(t-To)) for Ia, La in data)
+        df = lambda t: sum(-La*Ia*exp(-La*(t-To)) for Ia, La in data)
         # Return target time, or 0 if target time is negative
         if f(0) < target:
             return 0
@@ -192,6 +197,7 @@ class Sample(object):
         # dominate at long times, but at short times they will not affect the
         # derivative. Choosing a time that satisfies the longest half-life seems
         # to work well enough.
+        #print("data", data, [])
         initial = max(-log(target/Ia)/La + To for Ia, La in data)
         t, ft = find_root(initial, f, df)
         percent_error = 100*abs(ft)/target
@@ -284,6 +290,7 @@ def find_root(x, f, df, max=20, tol=1e-10):
     """
     fx = f(x)
     for _ in range(max):
+        #print(f"step {_}: {x=} {fx=} f'={df(x)}")
         if abs(f(x)) < tol:
             break
         x -= fx / df(x)
@@ -463,16 +470,26 @@ def activity(isotope, mass, env, exposure, rest_times):
             # Column W: L/(L-nvs1+nvs2)
             W = lam/(lam-flux*initialXS*3600*1e-24+env.fluence*effectiveXS*3600*1e-24)
             # Column X: V#*[e(-S#)-e(U#)]
-            # [PAK 2024-02-28] The original expression is a very poor approximation:
-            #    if abs(U) < 1e-10 and abs(V) < 1e-10:
-            #        precision_correction = W * (V-U+(V+U)/2)
-            #    else:
-            #        precision_correction = W * (exp(-U)-exp(-V))
-            # Instead rewrite using exp(-V)*(exp(V-U) - 1) and use expm1.
-            # Run _check_exp_diff() below for verification.
-            precision_correction = W*exp(-V)*expm1(V-U)
-
+            # [PAK 2024-02-28] Rewrite the precision correction using the
+            # high accuracy expm1() function to avoid cancellation.
+            # See _check_exp_diff() below for verification.
+            precision_correction = W*exp(-V)*expm1(V-U) if U>V else -W*exp(-U)*expm1(U-V)
             activity = root*precision_correction
+
+            # Check the effects of changing the formula. To look at all elements
+            # at once, enable the following and use:
+            #    $ python -m periodictable.activation -m 1000 -f 1e8 -e 1000
+            if 0:
+                if abs(U) < 1e-10 and abs(V) < 1e-10:
+                    precision_correction = W * (V-U+(V+U)/2)
+                    trigger = '*'
+                else:
+                    precision_correction = exp(-U) - exp(-V)
+                    trigger = ''
+                delta = activity - root*precision_correction
+                if activity > 0 and delta/activity > 1e-4:
+                    print(f"{trigger}activity change {delta:10.4e} from {activity:10.4e} ({100*delta/activity:.2f}%) for {ai.isotope} => {ai.daughter} ({ai.reaction})")
+
             if activity < 0:
                 msg = "activity %g less than zero for %g"%(activity, isotope)
                 raise RuntimeError(msg)
@@ -539,46 +556,9 @@ def init(table, reload=False):
 class ActivationResult(object):
     def __init__(self, **kw):
         self.__dict__ = kw
+    def __str__(self):
+        return str(self.__dict__)
 
-
-def demo():  # pragma: nocover
-    import sys
-    decay_level = 5e-4
-    fluence = 1e5
-    exposure = 10
-    mass = 1
-    if len(sys.argv) > 1:
-        formula = sys.argv[1]
-    else:
-        # Make sure all elements compute
-        import periodictable as pt
-        formula = "".join(str(el) for el in pt.elements)[1:]
-        # Use an enormous mass to force significant activation of rare isotopes
-        mass, fluence = 1e15, 1e8
-    env = ActivationEnvironment(fluence=fluence, Cd_ratio=70, fast_ratio=50, location="BT-2")
-    sample = Sample(formula, mass=mass)
-    sample.calculate_activation(
-        env, exposure=exposure, rest_times=(0, 1, 24, 360),
-        abundance=IAEA1987_isotopic_abundance,
-        #abundance=NIST2001_isotopic_abundance,
-        )
-    print("%gg %s for %g hours at %g n/cm^2/s"
-          % (mass, formula, exposure, fluence))
-    print("Time to decay to %g uCi is %g hours."
-          % (decay_level, sample.decay_time(decay_level)))
-    sample.show_table(cutoff=0.0)
-
-    ## Print a table of flux vs. activity so we can debug the
-    ## precision_correction value in the activity() function.
-    ## Note that you also need to uncomment the print statement
-    ## at the end of activity() that shows the column values.
-    #import numpy as np
-    #sample = Sample('Co', mass=10)
-    #for fluence in np.logspace(3, 20, 20-3+1):
-    #    env = ActivationEnvironment(fluence=fluence)
-    #    sample.calculate_activation(
-    #        env, exposure=exposure, rest_times=[0],
-    #        abundance=IAEA1987_isotopic_abundance)
 
 def _check_exp_diff(p, delta):
     """
@@ -630,6 +610,59 @@ def _check_exp_diff(p, delta):
     def err(v): return f"{math.log10(float(abs((v-mp_diff)/mp_diff))):4.1f}"
     #print(f"mp:{mp_diff}  direct:{math_diff}  alt:{math_alt}  taylor:{math_tay}")
     print(f"U:1e{p:<3d} mp: {mp.nstr(mp_diff,10):15s}  Δexp: {err(math_diff)}  Δexpm1: {err(math_alt)}  Δtaylor: {err(math_tay)}  Δoriginal: {err(math_orig)}")
+
+def demo():  # pragma: nocover
+    import sys
+    import argparse
+    import periodictable as pt
+
+    # From chatGPT
+    parser = argparse.ArgumentParser(description='Process some data with mass, flux, exposure, and decay options.')
+    parser.add_argument('-m', '--mass', type=float, default=1, help='Specify the mass value (default: 1)')
+    parser.add_argument('-f', '--flux', type=float, default=1e8, help='Specify the flux value (default: 1e8)')
+    parser.add_argument('-e', '--exposure', type=float, default=10, help='Specify the exposure value (default: 10)')
+    parser.add_argument('-d', '--decay', type=float, default=5e-4, help='Specify the decay value (default: 5e-4)')
+    parser.add_argument('--cd-ratio', type=float, default=70, help='Specify the Cd ratio value (default: 70)')
+    parser.add_argument('--fast-ratio', type=float, default=50, help='Specify the fast ratio value (default: 50)')
+
+    parser.add_argument('formula', nargs='?', type=str, default=None, help='Specify the formula as a positional argument')
+    args = parser.parse_args()
+
+    formula = args.formula
+    if formula is None:
+        # Make sure all elements compute
+        #formula = "".join(str(el) for el in pt.elements)[1:]
+        formula = build_formula([(1/el.mass, el) for el in pt.elements][1:])
+        # Use an enormous mass to force significant activation of rare isotopes
+        mass, fluence = 1e15, 1e8
+    env = ActivationEnvironment(fluence=args.flux, Cd_ratio=args.cd_ratio, fast_ratio=args.fast_ratio, location="BT-2")
+    sample = Sample(formula, mass=args.mass)
+    abundance = IAEA1987_isotopic_abundance
+    #abundance=NIST2001_isotopic_abundance,
+    sample.calculate_activation(
+        env, exposure=args.exposure, rest_times=(0, 1, 24, 360),
+        abundance=abundance,
+        )
+    decay_time = sample.decay_time(args.decay)
+    print(f"{args.mass} g {formula} for {args.exposure} hours at {args.flux} n/cm^2/s")
+    print(f"Time to decay to {args.decay} uCi is {decay_time} hours.")
+    sample.calculate_activation(
+        env, exposure=args.exposure, rest_times=(0, 1, 24, 360, decay_time),
+        abundance=abundance,
+        )
+    sample.show_table(cutoff=0.0)
+
+    ## Print a table of flux vs. activity so we can debug the
+    ## precision_correction value in the activity() function.
+    ## Note that you also need to uncomment the print statement
+    ## at the end of activity() that shows the column values.
+    #import numpy as np
+    #sample = Sample('Co', mass=10)
+    #for fluence in np.logspace(3, 20, 20-3+1):
+    #    env = ActivationEnvironment(fluence=fluence)
+    #    sample.calculate_activation(
+    #        env, exposure=exposure, rest_times=[0],
+    #        abundance=IAEA1987_isotopic_abundance)
 
 if __name__ == "__main__":
     #for k in range(-20,3,3): _check_exp_diff(k,10)

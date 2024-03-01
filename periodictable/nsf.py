@@ -1764,7 +1764,7 @@ def energy_dependent_table(table=None):
         if dep:
             print("    " + " ".join(dep))
 
-def _diff(iso, a, b, tol=0.01):
+def _diff(iso, a, b, tol):
     if None in (a, b):
         if a is not None or b is not None:
             if a is None and b > tol:
@@ -1777,7 +1777,9 @@ def _diff(iso, a, b, tol=0.01):
         print("%10s %8.2f %8.2f %5.1f%%"
               % (iso, a, b, (100*(a-b)/b if b != 0 else inf)))
 
-def compare(fn1, fn2, table=None, tol=0.01):
+def compare(fn1, fn2, table=None, tol=None):
+    if tol is None:
+        tol = 0.01
     table = default_table(table)
     for el in table:
         try:

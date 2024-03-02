@@ -528,68 +528,69 @@ def init(table, reload=False):
     # of the cells involved formulas, which need to be reproduced when loading
     # in order to match full double precision values.
     path = os.path.join(core.get_data_path('.'), 'activation.dat')
-    for row in open(path, 'r'):
-        #print(row, end='')
-        columns = row.split('\t')
-        if columns[0].strip() in ('', 'xx'):
-            continue
-        columns = [c[1:-1] if c.startswith('"') else c
-                for c in columns]
-        #print columns
-        for c in INT_COLUMNS:
-            columns[c] = int(columns[c])
-        for c in BOOL_COLUMNS:
-            columns[c] = (columns[c] == 'y')
-        for c in FLOAT_COLUMNS:
-            columns[c] = float(columns[c]) if columns[c].strip() else 0.
-        # clean up comment column
-        columns[-1] = columns[-1].replace('"', '').strip()
-        kw = dict(zip(COLUMN_NAMES, columns))
-        # Recreate Thalf_hrs column using double precision.
-        # Note: spreadsheet is not converting half-life to hours in cell AW1462 (186-W => 188-W)
-        kw['Thalf_hrs'] = float(kw['_Thalf']) * UNITS_TO_HOURS[kw['_Thalf_unit']]
-        # Recreate Thalf_parent by fetching from the new Thalf_hrs
-        # e.g., =IF(OR(AR1408="2n",AR1408="b"),IF(AR1407="b",AW1406,AW1407),"")
-        # This requires that the parent is directly before the 'b' or 'nb'
-        # with its activation list already entered into the isotope.
-        # Note: 150-Nd has 'act' followed by two consecutive 'b' entries.
-        if kw['reaction'] in ('b', '2n'):
-            act = table[kw['Z']][kw['A']].neutron_activation
-            parent = act[-2] if act[-1].reaction == 'b' else act[-1]
-            kw['Thalf_parent'] = parent.Thalf_hrs
-        else:
-            #assert kw['Thalf_parent'] == 0
-            kw['Thalf_parent'] = None
-        # Half-lives use My, Gy, Ty, Py
-        value, units = float(kw['_Thalf']), kw['_Thalf_unit']
-        if units == 'y':
-            if value >= 1e12:
-                value, units = value/1e12, 'Ty'
-            elif value >= 1e9:
-                value, units = value/1e9, 'Gy'
-            elif value >= 200e3: # above 200,000 years use My
-                value, units = value/1e6, 'My'
-            elif value >= 20e3: # between 20,000 and 200,000 use ky
-                value, units = value/1e3, 'ky'
-        formatted = f"{value:g} {units}"
-        #if formatted.replace(' ', '') != kw['Thalf_str'].replace(' ', ''):
-        #    print(f"{kw['_index']}: old {kw['Thalf_str']} != {formatted} new")
-        kw['Thalf_str'] = formatted
+    with open(path, 'r') as fd:
+        for row in fd:
+            #print(row, end='')
+            columns = row.split('\t')
+            if columns[0].strip() in ('', 'xx'):
+                continue
+            columns = [c[1:-1] if c.startswith('"') else c
+                    for c in columns]
+            #print columns
+            for c in INT_COLUMNS:
+                columns[c] = int(columns[c])
+            for c in BOOL_COLUMNS:
+                columns[c] = (columns[c] == 'y')
+            for c in FLOAT_COLUMNS:
+                columns[c] = float(columns[c]) if columns[c].strip() else 0.
+            # clean up comment column
+            columns[-1] = columns[-1].replace('"', '').strip()
+            kw = dict(zip(COLUMN_NAMES, columns))
+            # Recreate Thalf_hrs column using double precision.
+            # Note: spreadsheet is not converting half-life to hours in cell AW1462 (186-W => 188-W)
+            kw['Thalf_hrs'] = float(kw['_Thalf']) * UNITS_TO_HOURS[kw['_Thalf_unit']]
+            # Recreate Thalf_parent by fetching from the new Thalf_hrs
+            # e.g., =IF(OR(AR1408="2n",AR1408="b"),IF(AR1407="b",AW1406,AW1407),"")
+            # This requires that the parent is directly before the 'b' or 'nb'
+            # with its activation list already entered into the isotope.
+            # Note: 150-Nd has 'act' followed by two consecutive 'b' entries.
+            if kw['reaction'] in ('b', '2n'):
+                act = table[kw['Z']][kw['A']].neutron_activation
+                parent = act[-2] if act[-1].reaction == 'b' else act[-1]
+                kw['Thalf_parent'] = parent.Thalf_hrs
+            else:
+                #assert kw['Thalf_parent'] == 0
+                kw['Thalf_parent'] = None
+            # Half-lives use My, Gy, Ty, Py
+            value, units = float(kw['_Thalf']), kw['_Thalf_unit']
+            if units == 'y':
+                if value >= 1e12:
+                    value, units = value/1e12, 'Ty'
+                elif value >= 1e9:
+                    value, units = value/1e9, 'Gy'
+                elif value >= 200e3: # above 200,000 years use My
+                    value, units = value/1e6, 'My'
+                elif value >= 20e3: # between 20,000 and 200,000 use ky
+                    value, units = value/1e3, 'ky'
+            formatted = f"{value:g} {units}"
+            #if formatted.replace(' ', '') != kw['Thalf_str'].replace(' ', ''):
+            #    print(f"{kw['_index']}: old {kw['Thalf_str']} != {formatted} new")
+            kw['Thalf_str'] = formatted
 
-        # Strip columns whose names start with underscore
-        kw = dict((k, v) for k, v in kw.items() if not k.startswith('_'))
+            # Strip columns whose names start with underscore
+            kw = dict((k, v) for k, v in kw.items() if not k.startswith('_'))
 
-        # Create an Activation record and add it to the isotope
-        iso = table[kw['Z']][kw['A']]
-        activation = getattr(iso, 'neutron_activation', [])
-        activation.append(ActivationResult(**kw))
-        iso.neutron_activation = activation
+            # Create an Activation record and add it to the isotope
+            iso = table[kw['Z']][kw['A']]
+            activation = getattr(iso, 'neutron_activation', [])
+            activation.append(ActivationResult(**kw))
+            iso.neutron_activation = activation
 
-        # Check abundance values
-        #if abs(iso.abundance - kw['abundance']) > 0.001*kw['abundance']:
-        #    percent = 100*abs(iso.abundance - kw['abundance'])/kw['abundance']
-        #    print "Abundance of", iso, "is", iso.abundance, \
-        #        "but activation.dat has", kw['abundance'], "(%.1f%%)"%percent
+            # Check abundance values
+            #if abs(iso.abundance - kw['abundance']) > 0.001*kw['abundance']:
+            #    percent = 100*abs(iso.abundance - kw['abundance'])/kw['abundance']
+            #    print "Abundance of", iso, "is", iso.abundance, \
+            #        "but activation.dat has", kw['abundance'], "(%.1f%%)"%percent
 
 class ActivationResult(object):
     def __init__(self, **kw):

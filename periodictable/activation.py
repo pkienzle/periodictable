@@ -214,7 +214,7 @@ class Sample(object):
             el_total = self.activity.get(el, [0]*len(self.rest_times))
             self.activity[el] = [T+v for T, v in zip(el_total, activity_el)]
 
-    def show_table(self, cutoff=0.0001, format="%.4g"):
+    def show_table(self, cutoff=0.0001, format="%.6e"):
         """
         Tabulate the daughter products.
 
@@ -250,8 +250,8 @@ class Sample(object):
         # Print a dashed separator above and below each column
         header = ["isotope", "product", "reaction", "half-life"] \
                  + ["%g hrs"%vi for vi in self.rest_times]
-        separator = ["-"*8, "-"*8, "-"*8, "-"*10] + ["-"*12]*len(self.rest_times)
-        cformat = "%-8s %-8s %8s %10s " + " ".join(["%12s"]*len(self.rest_times))
+        separator = ["-"*8, "-"*9, "-"*8, "-"*10] + ["-"*12]*len(self.rest_times)
+        cformat = "%-8s %-9s %8s %10s " + " ".join(["%12s"]*len(self.rest_times))
 
         width = sum(len(c)+1 for c in separator[4:]) - 1
         if width < 16:
@@ -366,6 +366,7 @@ COLUMN_NAMES = [
 INT_COLUMNS = [1, 2, 4]
 BOOL_COLUMNS = [13]
 FLOAT_COLUMNS = [6, 11, 14, 15, 16, 17, 19, 20, 21]
+UNITS_TO_HOURS = {'y': 8760, 'd': 24, 'h': 1, 'm': 1/60, 's': 1/3600}
 
 def activity(isotope, mass, env, exposure, rest_times):
     """
@@ -460,7 +461,6 @@ def activity(isotope, mass, env, exposure, rest_times):
             # reactions (excluding 'b') is included here.
             # See README file for details.
 
-            # Column P: effective cross-section 2n product and n, g burnup (b)
             # Note: This cross-section always uses the total thermal flux
             effectiveXS = ai.thermalXS_parent + env.epithermal_reduction_factor*ai.resonance_parent
             # Column U: nv1s1t
@@ -469,24 +469,26 @@ def activity(isotope, mass, env, exposure, rest_times):
             V = (env.fluence*effectiveXS*3600*1e-24+lam)*exposure
             # Column W: L/(L-nvs1+nvs2)
             W = lam/(lam-flux*initialXS*3600*1e-24+env.fluence*effectiveXS*3600*1e-24)
-            # Column X: V#*[e(-S#)-e(U#)]
+            # Column X: W*(exp(-U)-exp(V)) if U,V > 1e-10 else W*(V-U+(V-U)*(V+U)/2)
             # [PAK 2024-02-28] Rewrite the precision correction using the
             # high accuracy expm1() function to avoid cancellation.
             # See _check_exp_diff() below for verification.
-            precision_correction = W*exp(-V)*expm1(V-U) if U>V else -W*exp(-U)*expm1(U-V)
-            activity = root*precision_correction
+            X = W*exp(-V)*expm1(V-U) if U>V else -W*exp(-U)*expm1(U-V)
+            # Column Y: O if "b" else T if "2n" else L*X
+            activity = root*X
+            #print(f"{ai.isotope}=>{ai.daughter} {U=} {V=} {W=} {X=} {activity=}")
 
             # Check the effects of changing the formula. To look at all elements
             # at once, enable the following and use:
             #    $ python -m periodictable.activation -m 1000 -f 1e8 -e 1000
             if 0:
                 if abs(U) < 1e-10 and abs(V) < 1e-10:
-                    precision_correction = W * (V-U+(V+U)/2)
+                    X = W * (V-U+(V+U)/2)
                     trigger = '*'
                 else:
-                    precision_correction = exp(-U) - exp(-V)
+                    X = exp(-U) - exp(-V)
                     trigger = ''
-                delta = activity - root*precision_correction
+                delta = activity - root*X
                 if activity > 0 and delta/activity > 1e-4:
                     print(f"{trigger}activity change {delta:10.4e} from {activity:10.4e} ({100*delta/activity:.2f}%) for {ai.isotope} => {ai.daughter} ({ai.reaction})")
 
@@ -509,6 +511,7 @@ def init(table, reload=False):
     """
     Add neutron activation levels to each isotope.
     """
+    from math import floor
     if 'neutron_activation' in table.properties and not reload:
         return
     table.properties.append('neutron_activation')
@@ -519,13 +522,19 @@ def init(table, reload=False):
             if hasattr(el[iso], 'neutron_activation'):
                 del el[iso].neutron_activation
 
+    # We are keeping the table as a simple export of the activation data
+    # from the ncnr health physics excel spreadsheet so that it is easier
+    # to validate that the table contains the same data. Unfortunately some
+    # of the cells involved formulas, which need to be reproduced when loading
+    # in order to match full double precision values.
     path = os.path.join(core.get_data_path('.'), 'activation.dat')
     for row in open(path, 'r'):
+        #print(row, end='')
         columns = row.split('\t')
         if columns[0].strip() in ('', 'xx'):
             continue
         columns = [c[1:-1] if c.startswith('"') else c
-                   for c in columns]
+                for c in columns]
         #print columns
         for c in INT_COLUMNS:
             columns[c] = int(columns[c])
@@ -536,7 +545,36 @@ def init(table, reload=False):
         # clean up comment column
         columns[-1] = columns[-1].replace('"', '').strip()
         kw = dict(zip(COLUMN_NAMES, columns))
-        kw['Thalf_str'] = " ".join((kw['_Thalf'], kw['_Thalf_unit']))
+        # Recreate Thalf_hrs column using double precision.
+        # Note: spreadsheet is not converting half-life to hours in cell AW1462 (186-W => 188-W)
+        kw['Thalf_hrs'] = float(kw['_Thalf']) * UNITS_TO_HOURS[kw['_Thalf_unit']]
+        # Recreate Thalf_parent by fetching from the new Thalf_hrs
+        # e.g., =IF(OR(AR1408="2n",AR1408="b"),IF(AR1407="b",AW1406,AW1407),"")
+        # This requires that the parent is directly before the 'b' or 'nb'
+        # with its activation list already entered into the isotope.
+        # Note: 150-Nd has 'act' followed by two consecutive 'b' entries.
+        if kw['reaction'] in ('b', '2n'):
+            act = table[kw['Z']][kw['A']].neutron_activation
+            parent = act[-2] if act[-1].reaction == 'b' else act[-1]
+            kw['Thalf_parent'] = parent.Thalf_hrs
+        else:
+            #assert kw['Thalf_parent'] == 0
+            kw['Thalf_parent'] = None
+        # Half-lives use My, Gy, Ty, Py
+        value, units = float(kw['_Thalf']), kw['_Thalf_unit']
+        if units == 'y':
+            if value >= 1e12:
+                value, units = value/1e12, 'Ty'
+            elif value >= 1e9:
+                value, units = value/1e9, 'Gy'
+            elif value >= 200e3: # above 200,000 years use My
+                value, units = value/1e6, 'My'
+            elif value >= 20e3: # between 20,000 and 200,000 use ky
+                value, units = value/1e3, 'ky'
+        formatted = f"{value:g} {units}"
+        #if formatted.replace(' ', '') != kw['Thalf_str'].replace(' ', ''):
+        #    print(f"{kw['_index']}: old {kw['Thalf_str']} != {formatted} new")
+        kw['Thalf_str'] = formatted
 
         # Strip columns whose names start with underscore
         kw = dict((k, v) for k, v in kw.items() if not k.startswith('_'))

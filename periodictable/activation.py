@@ -38,14 +38,14 @@ Example::
     >>> sample = activation.Sample("Co30Fe70", 10)
     >>> sample.calculate_activation(env, exposure=10, rest_times=[0, 1, 24, 360])
     >>> sample.show_table()
-                                          ----------------- activity (uCi) ------------------
-    isotope  product  reaction  half-life        0 hrs        1 hrs       24 hrs      360 hrs
-    -------- -------- -------- ---------- ------------ ------------ ------------ ------------
-    Co-59    Co-60         act    5.272 y     0.000496     0.000496    0.0004958    0.0004933
-    Co-59    Co-60m+       act     10.5 m        1.664       0.0317          ---          ---
-    -------- -------- -------- ---------- ------------ ------------ ------------ ------------
-                                    total        1.665      0.03221    0.0005084     0.000505
-    -------- -------- -------- ---------- ------------ ------------ ------------ ------------
+                                           ----------------- activity (uCi) ------------------
+    isotope  product   reaction  half-life        0 hrs        1 hrs       24 hrs      360 hrs
+    -------- --------- -------- ---------- ------------ ------------ ------------ ------------
+    Co-59    Co-60          act    5.272 y    0.0004959    0.0004959    0.0004958    0.0004933
+    Co-59    Co-60m+        act     10.5 m        1.664      0.03169          ---          ---
+    -------- --------- -------- ---------- ------------ ------------ ------------ ------------
+                                     total        1.664       0.0322    0.0005084    0.0005049
+    -------- --------- -------- ---------- ------------ ------------ ------------ ------------
 
     >>> print("%.3f"%sample.decay_time(0.001)) # number of hours to reach 1 nCi
     2.053
@@ -214,7 +214,7 @@ class Sample(object):
             el_total = self.activity.get(el, [0]*len(self.rest_times))
             self.activity[el] = [T+v for T, v in zip(el_total, activity_el)]
 
-    def show_table(self, cutoff=0.0001, format="%.6e"):
+    def show_table(self, cutoff=0.0001, format="%.4g"):
         """
         Tabulate the daughter products.
 
@@ -370,8 +370,54 @@ UNITS_TO_HOURS = {'y': 8760, 'd': 24, 'h': 1, 'm': 1/60, 's': 1/3600}
 
 def activity(isotope, mass, env, exposure, rest_times):
     """
-    Compute isotope specific daughter products after the given exposure time and rest period.
+    Compute isotope specific daughter products after the given exposure time and
+    rest period.
+
+    Activations are listed in *isotope.neutron_activation*. Most of the
+    activations (n,g n,p n,a n,2n) define a single step process, where a neutron
+    is absorbed yielding the daughter and some prompt radiation. The daughter
+    itself will decay during exposure, yielding a balance between production and
+    emission. Any exposure beyound about eight halflives will not increase
+    activity for that product.
+
+    Activity for daughter products may undergo further neutron capture, reducing
+    the activity of the daughter product but introducing a grand daughter with
+    its own activity.
+
+    The data tables for activation are only precise to about three significant
+    figures. Any changes to the calculations below this threshold, e.g., due to
+    slightly different mass or abundance, are therefore of little concern.
+
+    Differences in formulas compare to the NCNR activation spreadsheet:
+
+    * Column M: Use ln(2) rather than 0.693
+    * Column N: Use ln(2) rather than 0.693
+    * Column O: Rewrite to use expm1(x) = exp(x) - 1::
+        = L (1 - exp(-M Y43)/(1-(M/N) ) + exp(-N Y43)/((N/M)-1) )
+        = L (1 - N exp(-M Y43)/(N-M) + M exp(-N Y43)/(N-M) )
+        = L/(N-M) ( (N-M) - N exp(-M Y43) + M exp(-N Y43) )
+        = L/(N-M) ( N(1 - exp(-M Y43)) + M (exp(-N Y43) - 1) )
+        = L/(N-M) ( -N expm1(-M Y43) + M expm1(-N) )
+        = L/(N-M) (M expm1(-N Y43) - N expm1(-M Y43))
+    * Column X: Rewrite to use expm1(x) = exp(x) - 1::
+        = W ((|U|<1e-10 and |V|<1e-10) ? (V-U + (V-U)(V+U)/2) : (exp(-U)-exp(-V)))
+        = W (exp(-U) - exp(-V))
+        = W exp(-V) (exp(V-U) - 1) = W exp(-U) (1 - exp(U-V))
+        = W exp(-V) expm1(V-U) = -W exp(-U) expm1(U-V)
+        = (U > V) ? (W exp(-V) expm1(V-U)) : (-W exp(-U) expm1(U-V))
+
+    Differences in the data tables:
+
+    * AW1462 (W-186 => W-188 2n) t1/2 in hrs is not converting days to hours
+    * AK1495 (Au-198 => Au-199 2n) target should be Au-197
+    * AN1428 (Tm-169 => Tm-171 2n) t1/2 updated to Tm-171 rather than Tm-172
+    * AN1420 (Er-162 => Ho-163 b) t1/2 updated to 4570 y from 10 y
     """
+    # TODO: is the table missing 1-H => 3-H ?
+    # 0nly activations which produce radioactive daughter products are
+    # included. Because 1-H => 2-H (act) is not in the table, is this why
+    # there is no entry for 1-H => 3-H (2n).
+
     result = {}
     if not hasattr(isotope, 'neutron_activation'):
         return result
@@ -389,17 +435,24 @@ def activity(isotope, mass, env, exposure, rest_times):
         # Column G: Half-life
         #    ai.Thalf_str
         # Column H: initial effective cross-section (b)
+        #    env.epithermal_reduction_factor:$Q$1 = 1/env.Cd_ratio:$F$15
         initialXS = ai.thermalXS + env.epithermal_reduction_factor*ai.resonance
         # Column I: reaction
         #    ai.reaction
         # Column J: fast?
         #    ai.fast
         # Column K: effective reaction flux (n/cm^2/s)
+        #    env.fluence:$F$13  env.fast_ratio:$F$17
         flux = env.fluence/env.fast_ratio if ai.fast else env.fluence
         # Column L: root part of activation calculation
-        # Decay correction portion done in column M
-        # The given mass is sample mass * sample fraction * isotope abundance
-        root = flux * initialXS * 1e-24 * mass / isotope.isotope * 1.6278e19
+        #    mass:$F$19
+        #    Decay correction portion done in column M
+        #    The given mass is sample mass * sample fraction * isotope abundance
+        #    The constant converts from Bq to uCi via avogadro's number with
+        #        N_A[atoms] / 3.7e10[Bq/Ci] * 1e6 [uCi/Ci] ~ 1.627605611e19
+        Bq_to_uCi = 1.6276e19
+        #Bq_to_uCi = constants.avogadro_number / 3.7e4
+        root = flux * initialXS * 1e-24 * mass / isotope.isotope * Bq_to_uCi
         # Column M: 0.69/t1/2  (1/h) lambda of produced nuclide
         lam = LN2/ai.Thalf_hrs
         #print(ai.thermalXS, ai.resonance, env.epithermal_reduction_factor)
@@ -461,6 +514,7 @@ def activity(isotope, mass, env, exposure, rest_times):
             # reactions (excluding 'b') is included here.
             # See README file for details.
 
+            # Column P: effective cross-section 2n product and n, g burnup (b)
             # Note: This cross-section always uses the total thermal flux
             effectiveXS = ai.thermalXS_parent + env.epithermal_reduction_factor*ai.resonance_parent
             # Column U: nv1s1t
@@ -512,21 +566,24 @@ def init(table, reload=False):
     Add neutron activation levels to each isotope.
     """
     from math import floor
-    if 'neutron_activation' in table.properties and not reload:
+    # TODO: importlib.reload does not work for iso.neutron_activation attribute
+    if 'neutron_activation' not in table.properties:
+        table.properties.append('neutron_activation')
+    elif not reload:
         return
-    table.properties.append('neutron_activation')
-
-    # Clear the existing activation table
-    for el in table:
-        for iso in el.isotopes:
-            if hasattr(el[iso], 'neutron_activation'):
-                del el[iso].neutron_activation
+    else:
+        # Reloading activation table so clear the existing data.
+        for el in table:
+            for iso in el.isotopes:
+                if hasattr(el[iso], 'neutron_activation'):
+                    del el[iso].neutron_activation
 
     # We are keeping the table as a simple export of the activation data
     # from the ncnr health physics excel spreadsheet so that it is easier
     # to validate that the table contains the same data. Unfortunately some
     # of the cells involved formulas, which need to be reproduced when loading
     # in order to match full double precision values.
+    activations = {}
     path = os.path.join(core.get_data_path('.'), 'activation.dat')
     with open(path, 'r') as fd:
         for row in fd:
@@ -542,20 +599,35 @@ def init(table, reload=False):
             for c in BOOL_COLUMNS:
                 columns[c] = (columns[c] == 'y')
             for c in FLOAT_COLUMNS:
-                columns[c] = float(columns[c]) if columns[c].strip() else 0.
+                s = columns[c].strip()
+                columns[c] = float(s) if s else 0.
             # clean up comment column
             columns[-1] = columns[-1].replace('"', '').strip()
             kw = dict(zip(COLUMN_NAMES, columns))
+            iso = (kw['Z'], kw['A'])
+            act = activations.setdefault(iso, [])
+
+            # TODO: use NuBase2020 for halflife
+            # NuBase2020 uses different isomer labels.
+            # Strip the (+, *, s, t) tags
+            # Convert m1/m2 to m/n for
+            #   In-114 In-116 Sb-124 Eu-152 Hf-179 Ir-192
+            # Convert Eu-152m2 to Eu-152r
+            # Convert m to n for
+            #   Sc-46m Ge-73m Kr-83m Pd-107m Pd-109m Ag-110m Ta-182m Ir-194m Pb-204m
+            # Convert m to p for
+            #   Sb-122m Lu-177m
+
             # Recreate Thalf_hrs column using double precision.
             # Note: spreadsheet is not converting half-life to hours in cell AW1462 (186-W => 188-W)
             kw['Thalf_hrs'] = float(kw['_Thalf']) * UNITS_TO_HOURS[kw['_Thalf_unit']]
+            #print(f"T1/2 {kw['Thalf_hrs']} +/- {kw['Thalf_hrs_unc']}")
             # Recreate Thalf_parent by fetching from the new Thalf_hrs
             # e.g., =IF(OR(AR1408="2n",AR1408="b"),IF(AR1407="b",AW1406,AW1407),"")
             # This requires that the parent is directly before the 'b' or 'nb'
             # with its activation list already entered into the isotope.
             # Note: 150-Nd has 'act' followed by two consecutive 'b' entries.
             if kw['reaction'] in ('b', '2n'):
-                act = table[kw['Z']][kw['A']].neutron_activation
                 parent = act[-2] if act[-1].reaction == 'b' else act[-1]
                 kw['Thalf_parent'] = parent.Thalf_hrs
             else:
@@ -581,16 +653,17 @@ def init(table, reload=False):
             kw = dict((k, v) for k, v in kw.items() if not k.startswith('_'))
 
             # Create an Activation record and add it to the isotope
-            iso = table[kw['Z']][kw['A']]
-            activation = getattr(iso, 'neutron_activation', [])
-            activation.append(ActivationResult(**kw))
-            iso.neutron_activation = activation
+            act.append(ActivationResult(**kw))
 
             # Check abundance values
             #if abs(iso.abundance - kw['abundance']) > 0.001*kw['abundance']:
             #    percent = 100*abs(iso.abundance - kw['abundance'])/kw['abundance']
             #    print "Abundance of", iso, "is", iso.abundance, \
             #        "but activation.dat has", kw['abundance'], "(%.1f%%)"%percent
+
+    # Plug the activation products into the table
+    for (Z, A), daughters in activations.items():
+        table[Z][A].neutron_activation = tuple(daughters)
 
 class ActivationResult(object):
     def __init__(self, **kw):
@@ -655,7 +728,6 @@ def demo():  # pragma: nocover
     import argparse
     import periodictable as pt
 
-    # From chatGPT
     parser = argparse.ArgumentParser(description='Process some data with mass, flux, exposure, and decay options.')
     parser.add_argument('-m', '--mass', type=float, default=1, help='Specify the mass value (default: 1)')
     parser.add_argument('-f', '--flux', type=float, default=1e8, help='Specify the flux value (default: 1e8)')

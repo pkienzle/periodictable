@@ -524,27 +524,11 @@ def activity(isotope, mass, env, exposure, rest_times):
             # Column W: L/(L-nvs1+nvs2)
             W = lam/(lam-flux*initialXS*3600*1e-24+env.fluence*effectiveXS*3600*1e-24)
             # Column X: W*(exp(-U)-exp(V)) if U,V > 1e-10 else W*(V-U+(V-U)*(V+U)/2)
-            # [PAK 2024-02-28] Rewrite the precision correction using the
-            # high accuracy expm1() function to avoid cancellation.
-            # See _check_exp_diff() below for verification.
+            # [PAK 2024-02-28] Rewrite the exponential difference using expm1()
             X = W*exp(-V)*expm1(V-U) if U>V else -W*exp(-U)*expm1(U-V)
             # Column Y: O if "b" else T if "2n" else L*X
             activity = root*X
             #print(f"{ai.isotope}=>{ai.daughter} {U=} {V=} {W=} {X=} {activity=}")
-
-            # Check the effects of changing the formula. To look at all elements
-            # at once, enable the following and use:
-            #    $ python -m periodictable.activation -m 1000 -f 1e8 -e 1000
-            if 0:
-                if abs(U) < 1e-10 and abs(V) < 1e-10:
-                    X = W * (V-U+(V+U)/2)
-                    trigger = '*'
-                else:
-                    X = exp(-U) - exp(-V)
-                    trigger = ''
-                delta = activity - root*X
-                if activity > 0 and delta/activity > 1e-4:
-                    print(f"{trigger}activity change {delta:10.4e} from {activity:10.4e} ({100*delta/activity:.2f}%) for {ai.isotope} => {ai.daughter} ({ai.reaction})")
 
             if activity < 0:
                 msg = "activity %g less than zero for %g"%(activity, isotope)
@@ -672,57 +656,6 @@ class ActivationResult(object):
         return str(self.__dict__)
 
 
-def _check_exp_diff(p, delta):
-    """
-    Compare methods for computing exp(-U) - exp(-V).
-
-    The output shows error relative as log10(|(f - m)/m|) where 
-    m is computed with 500 bits of precision:
-
-    * Δexp uses exp(-V) - exp(-U)
-    * Δexpm1 uses exp(-V)*expm1(V-U)
-    * Δtaylor uses (V-U) + (U**2-V**2)/2 = (V-U)*(1-(V+U)/2)
-    * Δoriginal uses (V-U) + (V+U)/2
-
-    Call with (p, δ) such that U = 10**p, V = 10**p + 10**(p-δ). That is,
-    *p* gives the order of magnitude of the function and *delta* gives the
-    relative magnitude of the difference. For example, (-3,2)=>(0.001,0.00101)
-
-    Try with::
-
-        for k in range(-20,3,3): _check_exp_diff(k,8)
-
-    The spreadsheet uses the original expression when U, V are less than 1e-10
-    but the approximation is poor even in that region.
-
-    The Δexpm1 is strictly better than the direct calculatio almost everywhere.
-    Where it is worse it is only slightly worse, and the calculated activity
-    is small. It is at least as good as the Taylor approximation everywhere.
-
-    The expm1 form gives us at least 0.1% precision relative to the high
-    accuracy calculation. This occurs when U,V differ in the final digit
-    of a double precision number. When U,V differ in the 10th digit we
-    get 6-7 digits of precision. If they differ in the 3rd digit we get the
-    full precision for floating point double values. The precision is roughly
-    constant across the domain.
-    """
-    import mpmath as mp
-    import math
-    with mp.workprec(500):
-        mp_x, mp_y = mp.mpf(10)**p, mp.mpf(10)**p + mp.mpf(10)**(p-delta)
-        mp_diff = mp.exp(-mp_x) - mp.exp(-mp_y)
-        #print(f"{mp_x} {mp_y} {mp_diff}")
-    math_x, math_y = 10**p, 10**p + 10**(p-delta)
-    #print(f"{math_y}-{math_x}={math_y - math_x}")
-    math_diff = math.exp(-math_x) - math.exp(-math_y)
-    math_alt = math.exp(-math_y)*math.expm1(math_y-math_x)
-    math_orig = math_y-math_x + (math_y+math_x)/2
-    math_tay = math_y-math_x + (math_x**2-math_y**2)/2
-    math_tay = (math_y-math_x)*(1 - (math_x+math_y)/2)
-    def err(v): return f"{math.log10(float(abs((v-mp_diff)/mp_diff))):4.1f}"
-    #print(f"mp:{mp_diff}  direct:{math_diff}  alt:{math_alt}  taylor:{math_tay}")
-    print(f"U:1e{p:<3d} mp: {mp.nstr(mp_diff,10):15s}  Δexp: {err(math_diff)}  Δexpm1: {err(math_alt)}  Δtaylor: {err(math_tay)}  Δoriginal: {err(math_orig)}")
-
 def demo():  # pragma: nocover
     import sys
     import argparse
@@ -776,5 +709,4 @@ def demo():  # pragma: nocover
     #        abundance=IAEA1987_isotopic_abundance)
 
 if __name__ == "__main__":
-    #for k in range(-20,3,3): _check_exp_diff(k,10)
     demo()  # pragma: nocover

@@ -73,6 +73,23 @@ Known issues
 Change history
 ==============
 
+1.7.0 2024-03-11
+----------------
+
+Modified:
+
+* Use wt% and vol% for mixtures. The non-standard %wt and %vol are still
+  supported, but may be removed in a future version if they cause ambiguity
+  in the parser.
+* Support mixtures containing FASTA components such as dna:CGCTAATC
+* Improve FASTA calculations by adding H+OH to sequences and removing Na from
+  the DNA/RNA residues. Use a different reference for residue volumes.
+* Use correct halflife for Tm-171, Ho-163 and W-188 activation products.
+* Support unicode subscripts in chemical formula inputs.
+* Fix decay time estimation routine.
+* Tested on Python 3.8 and above. Support for python 2.7 dropped.
+* Remove eval() from codebase.
+
 1.6.1 2022-05-18
 ----------------
 

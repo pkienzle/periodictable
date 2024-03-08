@@ -82,8 +82,9 @@ Modified:
   supported, but may be removed in a future version if they cause ambiguity
   in the parser.
 * Support mixtures containing FASTA components such as dna:CGCTAATC
-* Improve FASTA calculations by adding H+OH to sequences and removing Na from
-  the DNA/RNA residues. Use a different reference for residue volumes.
+* Fasta calculations for formula, density and sld have changed. DNA/RNA now
+  use Buckin (1989) for unit volumes. DNA/RNA no longer include sodium ions
+  from tables in Perkins (1988). Sequences now include  H+ and OH- terminators.
 * Use correct halflife for Tm-171, Ho-163 and W-188 activation products.
 * Support unicode subscripts in chemical formula inputs.
 * Fix decay time estimation routine.

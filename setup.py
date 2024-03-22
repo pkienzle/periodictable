@@ -2,7 +2,7 @@
 import sys
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 ROOT = os.path.join(os.path.dirname(__file__))
 
@@ -38,7 +38,7 @@ setup(
         'Topic :: Scientific/Engineering :: Chemistry',
         'Topic :: Scientific/Engineering :: Physics',
         ],
-    packages=find_packages(),
+    packages=['periodictable'],
     include_package_data=True,
     package_data={
         # NOTE: be sure to include files in MANIFEST.in as well

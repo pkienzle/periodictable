@@ -1018,6 +1018,17 @@ def _convert_to_hill_notation(atoms):
     #return [(atoms[el], el) for el in sorted(atoms.keys(), cmp=_hill_compare)]
     return [(atoms[el], el) for el in sorted(atoms.keys(), key=_hill_key)]
 
+def _str_one_atom(fragment):
+    # Normal isotope string form is #-Yy, but we want Yy[#]
+    if isisotope(fragment) and 'symbol' not in fragment.__dict__:
+        ret = "%s[%d]"%(fragment.symbol, fragment.isotope)
+    else:
+        ret = fragment.symbol
+    if fragment.charge != 0:
+        sign = '+' if fragment.charge > 0 else '-'
+        value = str(abs(fragment.charge)) if abs(fragment.charge) > 1 else ''
+        ret += '{'+value+sign+'}'
+    return ret
 
 def _str_atoms(seq):
     """
@@ -1027,15 +1038,7 @@ def _str_atoms(seq):
     ret = ""
     for count, fragment in seq:
         if isatom(fragment):
-            # Normal isotope string form is #-Yy, but we want Yy[#]
-            if isisotope(fragment) and 'symbol' not in fragment.__dict__:
-                ret += "%s[%d]"%(fragment.symbol, fragment.isotope)
-            else:
-                ret += fragment.symbol
-            if fragment.charge != 0:
-                sign = '+' if fragment.charge > 0 else '-'
-                value = str(abs(fragment.charge)) if abs(fragment.charge) > 1 else ''
-                ret += '{'+value+sign+'}'
+            ret += _str_one_atom(fragment)
             if count != 1:
                 ret += "%g"%count
         else:
@@ -1108,7 +1111,7 @@ def unicode_superscript(value):
     }
     return ''.join(superscript_codepoints.get(char, char) for char in str(value))
 
-SUPERSCRIPT = {
+SUBSCRIPT = {
     # The latex renderer should work for github style markdown
     'latex': lambda text: f'$_{{{text}}}$',
     'html': lambda text: f'<sub>{text}</sub>',
@@ -1123,7 +1126,7 @@ def pretty(compound, mode='unicode'):
 
     Use *pretty(compound.hill)* for a more compact representation.
     """
-    return _pretty(compound.structure, SUPERSCRIPT[mode])
+    return _pretty(compound.structure, SUBSCRIPT[mode])
 
 def _pretty(structure, subscript):
     # TODO: if superscript is not None then render O[16] as {}^{16}O
@@ -1135,9 +1138,9 @@ def _pretty(structure, subscript):
             else:
                 parts.append(f'({_pretty(part, subscript)}){subscript(count)}')
         elif count == 1:
-            parts.append(f'{part}')
+            parts.append(f'{_str_one_atom(part)}')
         else:
-            parts.append(f'{part}{subscript(count)}')
+            parts.append(f'{_str_one_atom(part)}{subscript(count)}')
     return ''.join(parts)
 
 
@@ -1148,6 +1151,10 @@ def demo():
         print(f"Missing density for {pretty(compound.hill)}")
     else:
         print(f"{pretty(compound.hill)}@{compound.density:.3f} sld={compound.neutron_sld()}")
+        #print(pretty(compound.hill, 'latex'))
+        #print(pretty(compound.hill, 'html'))
+        #print(pretty(compound.hill, 'unicode'))
+        #print(pretty(compound.hill, 'plain'))
 
 if __name__ == "__main__":
     demo()

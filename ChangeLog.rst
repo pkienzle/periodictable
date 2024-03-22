@@ -17,20 +17,23 @@ Known issues
 Change history
 ==============
 
-2024-03-11 R1.7.0
+2024-03-22 R1.7.0
 -----------------
 
-Modified:
+New:
 
 * Use wt% and vol% for mixtures. The non-standard %wt and %vol are still
   supported, but may be removed in a future version if they cause ambiguity
   in the parser.
 * Support mixtures containing FASTA components such as dna:CGCTAATC
+* Support unicode subscripts in chemical formula input.
+
+Modified:
+
 * Fasta calculations for formula, density and sld have changed. DNA/RNA now
   use Buckin (1989) for unit volumes. DNA/RNA no longer include sodium ions
   from tables in Perkins (1988). Sequences now include  H+ and OH- terminators.
 * Use correct halflife for Tm-171, Ho-163 and W-188 activation products.
-* Support unicode subscripts in chemical formula input.
 * Fix decay time estimation routine.
 * Tested on Python 3.8 and above. Support for python 2.7 dropped.
 * Remove eval() from codebase.

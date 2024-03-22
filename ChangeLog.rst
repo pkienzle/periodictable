@@ -17,8 +17,8 @@ Known issues
 Change history
 ==============
 
-1.7.0 2024-03-11
-----------------
+2024-03-11 R1.7.0
+-----------------
 
 Modified:
 
@@ -35,8 +35,8 @@ Modified:
 * Tested on Python 3.8 and above. Support for python 2.7 dropped.
 * Remove eval() from codebase.
 
-1.6.1 2022-05-18
-----------------
+2022-05-18 R1.6.1
+-----------------
 
 Modified:
 
@@ -44,8 +44,8 @@ Modified:
   activation.
 * Calculate b mode activation correctly for Eu[151] => Gd[152]
 
-1.6.0 2021-04-21
-----------------
+2021-04-21 R1.6.0
+-----------------
 
 New:
 
@@ -64,8 +64,8 @@ Breaking changes:
   even for energy independent elements. Previous versions returned a scalar
   if the returned value was identical for each wavelength.
 
-1.5.3 2020-11-04
-----------------
+2020-11-04 R1.5.3
+-----------------
 
 Breaking changes:
 
@@ -94,8 +94,8 @@ Modified:
 * Switch unit test framework from nose to pytest.
 * Update docs.
 
-1.5.2 2019-11-19
-----------------
+2019-11-19 R1.5.2
+-----------------
 
 Modified:
 
@@ -106,8 +106,8 @@ Modified:
   Neutron Data Booklet, which cites CRC as the primary source.
 * Updated references.
 
-1.5.1 2019-09-09
-----------------
+2019-09-09 R1.5.1
+-----------------
 
 Modified:
 
@@ -116,8 +116,8 @@ Modified:
 * remove half-life units from column header in activation table since
   each row gives its own units.
 
-1.5.0 2017-05-11
-----------------
+2017-05-11 R1.5.0
+-----------------
 
 New:
 
@@ -131,36 +131,35 @@ Modified:
 * fixed computation of incoherent cross section so it is consistent with
   coherent cross section and total cross section
 
-
-1.4.1 2014-02-04
-----------------
+2014-02-04 R1.4.1
+-----------------
 
 Modified:
 
 * default density is now the isotopic density rather than the natural density
 
-1.4.0 2013-12-20
-----------------
+2013-12-20 v1.4.0
+-----------------
 
 * support python 3.3
 
-1.3.10 2013-10-25
------------------
+2013-10-25 R1.3.10
+------------------
 
 Modified:
 
 * fix activation calculation to ignore fast neutrons in thermal environment
 * add emission spectra for remaining elements above neon
 
-1.3.9 2013-04-23
-----------------
+2013-04-23 R1.3.9
+-----------------
 
 Modified:
 
 * Update requirements to pyparsing<2.0.0 (we don't support python 3 yet)
 
-1.3.8 2013-04-08
-----------------
+2013-04-08 R1.3.8
+-----------------
 
 New:
 
@@ -171,8 +170,8 @@ Modified:
 * py2exe/py2app wrapping now includes missing activation.dat
 * skipping bad 1.3.7 build which didn't include all changes
 
-1.3.6 2013-03-05
-----------------
+2013-03-05 R1.3.6
+-----------------
 
 New:
 
@@ -186,8 +185,8 @@ Modified:
   cross section.  Penetration depth of the unscattered beam still uses
   the total cross section plus the absorption cross section.
 
-1.3.5 2013-02-26
-----------------
+2013-02-26 R1.3.5
+-----------------
 
 New:
 
@@ -206,7 +205,7 @@ Modified:
 * fix element.interatomic_distance
 * formula(value=...) -> formula(compound=...)
 
-1.3  2010-12-05
+2010-12-05 R1.3
 ---------------
 
 New:
@@ -220,7 +219,7 @@ Modified:
 * need wavelength= or energy= for xray/neutron sld
 * improved docs and testing
 
-1.2  2010-04-28
+2010-04-28 R1.2
 ---------------
 
 New:
@@ -241,7 +240,7 @@ Modified:
 * bug fix: sld for H[2] was wrong when queried before sld for H.
 * remove CrysFML ionic radius definitions
 
-1.1  2009-01-20
+2009-01-20 R1.1
 ---------------
 
 Modified:

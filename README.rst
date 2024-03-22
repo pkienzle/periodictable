@@ -40,7 +40,9 @@ Source links:
 * https://github.com/pkienzle/periodictable
 * https://github.com/scattering/activation
 
-|CI| |RTD| |DOI|
+.. only:: html
+
+  |CI| |RTD| |DOI|
 
 .. |CI| image:: https://github.com/pkienzle/periodictable/workflows/Test/badge.svg
    :alt: Build status

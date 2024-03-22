@@ -400,7 +400,7 @@ def activity(isotope, mass, env, exposure, rest_times):
         = L/(N-M) ( -N expm1(-M Y43) + M expm1(-N) )
         = L/(N-M) (M expm1(-N Y43) - N expm1(-M Y43))
     * Column X: Rewrite to use expm1(x) = exp(x) - 1::
-        = W ((|U|<1e-10 and |V|<1e-10) ? (V-U + (V-U)(V+U)/2) : (exp(-U)-exp(-V)))
+        = W ((abs(U)<1e-10 and abs(V)<1e-10) ? (V-U + (V-U)(V+U)/2) : (exp(-U)-exp(-V)))
         = W (exp(-U) - exp(-V))
         = W exp(-V) (exp(V-U) - 1) = W exp(-U) (1 - exp(U-V))
         = W exp(-V) expm1(V-U) = -W exp(-U) expm1(U-V)

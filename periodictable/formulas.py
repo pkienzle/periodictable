@@ -1121,7 +1121,7 @@ SUBSCRIPT = {
 def pretty(compound, mode='unicode'):
     """
     Convert the formula to a string. The *mode* can be 'unicode', 'html' or
-    'latex' depending on how subscripts should be rendered. If *mode*='plain'
+    'latex' depending on how subscripts should be rendered. If *mode* is 'plain'
     then don't use subscripts for the element quantities.
 
     Use *pretty(compound.hill)* for a more compact representation.

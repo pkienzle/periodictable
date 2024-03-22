@@ -68,6 +68,17 @@ A formula string is translated into a formula using
     >>> print(formula("CaCO3+(3HO1.5)2"))
     CaCO3((HO1.5)3)2
 
+* Unicode subscripts can be used for counts, with the usual decimal point:
+
+    >>> print(formula("CaCO₃+(3HO₁.₅)₂"))
+    CaCO3((HO1.5)3)2
+
+* Print formulas with unicode using the pretty() function:
+
+    >>> from periodictable.formulas import pretty
+    >>> print(pretty(formula("CaCO3+(3HO1.5)2")))
+    CaCO₃((HO₁.₅)₃)₂
+
 * Formula density can be specified using the special '@' tag:
 
     >>> print(formula("NaCl@2.16").density)
@@ -91,17 +102,17 @@ A formula string is translated into a formula using
     >>> print("%.3f"%formula("2D2O + H2O@1n").density)
     1.074
 
-* Mass fractions use %wt, with the final portion adding to 100%:
+* Mass fractions use wt%, with the final portion adding to 100%:
 
-    >>> print(formula("10%wt Fe // 15% Co // Ni"))
+    >>> print(formula("10wt% Fe // 15% Co // Ni"))
     FeCo1.4214Ni7.13602
 
   Only the first item needs to specify that it is a mass fraction,
   and the remainder can use a bare %.
 
-* Volume fractions use %vol, with the final portion adding to 100%:
+* Volume fractions use vol%, with the final portion adding to 100%:
 
-    >>> print(formula("10%vol Fe // Ni"))
+    >>> print(formula("10vol% Fe // Ni"))
     FeNi9.68121
 
   Only the first item needs to specify that it is a volume fraction, and
@@ -134,7 +145,7 @@ A formula string is translated into a formula using
 * Mixtures can nest.  The following is a 10% salt solution by weight mixed
   20:80 by volume with D2O:
 
-    >>> print(formula("20%vol (10%wt NaCl@2.16 // H2O@1) // D2O@1n"))
+    >>> print(formula("20vol% (10 wt% NaCl@2.16 // H2O@1) // D2O@1n"))
     NaCl(H2O)29.1966(D2O)122.794
 
 * Empty formulas are supported, e.g., for air or vacuum:
@@ -150,25 +161,26 @@ The grammar used for parsing formula strings is the following:
 
     formula    :: compound | mixture | nothing
     mixture    :: quantity | percentage
-    quantity   :: count unit part ('//' count unit part)*
-    percentage :: count '%wt|%vol' part ('//' count '%' part)* '//' part
+    quantity   :: number unit part ('//' number unit part)*
+    percentage :: number 'wt%|vol%' part ('//' number '%' part)* '//' part
     part       :: compound | '(' mixture ')'
-    compound   :: group (separator group)* density?
-    group      :: count element+ | '(' formula ')' count
-    element    :: symbol isotope? ion? count?
+    compound   :: (composite | fasta) density?
+    fasta      :: ('dna' | 'rna' | 'aa') ':' [A-Z -*]+
+    composite  :: group (separator group)*
+    group      :: number element+ | '(' formula ')' number
+    element    :: symbol isotope? ion? number?
     symbol     :: [A-Z][a-z]*
-    isotope    :: '[' number ']'
-    ion        :: '{' number? [+-] '}'
-    density    :: '@' count
-    count      :: number | fraction
-    number     :: [1-9][0-9]*
+    isotope    :: '[' integer ']'
+    ion        :: '{' integer? [+-] '}'
+    density    :: '@' number [ni]?
+    number     :: integer | fraction
+    integer    :: [1-9][0-9]*
     fraction   :: ([1-9][0-9]* | 0)? '.' [0-9]*
     separator  :: space? '+'? space?
     unit       :: mass | volume | length
     mass       :: 'kg' | 'g' | 'mg' | 'ug' | 'ng'
     volume     :: 'L' | 'mL' | 'uL' | 'nL'
     length     :: 'cm' | 'mm' | 'um' | 'nm'
-
 
 Formulas can also be constructed from atoms or other formulas:
 
@@ -206,7 +218,7 @@ to those isotopes used.
 This makes heavy water density easily specified as:
 
     >>> D2O = formula('D2O',natural_density=1)
-    >>> print("%s %.4g"%(D2O,D2O.density))
+    >>> print(f"{D2O} {D2O.density:.4g}")
     D2O 1.112
 
 Density can also be estimated from the volume of the unit cell, either
@@ -223,19 +235,20 @@ Because the packing fraction method relies on the covalent radius
 estimate it is not very accurate:
 
     >>> from periodictable import elements, formula
-    >>> Fe = formula("2Fe")  # bcc lattice has 2 atoms per unit cell
-    >>> Fe.density = Fe.molecular_mass/Fe.volume('bcc')
-    >>> print("%.3g"%Fe.density)
+    >>> Fe_bcc = formula("2Fe")  # bcc lattice has 2 atoms per unit cell
+    >>> Fe_bcc.density = Fe_bcc.molecular_mass/Fe_bcc.volume('bcc')
+    >>> print(f"{Fe_bcc.density:.3g}")
     6.55
-    >>> print("%.3g"%elements.Fe.density)
+    >>> print(f"{elements.Fe.density:.3g}")
     7.87
 
 Using lattice parameters the results are much better:
 
-    >>> Fe.density = Fe.molecular_mass/Fe.volume(a=2.8664)
-    >>> print("%.3g"%Fe.density)
+    >>> Fe_lattice = formula("2Fe")  # bcc lattice has 2 atoms per unit cell
+    >>> Fe_lattice.density = Fe_lattice.molecular_mass/Fe_lattice.volume(a=2.8664)
+    >>> print(f"{Fe_lattice.density:.3g}")
     7.88
-    >>> print("%.3g"%elements.Fe.density)
+    >>> print(f"{elements.Fe.density:.3g}")
     7.87
 
 Mixtures
@@ -249,13 +262,13 @@ following is a 2:1 mixture of water and heavy water:
     >>> H2O = formula('H2O',natural_density=1)
     >>> D2O = formula('D2O',natural_density=1)
     >>> mix = mix_by_volume(H2O,2,D2O,1)
-    >>> print("%s %.4g"%(mix,mix.density))
+    >>> print(f"{mix} {mix.density:.4g}")
     (H2O)2D2O 1.037
 
 Note that this is different from a 2:1 mixture by weight:
 
     >>> mix = mix_by_weight(H2O,2,D2O,1)
-    >>> print("%s %.4g"%(mix,mix.density))
+    >>> print(f"{mix} {mix.density:.4g}")
     (H2O)2.2234D2O 1.035
 
 Except in the simplest of cases, the density of the mixture cannot be
@@ -272,14 +285,14 @@ compute molar mass and neutron/xray scattering length density:
     >>> import periodictable
     >>> SiO2 = periodictable.formula('SiO2')
     >>> hydrated = SiO2 + periodictable.formula('3H2O')
-    >>> print('%s mass %s'%(hydrated,hydrated.mass))
+    >>> print(f"{hydrated} mass {hydrated.mass}")
     SiO2(H2O)3 mass 114.13014
     >>> rho,mu,inc = periodictable.neutron_sld('SiO2+3H2O',density=1.5,wavelength=4.75)
-    >>> print('%s neutron sld %.3g'%(hydrated,rho))
+    >>> print(f"{hydrated} neutron sld {rho:.3g}")
     SiO2(H2O)3 neutron sld 0.849
     >>> rho,mu = periodictable.xray_sld(hydrated,density=1.5,
     ... wavelength=periodictable.Cu.K_alpha)
-    >>> print('%s X-ray sld %.3g'%(hydrated,rho))
+    >>> print(f"{hydrated} X-ray sld {rho:.3g}")
     SiO2(H2O)3 X-ray sld 13.5
 
 Biomolecules

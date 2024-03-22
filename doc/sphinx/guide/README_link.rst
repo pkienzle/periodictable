@@ -1,5 +1,0 @@
-******
-README
-******
-
-.. include:: ../../../README.rst

@@ -261,7 +261,7 @@ class Xray(object):
                                     self.element.symbol.lower()+".nff")
             if self.element.symbol != 'n' and os.path.exists(filename):
                 xsf = numpy.loadtxt(filename, skiprows=1).T
-                xsf[1, xsf[1] == -9999.] = numpy.NaN
+                xsf[1, xsf[1] == -9999.] = numpy.nan
                 xsf[0] *= 0.001  # Use keV in table rather than eV
                 self._table = xsf
         return self._table
@@ -414,6 +414,8 @@ def xray_sld(compound, density=None, natural_density=None,
     for element, quantity in compound.atoms.items():
         mass += element.mass*quantity
         f1, f2 = element.xray.scattering_factors(energy=energy)
+        if f1 is None:
+            raise ValueError('X-ray scattering factors not available for '+str(element))
         #print element, f1, f2, wavelength
         sum_f1 += f1*quantity
         sum_f2 += f2*quantity

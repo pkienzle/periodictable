@@ -456,8 +456,6 @@ class Neutron(object):
         # TODO: return NaN instead of None for missing sld.
         # This should happen automatically if the cross sections are NaN in
         # the table.
-        if not self.has_sld():
-            return None, None, None
         return self.scattering(wavelength=wavelength)[0]
 
     @require_keywords
@@ -544,7 +542,7 @@ def init(table, reload=False):
         # Note: Sears (1992) uses b = b' - i b'', so negate sigma_a for b''.
         # Warning: -b_c.imag may be -0, which can mess with your calculations.
         #if nsf.b_c is None: print(f"b_c unavailable for {columns[0]}")
-        b_c = nsf.b_c if nsf.b_c is not None else np.NaN
+        b_c = nsf.b_c if nsf.b_c is not None else np.nan
         b_c_i = -nsf.absorption/(2000*ABSORPTION_WAVELENGTH)
         nsf.b_c_complex = b_c + 1j*b_c_i
 
@@ -1766,7 +1764,7 @@ def energy_dependent_table(table=None):
         if dep:
             print("    " + " ".join(dep))
 
-def _diff(iso, a, b, tol=0.01):
+def _diff(iso, a, b, tol):
     if None in (a, b):
         if a is not None or b is not None:
             if a is None and b > tol:
@@ -1779,7 +1777,9 @@ def _diff(iso, a, b, tol=0.01):
         print("%10s %8.2f %8.2f %5.1f%%"
               % (iso, a, b, (100*(a-b)/b if b != 0 else inf)))
 
-def compare(fn1, fn2, table=None, tol=0.01):
+def compare(fn1, fn2, table=None, tol=None):
+    if tol is None:
+        tol = 0.01
     table = default_table(table)
     for el in table:
         try:

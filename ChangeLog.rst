@@ -17,6 +17,14 @@ Known issues
 Change history
 ==============
 
+
+2024-07-08 R1.7.1
+-----------------
+
+Updated:
+
+* Support numpy 2.x, which removed the alias np.NaN
+
 2024-03-22 R1.7.0
 -----------------
 

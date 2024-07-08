@@ -261,7 +261,7 @@ class Xray(object):
                                     self.element.symbol.lower()+".nff")
             if self.element.symbol != 'n' and os.path.exists(filename):
                 xsf = numpy.loadtxt(filename, skiprows=1).T
-                xsf[1, xsf[1] == -9999.] = numpy.NaN
+                xsf[1, xsf[1] == -9999.] = numpy.nan
                 xsf[0] *= 0.001  # Use keV in table rather than eV
                 self._table = xsf
         return self._table

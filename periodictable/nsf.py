@@ -542,7 +542,7 @@ def init(table, reload=False):
         # Note: Sears (1992) uses b = b' - i b'', so negate sigma_a for b''.
         # Warning: -b_c.imag may be -0, which can mess with your calculations.
         #if nsf.b_c is None: print(f"b_c unavailable for {columns[0]}")
-        b_c = nsf.b_c if nsf.b_c is not None else np.NaN
+        b_c = nsf.b_c if nsf.b_c is not None else np.nan
         b_c_i = -nsf.absorption/(2000*ABSORPTION_WAVELENGTH)
         nsf.b_c_complex = b_c + 1j*b_c_i
 

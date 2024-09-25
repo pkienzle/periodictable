@@ -130,6 +130,9 @@ def delayed_load(all_props, loader, element=True, isotope=False, ion=False):
         def setfn(el, value):
             #print "set", el, propname, value
             clearprops()
+            # Since the property is now cleared the lazy loader will not be
+            # triggered in the getter for a different element, so call it here.
+            loader()
             setattr(el, propname, value)
         return setfn
 

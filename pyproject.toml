@@ -10,6 +10,15 @@ license = { file = "LICENSE.txt" }
 dependencies = [
     "pyparsing", "numpy",
 ]
+
+[project.optional-dependencies]
+dev = [
+    'build',
+    'pytest',
+    'pytest-cov',
+    'sphinx',
+]
+
 classifiers=[
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",

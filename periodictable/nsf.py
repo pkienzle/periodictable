@@ -567,6 +567,9 @@ def init(table, reload=False):
         symbol = parts[1]
         isotope_number = int(parts[2]) if len(parts) == 3 else 0
 
+        if Z == 0: # Skip row 0-n-1
+            continue
+
         # Fetch element from the table and check that the symbol matches
         element = table[Z]
         assert element.symbol == symbol, \
@@ -575,13 +578,6 @@ def init(table, reload=False):
         # Plug the default number density for the element into the nsf so
         # it can calculate sld.
         nsf._number_density = element.number_density # N/cm^3 = N/cm^3
-
-
-        # For new elements, clear out 'neutron' attribute for isotopes
-        # This protects against isotope using the element data when
-        # they don't have any specific neutron data.
-        #if isotope_number == 0 or not hasattr(element,'neutron'):
-        #    for iso in element: iso.neutron = None
 
         if isotope_number == 0:
             # Bulk values using laboratory abundances of isotopes
@@ -1876,8 +1872,6 @@ def coherent_comparison_table(table=None, tol=None):
 
         >>> coherent_comparison_table (tol=0.5) # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
         Comparison of (4 pi |b_c|^2/100) and coherent
-                 n   172.03    43.01 300.0%
-               1-n   172.03    43.01 300.0%
                 Sc    18.40    19.00  -3.2%
              45-Sc    18.40    19.00  -3.2%
              65-Cu    13.08    14.10  -7.2%
@@ -1908,8 +1902,6 @@ def total_comparison_table(table=None, tol=None):
 
         >>> total_comparison_table (tol=0.1)
         Comparison of total cross section to (coherent + incoherent)
-                 n    43.01     ----
-               1-n    43.01     ----
              84-Kr     6.60     ----
             149-Sm   200.00   200.50  -0.2%
                 Eu     9.20     9.07   1.4%

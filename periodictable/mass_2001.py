@@ -81,13 +81,13 @@ def init(table, reload=False):
         iso._mass, iso._mass_unc = parse_uncertainty(m)
         iso._abundance,iso._abundance_unc = parse_uncertainty(p) if p else (0,0)
 
-    # A single neutron is an isotope of element 0
-    from .constants import neutron_mass
-    el = table[0]
-    el._mass = neutron_mass
-    iso = el.add_isotope(1)
-    iso._mass = neutron_mass
-    iso._abundance = 100
+    # # A single neutron is an isotope of element 0
+    # from .constants import neutron_mass
+    # el = table[0]
+    # el._mass = neutron_mass
+    # iso = el.add_isotope(1)
+    # iso._mass = neutron_mass
+    # iso._abundance = 100
 
 # z-El-n,iso_mass(unc),abundance%(unc),element_mass(unc)
 massdata = """\

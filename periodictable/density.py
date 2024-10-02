@@ -170,8 +170,7 @@ def init(table, reload=False):
             el.density_caveat = ""
 
 element_densities = dict(
-    # TODO: stop pretending that a bare neutron is element zero.
-    n=None,
+    # n=None,  # No longer using element 0 for a bare neutron
     H=(0.0708, "T=-252.87"),
     He=(0.122, "T=-268.93"),
     Li=0.534,

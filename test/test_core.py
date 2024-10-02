@@ -22,8 +22,8 @@ def test():
 
     # Check that "for el in elements" works and for iso in el works
     els = tuple(el for el in elements)
-    assert els[0].number == 0
-    assert els[1].number == 1
+    assert els[0].number == 1
+    assert els[1].number == 2
     isotopes = tuple(iso for iso in O)
     assert isotopes[0].isotope == 12  # 12 is the first oxygen isotope listed
 

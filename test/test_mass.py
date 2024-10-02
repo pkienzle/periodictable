@@ -15,8 +15,6 @@ def test():
     assert abs(periodictable.Pb[206].abundance - Pb_206_abundance) < 1e-14
     assert abs(periodictable.Pb[209].abundance - Pb_209_abundance) < 1e-14
     assert periodictable.Pb.mass == Pb_mass
-    from periodictable.constants import neutron_mass
-    assert periodictable.n.mass == neutron_mass
 
     # Check abundance totals to 0% or 100%
     for el in periodictable.elements:

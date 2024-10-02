@@ -381,7 +381,7 @@ class PeriodicTable(object):
 
             >>> from periodictable import elements
             >>> elements.list('symbol', 'mass', 'density',
-            ...     format="%-2s: %6.2f u %5.2f g/cm^3") # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+            ...     format="%-2s: %6.2f u %6.2f g/cm^3") # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
             H :   1.01 u   0.07 g/cm^3
             He:   4.00 u   0.12 g/cm^3
             Li:   6.94 u   0.53 g/cm^3

@@ -1,15 +1,22 @@
 import periodictable
 
 def test():
+    # Constants defined in the tables. These may be updated from time to time.
+    Be_12_mass = 12.02692210
+    Be_mass = 9.0121831
+    Pb_206_abundance = 24.1
+    Pb_209_abundance = 0
+    Pb_mass = 207.2
 
-    assert periodictable.Be[12].mass == 12.026921
-    assert periodictable.Be.mass == 9.012182
-    assert abs(periodictable.Be[12].ion[2].mass - (12.026921 - 2*periodictable.constants.electron_mass))<1e-12
-    assert abs(periodictable.Be.ion[2].mass - (9.012182 - 2*periodictable.constants.electron_mass))<1e-12
-    assert periodictable.Pb[206].abundance == 24.1
-    assert periodictable.Pb[209].abundance == 0
-    assert periodictable.Pb.mass == 207.2
-    assert periodictable.n.mass == 1.00866491597
+    assert periodictable.Be[12].mass == Be_12_mass
+    assert periodictable.Be.mass == Be_mass
+    assert abs(periodictable.Be[12].ion[2].mass - (Be_12_mass - 2*periodictable.constants.electron_mass))<1e-12
+    assert abs(periodictable.Be.ion[2].mass - (Be_mass - 2*periodictable.constants.electron_mass))<1e-12
+    assert abs(periodictable.Pb[206].abundance - Pb_206_abundance) < 1e-14
+    assert abs(periodictable.Pb[209].abundance - Pb_209_abundance) < 1e-14
+    assert periodictable.Pb.mass == Pb_mass
+    from periodictable.constants import neutron_mass
+    assert periodictable.n.mass == neutron_mass
 
     # Check abundance totals to 0% or 100%
     for el in periodictable.elements:
@@ -22,10 +29,7 @@ def test():
         assert abs(abundance-100) < 1e-4 or abundance==0,\
             "total abundance for %s is %.15g%%"%(el.symbol,abundance)
 
-
     # Check average mass corresponds to abundance information
-    # Note: should check that this is true within uncertainty, but
-    # uncertainties are not being loaded.
     for el in periodictable.elements:
         abundance=0
         mass=0
@@ -35,7 +39,7 @@ def test():
             else:
                 abundance += iso.abundance
                 mass += iso.mass*iso.abundance/100.
-        assert abundance==0 or abs(mass - el.mass)/el.mass  < 1e-3,\
+        assert abundance==0 or abs(mass - el.mass)/el.mass < el._mass_unc,\
             "avg mass for %s is %g != %g"%(el.symbol,el.mass,mass)
 
 

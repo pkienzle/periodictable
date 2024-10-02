@@ -25,8 +25,8 @@ is the same as that for the element in the natural abundance.
     >>> from periodictable import D, H
     >>> print("H: %.4f, D: %.4f"%(H.density, D.density))
     H: 0.0708, D: 0.1415
-    >>> print((D.density/H.density) / (D.mass/H.mass))
-    1.0
+    >>> print(f"{(D.density/H.density) / (D.mass/H.mass):.4f}")
+    1.0000
 
 The following plot shows density for all elements:
 
@@ -170,7 +170,8 @@ def init(table, reload=False):
             el.density_caveat = ""
 
 element_densities = dict(
-    n=None, # Unless someone wants to look up neutron star densities...
+    # TODO: stop pretending that a bare neutron is element zero.
+    n=None,
     H=(0.0708, "T=-252.87"),
     He=(0.122, "T=-268.93"),
     Li=0.534,

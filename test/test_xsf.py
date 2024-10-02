@@ -1,5 +1,6 @@
-import numpy
+import numpy as np
 from numpy import pi, isnan
+
 from periodictable import formula
 from periodictable import Cu,Mo,Ni,Fe,Si,H,D,O
 from periodictable.xsf import xray_energy, xray_sld_from_atoms, xray_sld
@@ -26,7 +27,7 @@ def test_xsf():
     Fe_rho,Fe_mu = Fe.xray.sld(wavelength=Cu.K_alpha)
     assert abs(Fe_rho-59.45) < 0.01
     Si_rho,Si_mu = Si.xray.sld(energy=8.050)
-    assert abs(Si_rho-20.0701) < 0.0001
+    assert abs(Si_rho-20.0705) < 0.0001
     assert abs(Si_mu-0.4572) < 0.0001
 
     # Check that wavelength is the default
@@ -117,12 +118,9 @@ def test_xsf():
     assert '_xray' not in Ni[58].__dict__
 
 def test_refl():
-    # Note: io always works on unicode (python 2.x and 3.x), so tag the input
-    # as unicode.  The alternative is to import StringIO from six, but only
-    # if six is already required for some other reason.
     from io import StringIO
     # http://henke.lbl.gov/optical_constants/mirror2.html
-    data2=StringIO(u"""\
+    data2=StringIO("""\
 #SiO2 Rho=2.2, Sig=3.nm, P=1., 2.deg
 # Photon Energy (eV), Reflectivity
    30.0000  0.900114
@@ -136,7 +134,7 @@ def test_refl():
    495.934  0.717134
    704.226  0.392855
    1000.00  5.563799E-02""")
-    data3=StringIO(u"""\
+    data3=StringIO("""\
 #SiO2 Rho=2.2, Sig=3.nm, P=1., 3.deg
 # Photon Energy (eV), Reflectivity
    30.0000  0.853800
@@ -151,11 +149,12 @@ def test_refl():
    704.226  2.655170E-02
    1000.00  1.240138E-03""")
 
-    e,R2 = numpy.loadtxt(data2).T
-    e,R3 = numpy.loadtxt(data3).T
-    R = mirror_reflectivity(energy=e*1e-3,angle=[2,3],compound='SiO2',density=2.2,
-                            roughness=30)
-    assert numpy.max(abs((R-numpy.vstack([R2,R3]))/R)) < 1e-4
+    e, R2 = np.loadtxt(data2).T
+    e, R3 = np.loadtxt(data3).T
+    R = mirror_reflectivity(
+        energy=e*1e-3, angle=[2,3],
+        compound='SiO2', density=2.2, roughness=30)
+    assert np.max(abs((R-np.vstack([R2,R3]))/R)) < 2e-4
 
 
 def main():

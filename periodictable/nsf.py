@@ -75,13 +75,24 @@ There are a number of functions available in periodictable.nsf
 For private tables use :func:`init` to set the data.
 
 The neutron scattering information table is reproduced from the Atomic
-Institute for Austrian Universities\ [#Rauch2003]_  (retrieve March 2008):
+Institute for Austrian Universities\ [#Rauch2003]_  (retrieved March 2008):
 
-http://www.ati.ac.at/~neutropt/scattering/table.html
+    `<http://www.ati.ac.at/~neutropt/scattering/table.html>`_
 
 The above site has references to the published values for every entry in
 the table.  We have included these in the documentation directory
-associated with the periodictable package.
+within the periodictable source package. Some typographical errors have
+been fixed. In particular, Zn-70 has b_c listed as 6.9 in the table,
+but 6.0 in the source materials for the table.
+
+Alternative tables from Sears\ [#Sears1992]\ [#Sears2006] and Dawidowski,
+et al.\ [#Dawidowski2013] make different choices for the recommended values.
+These are noted in periodictable issue #59
+`<https://github.com/pkienzle/periodictable/issues/59>`_
+with changes from Sears to Rauch
+`(a) <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1693686953>`__
+and from Rauch to Dawidowski
+`(b) <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1690212205>`__.
 
 .. Note:
 
@@ -98,7 +109,7 @@ associated with the periodictable package.
 .. [#Rauch2000] Rauch, H. and Waschkowski, W. (2000)
     Neutron scattering lengths. Schopper, H. (ed.). SpringerMaterials -
     The Landolt-Börnstein Database (http://www.springermaterials.com).
-    doi: 10.1007/10499706_6
+    doi:10.1007/10499706_6
 
 .. [#Koester1991] Koester, L., Rauch, H., Seymann. E. (1991)
     Atomic Data Nuclear Data Tables 49, 65. doi:10.1016/0092-640X(91)90012-S
@@ -113,7 +124,7 @@ associated with the periodictable package.
     In Prince, E. ed. Intl. Tables for Crystallography C.
     Kluwer Academic Publishers. pp 444-454.
     (https://it.iucr.org/Cb/ch4o4v0001/sec4o4o4/)
-    doi: 10.1107/97809553602060000103
+    doi:10.1107/97809553602060000103
 
 .. [#Sears1992] Sears, V.F. (1992)
     Neutron scattering lengths and cross sections.
@@ -130,20 +141,25 @@ associated with the periodictable package.
 .. [#Smith2006] Smith, G.S. and Majkrzak, C.M. (2006)
     2.9 Neutron reflectometry.
     In E. Prince ed. Intl. Tables for Crystallography C.
-    Wiley InterScience. pp 126-146. doi: 10.1107/97809553602060000584
+    Wiley InterScience. pp 126-146. doi:10.1107/97809553602060000584
 
 .. [#Glinka2011] Glinka, C.J. (2011)
     Incoherent Neutron Scattering from Multi-element Materials.
-    J. Appl. Cryst. 44, 618-624. doi: 10.1107/S0021889811008223
-"""
-from __future__ import print_function
+    J. Appl. Cryst. 44, 618-624. doi:10.1107/S0021889811008223
 
+.. [#Dawidowski2013] Dawidowski, J., Granada, J. R., Santisteban,
+    J. R., Cantargi, F., & Palomino, L. A. R. (2013).
+    Appendix—Neutron Scattering Lengths and Cross Sections.
+    In F. Fernandez-Alonso & D. L. Price (Eds.),
+    Experimental Methods in the Physical Sciences (Vol. 44, pp. 471–528).
+    Academic Press. doi:10.1016/B978-0-12-398374-9.09989-7
+"""
 import numpy as np
 from numpy import sqrt, pi, asarray, inf
 from .core import Element, Isotope, default_table
 from .constants import (avogadro_number, plancks_constant, electron_volt,
                         neutron_mass, atomic_mass_constant)
-from .util import require_keywords
+from .util import require_keywords, parse_uncertainty
 
 __all__ = ['init', 'Neutron',
            'neutron_energy', 'neutron_wavelength',
@@ -303,7 +319,8 @@ class Neutron(object):
     * absorption (barn)
         Absorption cross section $\sigma_a$ at 1.798 |Ang|.  Scale to your beam
         by dividing by periodictable.nsf.ABSORPTION_WAVELENGTH and multiplying
-        by your wavelength.
+        by your wavelength. This wavelength corresponds to a neutron velocity
+        of 2200 m/s and neutron energy of 25.3 meV.
 
     * b_c_complex (fm)
         Complex coherent scattering length derived from the tabulated
@@ -453,9 +470,8 @@ class Neutron(object):
         See :func:`neutron_scattering` for details.
         """
         # TODO: deprecate in favour of neutron_scattering(el)
-        # TODO: return NaN instead of None for missing sld.
-        # This should happen automatically if the cross sections are NaN in
-        # the table.
+        if not self.has_sld():
+            return None, None, None
         return self.scattering(wavelength=wavelength)[0]
 
     @require_keywords
@@ -1254,7 +1270,7 @@ def sld_plot(table=None):
 # coherent, incoherent, total
 #   The coherent and incoherent scattering cross-sections in barns.
 # absorption
-#   The thermal absorption cross section in barns at 1.798 Angstroms/25.30 meV.
+#   The thermal absorption cross section in barns at 1.798 A; 25.30 meV; 2200 m/s
 #
 # Numbers in parenthesis represents uncertainty.
 # Numbers followed by '*' are estimated.
@@ -1363,7 +1379,7 @@ nsftable = """\
 30-Zn-66,27.8,0,5.98(5),,,,4.48(8),0,4.48(8),0.62(6)
 30-Zn-67,4.1,5/2,7.58(8),5.8(5),10.1(7),+/-,7.18(15),0.28(3),7.46(15),6.8(8)
 30-Zn-68,18.6,0,6.04(3),,,,4.57(5),0,4.57(5),1.1(1)
-30-Zn-70,0.62,0,6.9(1.0)*,,,,4.5(1.5),0,4.5(1.5),0.092(5)
+30-Zn-70,0.62,0,6.0(1.0)*,,,,4.5(1.5),0,4.5(1.5),0.092(5)
 31-Ga,,,7.288(2),,,,6.675(4),0.16(3),6.83(3),2.75(3)
 31-Ga-69,60,3/2,8.043(16),6.3(2),10.5(4),+/-,7.80(4),0.091(11),7.89(4),2.18(5)
 31-Ga-71,40,3/2,6.170(11),5.5(6),7.8(1),+/-,5.15(5),0.084(8),5.23(5),3.61(10)
@@ -1401,7 +1417,7 @@ nsftable = """\
 38-Sr-88,82.6,0,7.16(6),,,,6.42(11),0,6.42(11),0.058(4)
 39-Y-89,100,1/2,7.75(2),8.4(2),5.8(5),+/-,7.55(4),0.15(8),7.70(9),1.28(2)
 40-Zr,,,7.16(3),,,,6.44(5),0.02(15),6.46(14),0.185(3)
-40-Zr-90,51.48,0,6.5(1),,,,5.1(2),0,5.1(2),0.011(59
+40-Zr-90,51.48,0,6.5(1),,,,5.1(2),0,5.1(2),0.011(5)
 40-Zr-91,11.23,5/2,8.8(1),7.9(2),10.1(2),+/-,9.5(2),0.15(4),9.7(2),1.17(10)
 40-Zr-92,17.11,0,7.5(2),,,,6.9(4),0,6.9(4),0.22(6)
 40-Zr-94,17.4,0,8.3(2),,,,8.4(4),0,8.4(4),0.0499(24)
@@ -1465,7 +1481,7 @@ nsftable = """\
 52-Te-120,0.09,0,5.3(5),,,,3.5(7),0,3.5(7),2.3(3)
 52-Te-122,2.4,0,3.8(2),,,,1.8(2),0,1.8(2),3.4(5)
 52-Te-123,0.87,1/2,-0.05(25),-1.2(2),3.5(2),,0.002(3),0.52(5),0.52(5),418.0(30.0)
-52-Te-124,4.61,0,7.95(10),,,,8.0(2),0,8.0(2,6.8(1.3)
+52-Te-124,4.61,0,7.95(10),,,,8.0(2),0,8.0(2),6.8(1.3)
 52-Te-125,6.99,1/2,5.01(8),4.9(2),5.5(2),,3.17(10),0.008(8),3.18(10),1.55(16)
 52-Te-126,18.71,0,5.55(7),,,,3.88(10),0,3.88(10),1.04(15)
 52-Te-128,31.79,0,5.88(8),,,,4.36(10),0,4.36(10),0.215(8)
@@ -1489,7 +1505,7 @@ nsftable = """\
 56-Ba-135,6.59,3/2,4.66(10),,,,2.74(12),0.5(5)*,3.2(5),5.8(9)
 56-Ba-136,7.81,0,4.90(8),,,,3.03(10),0,3.03(10),0.68(17)
 56-Ba-137,11.32,3/2,6.82(10),,,,5.86(17),0.5(5)*,6.4(5),3.6(2)
-56-Ba-138,71.66,0,4.83(8),,,,2.94(10),0,2.94(19),0.27(14)
+56-Ba-138,71.66,0,4.83(8),,,,2.94(10),0,2.94(10),0.27(14)
 57-La,,,8.24(4),,,,8.53(8),1.13(19),9.66(17),8.97(2)
 57-La-138,0.09,5,8.0(2.0)*,,,,8.0(4.0),0.5(5)*,8.5(4.0),57.0(6.0)
 57-La-139,99.91,7/2,8.24(4),11.4(3),4.5(4),+/-,8.53(8),1.13(15),9.66(17),8.93(4)
@@ -1510,7 +1526,7 @@ nsftable = """\
 61-Pm-147,2.62 Y,7/2,12.6(4),,,,20.0(1.3),1.3(2.0),21.3(1.5),168.4(3.5)
 62-Sm,,,0.00(5),,,E,0.422(9),39.0(3.0),39.4(3.0),5922.0(56.0)
 62-Sm-144,3.1,0,-3.0(4.0)*,,,,1.0(3.0),0,1.0(3.0),0.7(3)
-62-Sm-147,15,7/2,14.0(3.0),,,,25.0(11.0),14.0(19.0.),39.0(16.0),57.0(3.0)
+62-Sm-147,15,7/2,14.0(3.0),,,,25.0(11.0),14.0(19.0),39.0(16.0),57.0(3.0)
 62-Sm-148,11.2,0,-3.0(4.0)*,,,,1.0(3.0),0,1.0(3.0),2.4(6)
 62-Sm-149,13.8,7/2,18.7(28),,,E,63.5(6),137.0(5.0),200.0(5.0),42080.0(400.0)
 62-Sm-150,7.4,0,14.0(3.0),,,,25.0(11.0),0,25.0(11.0),104.0(4.0)
@@ -1654,22 +1670,14 @@ nsftableI = """\
 # 63-Eu-151,-2.46,,
 # 64-Gd-157,-47,-75,
 
-
-
 def fix_number(str):
     """
     Converts strings of the form e.g., 35.24(2)* into numbers without
     uncertainty. Also accepts a limited range, e.g., <1e-6, which is
     converted as 1e-6.  Missing values are set to 0.
     """
-    if str == '':
-        return None
-    idx = str.find('(')
-    if idx >= 0:
-        str = str[0:idx]
-    if str[0] == '<':
-        str = str[1:]
-    return float(str)
+    from .util import parse_uncertainty
+    return parse_uncertainty(str.replace('<','').replace('*',''))[0]
 
 def sld_table(wavelength=1, table=None, isotopes=True):
     r"""
@@ -1690,8 +1698,8 @@ def sld_table(wavelength=1, table=None, isotopes=True):
         >>> sld_table(wavelength=4.75)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
          Neutron scattering length density table
         atom       mass density     sld    imag   incoh
-        H         1.008   0.071  -1.582   0.000  10.691
-        1-H       1.008   0.071  -1.583   0.000  10.691
+        H         1.008   0.071  -1.582   0.000  10.690
+        1-H       1.008   0.071  -1.583   0.000  10.690
         D         2.014   0.141   2.823   0.000   1.705
         T         3.016   0.212   2.027   0.000   0.453
         He        4.003   0.122   0.598   0.000   0.035
@@ -1764,7 +1772,7 @@ def energy_dependent_table(table=None):
         if dep:
             print("    " + " ".join(dep))
 
-def _diff(iso, a, b, tol):
+def _diff(iso, a, b, tol=0.01):
     if None in (a, b):
         if a is not None or b is not None:
             if a is None and b > tol:
@@ -1777,9 +1785,7 @@ def _diff(iso, a, b, tol):
         print("%10s %8.2f %8.2f %5.1f%%"
               % (iso, a, b, (100*(a-b)/b if b != 0 else inf)))
 
-def compare(fn1, fn2, table=None, tol=None):
-    if tol is None:
-        tol = 0.01
+def compare(fn1, fn2, table=None, tol=0.01):
     table = default_table(table)
     for el in table:
         try:
@@ -1875,7 +1881,6 @@ def coherent_comparison_table(table=None, tol=None):
                 Sc    18.40    19.00  -3.2%
              45-Sc    18.40    19.00  -3.2%
              65-Cu    13.08    14.10  -7.2%
-             70-Zn     5.98     4.50  33.0%
              84-Sr     3.14     6.00 -47.6%
            ...
 
@@ -1940,7 +1945,6 @@ def incoherent_comparison_table(table=None, tol=None):
                 Sc     4.50     5.10 -11.8%
              45-Sc     4.50     5.10 -11.8%
              65-Cu     0.40     1.42 -71.7%
-             70-Zn     0.00    -1.48 -100.0%
              84-Sr     0.00     2.86 -100.0%
            ...
 

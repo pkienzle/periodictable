@@ -415,7 +415,7 @@ def xray_sld(compound, density=None, natural_density=None,
         mass += element.mass*quantity
         f1, f2 = element.xray.scattering_factors(energy=energy)
         if f1 is None:
-            raise ValueError('X-ray scattering factors not available for '+str(element))
+            raise ValueError(f"X-ray scattering factors not available for {element}")
         #print element, f1, f2, wavelength
         sum_f1 += f1*quantity
         sum_f2 += f2*quantity
@@ -695,7 +695,7 @@ def sld_table(wavelength=None, table=None):
          He   1.03   0.00
          Li   3.92   0.00
          Be  13.93   0.01
-          B  18.40   0.01
+          B  18.40   0.02
           C  18.71   0.03
           N   6.88   0.02
           O   9.74   0.04

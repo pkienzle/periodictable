@@ -11,12 +11,24 @@ Known issues
 
 * Incoherent scattering calculations for energy-dependent rare earth elements
   is underestimated. The calculation requires bound incoherent scattering
-  lengths (b_i) and the bound coherent lengths (b_c), but only b_c is
+  length (b_i) but only the bound coherent scattering length (b_c) is
   included.
 
 Change history
 ==============
 
+2.0.0 2024-10-??
+----------------
+
+Modified:
+
+* Move to IAEA AME2020 for isotope mass
+* Move to IUPAC CIAAW 2021 for atomic weight and isotopic abundance
+* Li-6:Li-7 mass ratio changed from 12.2 to 19.6 (delta = 2.7%)
+* Isotope percentage changed by 0.1 to 0.5 for B, Zn, Ge, Se, Mo, Er, Yb, Pt, Hg
+* Atomic weight changed by 0.04% for Zn, 0.02% for S and 0.01% for Li, Ge, Se, Mo
+* Neutron b_c changed for Zn-70 from 6.9 to 6.0 (fixes a typo in the original table)
+* Fix typos in uncertainties in the neutron table (Zr-90, Te-124, Ba-138, Sm-147)
 
 2024-07-08 R1.7.1
 -----------------

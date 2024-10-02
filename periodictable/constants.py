@@ -15,12 +15,17 @@ speed_of_light = 299792458 # m/s (exact)
 #: electron radius r_e (m)
 electron_radius = 2.8179402894e-15 #(58) m
 
-# From NIST Reference on Constants, Units, and Uncertainty
+# [CODATA] From NIST Reference on Constants, Units, and Uncertainty
 #   http://physics.nist.gov/cuu/index.html
-# neutron mass = 1.008 664 915 97(43) u
-# atomic mass constant m_u = 1.660 538 782(83) x 10-27 kg
+# [AME2020] "The Ame2020 atomic mass evaluation (II)"
+#     by M.Wang, W.J.Huang, F.G.Kondev, G.Audi and S.Naimi
+#     Chinese Physics C45, 030003, March 2021.
 #: neutron mass (u)
-neutron_mass = 1.00866491597 #(43) u
+neutron_mass = 1.00866491590 #(47) u [AME 2020]
+neutron_mass_unc = 0.00000000047
+#neutron_mass = 1.00866491597 #(43) u [CODATA 2010?]
+#neutron_mass = 1.00866491595 #(49) u [CODATA 2018]
+
 #: atomic mass constant (kg / u)
 atomic_mass_constant = 1.660538782e-27 #(83) kg / u
 #: electron mass (u)

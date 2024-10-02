@@ -531,7 +531,7 @@ def fasta_table():
     rows += [v for k, v in sorted(NUCLEIC_ACID_COMPONENTS.items())]
     rows += [Sequence("beta casein", beta_casein)]
 
-    print("%20s %7s %7s %7s %5s %5s %5s %5s %5s %5s"
+    print("%25s %7s %7s %7s %5s %5s %5s %5s %5s %5s"
           % ("name", "M(H2O)", "M(D2O)", "volume",
              "den", "#el", "xray", "nH2O", "nD2O", "%D2O match"))
     for v in rows:
@@ -548,18 +548,27 @@ def test():
     from periodictable.constants import avogadro_number
     from .formulas import formula
     elements = default_table()
-    H2O = formula("H2O@1n")
-    D2O = formula("D2O@1n")
 
     # Beta casein results checked against Duncan McGillivray's spreadsheet
     # name        Hmass   Dmass   vol     den   #el   xray  Hsld  Dsld
     # =========== ======= ======= ======= ===== ===== ===== ===== =====
     # beta casein 23561.9 23880.9 30872.9  1.27 12614 11.55  1.68  2.75
+    # ... updated for new mass table [2023-08]
+    #   same      23562.3 23881.2   same   1.27 same         1.68  2.75
+
     seq = Sequence("beta casein", beta_casein)
-    assert abs((seq.mass-H2O.mass) - 23561.9) < 0.1
-    assert abs((seq.Dmass-D2O.mass) - 23880.9) < 0.1
+    density = seq.mass/avogadro_number/seq.cell_volume*1e24
+    # print(seq.formula)
+    # print(seq.mass, seq.Dmass, density, seq.sld, seq.Dsld)
+
+    # Sequence now includes terminators: H[1]-...-OH[1], so adjust the masses
+    # slightly from the spreadsheet values.
+    H2O = formula("H2O@1n")
+    D2O = formula("D2O@1n")
+    assert abs(seq.mass - (23562.3 + H2O.mass)) < 0.1
+    assert abs(seq.Dmass - (23881.2 + D2O.mass)) < 0.1
     assert abs(seq.cell_volume - 30872.9) < 0.1
-    assert abs(seq.mass/avogadro_number/seq.cell_volume*1e24 - 1.267) < 0.01
+    assert abs(density - 1.267) < 0.01
     assert abs(seq.sld - 1.68) < 0.01
     assert abs(seq.Dsld - 2.75) < 0.01
 
@@ -572,3 +581,4 @@ def test():
 
 if __name__ == "__main__":
     fasta_table()
+    #test()

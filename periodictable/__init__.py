@@ -28,7 +28,7 @@ whose conditions may differ from those of your experiment.
 __docformat__ = 'restructuredtext en'
 __all__ = ['elements', 'neutron_sld', 'xray_sld',
            'formula', 'mix_by_weight', 'mix_by_volume'] # and all elements
-__version__ = "1.7.1"
+__version__ = "2.0.0-pre"
 
 from . import core
 from . import mass

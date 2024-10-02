@@ -5,23 +5,21 @@ Extensible periodic table of the elements
 This package provides a periodic table of the elements with
 support for mass, density and xray/neutron scattering information.
 
-Masses, densities and natural abundances come from the
-NIST Physics Laboratory, but do not represent a critical
-evaluation by NIST scientists.
-
 Neutron scattering calculations use values collected by the
-Atomic Institute of the Austrian Universities.  These values
-do corresponding to those from other packages, though there
-are some differences depending to the tables used.  Bound
-coherent neutron scattering for gold in particular is significantly
-different from older value: 7.63(6) as measured in 1974
-compared to 7.90(7) as measured in 1990.
+Atomic Institute of the Austrian Universities as they appear in the neutron
+data booklet, with support for some energy dependent scattering
+in rare earth elements given by Lynn and Seeger (1990). X-ray scattering
+calculations use a combination of empirical and theoretical values from
+the LBL Center for X-ray Optics.
 
-X-ray scattering calculations use a combination of empirical and
-theoretical values from the LBL Center for X-ray Optics.  These
-values differ from those given in other sources such as the
-International Tables for Crystallography, Volume C, and so may
-give different results from other packages.
+Tabulated values differ from those given in other sources such as the
+International Tables for Crystallography, Volume C, and so computed
+cross sections may give different results from other packages.
+
+Neutron activation calculations are based on Shleien (1998), with
+isotopes important to health physics. They do not perform a full
+activation analysis, but instead give a gross estimate of the amount
+of activation expected for a sample in the beam.
 
 Install using::
 

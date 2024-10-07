@@ -105,4 +105,5 @@ jobs:
     # run before building the wheel.
     - name: Test wheel with pytest
       run: |
-        pytest -v --pyargs --import-mode=append
+        cd test
+        pytest -v --pyargs --import-mode=append periodictable test_*.py

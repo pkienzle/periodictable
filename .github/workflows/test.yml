@@ -41,7 +41,7 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install dependencies for building the wheel
+    - name: Install dependencies for building docs
       run: |
         python -m pip install -e .[dev]
         python -m pip install numpy scipy matplotlib sphinx
@@ -50,7 +50,7 @@ jobs:
       run: |
         make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html
 
-  # Test the wheel on different platforms, test webview, and check docs build
+  # Test the wheel on different platforms
   test:
     runs-on: ${{ matrix.cfg.os }}
     needs: build-wheel

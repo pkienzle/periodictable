@@ -664,15 +664,16 @@ def plot_xsf(el):
 
     :Returns: None
     """
-    import pylab
+    import matplotlib.pyplot as plt
+
     xsf = el.xray.sftable
-    pylab.title('X-ray scattering factors for '+el.name)
-    pylab.plot(xsf[0], xsf[1])
-    pylab.plot(xsf[0], xsf[2])
-    pylab.xlabel('Energy (keV)')
-    pylab.ylabel('Scattering factor')
-    pylab.legend(['f1', 'f2'])
-    pylab.show()
+    plt.title('X-ray scattering factors for '+el.name)
+    plt.plot(xsf[0], xsf[1])
+    plt.plot(xsf[0], xsf[2])
+    plt.xlabel('Energy (keV)')
+    plt.ylabel('Scattering factor')
+    plt.legend(['f1', 'f2'])
+    plt.show()
 
 def sld_table(wavelength=None, table=None):
     """

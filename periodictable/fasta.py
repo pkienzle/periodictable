@@ -538,7 +538,7 @@ def fasta_table():
         protons = sum(num*el.number for el, num in v.natural_formula.atoms.items())
         electrons = protons - v.charge
         Xsld = xray_sld(v.formula, wavelength=elements.Cu.K_alpha)
-        print("%20s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
+        print("%25s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
             v.name, v.mass, v.Dmass, v.cell_volume, v.natural_formula.density,
             electrons, Xsld[0], v.sld, v.Dsld, v.D2Omatch))
 

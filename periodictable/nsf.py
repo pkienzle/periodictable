@@ -1991,3 +1991,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #coherent_comparison_table(tol=0.5)
+    #incoherent_comparison_table(tol=0.5)

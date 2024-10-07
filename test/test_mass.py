@@ -37,7 +37,7 @@ def test():
             else:
                 abundance += iso.abundance
                 mass += iso.mass*iso.abundance/100.
-        assert abundance==0 or abs(mass - el.mass)/el.mass < el._mass_unc,\
+        assert abundance==0 or abs(mass - el.mass)  < el._mass_unc,\
             "avg mass for %s is %g != %g"%(el.symbol,el.mass,mass)
 
 

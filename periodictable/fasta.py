@@ -492,13 +492,13 @@ def fasta_table():
 beta_casein = "RELEELNVPGEIVESLSSSEESITRINKKIEKFQSEEQQQTEDELQDKIHPFAQTQSLVYPFPGPIPNSLPQNIPPLTQTPVVVPPFLQPEVMGVSKVKEAMAPKHKEMPFPKYPVEPFTESQSLTLTDVENLHLPLPLLQSWMHQPHQPLPPTVMFPPQSVLSLSQSKVLPVPQKAVPYPQRDMPIQAFLLYQEPVLGPVRGPFPIIV"
 
 def doctestpath():
-    ```
+    """
     Checking import path for doctests::
 
         >>> import periodictable
         >>> print(f"Path to imported periodictable in docstr is {periodictable.__file__}")
         some path printed here
-    ```
+    """
 def test():
     from periodictable.constants import avogadro_number
     elements = default_table()

@@ -508,7 +508,7 @@ def test():
     ## Uncomment to show package path on CI infrastructure
     #import periodictable
     #print(f"Path to imported periodictable in package is {periodictable.__file__}")
-    print(fail_test)
+    #print(fail_test)
 
     # Beta casein results checked against Duncan McGillivray's spreadsheet
     # name        Hmass   Dmass   vol     den   #el   xray  Hsld  Dsld

@@ -11,13 +11,14 @@ dependencies = [
     "pyparsing", "numpy",
 ]
 
-[project.optional-dependencies]
-dev = [
-    'build',
-    'pytest',
-    'pytest-cov',
-    'sphinx',
-]
+#[project.optional-dependencies]
+#dev = [
+#    "build",
+#    "pytest",
+#    "pytest-cov",
+#    "matplotlib",
+#    "sphinx",
+#]
 
 classifiers=[
     "Development Status :: 5 - Production/Stable",
@@ -49,7 +50,8 @@ packages = ["periodictable"]
 [tool.pytest.ini_options]
 addopts = ["--doctest-modules", "--doctest-glob=*.rst", "--cov=periodictable"]
 doctest_optionflags = "ELLIPSIS"
+pythonpath = ["doc/sphinx"]
 testpaths = ["periodictable", "test", "doc/sphinx/guide"]
 python_files = "*.py"
 python_classes = "NoClassTestsWillMatch"
-python_functions = ["test", "*_test", "test_*", "model_tests"]
+python_functions = ["test", "*_test", "test_*"]

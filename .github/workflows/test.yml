@@ -18,20 +18,7 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Run the tests
-      run: |
-        python -m pip install numpy pyparsing pytest pytest-cov
-        pytest -v
-
-    - name: Install dependencies for building docs
-      run: |
-        python -m pip install matplotlib sphinx
-
-    - name: Check that the docs build
-      run: |
-        make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html
-
-    - name: Build wheel
+    - name: Build the wheel
       run: |
         python -m pip install build
         python -m build
@@ -41,6 +28,17 @@ jobs:
       with:
         name: wheel
         path: dist/*.whl
+
+    - name: Run the tests
+      run: |
+        python -m pip install numpy pyparsing pytest pytest-cov
+        pytest -v
+
+    - name: Build the docs
+      run: |
+        python -m pip install matplotlib sphinx
+        python -m pip install dist/periodictable*.whl
+        make -j 4 -C doc/sphinx SPHINXOPTS="-W --keep-going" html
 
   # Test the wheel on different platforms
   test:

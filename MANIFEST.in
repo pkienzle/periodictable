@@ -1,8 +1,8 @@
 include LICENSE.txt
 include README.rst
-graft doc
 graft periodictable/xsf
 include periodictable/activation.dat
+prune doc
 prune doc/sphinx/_build
 prune doc/sphinx/build
 prune */__pycache__

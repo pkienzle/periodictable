@@ -544,10 +544,25 @@ def fasta_table():
 
 beta_casein = "RELEELNVPGEIVESLSSSEESITRINKKIEKFQSEEQQQTEDELQDKIHPFAQTQSLVYPFPGPIPNSLPQNIPPLTQTPVVVPPFLQPEVMGVSKVKEAMAPKHKEMPFPKYPVEPFTESQSLTLTDVENLHLPLPLLQSWMHQPHQPLPPTVMFPPQSVLSLSQSKVLPVPQKAVPYPQRDMPIQAFLLYQEPVLGPVRGPFPIIV"
 
+## Uncomment to show package path on CI infrastructure
+#def doctestpath():
+#    """
+#    Checking import path for doctests::
+#
+#        >>> import periodictable
+#        >>> print(f"Path to imported periodictable in docstr is {periodictable.__file__}")
+#        some path printed here
+#    """
+
 def test():
     from periodictable.constants import avogadro_number
     from .formulas import formula
     elements = default_table()
+
+    ## Uncomment to show package path on CI infrastructure
+    #import periodictable
+    #print(f"Path to imported periodictable in package is {periodictable.__file__}")
+    #print(fail_test)
 
     # Beta casein results checked against Duncan McGillivray's spreadsheet
     # name        Hmass   Dmass   vol     den   #el   xray  Hsld  Dsld

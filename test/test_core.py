@@ -1,6 +1,10 @@
 from periodictable import H, O, Fe, helium, elements, data_files
 
 def test():
+    ## Uncomment to print the package path on the CI infrastructure
+    #import periodictable
+    #print(f"Path to imported periodictable in test dir is {periodictable.__file__}")
+    #print(fail_test)
     # Check that we can access element properties
     assert H.name == "hydrogen"
     assert H.symbol == "H"

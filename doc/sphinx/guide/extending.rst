@@ -25,7 +25,7 @@ The simplest solution is to load it directly when your package is imported.
 In the current example, this could be done by adding the following
 line to the end of the file::
 
-    init(periodictable.core.elements)
+    init(periodictable.core.default_table())
 
 This would be fine for the current example because the table size is
 small and load time is fast.  For large tables, you may wish to

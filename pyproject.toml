@@ -13,10 +13,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    'build',
-    'pytest',
-    'pytest-cov',
-    'sphinx',
+    "build",
+    "pytest",
+    "pytest-cov",
+    "sphinx",
 ]
 
 classifiers=[

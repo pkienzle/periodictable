@@ -412,6 +412,7 @@ def activity(isotope, mass, env, exposure, rest_times):
     * AK1495 (Au-198 => Au-199 2n) target should be Au-197
     * AN1428 (Tm-169 => Tm-171 2n) t1/2 updated to Tm-171 rather than Tm-172
     * AN1420 (Er-162 => Ho-163 b) t1/2 updated to 4570 y from 10 y
+    * AT1508 (Pb-208 => Pb-209 act) Thermal (b) x1000 to convert from mbarns to barns
     """
     # TODO: is the table missing 1-H => 3-H ?
     # 0nly activations which produce radioactive daughter products are

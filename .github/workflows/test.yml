@@ -18,6 +18,11 @@ jobs:
       with:
         python-version: '3.11'
 
+    #- name: test package before building wheel
+    #  run: |
+    #    python -m pip install numpy pytest pytest-cov
+    #    pytest -v
+
     - name: build wheel
       run: |
         python -m pip install build
@@ -95,6 +100,9 @@ jobs:
       run: |
         python -m pip install pytest pytest-cov
 
-    - name: Test with pytest
+    # Change into the test directory to test the wheel so that the
+    # source directory is not on the path. Full tests with coverage are
+    # run before building the wheel.
+    - name: Test wheel with pytest
       run: |
-        pytest -v --import-mode=importlib
+        pytest -v --pyargs --import-mode=append

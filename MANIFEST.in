@@ -1,4 +1,7 @@
 include LICENSE.txt
+include README.rst
+include periodictable/activation.dat
+graft periodictable/xsf
 graft doc
 prune doc/sphinx/_build
 prune doc/sphinx/build

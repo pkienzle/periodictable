@@ -119,13 +119,13 @@ def init(table, reload=False):
         #iso._abundance, iso._abundance_unc = parse_uncertainty(p)
         iso._abundance, iso._abundance_unc = 0, 0
 
-    # A single neutron is an isotope of element 0
-    from .constants import neutron_mass, neutron_mass_unc
-    el = table[0]
-    el._mass, el._mass_unc = neutron_mass, neutron_mass_unc
-    iso = el.add_isotope(1)
-    iso._mass, iso._mass_unc = neutron_mass, neutron_mass_unc
-    iso._abundance, iso._abundance_unc = 100, 0
+    # # A single neutron is an isotope of element 0
+    # from .constants import neutron_mass, neutron_mass_unc
+    # el = table[0]
+    # el._mass, el._mass_unc = neutron_mass, neutron_mass_unc
+    # iso = el.add_isotope(1)
+    # iso._mass, iso._mass_unc = neutron_mass, neutron_mass_unc
+    # iso._abundance, iso._abundance_unc = 100, 0
 
     # Parse element mass table where each line looks like:
     #    z  El  element mass(unc)|[low,high]|- note note ...

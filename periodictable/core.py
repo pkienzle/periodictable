@@ -188,8 +188,7 @@ class PeriodicTable(object):
         56-Fe
 
 
-    Deuterium and tritium are defined as 'D' and 'T'.  Some
-    neutron properties are available in ``elements[0]``.
+    Deuterium and tritium are defined as 'D' and 'T'.
 
     To show all the elements in the table, use the iterator:
 
@@ -198,7 +197,6 @@ class PeriodicTable(object):
         >>> from periodictable import *
         >>> for el in elements:  # lists the element symbols
         ...     print("%s %s"%(el.symbol, el.name))  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        n neutron
         H hydrogen
         He helium
         ...
@@ -606,7 +604,7 @@ def _make_isotope_ion(table, Z, n, c):
 element_base = {
     # number: name symbol common_ions uncommon_ions
     # ion info comes from Wikipedia: list of oxidation states of the elements.
-    0: ['Neutron',     'n',  [],         []],
+    # 0: ['Neutron',     'n',  [],         []],
     1: ['Hydrogen',    'H',  [-1, 1],    []],
     2: ['Helium',      'He', [],         [1, 2]],  # +1,+2  http://periodic.lanl.gov/2.shtml
     3: ['Lithium',     'Li', [1],        []],

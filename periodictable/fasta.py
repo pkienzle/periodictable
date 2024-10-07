@@ -538,16 +538,31 @@ def fasta_table():
         protons = sum(num*el.number for el, num in v.natural_formula.atoms.items())
         electrons = protons - v.charge
         Xsld = xray_sld(v.formula, wavelength=elements.Cu.K_alpha)
-        print("%20s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
+        print("%25s %7.1f %7.1f %7.1f %5.2f %5d %5.2f %5.2f %5.2f %5.1f"%(
             v.name, v.mass, v.Dmass, v.cell_volume, v.natural_formula.density,
             electrons, Xsld[0], v.sld, v.Dsld, v.D2Omatch))
 
 beta_casein = "RELEELNVPGEIVESLSSSEESITRINKKIEKFQSEEQQQTEDELQDKIHPFAQTQSLVYPFPGPIPNSLPQNIPPLTQTPVVVPPFLQPEVMGVSKVKEAMAPKHKEMPFPKYPVEPFTESQSLTLTDVENLHLPLPLLQSWMHQPHQPLPPTVMFPPQSVLSLSQSKVLPVPQKAVPYPQRDMPIQAFLLYQEPVLGPVRGPFPIIV"
 
+## Uncomment to show package path on CI infrastructure
+#def doctestpath():
+#    """
+#    Checking import path for doctests::
+#
+#        >>> import periodictable
+#        >>> print(f"Path to imported periodictable in docstr is {periodictable.__file__}")
+#        some path printed here
+#    """
+
 def test():
     from periodictable.constants import avogadro_number
     from .formulas import formula
     elements = default_table()
+
+    ## Uncomment to show package path on CI infrastructure
+    #import periodictable
+    #print(f"Path to imported periodictable in package is {periodictable.__file__}")
+    #print(fail_test)
 
     # Beta casein results checked against Duncan McGillivray's spreadsheet
     # name        Hmass   Dmass   vol     den   #el   xray  Hsld  Dsld

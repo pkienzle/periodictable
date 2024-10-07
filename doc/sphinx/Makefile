@@ -31,7 +31,7 @@ help:
 clean:
 	-rm -rf _build/* build/* plots/*.pyc plots/*.png
 
-html: build
+html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
@@ -66,7 +66,7 @@ qthelp:
 	@echo "To view the help file:"
 	@echo "# assistant -collectionFile _build/qthelp/Periodic Table.qhc"
 
-latex: build
+latex:
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in _build/latex."
@@ -92,5 +92,3 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
 
-build:
-	cd ../.. && python setup.py build

@@ -25,7 +25,6 @@ neutron_mass = 1.00866491590 #(47) u [AME 2020]
 neutron_mass_unc = 0.00000000047
 #neutron_mass = 1.00866491597 #(43) u [CODATA 2010?]
 #neutron_mass = 1.00866491595 #(49) u [CODATA 2018]
-
 #: atomic mass constant (kg / u)
 atomic_mass_constant = 1.660538782e-27 #(83) kg / u
 #: electron mass (u)

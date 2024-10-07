@@ -25,8 +25,7 @@ jobs:
 
     - name: Install dependencies for building docs
       run: |
-        python -m pip install -e .[dev]
-        python -m pip install numpy scipy matplotlib sphinx
+        python -m pip install matplotlib sphinx
 
     - name: Check that the docs build
       run: |

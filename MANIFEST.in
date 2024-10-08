@@ -1,6 +1,7 @@
 include LICENSE.txt
 include README.rst
 graft periodictable/xsf
+include periodictable/f0_WaasKirf.dat
 include periodictable/activation.dat
 prune doc
 prune doc/sphinx/_build

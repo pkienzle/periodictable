@@ -11,7 +11,7 @@
         "pyparsing", "numpy",
     ]
 
-    classifiers=[
+    classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Intended Audience :: Science/Research",

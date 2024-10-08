@@ -5,7 +5,7 @@ import numpy as np
 import periodictable
 from periodictable import elements, formula, nsf
 from periodictable.nsf import neutron_scattering, neutron_sld
-from periodictable.constants import avogadro_number as N_A
+from periodictable.constants import avogadro_number as N_A, neutron_mass
 
 def test():
     H,He,D,O = elements.H,elements.He,elements.D,elements.O
@@ -134,6 +134,19 @@ def test():
     assert all(abs(v-w)<1e-14 for v,w in zip(sld,sld2))
     assert all(abs(v-w)<1e-14 for v,w in zip(xs,xs2))
     assert abs(depth-depth2)<1e-14
+
+def test_bare_neutron():
+    n = elements.n
+    assert n == elements[0]
+    assert n == periodictable.neutron
+    n_iso = elements[0][1]
+    assert n.mass == neutron_mass
+    assert n_iso.mass == neutron_mass
+    assert n.neutron.b_c == -37.0
+    assert n.density is None
+    assert n.number_density is None
+    assert n.neutron.scattering()[0] is None
+
 
 def test_formula():
     density = 2.52

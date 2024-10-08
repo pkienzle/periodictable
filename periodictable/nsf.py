@@ -567,9 +567,6 @@ def init(table, reload=False):
         symbol = parts[1]
         isotope_number = int(parts[2]) if len(parts) == 3 else 0
 
-        if Z == 0: # Skip row 0-n-1
-            continue
-
         # Fetch element from the table and check that the symbol matches
         element = table[Z]
         assert element.symbol == symbol, \
@@ -580,7 +577,7 @@ def init(table, reload=False):
         nsf._number_density = element.number_density # N/cm^3 = N/cm^3
 
         if isotope_number == 0:
-            # Bulk values using laboratory abundances of isotopes
+            # Value for element using laboratory abundances of isotopes
             element.neutron = nsf
         else:
             # Values for the individual isotope

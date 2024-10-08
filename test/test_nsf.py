@@ -123,8 +123,8 @@ def test():
     assert abs(depth-depth2)<1e-14
 
     # Test energy <=> velocity <=> wavelength
-    # PAK: value changes with updated neutron and atomic mass constants [2023-08]
-    assert abs(nsf.neutron_wavelength_from_velocity(2200) - 1.7981972619684314) < 1e-14
+    # PAK: value changes with updated neutron and atomic mass constants [2024-10]
+    assert abs(nsf.neutron_wavelength_from_velocity(2200) - 1.7981972755018132) < 1e-14
     assert abs(nsf.neutron_wavelength(25) - 1.8) < 0.1
     assert abs(nsf.neutron_energy(nsf.neutron_wavelength(25)) - 25) < 1e-14
 

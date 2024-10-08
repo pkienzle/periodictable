@@ -157,7 +157,7 @@ and from Rauch to Dawidowski
 import numpy as np
 from numpy import sqrt, pi, asarray, inf
 from .core import Element, Isotope, default_table
-from .constants import (avogadro_number, plancks_constant, electron_volt,
+from .constants import (avogadro_number, planck_constant, electron_volt,
                         neutron_mass, atomic_mass_constant)
 from .util import require_keywords, parse_uncertainty
 
@@ -173,24 +173,24 @@ __all__ = ['init', 'Neutron',
            #'scattering_potential',
           ]
 
-ABSORPTION_WAVELENGTH = 1.798
+#: Wavelength [Å] for which neutron scattering cross sections are tabulated.
+ABSORPTION_WAVELENGTH = 1.798 # [Å]
 
 
-# Velocity (m/s) <=> wavelength (A)
-#   lambda = h / p = h (eV) (J/eV) / ( m_n (kg) v (m/s) ) (10^10 A/m)
-#
-# Since plancks constant is in eV
-#   lambda = (1e10 * h*electron_volt/(neutron_mass/N_A)) / velocity
+#: Energy [eV] <=> wavelength [Å]:
+#:   E = 1/2 m v² = h² / (2 m λ²)
+#:   E[meV s]  = h[J s]²/(2 m_n[u] m_u[kg/u] λ[Å]²/10^20[Å/m])
+#:             * 1000[meV/eV] / electron_volt[J/eV]
+ENERGY_FACTOR = (
+    1e23 * planck_constant**2/electron_volt
+    / (2 * neutron_mass * atomic_mass_constant))
 
-# Energy (eV) <=> wavelength (A)
-#   h^2/(2 m_n kg lambda A) (10^20 A/m) (1000 meV/eV) / (electron_volt J/eV)
-# Since plancks constant is in eV
-#   (h J)^2/electron_volt = ((h eV)(electron_volt J/eV))^2/electron_volt
-#                         = (h eV)^2 * electron_volt
-ENERGY_FACTOR = (plancks_constant**2*electron_volt
-                 / (2 * neutron_mass * atomic_mass_constant)) * 1e23
-VELOCITY_FACTOR = (plancks_constant*electron_volt
-                   / (neutron_mass * atomic_mass_constant)) * 1e10
+#: Velocity[m/s] <=> wavelength[Å]:
+#:  h = p λ = m v λ
+#:  λ[Å] = h[J s] / ( m_n[kg] v[m/s] ) 10^10[Å/m]
+VELOCITY_FACTOR = (
+    1e10 * planck_constant / (neutron_mass * atomic_mass_constant))
+
 def neutron_wavelength(energy):
     r"""
     Convert neutron energy to wavelength.
@@ -210,7 +210,7 @@ def neutron_wavelength(energy):
 
     where
 
-        $h$ = planck's constant in |Js|
+        $h$ = Planck constant in |Js|
 
         $m_n$ = neutron mass in kg
 
@@ -235,7 +235,7 @@ def neutron_wavelength_from_velocity(velocity):
 
     where
 
-        $h$ = planck's constant in |Js|
+        $h$ = Planck constant in |Js|
 
         $m_n$ = neutron mass in kg
     """
@@ -259,7 +259,7 @@ def neutron_energy(wavelength):
 
     where:
 
-        $h$ = planck's constant in |Js|
+        $h$ = Planck constant in |Js|
 
         $m_n$ = neutron mass in kg
     """
@@ -289,7 +289,7 @@ def _CHECK_scattering_potential(sld):
 
         $\hbar = h / (2 \pi)$
 
-        $h$ = planck's constant in |Js|
+        $h$ = Planck constant in |Js|
 
         $N_b = \sum{ n_i b_i } / V$
 

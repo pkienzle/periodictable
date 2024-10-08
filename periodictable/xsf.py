@@ -192,8 +192,9 @@ import numpy
 from numpy import nan, pi, exp, sin, cos, sqrt, radians
 
 from .core import Element, Ion, default_table, get_data_path
-from .constants import (avogadro_number, plancks_constant, speed_of_light,
-                        electron_radius)
+from .constants import (
+    avogadro_number, planck_constant, speed_of_light, electron_volt,
+    electron_radius)
 from .util import require_keywords
 
 def xray_wavelength(energy):
@@ -214,11 +215,11 @@ def xray_wavelength(energy):
 
     where:
 
-        $h$ = planck's constant in eV\ |cdot|\ s
+        $h$ = Planck constant in J\ |cdot|\ s
 
         $c$ = speed of light in m/s
     """
-    return plancks_constant*speed_of_light/numpy.asarray(energy)*1e7
+    return planck_constant/electron_volt*speed_of_light/numpy.asarray(energy)*1e7
 
 def xray_energy(wavelength):
     r"""
@@ -238,11 +239,11 @@ def xray_energy(wavelength):
 
     where:
 
-        $h$ = planck's constant in eV\ |cdot|\ s
+        $h$ = Planck constant in J\ |cdot|\ s
 
         $c$ = speed of light in m/s
     """
-    return plancks_constant*speed_of_light/numpy.asarray(wavelength)*1e7
+    return planck_constant/electron_volt*speed_of_light/numpy.asarray(wavelength)*1e7
 
 class Xray(object):
     """

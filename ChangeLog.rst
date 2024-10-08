@@ -32,6 +32,10 @@ Modified:
 * Fix typos in uncertainties in the neutron table (Zr-90, Te-124, Ba-138, Sm-147)
 * Use correctactivation for Pb-208 which was entered as barns rather than mbarns
 * Use Aug 2023 update to CXRO scattering factors (Pt, Cr, Nb, Y, Er)
+* Update physical constants to CODATA 2022. Relative change up to 1e-7 in
+  Avogadro number, Planck constant, J/eV, electron radius, electron mass,
+  neutron mass and atomic mass constant. `planck_constant` is now in J/Hz rather
+  than eV s.
 
 2024-07-08 R1.7.1
 -----------------

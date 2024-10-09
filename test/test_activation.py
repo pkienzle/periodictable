@@ -2,8 +2,7 @@ import numpy as np
 
 import periodictable as pt
 from periodictable.activation import Sample, ActivationEnvironment
-from periodictable.activation import IAEA1987_isotopic_abundance
-from periodictable.activation import NIST2001_isotopic_abundance
+from periodictable.activation import IAEA1987_isotopic_abundance, table_abundance
 
 def test():
     # This is not a very complete test of the activation calculator.
@@ -40,7 +39,7 @@ def test():
     sample.calculate_activation(
         env, exposure=exposure, rest_times=(0, 1, 24, 360),
         abundance=IAEA1987_isotopic_abundance,
-        #abundance=NIST2001_isotopic_abundance,
+        #abundance=table_abundance,
         )
 
     # TODO: Why aren't we matching the spreadsheet results?
@@ -62,7 +61,7 @@ def test():
     sample.calculate_activation(
         env, rest_times=[0, 1, 24],
         abundance=IAEA1987_isotopic_abundance,
-        #abundance=NIST2001_isotopic_abundance,
+        #abundance=table_abundance,
         )
     print(sample.activity)
     for product, activity in sample.activity.items():

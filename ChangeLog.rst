@@ -28,14 +28,19 @@ Modified:
 * Li-6:Li-7 mass ratio changed from 12.2 to 19.6 (delta = 2.7%)
 * Isotope percentage changed by 0.1 to 0.5 for B, Zn, Ge, Se, Mo, Er, Yb, Pt, Hg
 * Atomic weight changed by 0.04% for Zn, 0.02% for S and 0.01% for Li, Ge, Se, Mo
-* Neutron b_c changed for Zn-70 from 6.9 to 6.0 (fixes a typo in the original table)
+* Neutron b_c changed for Zn-70 from 6.9 to 6.0 (fixes a typo in the table)
 * Fix typos in uncertainties in the neutron table (Zr-90, Te-124, Ba-138, Sm-147)
-* Use correctactivation for Pb-208 which was entered as barns rather than mbarns
-* Use Aug 2023 update to CXRO scattering factors (Pt, Cr, Nb, Y, Er)
-* Update physical constants to CODATA 2022. Relative change up to 1e-7 in
-  Avogadro number, Planck constant, J/eV, electron radius, electron mass,
-  neutron mass and atomic mass constant. `planck_constant` is now in J/Hz rather
-  than eV s.
+* Use correct activation for Pb-208 which was entered as barns rather than mbarns
+* Use Aug 2023 update to X-ray scattering factors (Pt, Cr, Nb, Y, Er)
+* Update physical constants to CODATA 2022. Values have changed by as much
+  as 1e-7 (relative) in Avogadro number, Planck constant, J/eV, electron radius,
+  electron mass, neutron mass and atomic mass constant.
+
+Breaking changes:
+
+* Remove Z=0 (bare neutron) from the PeriodicTable iterator.
+* Replace `constants.plancks_constant` (eV s) with
+  `constants.planck_constant` (J/Hz).
 
 2024-07-08 R1.7.1
 -----------------

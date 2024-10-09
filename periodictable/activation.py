@@ -83,13 +83,9 @@ from . import core
 
 LN2 = log(2)
 
-def NIST2001_isotopic_abundance(iso):
+def table_abundance(iso):
     """
     Isotopic abundance in % from the periodic table package.
-
-    Böhlke, et al.
-    Isotopic Compositions of the Elements, 2001.
-    J. Phys. Chem. Ref. Data, Vol. 34, No. 1, 2005
     """
     return iso.abundance
 
@@ -139,7 +135,7 @@ class Sample(object):
 
     def calculate_activation(self, environment, exposure=1,
                              rest_times=(0, 1, 24, 360),
-                             abundance=NIST2001_isotopic_abundance):
+                             abundance=table_abundance):
         """
         Calculate sample activation after exposure to a neutron flux.
 
@@ -150,8 +146,9 @@ class Sample(object):
         *rest_times* is the list of deactivation times in hours (default is [0, 1, 24, 360]).
 
         *abundance* is a function that returns the relative abundance of an isotope.  By
-        default it uses :func:`NIST2001_isotopic_abundance`, and there is the alternative
-        :func:`IAEA1987_isotopic_abundance`.
+        default it uses :func:`table_abundance` with natural abundance defined
+        in :mod:`periodictable.mass`, but there is the alternative
+        :func:`IAEA1987_isotopic_abundance` in the activation data table.
         """
         self.activity = {}
         self.environment = environment

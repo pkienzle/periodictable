@@ -444,8 +444,8 @@ class Neutron(object):
             *sigma_s* \: float(s) | barn
         """
         # TODO: do vector conversion at the end rather than the beginning.
-        ones = 1 if np.isscalar(wavelength) else np.ones_like(wavelength)
         if self.nsf_table is None:
+            ones = 1 if np.isscalar(wavelength) else np.ones_like(wavelength)
             return ones*self.b_c_complex, ones*self.total
         b_c = np.interp(wavelength, self.nsf_table[0], self.nsf_table[1])
         # TODO: sigma_s should include an incoherent contribution

@@ -85,20 +85,47 @@ within the periodictable source package. Some typographical errors have
 been fixed. In particular, Zn-70 has b_c listed as 6.9 in the table,
 but 6.0 in the source materials for the table.
 
-Alternative tables from Sears\ [#Sears1992]\ [#Sears2006] and Dawidowski,
-et al.\ [#Dawidowski2013] make different choices for the recommended values.
-These are noted in periodictable issue #59
+Note that enteries in the table have been measured independently, so the values
+for the scattering length of an element or isotope may be inconsistent with
+the values measured for the corresponding cross section. The comparison table
+functions highlight these differences.
+
+Tables from Sears\ [#Sears1992]\ [#Sears2006], Rauch\ [#Rauch2003] and
+Dawidowski\ [#Dawidowski2013] make different choices for the recommended
+values. These are noted in periodictable issue #59
 `<https://github.com/pkienzle/periodictable/issues/59>`_
 with changes from Sears to Rauch
 `(a) <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1693686953>`__
 and from Rauch to Dawidowski
 `(b) <https://github.com/pkienzle/periodictable/issues/59#issuecomment-1690212205>`__.
 
-.. Note:
+The following newer measurements from the literature are included:
 
-   Enteries in the table have been measured independently, so the values
-   measured for the scattering length of an element or isotope may be
-   inconsistent with the values measured for the corresponding cross section.
+    1H b_c -3.7423(12) => -3.7395(11) [1]
+    2H b_c 6.674(6) => 6.6681(27) [1]
+    4He b_c 3.26(3) => 3.0982(21) [3] (see also [5], which gives 3.075(6))
+    4He coherent = total cross sections computed from 4 pi b_c^2/100
+    nat-He computed from isotopic weighting of 3He and 4He
+    12C b_c 6.6535(14) => 6.6472(9) [1]
+    16O b_c 5.805(5) => 5.8037(29) [1]
+    17O b_c 5.6(5) => 5.867(4) [2]
+    18O b_c 5.84(7) => 6.009(5) [2]
+    119Sn b_c 6.28(3) => 6.2239(13) [1]
+    154Sm b_c 8.0(1.0) => 8.97(6) [4]
+    153Eu b_c 8.22(12) => 8.85(3) [4]
+    207Pb b_c 9.286(16) => 9.4024(13) [1]
+    209Bi b_c 8.532(2) => 8.5242(18) [1]
+
+    He total 1.34(2) => 1.188(5) [5] (ignored; using 4 pi b_c^2/100)
+    Ar total 0.683(4) => 0.683(5) [5] (ignored; existing value is more precise)
+    Kr total 7.68(13) => 7.685(26) [5]
+    Xe total --- => 4.344(17) [5]
+
+    [1] Snow (2020) 10.1103/PhysRevD.101.062004
+    [2] Fischer (2012) 10.1088/0953-8984/24/50/505105
+    [3] Haun (2020) 10.1103/PhysRevLett.124.012501
+    [4] Kohlmann (2016) 10.1515/zkri-2016-1984
+    [5] Haddock (2019) 10.1103/PhysRevC.100.064002
 
 .. [#Rauch2003] Rauch, H. and Waschkowski, W. (2003)
     Neutron Scattering Lengths in ILL
@@ -447,6 +474,8 @@ class Neutron(object):
         if self.nsf_table is None:
             ones = 1 if np.isscalar(wavelength) else np.ones_like(wavelength)
             return ones*self.b_c_complex, ones*self.total
+        #energy = neutron_energy(wavelength)
+        #b_c = np.interp(energy, self.nsf_table[0], self.nsf_table[1])
         b_c = np.interp(wavelength, self.nsf_table[0], self.nsf_table[1])
         # TODO: sigma_s should include an incoherent contribution
         sigma_s = _4PI_100*abs(b_c)**2 # 1 barn = 1 fm^2 1e-2 barn/fm^2
@@ -517,6 +546,7 @@ def energy_dependent_init(table):
         el = getattr(table, el_name)
         atom = el if iso_num is None else el[iso_num]
         xs = asarray(re_a) + 1j*asarray(im_a)
+        #atom.neutron.nsf_table = asarray(energy)*1000, xs
         atom.neutron.nsf_table = wavelength[::-1], xs[::-1]
         #print(f"adding {atom}")
 
@@ -592,17 +622,6 @@ def init(table, reload=False):
             # one isotope.
             if element.neutron is missing:
                 element.neutron = nsf
-
-    # Gaps in the table for Xe and Eu[151]. Fill them in with guesses from
-    # other columns even though they have not been measured directly. The
-    # assertions are here so that we remember to remove this code if the
-    # table eventually gets updated.
-    assert table.Xe.neutron.total is None
-    assert table.Eu[151].neutron.b_c is None
-    table.Xe.neutron.total = (
-        table.Xe.neutron.coherent + table.Xe.neutron.incoherent)
-    table.Eu[151].neutron.b_c = (
-        sqrt(table.Eu[151].neutron.coherent/_4PI_100))
 
     for line in nsftableI.split('\n'):
         columns = line.split(',')
@@ -898,7 +917,7 @@ def neutron_scattering(compound, density=None,
         num_atoms += quantity
         # PAK 2021-04-05: allow energy dependent b_c, b''
         b_ck, sigma_sk = element.neutron.scattering_by_wavelength(wavelength)
-        #print(f"{element=}; {re_a=}; {im_a=}; {total_xs=}")
+        #print(f"{element=}; {b_ck=}; {sigma_sk=}")
         b_c += quantity * b_ck
         sigma_s += quantity * sigma_sk
         is_energy_dependent |= element.neutron.is_energy_dependent
@@ -1269,17 +1288,24 @@ def sld_plot(table=None):
 # Numbers followed by '*' are estimated.
 # Numbers may be given as limit, e.g., <1.0e-6
 #
-# Formatting corrections by Paul Kienzle
+# [Paul Kienzle]
+# * Fix typos such as 70Zn b_c 6.9(1.0) => 6.0(1.0).
+# * Update bound coherent scattering length for H-1, H-2, He-4, C-12,
+#   O-16, O-17, O-18, Sn-119, Sm-154, Eu-153, Pb-207, Bi-209
+# * Update total cross section for He, Kr, Xe
+# * Usd 63-Eu-151 b_c from 84Mug1. This change is moot since this isotope
+#   has energy dependent isotope coeffs.
+# * Use calculated values for 4He coh and total, and natHe b_c, coh and total.
 
 nsftable = """\
 0-n-1,618 S,1/2,-37.0(6),0,-37.0(6),,43.01(2),,43.01(2),0
 1-H,,,-3.7409(11),,,,1.7568(10),80.26(6),82.02(6),0.3326(7)
-1-H-1,99.985,1/2,-3.7423(12),10.817(5),-47.420(14),+/-,1.7583(10),80.27(6),82.03(6),0.3326(7)
-1-H-2,0.0149,1,6.674(6),9.53(3),0.975(60),,5.592(7),2.05(3),7.64(3),0.000519(7)
+1-H-1,99.985,1/2,-3.7395(11),10.817(5),-47.420(14),+/-,1.7583(10),80.27(6),82.03(6),0.3326(7)
+1-H-2,0.0149,1,6.6681(27),9.53(3),0.975(60),,5.592(7),2.05(3),7.64(3),0.000519(7)
 1-H-3,12.26 Y,1/2,4.792(27),4.18(15),6.56(37),,2.89(3),0.14(4),3.03(5),<6.0E-6
-2-He,,,3.26(3),,,,1.34(2),0,1.34(2),0.00747(1)
+2-He,,,3.0985(21),,,,1.2065(16),0,1.2065(16),0.00747(1)
 2-He-3,0.013,1/2,5.74(7),4.7(5),8.8(1.4),E,4.42(10),1.6(4),6.0(4),5333.0(7.0)
-2-He-4,99.987,0,3.26(3),,,,1.34(2),0,1.34(2),0
+2-He-4,99.987,0,3.0982(21),,,,1.2062(16),0,1.2062(16),0
 3-Li,,,-1.90(3),,,,0.454(10),0.92(3),1.37(3),70.5(3)
 3-Li-6,7.5,1,2.0(1),0.67(14),4.67(17),+/-,0.51(5),0.46(5),0.97(7),940.0(4.0)
 3-Li-7,92.5,3/2,-2.22(2),-4.15(6),1.00(8),+/-,0.619(11),0.78(3),1.40(3),0.0454(3)
@@ -1288,15 +1314,15 @@ nsftable = """\
 5-B-10,19.4,3,-0.2(4),-4.2(4),5.2(4),,0.144(6),3.0(4),3.1(4),3835.0(9.0)
 5-B-11,80.2,3/2,6.65(4),5.6(3),8.3(3),,5.56(7),0.21(7),5.77(10),0.0055(33)
 6-C,,,6.6484(13),,,,5.551(2),0.001(4),5.551(3),0.00350(7)
-6-C-12,98.89,0,6.6535(14),,,,5.559(3),0,5.559(3),0.00353(7)
+6-C-12,98.89,0,6.6472(9),,,,5.559(3),0,5.559(3),0.00353(7)
 6-C-13,1.11,1/2,6.19(9),5.6(5),6.2(5),+/-,4.81(14),0.034(11),4.84(14),0.00137(4)
 7-N,,,9.36(2),,,,11.01(5),0.50(12),11.51(11),1.90(3)
 7-N-14,99.635,1,9.37(2),10.7(2),6.2(3),,11.03(5),0.50(12),11.53(11),1.91(3)
 7-N-15,0.365,1/2,6.44(3),6.77(10),6.21(10),,5.21(5),0.00005(10),5.21(5),0.000024(8)
 8-O,,,5.805(4),,,,4.232(6),0.000(8),4.232(6),0.00019(2)
-8-O-16,99.75,0,5.805(5),,,,4.232(6),0,4.232(6),0.00010(2)
-8-O-17,0.039,5/2,5.6(5),5.52(20),5.17(20),,4.20(22),0.004(3),4.20(22),0.236(10)
-8-O-18,0.208,0,5.84(7),,,,4.29(10),0,4.29(10),0.00016(1)
+8-O-16,99.75,0,5.8037(29),,,,4.232(6),0,4.232(6),0.00010(2)
+8-O-17,0.039,5/2,5.867(4),5.52(20),5.17(20),,4.20(22),0.004(3),4.20(22),0.236(10)
+8-O-18,0.208,0,6.009(5),,,,4.29(10),0,4.29(10),0.00016(1)
 9-F-19,100,1/2,5.654(12),5.632(10),5.767(10),+/-,4.017(14),0.0008(2),4.018(14),0.0096(5)
 10-Ne,,,4.566(6),,,,2.620(7),0.008(9),2.628(6),0.039(4)
 10-Ne-20,90.5,0,4.631(6),,,,2.695(7),0,2.695(7),0.036(4)
@@ -1393,7 +1419,7 @@ nsftable = """\
 35-Br,,,6.79(2),,,,5.80(3),0.10(9),5.90(9),6.9(2)
 35-Br-79,50.49,3/2,6.79(7),,,+/-,5.81(2),0.15(6),5.96(13),11.0(7)
 35-Br-81,49.31,3/2,6.78(7),,,+/-,5.79(12),0.05(2),5.84(12),2.7(2)
-36-Kr,,,7.81(2),,,,7.67(4),0.01(14),7.68(13),25.0(1.0)
+36-Kr,,,7.81(2),,,,7.67(4),0.01(14),7.685(26),25.0(1.0)
 36-Kr-78,0.35,0,,,,,,0,,6.4(9)
 36-Kr-80,2.5,0,,,,,,0,,11.8(5)
 36-Kr-82,11.6,0,,,,,,0,,29.0(20.0)
@@ -1463,7 +1489,7 @@ nsftable = """\
 50-Sn-116,14.3,0,6.10(1),,,,4.42(7),0,4.42(7),0.14(3)
 50-Sn-117,7.61,1/2,6.59(8),0.22(10),-0.23(10),,5.28(8),0.3(3)*,5.6(3),2.3(5)
 50-Sn-118,24.03,0,6.23(4),,,,4.63(8),0,4.63(8),0.22(5)
-50-Sn-119,8.58,1/2,6.28(3),0.14(10),0.0(1),,4.71(8),0.3(3)*,5.0(3),2.2(5)
+50-Sn-119,8.58,1/2,6.2239(13),0.14(10),0.0(1),,4.71(8),0.3(3)*,5.0(3),2.2(5)
 50-Sn-120,32.86,0,6.67(4),,,,5.29(8),0,5.29(8),0.14(3)
 50-Sn-122,4.72,0,5.93(3),,,,4.14(7),0,4.14(7),0.18(2)
 50-Sn-124,5.94,0,6.15(3),,,,4.48(8),0,4.48(8),0.133(5)
@@ -1480,7 +1506,7 @@ nsftable = """\
 52-Te-128,31.79,0,5.88(8),,,,4.36(10),0,4.36(10),0.215(8)
 52-Te-130,34.48,0,6.01(7),,,,4.55(11),0,4.55(11),0.29(6)
 53-I-127,100,5/2,5.28(2),6.6(2),3.4(2),,3.50(3),0.31(6),3.81(7),6.15(6)
-54-Xe,,,4.69(4),,,,3.04(4),0,,23.9(1.2)
+54-Xe,,,4.69(4),,,,3.04(4),0,4.344(17),23.9(1.2)
 54-Xe-124,0.1,0,,,,,,0,,165.0(20.0)
 54-Xe-126,0.09,0,,,,,,0,,3.5(8)
 54-Xe-128,1.9,0,,,,,,0,,<8.0
@@ -1524,10 +1550,10 @@ nsftable = """\
 62-Sm-149,13.8,7/2,18.7(28),,,E,63.5(6),137.0(5.0),200.0(5.0),42080.0(400.0)
 62-Sm-150,7.4,0,14.0(3.0),,,,25.0(11.0),0,25.0(11.0),104.0(4.0)
 62-Sm-152,26.7,0,-5.0(6),,,,3.1(8),0,3.1(8),206.0(6.0)
-62-Sm-154,22.8,0,8.0(1.0),,,,11.0(2.0),0,11.0(2.0),8.4(5)
+62-Sm-154,22.8,0,8.97(6),,,,11.0(2.0),0,11.0(2.0),8.4(5)
 63-Eu,,,5.3(3),,,E,6.57(4),2.5(4),9.2(4),4530.0(40.0)
-63-Eu-151,47.8,5/2,,,,E,5.5(2),3.1(4),8.6(4),9100.0(100.0)
-63-Eu-153,52.8,5/2,8.22(12),,,,8.5(2),1.3(7),9.8(7),312.0(7.0)
+63-Eu-151,47.8,5/2,6.92(15),,,E,5.5(2),3.1(4),8.6(4),9100.0(100.0)
+63-Eu-153,52.8,5/2,8.85(3),,,,8.5(2),1.3(7),9.8(7),312.0(7.0)
 64-Gd,,,9.5(2),,,E,29.3(8),151.0(2.0),180.0(2.0),49700.0(125.0)
 64-Gd-152,0.2,0,10.0(3.0)*,,,,13.0(8.0),0,13.0(8.0),735.0(20.0)
 64-Gd-154,2.2,0,10.0(3.0)*,,,,13.0(8.0),0,13.0(8.0),85.0(12.0)
@@ -1617,9 +1643,9 @@ nsftable = """\
 82-Pb,,,9.401(2),,,,11.115(7),0.0030(7),11.118(7),0.171(2)
 82-Pb-204,1.4,0,10.893(78),,,,12.3(2),0,12.3(2),0.65(7)
 82-Pb-206,24.1,0,9.221(78),,,,10.68(12),0,10.68(12),0.0300(8)
-82-Pb-207,22.1,1/2,9.286(16),,,+/-,10.82(9),0.002(2),10.82(9),0.699(10)
+82-Pb-207,22.1,1/2,9.4024(13),,,+/-,10.82(9),0.002(2),10.82(9),0.699(10)
 82-Pb-208,52.4,0,9.494(30),,,,11.34(5),0,11.34(5),0.00048(3)
-83-Bi-209,100,9/2,8.532(2),8.26(1),8.74(1),,9.148(4),0.0084(19),9.156(4),0.0338(7)
+83-Bi-209,100,9/2,8.5242(18),8.26(1),8.74(1),,9.148(4),0.0084(19),9.156(4),0.0338(7)
 88-Ra-226,1620 Y,0,10.0(1.0),,,,13.0(3.0),0,13.0(3.0),12.8(1.5)
 90-Th-232,100,0,10.31(3),,,,13.36(8),0,13.36(8),7.37(6)
 91-Pa-231,32500 Y,3/2,9.1(3),,,,10.4(7),0.1(3.3),10.5(3.2),200.6(2.3)
@@ -1692,12 +1718,12 @@ def sld_table(wavelength=1, table=None, isotopes=True):
          Neutron scattering length density table
         atom       mass density     sld    imag   incoh
         H         1.008   0.071  -1.582   0.000  10.690
-        1-H       1.008   0.071  -1.583   0.000  10.690
-        D         2.014   0.141   2.823   0.000   1.705
+        1-H       1.008   0.071  -1.582   0.000  10.691
+        D         2.014   0.141   2.820   0.000   1.709
         T         3.016   0.212   2.027   0.000   0.453
-        He        4.003   0.122   0.598   0.000   0.035
+        He        4.003   0.122   0.569   0.000   0.003
         3-He      3.016   0.092   1.054   0.272   0.652 *
-        4-He      4.003   0.122   0.598   0.000   0.035
+        4-He      4.003   0.122   0.569   0.000   0.000
            ...
         248-Cm  248.072  13.569   2.536   0.000   0.207
         * Energy dependent cross sections
@@ -1900,6 +1926,7 @@ def total_comparison_table(table=None, tol=None):
         >>> total_comparison_table (tol=0.1)
         Comparison of total cross section to (coherent + incoherent)
              84-Kr     6.60     ----
+                Xe     4.34     3.04  42.9%
             149-Sm   200.00   200.50  -0.2%
                 Eu     9.20     9.07   1.4%
                 Gd   180.00   180.30  -0.2%
@@ -1988,5 +2015,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-    #coherent_comparison_table(tol=0.5)
-    #incoherent_comparison_table(tol=0.5)
+    #sld_table()
+    #coherent_comparison_table(tol=0.1)
+    #incoherent_comparison_table(tol=0.1)

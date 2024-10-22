@@ -41,17 +41,14 @@ def test():
             ## Printing suppressed for the release version
             #print("%2s %.3f % 7.3f % 7.3f"%(el.symbol,err,b_c,el.neutron.b_c))
 
-    # Check neutron_sld and neutron_xs against NIST calculator
-    # Note that we are using different tables, so a general comparison with
-    # NIST numbers is not possible, but ^30Si and ^18O are the same in both.
+    # Isotopic formula.
     M = formula('Si[30]O[18]2',density=2.2)
     sld,xs,depth = neutron_scattering(M,wavelength=4.75)
     sld2 = neutron_sld(M,wavelength=4.75)
     assert all(abs(v-w)<1e-10 for v,w in zip(sld,sld2))
     #_summarize(M)
     #_summarize(formula('O2',density=1.14))
-    # Alan's numbers:
-    assert abs(sld[0] - 3.27) < 0.01
+    assert abs(sld[0] - 3.33) < 0.01
     assert abs(sld[1] - 0) < 0.01
     #assert abs(xs[2] - 0.00292) < 0.00001   # TODO fix test
     assert abs(xs[1] - 0.00569) < 0.00001

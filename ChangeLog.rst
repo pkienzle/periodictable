@@ -35,6 +35,9 @@ Modified:
 * Update physical constants to CODATA 2022. Values have changed by as much
   as 1e-7 (relative) in Avogadro number, Planck constant, J/eV, electron radius,
   electron mass, neutron mass and atomic mass constant.
+* Updated bound coherent scattering length for H-1, H-2, He-4, C-12,
+  O-16, O-17, O-18, Sn-119, Sm-154, Eu-153, Pb-207, Bi-209
+* Updated total cross section for He, Kr, Xe
 
 Breaking changes:
 

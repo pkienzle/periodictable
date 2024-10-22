@@ -75,7 +75,7 @@ There are a number of functions available in periodictable.nsf
 For private tables use :func:`init` to set the data.
 
 The neutron scattering information table is reproduced from the Atomic
-Institute for Austrian Universities\ [#Rauch2003]_  (retrieved March 2008):
+Institute for Austrian Universities\ [#Rauch2003]_,\ [#Rauch2000]_:
 
     `<http://www.ati.ac.at/~neutropt/scattering/table.html>`_
 
@@ -91,7 +91,7 @@ the values measured for the corresponding cross section. The comparison table
 functions highlight these differences.
 
 Tables from Sears\ [#Sears1992]_\ [#Sears2006]_, Rauch\ [#Rauch2003]_ and
-Dawidowski\ [#Dawidowski2013] make different choices for the recommended
+Dawidowski\ [#Dawidowski2013]_ make different choices for the recommended
 values. These are noted in periodictable issue #59
 `<https://github.com/pkienzle/periodictable/issues/59>`_
 with changes from Sears to Rauch
@@ -131,15 +131,13 @@ The following newer measurements from the literature are included:
     Neutron Scattering Lengths in ILL
     Neutron Data Booklet (second edition), A.-J. Dianoux, G. Lander, Eds.
     Old City Publishing, Philidelphia, PA. pp 1.1-1 to 1.1-17.
-    (https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf)
+    (https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf
+    Retrieved March 2008)
 
 .. [#Rauch2000] Rauch, H. and Waschkowski, W. (2000)
     Neutron scattering lengths. Schopper, H. (ed.). SpringerMaterials -
     The Landolt-Börnstein Database (http://www.springermaterials.com).
     doi:10.1007/10499706_6
-
-.. [#Koester1991] Koester, L., Rauch, H., Seymann. E. (1991)
-    Atomic Data Nuclear Data Tables 49, 65. doi:10.1016/0092-640X(91)90012-S
 
 .. [#Lynn1990] Lynn, J.E. and Seeger, P.A. (1990)
     Resonance effects in neutron scattering lengths of rare-earth nuclides.
@@ -165,11 +163,6 @@ The following newer measurements from the literature are included:
    Neutron Transmission of Single-Crystal Sapphire.
    J Appl Crystallogr 31, 835–840. doi:10.1107/S0021889898005846
 
-.. [#Smith2006] Smith, G.S. and Majkrzak, C.M. (2006)
-    2.9 Neutron reflectometry.
-    In E. Prince ed. Intl. Tables for Crystallography C.
-    Wiley InterScience. pp 126-146. doi:10.1107/97809553602060000584
-
 .. [#Glinka2011] Glinka, C.J. (2011)
     Incoherent Neutron Scattering from Multi-element Materials.
     J. Appl. Cryst. 44, 618-624. doi:10.1107/S0021889811008223
@@ -181,6 +174,15 @@ The following newer measurements from the literature are included:
     Experimental Methods in the Physical Sciences (Vol. 44, pp. 471–528).
     Academic Press. doi:10.1016/B978-0-12-398374-9.09989-7
 """
+
+#.. [#Koester1991] Koester, L., Rauch, H., Seymann. E. (1991)
+#    Atomic Data Nuclear Data Tables 49, 65. doi:10.1016/0092-640X(91)90012-S
+#.. [#Smith2006] Smith, G.S. and Majkrzak, C.M. (2006)
+#    2.9 Neutron reflectometry.
+#    In E. Prince ed. Intl. Tables for Crystallography C.
+#    Wiley InterScience. pp 126-146. doi:10.1107/97809553602060000584
+#
+
 import numpy as np
 from numpy import sqrt, pi, asarray, inf
 from .core import Element, Isotope, default_table

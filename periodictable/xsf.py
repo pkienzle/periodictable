@@ -74,7 +74,7 @@ Emission line tables
 ====================
 
 Data for the $K_\alpha$ and $K_\beta$ lines comes from
-[#Deslattes2003], with the full tables available at
+[#Deslattes2003]_, with the full tables available at
 `<http://www.nist.gov/pml/data/xraytrans/index.cfm>`_.
 Experimental Values are used, truncated to 4 digits
 of precision to correspond to the values for the subset
@@ -177,7 +177,6 @@ with minor formatting changes:
 
 .. [#Deslattes2003] R. D. Deslattes, E. G. Kessler, Jr., P. Indelicato, L. de Billy,
        E. Lindroth, and J. Anton.  Rev. Mod. Phys. 75, 35-99 (2003).
-
 """
 from __future__ import with_statement
 __all__ = ['Xray', 'init', 'init_spectral_lines',

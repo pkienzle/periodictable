@@ -32,7 +32,7 @@ adjusted slightly so that they would sum to 100%.
 
 The values for Ar and N were set to the values present in the atmosphere
 and U was set to the values in a Namibian ore per the recommendations
-in Meija (2016).
+in Meija [#Meija]_.
 
 The values for Pb in the CIAAW table are too broad to be usable. For example,
 206-Pb varies from 0.02 to 0.87 in monazite samples (Zhu 2020) [#Zhu]_. Rather
@@ -43,19 +43,19 @@ atomic abundance values in Meija (2016). See the CIAAW page on
 Note: uncertainties are stored in `iso._mass_unc` and `iso._abundance_unc`,
 but they are not yet part of the public interface.
 
-.. [#CIAAW] CIAAW. Isotopic compositions of the elements 2021.
-   Available online at www.ciaaw.org.
 .. [#Wang] Meng Wang et al. (2021) Chinese Phys. C 45 030003
     DOI:10.1088/1674-1137/abddaf
     From https://www-nds.iaea.org/amdc/ame2020/massround.mas20.txt (2023-07-06)
-.. [#Meija] J. Meija et al. (2016)
-    Isotopic compositions of the elements 2013
-    Pure and Applied Chemistry 88, 293-306.
-    From https://www.ciaaw.org/isotopic-abundances.htm (2023-07-06)
+.. [#CIAAW] CIAAW. Isotopic compositions of the elements 2021.
+   Available online at https://www.ciaaw.org.
 .. [#Prohaska] T. Prohaska, et al. (2022)
     Standard atomic weights of the elements 2021.
     Pure Appl. Chem. 94. DOI:10.1515/pac-2019-0603
     From https://www.ciaaw.org/atomic-weights.htm (2023-07-06)
+.. [#Meija] J. Meija et al. (2016)
+    Isotopic compositions of the elements 2013
+    Pure and Applied Chemistry 88, 293-306.
+    From https://www.ciaaw.org/isotopic-abundances.htm (2023-07-06)
 .. [#Zhu] Zhu, X., Benefield, J., Coplen, T., Gao, Z. & Holden, N. (2021).
     Variation of lead isotopic composition and atomic weight in terrestrial
     materials (IUPAC Technical Report). Pure and Applied Chemistry, 93(1), 155-166.

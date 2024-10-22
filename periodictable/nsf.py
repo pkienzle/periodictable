@@ -977,6 +977,8 @@ def _calculate_scattering(number_density, wavelength, b_c, sigma_s):
     # Note: Sears (1992) uses b = b' - i b'', so use |Im(b_c)| for sigma_a.
     sigma_a = 2000 * abs(b_c.imag) * wavelength # 1 barn = 1 fm 1 A 1e5 A/fm 1e-2 barn/fm
 
+    # print(f"σ_a {sigma_c:.3f} σ_i {sigma_i:.3f} σ_s {sigma_s:.3f} σ_a {sigma_a:.3f}")
+
     # Compute macroscopic scattering cross section per unit volume (1/cm)
     total_xs = number_density * sigma_s # 1/cm = 1/A^3 1 barn 1e-8 A^2/barn 1e8 A/cm
     coh_xs = number_density * sigma_c
@@ -1983,8 +1985,8 @@ def print_scattering(compound, wavelength=ABSORPTION_WAVELENGTH):
     print("%s at %g Ang  (density=%g g/cm^3)"
           % (str(compound), wavelength, density))
     print("  sld: %g + %g j  (%g incoherent)  1e-6/Ang^2"%sld)
-    print("  sigma_c: %g  sigma_a: %g  sigma_i: %g  1/cm"%xs)
-    print("  mu: %g 1/cm  1/e penetration: %g cm"%(1/penetration, penetration))
+    print("  Σ_c: %g  Σ_a: %g  Σ_i: %g  1/cm"%xs)
+    print("  μ: %g 1/cm  1/e penetration: %g cm"%(1/penetration, penetration))
 
 def main():
     """

@@ -26,7 +26,7 @@ recommended table therefore gives ranges of values for the natural mass
 and isotope abundance rather than a single value with an uncertainty.
 
 For periodictable, fractionation ranges for masses were replaced with abridged
-standard atomic weights as given in Prohaska [#Prohaska]. For the abundance
+standard atomic weights as given in Prohaska [#Prohaska]_. For the abundance
 ratios the center value of the range was chosen. A few elements had to be
 adjusted slightly so that they would sum to 100%.
 
@@ -35,7 +35,7 @@ and U was set to the values in a Namibian ore per the recommendations
 in Meija (2016).
 
 The values for Pb in the CIAAW table are too broad to be usable. For example,
-206-Pb varies from 0.02 to 0.87 in monazite samples (Zhu 2020) [#Zhu]. Rather
+206-Pb varies from 0.02 to 0.87 in monazite samples (Zhu 2020) [#Zhu]_. Rather
 than return NaN for composition we replace the ranges with representative
 atomic abundance values in Meija (2016). See the CIAAW page on
 `lead <https://www.ciaaw.org/lead.htm>`_ for details.
@@ -56,7 +56,7 @@ but they are not yet part of the public interface.
     Standard atomic weights of the elements 2021.
     Pure Appl. Chem. 94. DOI:10.1515/pac-2019-0603
     From https://www.ciaaw.org/atomic-weights.htm (2023-07-06)
-.. [*Zhu] Zhu, X., Benefield, J., Coplen, T., Gao, Z. & Holden, N. (2021).
+.. [#Zhu] Zhu, X., Benefield, J., Coplen, T., Gao, Z. & Holden, N. (2021).
     Variation of lead isotopic composition and atomic weight in terrestrial
     materials (IUPAC Technical Report). Pure and Applied Chemistry, 93(1), 155-166.
     https://doi.org/10.1515/pac-2018-0916

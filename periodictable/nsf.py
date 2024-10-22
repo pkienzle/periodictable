@@ -90,7 +90,7 @@ for the scattering length of an element or isotope may be inconsistent with
 the values measured for the corresponding cross section. The comparison table
 functions highlight these differences.
 
-Tables from Sears\ [#Sears1992]\ [#Sears2006], Rauch\ [#Rauch2003] and
+Tables from Sears\ [#Sears1992]_\ [#Sears2006]_, Rauch\ [#Rauch2003]_ and
 Dawidowski\ [#Dawidowski2013] make different choices for the recommended
 values. These are noted in periodictable issue #59
 `<https://github.com/pkienzle/periodictable/issues/59>`_

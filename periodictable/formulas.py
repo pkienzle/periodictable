@@ -221,6 +221,42 @@ def formula(compound=None, density=None, natural_density=None,
     :Exceptions:
         *ValueError* : invalid formula initializer
 
+    Example compounds:
+
+       string:
+          m = formula( "CaCO3+6H2O" )
+       sequence of fragments:
+          m = formula( [(1, Ca), (2, C), (3, O), (6, [(2, H), (1, O)]] )
+       molecular math:
+          m = formula( "CaCO3" ) + 6*formula( "H2O" )
+       another formula (makes a copy):
+          m = formula( formula("CaCO3+6H2O") )
+       an atom:
+          m = formula( Ca )
+       nothing:
+          m = formula()
+
+    Operations:
+       m.atoms returns {isotope: count, ...} for each atom in the compound.
+
+    Formula strings consist of counts and atoms such as "CaCO3+6H2O".
+    Groups can be separated by '+' or space, so "CaCO3 6H2O" works as well.
+    Groups and be defined using parentheses, such as "CaCO3(H2O)6".
+    Parentheses can nest: "(CaCO3(H2O)6)1"
+    Isotopes are represented by index, e.g., "CaCO[18]3+6H2O".
+    Counts can be integer or decimal, e.g. "CaCO3+(3HO0.5)2".
+    Density can be specified in the formula using, e.g., "H2O@1". Isotopic
+    formulas can use natural density, e.g., "D2O@1n", or the expected density
+    with that isotope, e.g., "D2O@1.11".
+
+    For full details see help(periodictable.formulas.formula_grammar)
+
+    The chemical formula is designed for simple calculations such
+    as molar mass, not for representing bonds or atom positions.
+    However, we preserve the structure of the formula so that it can
+    be used as a basis for a rich text representation such as
+    matplotlib TeX markup.
+
     After creating a formula, a rough estimate of the density can be
     computed using::
 

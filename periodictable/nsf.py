@@ -2022,3 +2022,5 @@ if __name__ == "__main__":
     #sld_table()
     #coherent_comparison_table(tol=0.1)
     #incoherent_comparison_table(tol=0.1)
+    #absorption_comparison_table(tol=0.1)
+    #total_comparison_table(tol=0.1)

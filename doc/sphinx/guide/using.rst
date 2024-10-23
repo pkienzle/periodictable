@@ -29,7 +29,7 @@ Access particular elements as symbols:
     B absorption 767.0
     >>> print("Ni f1/f2 for Cu K-alpha X-rays f'=%.5f f''=%.5f"
     ...       % Ni.xray.scattering_factors(wavelength=Cu.K_alpha))
-    Ni f1/f2 for Cu K-alpha X-rays f'=25.02293 f''=0.52493
+    Ni f1/f2 for Cu K-alpha X-rays f'=25.02293 f''=0.52491
 
 Access isotopes using mass number subscripts:
 

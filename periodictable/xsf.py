@@ -178,7 +178,6 @@ with minor formatting changes:
 .. [#Deslattes2003] R. D. Deslattes, E. G. Kessler, Jr., P. Indelicato, L. de Billy,
        E. Lindroth, and J. Anton.  Rev. Mod. Phys. 75, 35-99 (2003).
 """
-from __future__ import with_statement
 __all__ = ['Xray', 'init', 'init_spectral_lines',
            'xray_energy', 'xray_wavelength',
            'xray_sld', 'xray_sld_from_atoms',
@@ -187,7 +186,7 @@ __all__ = ['Xray', 'init', 'init_spectral_lines',
            ]
 import os.path
 
-import numpy
+import numpy as np
 from numpy import nan, pi, exp, sin, cos, sqrt, radians
 
 from .core import Element, Ion, default_table, get_data_path
@@ -218,7 +217,7 @@ def xray_wavelength(energy):
 
         $c$ = speed of light in m/s
     """
-    return planck_constant/electron_volt*speed_of_light/numpy.asarray(energy)*1e7
+    return planck_constant/electron_volt*speed_of_light/np.asarray(energy)*1e7
 
 def xray_energy(wavelength):
     r"""
@@ -242,7 +241,7 @@ def xray_energy(wavelength):
 
         $c$ = speed of light in m/s
     """
-    return planck_constant/electron_volt*speed_of_light/numpy.asarray(wavelength)*1e7
+    return planck_constant/electron_volt*speed_of_light/np.asarray(wavelength)*1e7
 
 class Xray(object):
     """
@@ -265,8 +264,8 @@ class Xray(object):
             filename = os.path.join(self._nff_path,
                                     self.element.symbol.lower()+".nff")
             if self.element.symbol != 'n' and os.path.exists(filename):
-                xsf = numpy.loadtxt(filename, skiprows=1).T
-                xsf[1, xsf[1] == -9999.] = numpy.nan
+                xsf = np.loadtxt(filename, skiprows=1).T
+                xsf[1, xsf[1] == -9999.] = np.nan
                 xsf[0] *= 0.001  # Use keV in table rather than eV
                 self._table = xsf
         return self._table
@@ -298,11 +297,13 @@ class Xray(object):
         if energy is None:
             raise TypeError('X-ray scattering factors need wavelength or energy')
 
-        scalar = numpy.isscalar(energy)
+        scalar = np.isscalar(energy)
         if scalar:
-            energy = numpy.array([energy])
-        f1 = numpy.interp(energy, xsf[0], xsf[1], left=nan, right=nan)
-        f2 = numpy.interp(energy, xsf[0], xsf[2], left=nan, right=nan)
+            energy = np.array([energy])
+        f1 = np.interp(energy, xsf[0], xsf[1], left=nan, right=nan)
+        f2 = np.exp(np.interp(
+            np.log(energy), np.log(xsf[0]), np.log(xsf[2]),
+            left=nan, right=nan))
         if scalar:
             f1, f2 = f1[0], f2[0]
         return f1, f2
@@ -505,10 +506,10 @@ def mirror_reflectivity(compound, density=None, natural_density=None,
         wavelength = xray_wavelength(energy)
     assert wavelength is not None, "scattering calculation needs energy or wavelength"
     angle = radians(angle)
-    if numpy.isscalar(wavelength):
-        wavelength = numpy.array([wavelength])
-    if numpy.isscalar(angle):
-        angle = numpy.array([angle])
+    if np.isscalar(wavelength):
+        wavelength = np.array([wavelength])
+    if np.isscalar(angle):
+        angle = np.array([angle])
     nv = index_of_refraction(compound=compound,
                              density=density, natural_density=natural_density,
                              wavelength=wavelength)
@@ -701,7 +702,7 @@ def sld_table(wavelength=None, table=None):
          He   1.03   0.00
          Li   3.92   0.00
          Be  13.93   0.01
-          B  18.40   0.02
+          B  18.40   0.01
           C  18.71   0.03
           N   6.88   0.02
           O   9.74   0.04

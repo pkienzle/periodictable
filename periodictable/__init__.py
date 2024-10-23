@@ -97,7 +97,7 @@ def __getattr__(name: str):
     if name in _LAZY_MODULES:
         return importlib.import_module(f'{__name__}.{name}')
     raise AttributeError(f"{__name__}.{name} not found")
-def __dir__() -> list[str]:
+def __dir__():
     return __all__
 
 # Export variables for each element name and symbol.

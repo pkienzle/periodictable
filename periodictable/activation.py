@@ -165,7 +165,7 @@ class Sample(object):
                         A = activity(el[iso], iso_mass, environment, exposure, rest_times)
                         self._accumulate(A)
 
-    def decay_time(self, target):
+    def decay_time(self, target, tol=1e-10):
         """
         After determining the activation, compute the number of hours required to achieve
         a total activation level after decay.
@@ -173,30 +173,32 @@ class Sample(object):
         if not self.rest_times or not self.activity:
             return 0
 
-        # Find the small rest time (probably 0 hr)
-        min_rest, To = min(enumerate(self.rest_times), key=lambda x: x[1])
+        # Find the smallest rest time (probably 0 hr)
+        k, t_k = min(enumerate(self.rest_times), key=lambda x: x[1])
         # Find the activity at that time, and the decay rate
         data = [
-            (Ia[min_rest], LN2/a.Thalf_hrs)
+            (Ia[k], LN2/a.Thalf_hrs)
             for a, Ia in self.activity.items()
             # TODO: not sure why Ia is zero, but it messes up the initial value guess if it is there
-            if Ia[min_rest] > 0.0
+            if Ia[k] > 0.0
             ]
-        # Build functions for total activity at time T - target and its derivative
-        # This will be zero when activity is at target
-        f = lambda t: sum(Ia*exp(-La*(t-To)) for Ia, La in data) - target
-        df = lambda t: sum(-La*Ia*exp(-La*(t-To)) for Ia, La in data)
-        # Return target time, or 0 if target time is negative
-        if f(0) < target:
-            return 0
         # Need an initial guess near the answer otherwise find_root gets confused.
         # Small but significant activation with an extremely long half-life will
         # dominate at long times, but at short times they will not affect the
         # derivative. Choosing a time that satisfies the longest half-life seems
         # to work well enough.
+        guess = max(-log(target/Ia)/La + t_k for Ia, La in data)
+        # With times far from zero the time resolution in the exponential is
+        # poor. Adjust the start time to the initial guess, rescaling intensities
+        # to the activity at that time.
+        adj = [(Ia*exp(-La*(guess-t_k)), La) for Ia, La in data]
+        #print(adj)
+        # Build f(t) = total activity at time T minus target activity and its
+        # derivative df/dt. f(t) will be zero when activity is at target
+        f = lambda t: sum(Ia*exp(-La*t) for Ia, La in adj) - target
+        df = lambda t: sum(-La*Ia*exp(-La*t) for Ia, La in adj)
         #print("data", data, [])
-        initial = max(-log(target/Ia)/La + To for Ia, La in data)
-        t, ft = find_root(initial, f, df)
+        t, ft = find_root(0, f, df, tol=tol)
         percent_error = 100*abs(ft)/target
         if percent_error > 0.1:
             #return 1e100*365*24 # Return 1e100 rather than raising an error
@@ -204,7 +206,9 @@ class Sample(object):
                 "Failed to compute decay time correctly (%.1g error). Please"
                 " report material, mass, flux and exposure.") % percent_error
             raise RuntimeError(msg)
-        return t
+        # Return time at least zero hours after removal from the beam. Correct
+        # for time adjustment we used to stablize the fit.
+        return max(t+guess, 0.0)
 
     def _accumulate(self, activity):
         for el, activity_el in activity.items():
@@ -287,8 +291,8 @@ def find_root(x, f, df, max=20, tol=1e-10):
     """
     fx = f(x)
     for _ in range(max):
-        #print(f"step {_}: {x=} {fx=} f'={df(x)}")
-        if abs(f(x)) < tol:
+        #print(f"step {_}: {x=} {fx=} df/dx={df(x)} dx={fx/df(x)}")
+        if abs(fx) < tol:
             break
         x -= fx / df(x)
         fx = f(x)
@@ -409,7 +413,7 @@ def activity(isotope, mass, env, exposure, rest_times):
     * AK1495 (Au-198 => Au-199 2n) target should be Au-197
     * AN1428 (Tm-169 => Tm-171 2n) t1/2 updated to Tm-171 rather than Tm-172
     * AN1420 (Er-162 => Ho-163 b) t1/2 updated to 4570 y from 10 y
-    * AT1508 (Pb-208 => Pb-209 act) Thermal (b) x1000 to convert from mbarns to barns
+    * AT1508 (Pb-208 => Pb-209 act) Thermal (b) x 1000 to convert from mbarns to barns
     """
     # TODO: is the table missing 1-H => 3-H ?
     # 0nly activations which produce radioactive daughter products are
@@ -650,8 +654,10 @@ def init(table, reload=False):
 class ActivationResult(object):
     def __init__(self, **kw):
         self.__dict__ = kw
+    def __repr__(self):
+        return f"ActivationResult({self.isotope},{self.reaction},{self.daughter})"
     def __str__(self):
-        return str(self.__dict__)
+        return f"{self.isotope}={self.reaction}=>{self.daughter}"
 
 
 def demo():  # pragma: nocover

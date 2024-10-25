@@ -130,6 +130,9 @@ def delayed_load(all_props, loader, element=True, isotope=False, ion=False):
         def setfn(el, value):
             #print "set", el, propname, value
             clearprops()
+            # Since the property is now cleared the lazy loader will not be
+            # triggered in the getter for a different element, so call it here.
+            loader()
             setattr(el, propname, value)
         return setfn
 
@@ -185,8 +188,7 @@ class PeriodicTable(object):
         56-Fe
 
 
-    Deuterium and tritium are defined as 'D' and 'T'.  Some
-    neutron properties are available in ``elements[0]``.
+    Deuterium and tritium are defined as 'D' and 'T'.
 
     To show all the elements in the table, use the iterator:
 
@@ -195,7 +197,6 @@ class PeriodicTable(object):
         >>> from periodictable import *
         >>> for el in elements:  # lists the element symbols
         ...     print("%s %s"%(el.symbol, el.name))  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-        n neutron
         H hydrogen
         He helium
         ...
@@ -238,7 +239,10 @@ class PeriodicTable(object):
         """
         Process the elements in Z order
         """
-        for _, el in sorted(self._element.items()):
+        # CRUFT: Since 3.7 dictionaries use insertion order, so no need to sort
+        elements = sorted(self._element.items())
+        # Skipping the first entry (neutron) in the iterator
+        for _, el in elements[1:]:
             yield el
 
     def symbol(self, input):
@@ -603,7 +607,7 @@ def _make_isotope_ion(table, Z, n, c):
 element_base = {
     # number: name symbol common_ions uncommon_ions
     # ion info comes from Wikipedia: list of oxidation states of the elements.
-    0: ['Neutron',     'n',  [],         []],
+    0: ['neutron',     'n',  [],         []],
     1: ['Hydrogen',    'H',  [-1, 1],    []],
     2: ['Helium',      'He', [],         [1, 2]],  # +1,+2  http://periodic.lanl.gov/2.shtml
     3: ['Lithium',     'Li', [1],        []],
@@ -763,7 +767,7 @@ def define_elements(table, namespace):
     for el in table:
         names[el.symbol] = el
         names[el.name] = el
-    for el in [table.D, table.T]:
+    for el in [table.D, table.T, table.n]:
         names[el.symbol] = el
         names[el.name] = el
 

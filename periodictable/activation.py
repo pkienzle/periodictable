@@ -5,31 +5,76 @@
 r"""
 Calculate expected neutron activation from time spent in beam line.
 
-Notation information for activation product:
-
- m, m1, m2: indicate metastable states.  Decay may be to the ground state or to
- another nuclide.
-
- \+: indicates radioactive daughter production already included in daughter listing
- several parent t1/2's required to acheive calculated daughter activity.  All
- activity assigned at end of irradiation.  In most cases the added activity to the
- daughter is small.
-
- \*: indicates radioactive daughter production NOT calculated, approximately
- secular equilibrium
-
- s: indicates radioactive daughter of this nuclide in secular equilibrium after several
- daughter t1/2's
-
- t: indicates transient equilibrium via beta decay.  Accumulation of that nuclide
- during irradiation is separately calculated.
-
-Reaction = b indicates production via decay from an activation produced parent
-
 Accounts for burnup and 2n, g production.
 
 This is only a gross estimate.  Many effects are not taken into account, such as
 self-shielding in the sample and secondary activation from the decay products.
+
+**Introduction to neutron activation terminology**
+
+See a text!! These are just a few notes to refresh the memory of those who
+already know the topic.
+
+Reactions: The most common reaction is the simple addition of a neutron,
+thereby increasing its atomic number by one but leaving it as the same
+element. Not all activation products are radioactive. Those that are not are
+not included in this database. Beware that there are production chains that
+depend upon these intermediate products. This database does not address those
+more complicated processes.
+
+There are exceptions to the simple addition process such as the n,alpha
+reaction of Li-6. These then result in a different element as the activation
+product. These are identified in the reaction column. Radioactive products
+also have the potential of undergoing a neutron reaction. This is
+accounted for in this database for selected products (generally those that
+result in significant half-life products). These reactions and products
+should only be important at very high fluences, i.e., >1E16 n/cm2.
+
+Neutron energy: The majority of the reactions are initiated by thermal neutrons.
+As a practical matter the number of thermal neutrons is usually measured with a
+cadmium filter. This excludes the neutrons above the cadmium absorption
+threshold, called the cadmium cutoff. For most materials the resulting measured
+'thermal' neutron fluence is adequate to determine the thermal neutron
+activation. A few materials have large cross-sections for the neutrons above the
+cadmium cutoff. Hence a 'cadmium ratio' is needed to predict the number of
+neutrons present above this cutoff, as seen by the specific reaction of
+interest.
+
+For the same neutron spectrum two different elements will have different
+cadmium ratios. Similarly, for the same reaction but different neutron
+environments the ratio will also vary.  Copper is a good material on which
+to predict the thermal-to-epithermal fluence ratio since its two cross-sections
+are about equal.  If you use the ratio of another reaction, correct the
+activity ratio of the nuclide by the cross-section ratio in order to derive
+the extimated fluence ratio.  Take care.  By definition, the cadmium ratio
+is an activity ratio, not a fluence ratio.  [Note: This ratio is divided
+into the specfied thermal neutron fluence rate to get the epithermal rate.]
+
+Fast neutron reactions: There are also those reactions that depend on
+higher energy neutrons. These can be of a great variety: n,gamma; n,p;
+n,d; n,alpha; n,triton; etc. Any they are highly variable in how high the
+neutron energy must be to initiate the reaction. In general the cross-
+sections are relatively small, e.g., 10's of millibarns and less as compared
+to 1000's of barns in some cases for thermal reactions. Plus the fast
+neutron fluences are much smaller so that in general the amount of the
+activation product is much less than for thermal production processes.
+
+Barn: As they say- just how big is the broad side of that barn? For neutrons
+it is 1 E-24 cm2, e.g. 0.000000000000000000000001 square cm. Millibarns
+are of course for the _______ (leprechauns?).
+
+Calulation:
+(number of atoms)*(cross-section)*(no. of neutrons)*(decay correction)*C.F.
+
+Number of atoms: mass*avagadro's number*isotopic abundance/mole.weight
+  where the mass is that of the target element, not the whole sample.
+
+Decay correction: Since the radioactive product decays while it is being
+  made one must correct for this using (1-exp(-0.693*t/hlflf))
+  where t is the exposure time and hlflf is the product halflife
+
+C.F: includes unit conversion factors, e.g., convert to microcuries
+
 
 Example::
 
@@ -71,7 +116,111 @@ where FORMULA is the chemical formula for the material.
    Handbook on Nuclear Activation Data.
    TR 273 (International Atomic Energy Agency, Vienna, Austria, 1987).
    http://cds.cern.ch/record/111089/files/IAEA-TR-273.pdf
+
+Code original developed for spreadsheet by Les Slaback of NIST.
 """
+
+# Comments on ACT_2N_X.xls from ACT_CALC.TXT
+#
+# Fast neutron cross-sections added 2/1/94
+#
+# One database error detected and corrected at this time.
+#
+# Corrections made 3/4/94
+#
+# 1. Halflife for entry 21 entered.       (previous entry blank)
+# 2. Cross-section for entry 311 entered  (previous entry blank)
+# 3. 2 beta mode entries - added parent lambda's
+# 4. Changed range of look up function in 2 columns to include last row.
+# 5. With 9E15 y halflife the calculation always returned 0 microcuries!
+#     The 9E15 exceeds a math precision resulting in zero being assigned to the
+#     the function 1-e(-x).  For any value of x<1E-10 the approximation x+x^2/2
+#     is more accurate, and for values of X<1E-16 this approximation returns a
+#     non-zero value while 1-e(-x)=0.
+#     Appropriate changes have been made, but in fact only two entries are
+#     affected by this, one with a 12 Ty halflife and one with a 9000Ty t1/2.
+#     The equations for "b" mode production were not changed because they are
+#     more complex, and none of the halflives currently in the database related
+#     to this mode are a problem. Take care if you add more with very long halflives.
+#     [PAK: These have since been updated to use expm1()]
+# 6. The cross-section for the reaction Sr-88(n,gamma)Sr-89 was reduced from
+#    .058 to .0058 b.  The entry of .058 in IAEA273 is in error, based on a
+#    number of other references (including IAEA156).
+# 7. The unit for the halflife of Pm-151 coorected from 'm' to 'h'
+#
+# Changes made in April 1994
+#
+# 1. Burnup cross-sections added to the database and nuclides produced by
+#     two neutron additions (2n,gamma) have been added.  The activation equations
+#     have been changed to account for burnup.  This does not become significant
+#     until exposures exceed 1e17 n/cm2 (e.g., 1e10 n/cm2/sec*1000 hrs), even for
+#     those with very large cross-sections.  Note that 'burnup' can be viewed as
+#     loss of the intended n,gamma product or as a 2n,gamma production mode.  Both
+#     effects are included in the database and equations.
+# 2.ACT_CALC.WQ1 does not have the burnup equations or related cross-section data.
+#     ACT_2N.WQ1 has the added equations and data, but requires manual entry of the
+#     cross-section database index numbers.
+#     ACT_2N_X.WQ1 allows direct entry of the chemical element to retrieve ALL
+#     entries from the database for that element
+#     Results from both have been compared to assure that the new spreadsheet
+#     is correct.  Also the Au-197(2n,g)Au-199 reaction has been checked against
+#     a textbook example (Friedlander,Kennedy,Miller:Nuclear Chemistry).
+# 3.An educational note related to this addition:
+# Computing the equation [exp(-x)-exp(-y)] in that syntax is better than using
+# [exp(-x)*(1-exp(x-y))].  The latter format blows up when large
+# values of X and Y are encountered due to computational limitations for these
+# functions in a PC.  But this problem was only encountered in excess of
+# 1E22 n/cm2.
+# 4. 61 (2n,g) reactions have been added.  You will note many more
+# radionuclides with secondary capture cross-sections.  Many of these go to
+# stable nuclides (particularly the larger x-section ones - logically enough).
+# The isomer-ground state pairs that have 2n modes to the same resulting
+# nuclide are treated one of several ways.
+#     - if the obvious dominate pathway is only through the ground state then
+#     only production via that mode is included.
+#     - if the combination of parent halflives and production cross-sections
+#     make it unclear as to which is the dominant production mode then both
+#     are calculated.  Beware, these are not necessarily additive values.
+#     Sometimes the ground state also reflects production via the isomer.
+#     See the specific notes for any particular reaction.
+# 5.None of the entries for production via 'b' (beta decay ingrowth from a
+# neutron induced parent) account for burnup.  Those with significant burnup
+# cross-sections have a specific note reminding of this.  This is an issue
+# only at high fluence rates.
+# 6.Note that the database entries have different meanings for 'b' and '2n'
+# production modes.  For instance, the first set of cross-sections (proceeding
+# horizontally for a particular database entry) is not the cross-section of
+# the 2n reaction, but that to produce the parent.  The second set of cross-
+# sections which are the burnup cross-sections for n,g; n,p; n,alpha; etc.
+# reactions are the production cross-sections for the 2n reactions.
+# 7.If you want to determine how much burnup is occurring do one of the
+# following:
+#     - do the calculation separately in ACT_CALC and ACT_2N.
+#     - do the calculation at a low fluence, e.g., 1E7, prorate to the fluence
+#     of interest, and compare to the result calculated directly.  Make
+#     certain the same exposure time is used.  You cannot prorate this
+#     parameter.
+#
+# Additions/changes made July 1997
+#
+# The following n,p and n,alpha reactions have both a thermal cross-section (as
+# per IAEA273) and a fast cross-section.  In all cases the database entry was for
+# the fast cross-section but indicated it was a thermal reaction.  That has been
+# corrected (and verified against IAEA156) and a second entry made for the thermal
+# reaction.  Despite the entry in IAEA 273 there is some question as to whether
+# the thermal induced reaction is energetically possible.  Dick Lindstrom's
+# calculation shows that the coulomb barrier should prevent the thermal reaction
+# from being possible.
+#
+# The entries changed, and added, are for the following:
+#
+#     35Cl (n,p)
+#     35Cl (n,alpha)
+#     33S (n,p)
+#     39K (n,alpha)
+#     40Ca (n,p)
+#     58Ni (n,alpha)
+
 
 from __future__ import division, print_function
 
@@ -137,18 +286,19 @@ class Sample(object):
                              rest_times=(0, 1, 24, 360),
                              abundance=table_abundance):
         """
-        Calculate sample activation after exposure to a neutron flux.
+        Calculate sample activation (uCi) after exposure to a neutron flux.
 
         *environment* is the exposure environment.
 
         *exposure* is the exposure time in hours (default is 1 h).
 
-        *rest_times* is the list of deactivation times in hours (default is [0, 1, 24, 360]).
+        *rest_times* are deactivation times in hours (default [0, 1, 24, 360]).
 
-        *abundance* is a function that returns the relative abundance of an isotope.  By
-        default it uses :func:`table_abundance` with natural abundance defined
-        in :mod:`periodictable.mass`, but there is the alternative
-        :func:`IAEA1987_isotopic_abundance` in the activation data table.
+        *abundance* is a function that returns the relative abundance of an
+        isotope.  By default it uses :func:`table_abundance` with natural
+        abundance defined in :mod:`periodictable.mass`, but there is the
+        alternative :func:`IAEA1987_isotopic_abundance` in the activation data
+        table.
         """
         self.activity = {}
         self.environment = environment
@@ -316,13 +466,63 @@ class ActivationEnvironment(object):
         Thermal neutron fluence on sample.  For COLD neutrons enter equivalent
         thermal neutron fluence.
 
+        **Warning**: For very high fluences, e.g., >E16 to E17 n/cm2, the
+        equations give erroneous results because of the precision limitations.
+        If there is doubt simply do the calculation at a lower flux and
+        proportion the result. This will not work for the cascade reactions,
+        i.e., two neutron additions.
+
     *Cd_ratio* : float
 
         Neutron cadmium ratio.  Use 0 to suppress epithermal contribution.
 
+        This is to account for those nuclides that have a significant
+        contribution to the activation due to epithermal neutrons. This is
+        tabulated in the cross-section database as the 'resonance cross-
+        section'. Values can range from 4 to more than 100.
+
+        ....... Use 0 for your initial calculation ..........
+
+        If you do a specific measurement for the nuclide and spectrum
+        of interest you simply apply a correction to the thermal based
+        calculation, i.e., reduce the fluence by the appropriate factor.
+
+        This computation can be based on a Cd ratio of a material that has
+        no significant resonance cross-section, or that has been corrected
+        so that it reflects just the thermal to epithermal fluence ratio.
+        The computation simply adds a portion of this resonance cross-section
+        to the thermal cross-section based on the presumption that the
+        Cd ratio reflects the fluence ratio. Copper is a good material on
+        which to equate the Cd ratio to the thermal-epithermal fluence ratio.
+
+        For other materials, correct for the thermal:epithermal cross-section
+        ratio.
+
+        At the NBSR this ranges from 12 in mid-core, to 200 at RT-4, to
+        >2000 at a filtered cold neutron guide position.
+
     *fast_ratio* : float
 
-        Thermal/fast ratio needed for fast reactions. Use 0 to suppress fast contribution.
+        Thermal/fast ratio needed for fast reactions. Use 0 to suppress fast
+        contribution.
+
+        this is very reaction dependent. You in essence need to know the
+        answer before you do the calculation! That is, this ratio depends
+        upon the shape of the cross-section curve as well as the spectrum
+        shape above the energy threshold of the reaction. But at least you
+        can do 'what-if' calculations with worse case assumptions (in the
+        absence of specific ratios).
+
+        the fast cross-sections in this database are weighted for a fast
+        maxwellian spectrum so the fast/thermal ratio should be just a
+        fluence correction (i.e., a fluence ratio), not an energy correction.
+
+        Fast neutron cross-sections from IAEA273 are manually spectrum weighted.
+        Those from IAEA156 are fission spectrum averaged as tabulated.
+
+        Use 50 (for NBSR calculations) as a starting point if you simply
+        exploring for possible products.
+
     """
     def __init__(self, fluence=1e5, Cd_ratio=0., fast_ratio=0., location=""):
         self.fluence = fluence     # cell F13
@@ -547,6 +747,139 @@ def activity(isotope, mass, env, exposure, rest_times):
 
     return result
 
+class ActivationResult(object):
+    r"""
+    *isotope* :
+
+        Activation target for this result ({symbol}-{A})
+
+    *abundance* : float | %
+
+        IAEA 1987 isotopic abundance of activation target
+
+    *symbol* :
+
+        Element symbol for isotope
+
+    *A* : int
+
+        Number of protons plus neutrons in isotope
+
+    *Z* : int
+
+        Number of protons in isotope
+
+    *reaction* :
+
+        Activation type
+
+        - "act" for (n,gamma)
+        - "n,p" for (n,proton)
+        - "n,a" for (n,alpha)
+        - "2n" for activation of a daughter (e.g., 95Mo + n => 95Nb + n => 96Nb)
+        - "n,2n" for neutron catalyzed release of a neutron
+        - "b" for beta decay of a daughter (e.g., 98Mo + n => 99Mo => Tc-99)
+
+    *comments* :
+
+        Notes relating to simplifications or assumptions in the
+        database. For most situations these do not affect your results.
+
+    *daughter* :
+
+        Daughter product from activation ({symbol}-{A}{isomer})
+
+    *isomer* :
+
+        Daughter product isotope annotation
+
+        m, m1, m2: indicate metastable states.  Decay may be to the ground
+        state or to another nuclide.
+
+        \+: indicates radioactive daughter production already included in
+        daughter listing several parent t1/2's required to acheive calculated
+        daughter activity.  All activity assigned at end of irradiation.  In
+        most cases the added activity to the daughter is small.
+
+        \*: indicates radioactive daughter production NOT calculated,
+        approximately secular equilibrium
+
+        s: indicates radioactive daughter of this nuclide in secular equilibrium
+        after several daughter t1/2's
+
+        t: indicates transient equilibrium via beta decay.  Accumulation of that
+        nuclide during irradiation is separately calculated.
+
+    *Thalf_hrs* : float | hours
+
+        Half-life of daughter in hours
+
+    *Thalf_str* :
+
+        Half-life of daughter as string, such as "29.0 y"
+
+    *Thalf_parent* : float | hours
+
+        Half-life of parent in chained "2n" or "b" reaction
+
+    *fast* : bool
+
+        Indicates whether the reaction is fast or thermal. If fast then the
+        fluence is reduced by the specified fast/thermal ratio. When
+        *fast_ratio* is zero in the environment this activation will not appear.
+
+    *thermalXS*, *resonance*, *thermalXS_parent*, *resonance_parent* :
+
+        Activation database values for computing the reaction cross section.
+
+    *gT*, *percentIT* :
+
+        Unused.
+
+    Database notes:
+
+    Most of the cross-section data is from IAEA 273. This is an excellent
+    compilation. I highly recommend its purchase. The fast neutron cross-section
+    data entered in the spreadsheet is weighted by an U-235 maxwellian
+    distributed fission spectrum. Allthermal reactions producing nuclides with a
+    half-life in excess of 1 second, and some less than 1 second, are included.
+    Also included are radioactive daughters with halflives substantially longer
+    than the parent produced by the neutron induced reaction, i.e., those
+    daughters not in secular equilibrium. See the database in for more detailed
+    notes relating to the database entries.
+
+    [Note: 150 fission spectrum averaged fast neutron reactions added from
+    IAEA156 on 2/1/94.  All those that are tabulated as measured have been
+    entered.  Those estimated by calculation have not been entered.  In practice
+    this means that the convenient, observable products are in this database.
+    Fast reactions included are n,p; n,alpha; n,2n; and n,n'.
+
+    Reaction = b  : This is the beta produced daughter of an activated parent.
+    This is calculated only for the cases where the daughter is long lived
+    relative to the parent. In the reverse case the daughter activity is
+    reasonably self evident and the parent nuclide is tagged to indicate a
+    radioactive daughter. The calculated activity of the beta produced
+    daughter is through the end of irradiation. Contributions from the
+    added decay of the parent after the end of irradiation are left for the
+    user to determine, but are usually negligible for irradiations that are
+    long relative to the parent halflife:
+
+        A1 = K [1-exp(-L1*t)]   where A1 is activity, L1 is decay constant
+
+    For the beta produced daughter the activity (A2) is:
+
+        A2 = K [1- exp(-L1*t) * L2/(L2-L1) + exp(-L2*t) * L1/(L2-L1)]
+
+    where K is the parent saturation activity.
+
+    """
+    def __init__(self, **kw):
+        self.__dict__ = kw
+    def __repr__(self):
+        return f"ActivationResult({self.isotope},{self.reaction},{self.daughter})"
+    def __str__(self):
+        return f"{self.isotope}={self.reaction}=>{self.daughter}"
+
 def init(table, reload=False):
     """
     Add neutron activation levels to each isotope.
@@ -650,15 +983,6 @@ def init(table, reload=False):
     # Plug the activation products into the table
     for (Z, A), daughters in activations.items():
         table[Z][A].neutron_activation = tuple(daughters)
-
-class ActivationResult(object):
-    def __init__(self, **kw):
-        self.__dict__ = kw
-    def __repr__(self):
-        return f"ActivationResult({self.isotope},{self.reaction},{self.daughter})"
-    def __str__(self):
-        return f"{self.isotope}={self.reaction}=>{self.daughter}"
-
 
 def demo():  # pragma: nocover
     import sys

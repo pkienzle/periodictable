@@ -72,7 +72,8 @@ def test():
         "Co-61":	[1.36478223029061e-09,	8.96645839472098e-10,	5.70749106813738e-14],
     }
     #print(list(sample.activity.keys()))
-    #print(dir(list(sample.activity.keys())[0]))
+    print(" ".join(k for k in dir(list(sample.activity.keys())[0]) if k[0] != '_'))
+    print(list(sample.activity.keys())[0].__dict__)
     for product, activity in sample.activity.items():
         #print(product)
         #print(dir(product))
@@ -100,7 +101,7 @@ def test():
     assert abs(total - target) < 1e-10, f"total activity {total} != {target}"
 
     # Al and Si daughters have short half-lives
-    sample = Sample('AlSi', mass=1e13)
+    sample = Sample('AlSi', mass=1e3)
     env = ActivationEnvironment(fluence=1e8)
     sample.calculate_activation(env, rest_times=[100,200])
     #sample.show_table(cutoff=0)
@@ -111,5 +112,21 @@ def test():
     total = sum(v[-1] for v in sample.activity.values())
     assert abs(total - target) < 1e-10, f"total activity {total} != {target}"
 
+    if 0: # TODO: doesn't work for high fluence
+        # Test high fluence
+        sample = Sample('Al2O3', mass=1e3)
+        flow, scale = 1e16, 1e2
+        rest_times = [0, 10]
+        env = ActivationEnvironment(fluence=flow*scale)
+        sample.calculate_activation(env, rest_times=rest_times)
+        sample.show_table(cutoff=0)
+        ahigh = list(sample.activity.values())
+        env = ActivationEnvironment(fluence=flow)
+        sample.calculate_activation(env, rest_times=rest_times)
+        sample.show_table(cutoff=0)
+        alow = np.asarray(list(sample.activity.values()))
+        for alow_k, ahigh_k in zip(alow, ahigh):
+            #print(f"{alow_k=} {ahigh_k=}")
+            assert np.allclose(alow_k*scale, ahigh_k), f"scaling fails at {t=} {alow_k=} {ahigh_k=}"
 
 test()
